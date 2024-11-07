@@ -26,8 +26,8 @@ const SITESTATS = new PersistentObject(SITE_STATISTICS_KEY).value();
 const APPSTATS = new PersistentObject(APPLICATION_STATISTICS_KEY).value();
 
 
-Port.onMessage("config",(config) => {
-	Config.load(config)
+Port.onMessage("config",(newConfig) => {
+	Config.load(newConfig)
 
 	new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist).then(blacklist => blacklistIP = blacklist)
 	new CombinedBlacklist().load(config.blacklist.url, URLBlacklist).then(blacklist => blacklistURL = blacklist)

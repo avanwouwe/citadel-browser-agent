@@ -151,3 +151,25 @@ Object.prototype.hashSHA256 = function () {
     }
     return (hash >>> 0).toString(16); // Ensure unsigned integer and convert to hex
 }
+
+function isObject(item) {
+    return item && typeof item === 'object' && !Array.isArray(item);
+}
+
+function mergeDeep(target, source) {
+    for (const key in source) {
+        if (Object.prototype.hasOwnProperty.call(source, key)) {
+            if (isObject(source[key])) {
+                // If the property is an object, we need to merge recursively
+                if (!target[key]) {
+                    target[key] = {};
+                }
+                mergeDeep(target[key], source[key]);
+            } else {
+                // For primitive values or arrays, just copy the value from source
+                target[key] = source[key];
+            }
+        }
+    }
+    return target;
+}

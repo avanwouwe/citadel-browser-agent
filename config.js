@@ -37,8 +37,8 @@ class Config {
 
     static #isLoaded = false
 
-    static load(config) {
-        Config.config = config
+    static load(newConfig) {
+        mergeDeep(Config.config, newConfig)
         Config.#isLoaded = true
         Port.postMessage("config", "ok")
     }
