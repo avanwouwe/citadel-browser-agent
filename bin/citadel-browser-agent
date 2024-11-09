@@ -3,7 +3,8 @@
 import sys
 import random
 from datetime import datetime
-import syslog
+import logging
+import platform
 import json
 import struct
 import getpass
@@ -13,14 +14,26 @@ import traceback
 PROTOCOL_VERSION = 1
 username = getpass.getuser()
 
-syslog_values = {
-    "FATAL": syslog.LOG_CRIT,
-    "ERROR": syslog.LOG_ERR,
-    "WARN": syslog.LOG_WARNING,
-    "INFO": syslog.LOG_INFO,
-    "DEBUG": syslog.LOG_DEBUG,
-    "TRACE": syslog.LOG_DEBUG
-}
+logger = None
+
+def log(event):
+    event['id'] = str(event['id'])
+    event['user'] = username
+    level = event.get('browseragent', { }).get('level') or "ERROR"
+    message = 'browser agent : ' + json.dumps(event)
+
+    if level == "DEBUG" or level == "TRACE":
+        logger.debug(message)
+    elif level == "INFO":
+        logger.info(message)
+    elif level == "WARNING":
+        logger.warning(message)
+    elif level == "ERROR":
+        logger.error(message)
+    elif level == "ALERT":
+        logger.critical(message)
+    else:
+        logger.critical("Unknown log level: %s", message)
 
 def createEvent(event, result, level, description):
     return {
@@ -32,14 +45,6 @@ def createEvent(event, result, level, description):
         "description": description
     }
 
-def log(event):
-    event['id'] = str(event['id'])
-    event['user'] = username
-    level = syslog_values.get(event.get('browseragent', { }).get('level')) or syslog.LOG_ERR
-    msg = f"browser agent : {json.dumps(event)}"
-    syslog.syslog(level, msg)
-
-
 def warning(msg):
     event = createEvent("messaging warning", "messaging warning", "WARN", msg)
     log(event)
@@ -48,6 +53,49 @@ def error(msg):
     event = createEvent("messaging error", "messaging error", "ERROR", msg)
     log(event)
     sys.exit(1)
+
+# create a platform-dependant logger
+current_os = platform.system()
+
+if current_os == 'Darwin':  # macOS
+    import syslog
+
+    class SyslogHandler(logging.Handler):
+
+        LEVEL_MAP = {
+            logging.DEBUG: syslog.LOG_DEBUG,
+            logging.INFO: syslog.LOG_INFO,
+            logging.WARNING: syslog.LOG_WARNING,
+            logging.ERROR: syslog.LOG_ERR,
+            logging.CRITICAL: syslog.LOG_CRIT,
+        }
+
+        def emit(self, record):
+            try:
+                message = self.format(record)
+                level = self.LEVEL_MAP.get(record.levelno, syslog.LOG_INFO)
+                syslog.syslog(level, message)
+            except Exception:
+                self.handleError(record)
+
+    logger = logging.getLogger('BrowserAgentLogger')
+    logger.setLevel(logging.DEBUG)
+    syslog_handler = SyslogHandler()
+    formatter = logging.Formatter('%(message)s')
+    syslog_handler.setFormatter(formatter)
+    logger.addHandler(syslog_handler)
+
+elif current_os == 'Windows':
+    from logging.handlers import NTEventLogHandler
+
+    logger = logging.getLogger('BrowserAgentLogger')
+    logger.setLevel(logging.DEBUG)
+    event_log_handler = NTEventLogHandler('Browser Agent')
+    logger.addHandler(event_log_handler)
+
+else:
+    error("unsupported OS")
+
 
 
 def readMessage(type):
