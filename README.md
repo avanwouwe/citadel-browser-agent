@@ -1,5 +1,5 @@
 <div align="center">
-  <img alt="Citadel logo" src="gui/images/logo.png" width="50%">
+  <img alt="Citadel logo" src="gui/images/logo.png" width="25%">
 </div>
 
 # citadel-browser-agent
@@ -21,14 +21,15 @@ It detects the following events in the browser:
 
 It also reports on usage statistics of applications, allowing for detection of shadow IT.
 
-Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md)..
+Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
 
 
 ## shadow IT detection
 Citadel inspects internet use and generates daily statistics per site. Citadel attempts to identify sites that are applications by separating authenticated and unauthenticated internet sites.
 
-The interaction analysis is based both on navigation and on clicks, ensuring that it also works for Single Page Applications.
+The interaction analysis is based both on navigation events and on clicks, ensuring that it also works for Single Page Applications.
 
+These usage reports can be aggregated in your SIEM / EDR and used to detect unexpected applications.
 
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
@@ -36,3 +37,33 @@ Citadel hashes the URL for events that do not indicate immediate threats, and ar
 The shadow-IT detection only reports on interaction with (authenticated) applications, and only tracks the number of interactions per site, per day.
 
 The data is logged on your computer and is never sent to the cloud.
+
+
+## Installation
+* [configuration](/doc/configuration.md)
+* [macOS](/doc/macos.md)
+* [Windows](/doc/windows.md)
+* [integration into Wazuh](/doc/wazuh.md)
+
+## Frequently Asked Questions
+
+### who is Citadel meant for?
+The design objective of Citadel is to allow a CISO or a CIO to gain better operational awareness of the security events in their scope. However in theory end-users can opt to install the extension just to benefit from the blacklisting functionality, to complement the existing protections already offered by [Google Safe Browsing](https://safebrowsing.google.com/).
+
+
+### what about user privacy?
+Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. Specifically:
+* shadow IT detection only logs the name of the site, and the number of interactions
+* shadow IT detection tries to report only on applications (i.e. websites that require authentication)
+* events lower than a certain level are sanitized (by default only sensitive events such as downloads and alerts are not masked)
+* log levels allow you to log events locally but not send them to your EDR, allowing post-incident analysis without having everything centrally logged
+
+See the [configuration](/config.js) to understand the default settings.
+
+
+### which browsers are supported?
+Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla and other Chromium-based browsers. However this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
+
+
+### what about performance?
+Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 55 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)
