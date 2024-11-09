@@ -361,8 +361,9 @@ function reportInteractions() {
 						`${date}T23:59:59.999Z`,
 						'report',
 						'usage report',
-						{ url: it.appUrl, value: it.interactions },
+						it.appUrl,
 						Log.INFO,
+						it.interactions,
 						`'${appName}' received ${it.interactions} interactions on ${date}`
 					);
 				});
