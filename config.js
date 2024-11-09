@@ -1,12 +1,15 @@
 class Config {
     static config = {
-        contact: 'it-support@whoz.com',
+        contact: 'Your IT support',
         warningProtocols: ['http:', 'ftp:'],
         standardPorts: ['80', '443'],
         blacklist: {
             refresh: 60,
             ip: [
-                {name: "firehol (level 1)", url: "https://iplists.firehol.org/files/firehol_level1.netset", freq: 60},
+                {
+                    name: "firehol (level 1)",
+                    url: "https://iplists.firehol.org/files/firehol_level1.netset",
+                    freq: 60},
                 {
                     name: "romainmarcoux",
                     url: "https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt",
