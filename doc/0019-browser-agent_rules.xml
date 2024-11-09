@@ -187,7 +187,7 @@
 
     <rule id="479" level="12">
         <if_sid>450</if_sid>
-        <field name="browseragent.level">^FATAL$</field>
+        <field name="browseragent.level">^ALERT$</field>
         <description>$(browseragent.description)</description>
     </rule>
 

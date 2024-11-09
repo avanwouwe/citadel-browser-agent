@@ -5,7 +5,7 @@ class Log {
     static INFO  = "INFO"
     static WARN  = "WARN"
     static ERROR = "ERROR"
-    static FATAL = "FATAL"
+    static ALERT = "ALERT"
     static NONE = "NONE"
 
     static #levelValue = {
@@ -14,7 +14,7 @@ class Log {
         INFO:  2,
         WARN:  3,
         ERROR: 4,
-        FATAL: 5,
+        ALERT: 5,
         NONE: 6
     };
 
@@ -86,7 +86,7 @@ class Log {
                 case Log.WARN:
                     return console.warn(logEntry)
                 case Log.ERROR:
-                case Log.FATAL:
+                case Log.ALERT:
                 default:
                     console.error(logEntry)      // there is no console.fatal()
              }
