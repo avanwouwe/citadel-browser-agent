@@ -27,7 +27,6 @@
   ],
 
   "action": {
-    "default_popup": "gui/popup.html",
     "default_icon": {
       "16": "gui/images/icon16.png",
       "48": "gui/images/icon48.png",
