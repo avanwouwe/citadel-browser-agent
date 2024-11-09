@@ -30,7 +30,7 @@ class Config {
             failurePopup: true,
             logLevel: 'DEBUG',
             consoleLevel: 'WARN',
-            maskUrlLevel: 'DEBUG',
+            maskUrlLevel: 'INFO',
             maxUrlLength: 500
         }
     }
