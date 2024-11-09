@@ -3,11 +3,11 @@
 </div>
 
 # citadel-browser-agent
-A browser extension that detects malware and shadow IT by analysing and logging security events in a privacy-respecting way. Comes pre-integrated with the open source SIEM Wazuh
+A browser agent that detects malware and shadow IT by analysing and logging security events in a privacy-respecting way. Comes pre-integrated with the open source EDR Wazuh.
 
 ## security event detection
 It detects the following events in the browser:
-* IP or URL is blacklisted
+* IP or URL is blacklisted (configurable blacklist)
 * the browser has blocked the navigation to the site
 * user is using unencrypted protocols (e.g. FTP or HTTP)
 * user is using non-standard port numbers (i.e. not 443)
@@ -19,7 +19,9 @@ It detects the following events in the browser:
 * SSL certificate authority invalid (e.g. self-signed or expired certificate)
 * SSL protocol error
 
-Events are written as syslog entries that can then be consumed by a SIEM. Citadel is [pre-integrated with Wazuh](/doc/wazuh.md).
+It also reports on usage statistics of applications, allowing for detection of shadow IT.
+
+Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md)..
 
 
 ## shadow IT detection
