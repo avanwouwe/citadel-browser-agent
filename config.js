@@ -4,20 +4,34 @@ class Config {
         warningProtocols: ['http:', 'ftp:'],
         standardPorts: ['80', '443'],
         blacklist: {
-            refresh: 60,
             ip: [
                 {
-                    name: "firehol (level 1)",
+                    name: "FireHOL (level 1)",
                     url: "https://iplists.firehol.org/files/firehol_level1.netset",
-                    freq: 60},
+                    freq: 60
+                },
                 {
-                    name: "romainmarcoux",
+                    name: "https://github.com/romainmarcoux/malicious-outgoing-ip-domains",
                     url: "https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt",
                     freq: 60
                 }
             ],
             url: [
-                {name: "urlhaus", url: "https://urlhaus.abuse.ch/downloads/text_online/", freq: 60}
+                {
+                    name: "URLhaus",
+                    url: "https://urlhaus.abuse.ch/downloads/text_online/",
+                    freq: 60
+                },
+                {
+                    name: "https://github.com/romainmarcoux/malicious-domains (AA)",
+                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-aa.txt",
+                    freq: 60
+                },
+                {
+                    name: "https://github.com/romainmarcoux/malicious-domains (AB)",
+                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ab.txt",
+                    freq: 60
+                }
             ],
             ignore: [
                 'about:blank',
