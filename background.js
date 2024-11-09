@@ -333,7 +333,7 @@ function reportInteractions() {
 
 	function report(isApp) {
 		const usagePerDayPerApp = { }
-		const today = nowTimestamp();
+		const today = nowDatestamp();
 
 		// aggregate interactions per date (only dates in the past)
 		for (const [appName, appStats] of Object.entries(APPSTATS)) {
