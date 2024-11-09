@@ -1,4 +1,5 @@
 # Wazuh integration
+Follow the following steps to ship the syslog events to your Wazuh instance.
 
 ## change ossec.conf
 ### macOS

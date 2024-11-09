@@ -2,10 +2,10 @@
   <img alt="Citadel logo" src="gui/images/logo.png" width="25%">
 </div>
 
-# citadel-browser-agent
-A browser agent that detects malware and shadow IT by analysing and logging security events in a privacy-respecting way. Comes pre-integrated with the open source EDR Wazuh.
+# Citadel browser agent
+Citadel is a browser agent that detects malware and shadow IT by analyzing and logging security events to syslog in a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow DFIR. Citadel comes pre-integrated with the open source EDR [Wazuh](https://wazuh.com/).
 
-## security event detection
+## Security event detection
 It detects the following events in the browser:
 * IP or URL is blacklisted (configurable blacklist)
 * the browser has blocked the navigation to the site
@@ -24,7 +24,7 @@ It also reports on usage statistics of applications, allowing for detection of s
 Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
 
 
-## shadow IT detection
+## Shadow IT detection
 Citadel inspects internet use and generates daily statistics per site. Citadel attempts to identify sites that are applications by separating authenticated and unauthenticated internet sites.
 
 The interaction analysis is based both on navigation events and on clicks, ensuring that it also works for Single Page Applications.
@@ -48,16 +48,16 @@ The data is logged on your computer and is never sent to the cloud.
 ## Frequently Asked Questions
 
 ### who is Citadel meant for?
-The design objective of Citadel is to allow a CISO or a CIO to gain better operational awareness of the security events in their scope. However in theory end-users can opt to install the extension just to benefit from the blacklisting functionality, to complement the existing protections already offered by [Google Safe Browsing](https://safebrowsing.google.com/).
+The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. There is no benefit for an end-user if the extension is installed without also setting up the Native Messaging ([macOS](/doc/macos.md) / [Windows](/doc/windows.md)).
 
 
-### what about user privacy?
-Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. Specifically:
+### what about end-user privacy?
+Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. By default:
 * shadow IT detection only logs the name of the site, and the number of interactions
 * shadow IT detection tries to report only on applications (i.e. websites that require authentication)
-* events lower than a certain level are sanitized (by default only sensitive events such as downloads and alerts are not masked)
-* log levels allow you to log events locally but not send them to your EDR, allowing post-incident analysis without having everything centrally logged
-
+* events lower than `INFO` log level are masked (meaning only sensitive events such as downloads and alerts are not masked)
+* log levels allow you to log events locally but not send them to your EDR, thus allowing post-incident analysis without having everything centrally logged
+ 
 See the [configuration](/config.js) to understand the default settings.
 
 

@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Citadel browser agent",
   "version": "1.0",
-  "description": "Provides protection against malware and data loss by analysing and logging security events in a privacy-respecting way.",
+  "description": "Citadel is a browser agent that detects malware and shadow IT by analyzing and logging security events to syslog in a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow DFIR.",
   "permissions": [
     "webNavigation",
     "webRequest",
