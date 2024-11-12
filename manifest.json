@@ -9,7 +9,6 @@
     "downloads",
     "storage",
     "alarms",
-    "scripting",
     "nativeMessaging"
   ],
   "host_permissions": [
