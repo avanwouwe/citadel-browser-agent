@@ -14,7 +14,7 @@ Modify the existing entry in`ossec.conf` to ensure that the syslog events are se
 ```
 
 # add decoder
-In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` go to the `Decoders` configuration and create a new decoder file `0009-browser-agent_decoder.xml` and fill it with the contents of [/doc/0009-browser-agent_decoder.xml](/doc/0009-browser-agent_decoder.xml).
+In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` go to the `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [/doc/0590-browser-agent_decoder.xml](/doc/0590-browser-agent_decoder.xml).
 
 # add rules
 Events only generate alerts if they are matched by a rule. In the Wazuh `Server Management` go to the `Rules` configuration and create a new rules file `0019-browser-agent_rules.xml` and fill it with the contents of [/doc/0019-browser-agent_rules.xml](/doc/0019-browser-agent_rules.xml).

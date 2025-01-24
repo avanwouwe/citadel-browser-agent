@@ -26,7 +26,7 @@ def log(event):
         logger.debug(message)
     elif level == "INFO":
         logger.info(message)
-    elif level == "WARNING":
+    elif level == "WARN":
         logger.warning(message)
     elif level == "ERROR":
         logger.error(message)
@@ -67,7 +67,7 @@ if current_os == 'Darwin':  # macOS
             logging.INFO: syslog.LOG_INFO,
             logging.WARNING: syslog.LOG_WARNING,
             logging.ERROR: syslog.LOG_ERR,
-            logging.CRITICAL: syslog.LOG_CRIT,
+            logging.CRITICAL: syslog.LOG_ALERT,
         }
 
         def emit(self, record):
