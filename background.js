@@ -81,7 +81,7 @@ function evaluateBlacklists(details) {
 
 	if (ignorelist?.find(details.url) ||
 		details.tabId < 0 ||
-		!isNavigate && ignorelist.find(initiator)
+		!isNavigate && ignorelist?.find(initiator)
 	) return { result: "ignored" }
 
 	const result = {
@@ -328,7 +328,7 @@ function detectAuthentication(appName, details, headers) {
 const DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
 
 function reportInteractions() {
-	Config.assertIsLoaded
+	Config.assertIsLoaded()
 
 	function report(isApp) {
 		const usagePerDayPerApp = { }
