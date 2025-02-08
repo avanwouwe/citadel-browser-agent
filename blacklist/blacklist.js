@@ -18,7 +18,7 @@ class CombinedBlacklist {
 
 			const failureEvents = new EventAccumulator(CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + blacklistName, CombinedBlacklist.#ERROR_REPORTING_FREQ, (eventCount) => {
 				const currStatus = status[blacklistName]
-				const level = currStatus === "loaded" ? Log.WARN : Log.ERROR
+				const level = (currStatus === "loaded" || eventCount < 3) ? Log.WARN : Log.ERROR
 
 				logger.log(nowTimestamp(), "report", "blacklist download error", conf.url, level, eventCount, `blacklist '${blacklistName} could not be downloaded ${eventCount} times, current state is '${currStatus}'`);
 			});
