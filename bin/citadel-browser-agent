@@ -88,9 +88,27 @@ if current_os == 'Darwin':  # macOS
 elif current_os == 'Windows':
     from logging.handlers import NTEventLogHandler
 
+    class CustomWindowsHandler(NTEventLogHandler):
+        LEVEL_MAP = {
+            logging.DEBUG: logging.DEBUG,
+            logging.INFO: logging.INFO,
+            logging.WARNING: logging.WARNING,
+            logging.ERROR: logging.WARNING,
+            logging.CRITICAL: logging.WARNING,
+        }
+
+        def emit(self, record):
+            record.levelno = self.LEVEL_MAP.get(record.levelno, logging.INFO)
+            record.levelname = logging.getLevelName(record.levelno)
+
+            super().emit(record)
+
+
     logger = logging.getLogger('BrowserAgentLogger')
     logger.setLevel(logging.DEBUG)
-    event_log_handler = NTEventLogHandler('Browser Agent')
+    event_log_handler = CustomWindowsHandler('Browser Agent')
+    formatter = logging.Formatter('%(message)s')
+    event_log_handler.setFormatter(formatter)
     logger.addHandler(event_log_handler)
 
 else:
