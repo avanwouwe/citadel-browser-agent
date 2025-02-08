@@ -1,10 +1,10 @@
 <decoder name="browser-agent">
     <type>syslog</type>
-    <program_name>Python</program_name>
+    <program_name>^Python|^BrowserAgent</program_name>
 </decoder>
 
 <decoder name="browser-agent-child">
-<parent>browser-agent</parent>
-<prematch> browser agent : </prematch>
+    <parent>browser-agent</parent>
+    <prematch>browser agent : </prematch>
 <plugin_decoder offset="after_prematch">JSON_Decoder</plugin_decoder>
 </decoder>

@@ -1,0 +1,14 @@
+<service>
+    <id>Citadel</id>
+    <name>Citadel</name>
+    <description>This service exports Citadel events to log files.</description>
+    <executable>C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe</executable>
+    <startarguments>-NoLogo -file "C:\Program Files\Citadel\citadel-events-syslog.ps1"</startarguments>
+    <log mode="roll-by-size">
+        <sizeThreshold>10240</sizeThreshold>
+        <keepFiles>8</keepFiles>
+    </log>
+    <logpath>C:\Program Files\Citadel\logs</logpath>
+    <delayedAutoStart>true</delayedAutoStart>
+    <onfailure action="restart" />
+</service>
