@@ -240,19 +240,18 @@ chrome.downloads.onChanged.addListener((delta) => {
 
 });
 
+// only raise errors that deal with security issues, such as virus or SSL
+// for the full list of errors see : chrome://network-errors/
+const NAVIGATION_SECURITY_WARNING = /_(SSL|CERT|UNSAFE|INSECUR|SECUR|VIRUS|TRUST|CRED)/
+const NAVIGATION_BLOCKED = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_CLIENT)/
 
 chrome.webNavigation.onErrorOccurred.addListener(
 	function (details) {
 		if (details.error) {
-			switch (details.error) {
-				case 'net::ERR_SSL_PROTOCOL_ERROR':
-				case 'net::ERR_CERT_COMMON_NAME_INVALID':
-				case 'net::ERR_CERT_AUTHORITY_INVALID':
-					logger.log(nowTimestamp(), "navigate", "navigation ssl error", details.url, Log.WARN , details.error,  `SSL error '${details.error}' when navigating to ${details.url}`, undefined, details.tabId);
-					break;
-				case 'net::ERR_BLOCKED_BY_CLIENT':
-					logger.log(nowTimestamp(), "navigate", "navigation blocked", details.url, Log.ERROR,undefined,  `browser blocked navigation to ${details.url}`, undefined, details.tabId);
-					break;
+			if (details.error.match(NAVIGATION_SECURITY_WARNING)) {
+				logger.log(nowTimestamp(), "navigate", "navigation error", details.url, Log.WARN , details.error,  `navigation error '${details.error}' when navigating to ${details.url}`, undefined, details.tabId);
+			} else if (details.error.match(NAVIGATION_BLOCKED)) {
+				logger.log(nowTimestamp(), "navigate", "navigation blocked", details.url, Log.ERROR, details.error,  `browser blocked navigation to ${details.url}`, undefined, details.tabId);
 			}
 		}
 	}, { urls: ["<all_urls>"] }
