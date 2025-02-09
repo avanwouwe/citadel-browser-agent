@@ -3,5 +3,5 @@
   "description": "Citadel browser agent",
   "path": "/Library/Scripts/Chrome/citadel-browser-agent",
   "type": "stdio",
-  "allowed_origins": ["chrome-extension://ckficpgapkbedkfjfbjihfbedapfgemo/"]
+  "allowed_origins": ["chrome-extension://anheildjmkfdkdpgbndmpjnmkfliefga/"]
 }

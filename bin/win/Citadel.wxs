@@ -27,7 +27,6 @@
                       ExeCommand="install"
                       Return="check"
                       Execute="deferred"
-                      HideTarget="yes"
                       Impersonate="no" />
 
         <CustomAction Id="UninstallCitadelSvcExe"
@@ -35,7 +34,6 @@
                       ExeCommand="uninstall"
                       Return="ignore"
                       Execute="deferred"
-                      HideTarget="yes"
                       Impersonate="no" />
 
         <CustomAction Id="StartCitadelSvcExe"
@@ -43,7 +41,6 @@
                       ExeCommand="start"
                       Return="check"
                       Execute="deferred"
-                      HideTarget="yes"
                       Impersonate="no" />
 
         <CustomAction Id="StopCitadelSvcExe"
@@ -51,7 +48,6 @@
                       ExeCommand="stop --force"
                       Return="ignore"
                       Execute="deferred"
-                      HideTarget="yes"
                       Impersonate="no" />
 
         <InstallExecuteSequence>
