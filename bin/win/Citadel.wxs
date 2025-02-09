@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+    <Package Name="Citadel" 
+             Language="1033" 
+             Version="1.0.0.0" 
+             Manufacturer="Arno van Wouwe" 
+             UpgradeCode="529e989c-4563-48d0-b46d-952631849b75"
+             Scope="perMachine">
+
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MediaTemplate EmbedCab="yes" />
+
+        <Icon Id="icon.ico" SourceFile="..\..\gui\images\icon32.ico"/>
+        <Property Id="ARPPRODUCTICON" Value="icon.ico" />
+
+        <Feature Id="ProductFeature" Title="Citadel" Level="1">
+            <ComponentGroupRef Id="ProductComponents" />
+            <ComponentRef Id="RegistryEntries" />
+        </Feature>
+
+        <StandardDirectory Id="ProgramFiles64Folder">
+            <Directory Id="INSTALLFOLDER" Name="Citadel" />
+        </StandardDirectory>
+
+        <CustomAction Id="InstallCitadelSvcExe"
+                      FileRef="CitadelSvcExeFile"
+                      ExeCommand="install"
+                      Return="check"
+                      Execute="deferred"
+                      HideTarget="yes"
+                      Impersonate="no" />
+
+        <CustomAction Id="UninstallCitadelSvcExe"
+                      FileRef="CitadelSvcExeFile"
+                      ExeCommand="uninstall"
+                      Return="ignore"
+                      Execute="deferred"
+                      HideTarget="yes"
+                      Impersonate="no" />
+
+        <CustomAction Id="StartCitadelSvcExe"
+                      FileRef="CitadelSvcExeFile"
+                      ExeCommand="start"
+                      Return="check"
+                      Execute="deferred"
+                      HideTarget="yes"
+                      Impersonate="no" />
+
+        <CustomAction Id="StopCitadelSvcExe"
+                      FileRef="CitadelSvcExeFile"
+                      ExeCommand="stop --force"
+                      Return="ignore"
+                      Execute="deferred"
+                      HideTarget="yes"
+                      Impersonate="no" />
+
+        <InstallExecuteSequence>
+            <Custom Action="InstallCitadelSvcExe" After="InstallFiles" Condition="NOT Installed" />
+            <Custom Action="StartCitadelSvcExe" After="InstallCitadelSvcExe" Condition="NOT Installed" />
+            <Custom Action="StopCitadelSvcExe" Before="RemoveFiles" Condition="REMOVE=&quot;ALL&quot;" />
+            <Custom Action="UninstallCitadelSvcExe" After="StopCitadelSvcExe" Condition="REMOVE=&quot;ALL&quot;" />
+        </InstallExecuteSequence>
+    </Package>
+
+    <Fragment>
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <Component Id="CitadelBrowserAgentJson" Guid="*">
+                <File Id="CitadelBrowserAgentJsonFile"
+                      Name="citadel.browser.agent.json"
+                      Source="citadel.browser.agent.json"
+                      KeyPath="yes" />
+            </Component>
+
+            <Component Id="CitadelBrowserAgentExe" Guid="*">
+                <File Id="CitadelBrowserAgentExeFile"
+                      Name="citadel-browser-agent.exe"
+                      Source="citadel-browser-agent.exe"
+                      KeyPath="yes" />
+            </Component>
+
+            <Component Id="CitadelEventsSyslog" Guid="*">
+                <File Id="CitadelEventsSyslogFile"
+                      Name="citadel-events-syslog.ps1"
+                      Source="citadel-events-syslog.ps1"
+                      KeyPath="yes" />
+            </Component>
+
+            <Component Id="CitadelSvcExe" Guid="*">
+                <File Id="CitadelSvcExeFile"
+                      Name="CitadelSvc.exe"
+                      Source="CitadelSvc.exe"
+                      KeyPath="yes" />
+            </Component>
+
+            <Component Id="CitadelSvcXml" Guid="*">
+                <File Id="CitadelSvcXmlFile"
+                      Name="CitadelSvc.xml"
+                      Source="CitadelSvc.xml"
+                      KeyPath="yes" />
+            </Component>
+
+        </ComponentGroup>
+
+        <Component Id="RegistryEntries" Guid="*" Directory="INSTALLFOLDER">
+            <RegistryKey Root="HKLM"
+                         Key="SOFTWARE\Google\Chrome\NativeMessagingHosts\citadel.browser.agent">
+                <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent.json" />
+            </RegistryKey>
+        </Component>
+    </Fragment>
+</Wix>

@@ -1,0 +1,7 @@
+{
+  "name": "citadel.browser.agent",
+  "description": "Citadel browser agent",
+  "path": "C:\\Program Files\\Citadel\\citadel-browser-agent.exe",
+  "type": "stdio",
+  "allowed_origins": ["chrome-extension://anheildjmkfdkdpgbndmpjnmkfliefga/"]
+}
