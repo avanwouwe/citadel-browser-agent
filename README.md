@@ -66,4 +66,4 @@ Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/exten
 
 
 ### what about performance?
-Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 55 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)
+Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 20 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)
