@@ -45,6 +45,14 @@ The data is logged on your computer and is never sent to the cloud.
 * [Windows](/doc/windows.md)
 * [integration into Wazuh](/doc/wazuh.md)
 
+Deployment to the corporate Chrome profiles can be eaily done by using the [Chrome management feature](https://admin.google.com/ac/chrome/apps/user) in Google Workspace admin. Deployment to all profiles can be done via an MDM platform or equivalent. The extension is available on the Chrome web store.
+<br>
+<div align="left">
+  <a href="https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga">
+    <img alt="Citadel logo" src="/doc/chrome%20web%20store.png">
+  </a>
+</div>
+
 ## Frequently Asked Questions
 
 ### who is Citadel meant for?
