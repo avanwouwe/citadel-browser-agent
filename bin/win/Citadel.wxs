@@ -22,30 +22,34 @@
             <Directory Id="INSTALLFOLDER" Name="Citadel" />
         </StandardDirectory>
 
+        <Property Id="InstallCitadelSvcExe" Value="&quot;C:\Program Files\Citadel\CitadelSvc.exe&quot; install" />
         <CustomAction Id="InstallCitadelSvcExe"
-                      FileRef="CitadelSvcExeFile"
-                      ExeCommand="install"
+                      BinaryRef="Wix4UtilCA_X64"
+                      DllEntry="WixQuietExec"
                       Return="check"
                       Execute="deferred"
                       Impersonate="no" />
 
+        <Property Id="UninstallCitadelSvcExe" Value="&quot;C:\Program Files\Citadel\CitadelSvc.exe&quot; uninstall" />
         <CustomAction Id="UninstallCitadelSvcExe"
-                      FileRef="CitadelSvcExeFile"
-                      ExeCommand="uninstall"
+                      BinaryRef="Wix4UtilCA_X64"
+                      DllEntry="WixQuietExec"
                       Return="ignore"
                       Execute="deferred"
                       Impersonate="no" />
 
+        <Property Id="StartCitadelSvcExe" Value="&quot;C:\Program Files\Citadel\CitadelSvc.exe&quot; start" />
         <CustomAction Id="StartCitadelSvcExe"
-                      FileRef="CitadelSvcExeFile"
-                      ExeCommand="start"
+                      BinaryRef="Wix4UtilCA_X64"
+                      DllEntry="WixQuietExec"
                       Return="check"
                       Execute="deferred"
                       Impersonate="no" />
 
+        <Property Id="StopCitadelSvcExe" Value="&quot;C:\Program Files\Citadel\CitadelSvc.exe&quot; stop --force" />
         <CustomAction Id="StopCitadelSvcExe"
-                      FileRef="CitadelSvcExeFile"
-                      ExeCommand="stop --force"
+                      BinaryRef="Wix4UtilCA_X64"
+                      DllEntry="WixQuietExec"
                       Return="ignore"
                       Execute="deferred"
                       Impersonate="no" />

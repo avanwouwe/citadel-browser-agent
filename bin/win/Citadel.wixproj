@@ -4,4 +4,8 @@
     <TargetFramework>net6.0-windows</TargetFramework>
     <Platform>x64</Platform>
   </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="WixToolset.Util.wixext" Version="5.0.1" />
+  </ItemGroup>
 </Project>
