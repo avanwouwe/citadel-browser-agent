@@ -38,27 +38,21 @@ Citadel hashes the URL for events that do not indicate immediate threats, and ar
 
 The shadow-IT detection only reports on interaction with (authenticated) applications, and only tracks the number of interactions per site, per day.
 
-The data is logged on your computer and is never sent to the cloud.
+The data is logged on your computer and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 
 
 ## Installation
-* [configuration](/doc/configuration.md)
+* [browser plugin](/doc/browser.md)
 * [macOS](/doc/macos.md)
 * [Windows](/doc/windows.md)
+* [configuration](/doc/configuration.md)
 * [integration into Wazuh](/doc/wazuh.md)
 
-Deployment to the corporate Chrome profiles can be easily done by using the [Chrome management feature](https://admin.google.com/ac/chrome/apps/user) in Google Workspace admin. The extension is available on the Chrome web store, and you can https://support.google.com/chrome/a/answer/6306504?hl=en to all profiles of managed browsers.
-<br>
-<div align="left">
-  <a href="https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga">
-    <img alt="Citadel logo" src="/doc/chrome%20web%20store.png">
-  </a>
-</div>
 
 ## Frequently Asked Questions
 
 ### who is Citadel meant for?
-The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. There is no benefit for an end-user if the extension is installed without also setting up the Native Messaging ([macOS](/doc/macos.md) / [Windows](/doc/windows.md)).
+The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. Theoretically end-users can decide by themselves to install the extension to benefit from the blacklist functionality, but logging won't work unless Native Messaging components are also installed ([macOS](/doc/macos.md) / [Windows](/doc/windows.md)).
 
 
 ### what about end-user privacy?
@@ -72,7 +66,7 @@ See the [configuration](/config.js) to understand the default settings.
 
 
 ### which browsers are supported?
-Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla, Edge and other Chromium-based browsers. However this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
+Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla, Edge and other Chromium-based browsers. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
 
 
 ### what about performance?

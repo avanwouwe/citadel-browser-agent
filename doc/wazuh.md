@@ -3,7 +3,9 @@ Follow the following steps to ship the syslog events to your Wazuh instance.
 
 ## change ossec.conf
 ### macOS
-Modify the existing entry in`ossec.conf` to ensure that the syslog events are seen by Wazuh, by adding to the query: `or (process == "Python" and message beginsWith "browser agent : ")`
+If you haven't already done so, install the [Native Messaging module](/doc/macos.md) that Citadel needs to communicate the events outside browser sandbox.
+
+In the `ossec.conf` file that is deployed on agents, edit the existing `<localfile>` entry to ensure that the syslog events are seen by Wazuh, by adding to the query: `or (process == "Python" and message beginsWith "browser agent : ")`
 
 ```
   <localfile>
@@ -13,14 +15,28 @@ Modify the existing entry in`ossec.conf` to ensure that the syslog events are se
   </localfile>
 ```
 
+
+
+### Windows
+If you haven't already done so, install the [Native Messaging module](/doc/windows.md) that Citadel needs to communicate the events outside browser sandbox.
+
+In the `ossec.conf` file that is deployed on agents, add the following `<localfile>` entry to ensure that the syslog events are seen by Wazuh.
+```
+  <!-- Browser Agent -->
+  <localfile>
+    <location>C:\Program Files\Citadel\logs\CitadelSvc.out.log</location>
+    <log_format>syslog</log_format>
+  </localfile>
+```
+
 # add decoder
-In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` go to the `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [/doc/0590-browser-agent_decoder.xml](/doc/0590-browser-agent_decoder.xml).
+In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` > `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [/doc/0590-browser-agent_decoder.xml](/doc/0590-browser-agent_decoder.xml).
 
 # add rules
-Events only generate alerts if they are matched by a rule. In the Wazuh `Server Management` go to the `Rules` configuration and create a new rules file `0019-browser-agent_rules.xml` and fill it with the contents of [/doc/0019-browser-agent_rules.xml](/doc/0019-browser-agent_rules.xml).
+Events only generate alerts if they are matched by a rule. In Wazuh `Server Management` > `Rules` configuration create a new rules file `0019-browser-agent_rules.xml` and fill it with the contents of [/doc/0019-browser-agent_rules.xml](/doc/0019-browser-agent_rules.xml).
 
-Restart the server for the changes to take effect, for example using the `Restart cluster` button in the `Server Management` > `Status` menu.
+Restart the server for the changes to take effect, for example using the `Restart cluster` > `Server Management` > `Status` menu.
 
-You should start seeing new events show up in the Threat hunting module. You can filter for `data.browseragent.event: *` to make it easier to see.
+You should start seeing new events show up in the `Threat hunting` module, for example if you visit [http://neverssl.com](http://neverssl.com) and filter in Wazuh for `data.browseragent.event: *`.
 
 ![screenshot of events in Wazuh](/doc/screenshot%20wazuh.png)
