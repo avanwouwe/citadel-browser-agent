@@ -47,6 +47,14 @@ The data is logged on your computer and is never sent to the cloud.
 * [Windows](/doc/windows.md)
 * [integration into Wazuh](/doc/wazuh.md)
 
+Deployment to the corporate Chrome profiles can be eaily done by using the [Chrome management feature](https://admin.google.com/ac/chrome/apps/user) in Google Workspace admin. Deployment to all profiles can be done via an MDM platform or equivalent. The extension is available on the Chrome web store.
+<br>
+<div align="left">
+  <a href="https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga">
+    <img alt="Citadel logo" src="/doc/chrome%20web%20store.png">
+  </a>
+</div>
+
 ## Frequently Asked Questions
 
 ### who is Citadel meant for?
@@ -64,8 +72,8 @@ See the [configuration](/config.js) to understand the default settings.
 
 
 ### which browsers are supported?
-Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla and other Chromium-based browsers. However this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
+Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla, Edge and other Chromium-based browsers. However this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
 
 
 ### what about performance?
-Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 55 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)
+Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 20 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)
