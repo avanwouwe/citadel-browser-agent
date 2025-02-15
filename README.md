@@ -3,7 +3,9 @@
 </div>
 
 # Citadel browser agent
-Citadel is a browser agent that detects malware and shadow IT by analyzing and logging security events to syslog in a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow DFIR. Citadel comes pre-integrated with the open source EDR [Wazuh](https://wazuh.com/).
+Citadel is a browser agent that detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response (DFIR).
+
+Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR.
 
 ## Security event detection
 It detects the following events in the browser:
@@ -29,7 +31,7 @@ Citadel inspects internet use and generates daily statistics per site. Citadel a
 
 The interaction analysis is based both on navigation events and on clicks, ensuring that it also works for Single Page Applications.
 
-These usage reports can be aggregated in your SIEM / EDR and used to detect unexpected applications.
+These usage reports can be aggregated in your SIEM / EDR and used to detect unexpected applications or unused licences.
 
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
