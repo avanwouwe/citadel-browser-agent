@@ -1,6 +1,7 @@
 # Browser plugin installation
+The extension is available on the Chrome web store.
 
-Deployment to Chrome is most easily done by using the [Chrome management feature](https://admin.google.com/ac/chrome/apps/user) in the Google Workspace admin console. The extension is available on the Chrome web store, and you can [force the installation of the extension](https://support.google.com/chrome/a/answer/6306504?hl=en) to all profiles of managed browsers.
+Deployment to Chrome is most easily done by using the [Chrome management feature](https://admin.google.com/ac/chrome/apps/user) in the Google Workspace admin console, where you can [force the installation of the extension](https://support.google.com/chrome/a/answer/6306504?hl=en) to all profiles of managed browsers.
 
 If you do not use Google Workspace you can use Chrome Policy lists to set `ExtensionInstallForcelist`. Policy lists work differently depending on the platform (Windwos, Mac, Linux).
 
