@@ -61,11 +61,19 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-	if (alarm.name === Alarm.REPORTING) {
+	if (alarm.name === Alarm.DAILY) {
+		// reset daily counters interactions with sites not (yet) allocated to applications
+		for (const stats of Object.values(SITESTATS)) {
+			stats.interactions = 0
+		}
+
+		SITESTATS.markDirty()
+
 		reportInteractions()
 	}
 
-	if (alarm.name === Alarm.CLEANING) {
+	if (alarm.name === Alarm.MONTHLY) {
+		// purge site statistics to prevent build-up of data and reset classifications
 		const siteStats = new PersistentObject(SITE_STATISTICS_KEY)
 		siteStats.clear()
 
