@@ -74,7 +74,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 });
 
 
-function evaluateBlacklists(details) {
+function evaluateRequest(details) {
 	const { ip, initiator } = details;
 	const url = new URL(details.url);
 	const isNavigate = details.method === undefined
@@ -128,7 +128,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 	}
 
 	const timestamp = timestampToISO(details.timeStamp)
-	const evaluation = evaluateBlacklists(details);
+	const evaluation = evaluateRequest(details);
 
 	switch (evaluation.result) {
 		case "ignored":
@@ -144,7 +144,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 
 chrome.webRequest.onBeforeRequest.addListener((details) => {
 	const timestamp = timestampToISO(details.timeStamp)
-	const evaluation = evaluateBlacklists(details);
+	const evaluation = evaluateRequest(details);
 
 	switch (evaluation.result) {
 		case "ignored":
