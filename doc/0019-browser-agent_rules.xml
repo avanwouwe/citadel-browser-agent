@@ -67,12 +67,6 @@
         <description>$(browseragent.description)</description>
     </rule>
 
-    <rule id="459" level="7">
-        <if_sid>450</if_sid>
-        <field name="browseragent.result">^port warning$</field>
-        <description>$(browseragent.description)</description>
-    </rule>
-
     <rule id="460" level="7">
         <if_sid>450</if_sid>
         <field name="browseragent.result">^URL auth warning$</field>

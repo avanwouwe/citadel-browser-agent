@@ -2,7 +2,6 @@ class Config {
     static config = {
         contact: 'Your IT support',
         warningProtocols: ['http:', 'ftp:'],
-        standardPorts: ['80', '443'],
         blacklist: {
             ip: [
                 {

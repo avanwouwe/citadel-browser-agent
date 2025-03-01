@@ -89,13 +89,6 @@ function evaluateBlacklists(details) {
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
-	if (url.port.isNotEmpty() && ! config.standardPorts.includes(url.port)) {
-		result.result = "port warning"
-		result.level = Log.WARN
-		result.value = url.port
-		result.description = `non-standard port number '${url.port}'`
-	}
-
 	if (config.warningProtocols.includes(url.protocol)) {
 		result.result = "protocol warning"
 		result.level = Log.WARN
