@@ -40,7 +40,7 @@ class Config {
         },
         reporting: {
             maxEntries: 200,
-            onlyApps: true
+            onlyAuthenticated: true
         },
         logging: {
             failurePopup: true,

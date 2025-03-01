@@ -295,8 +295,8 @@ function getAppname(details, headers) {
 function markIsAuthenticated(appName, reason) {
 	const appStats = APPSTATS.getOrSet(appName, { });
 
-	if (! appStats['isApp']) {
-		appStats['isApp'] = reason;
+	if (! appStats['isAuthenticated']) {
+		appStats['isAuthenticated'] = reason;
 		APPSTATS.isDirty = true;
 	}
 }
@@ -331,13 +331,13 @@ const DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
 function reportInteractions() {
 	Config.assertIsLoaded()
 
-	function report(isApp) {
+	function report(isAuthenticated) {
 		const usagePerDayPerApp = { }
 		const today = nowDatestamp();
 
 		// aggregate interactions per date (only dates in the past)
 		for (const [appName, appStats] of Object.entries(APPSTATS)) {
-			if ((appStats.isApp === undefined) !== !isApp) { continue; }
+			if ((appStats.isAuthenticated === undefined) !== !isAuthenticated) { continue; }
 
 			const dailyUsage = appStats.usage ?? {};
 
@@ -370,7 +370,7 @@ function reportInteractions() {
 		}
 	}
 
-	if (config.reporting.onlyApps) {
+	if (config.reporting.onlyAuthenticated) {
 		report(true)
 	} else {
 		report(true)
