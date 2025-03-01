@@ -98,10 +98,16 @@ function evaluateRequest(details) {
 	}
 
 	if (config.warningProtocols.includes(url.protocol)) {
-		result.result = "protocol warning"
-		result.level = Log.WARN
-		result.value = url.protocol
-		result.description = `use of protocol type '${url.protocol}'`
+		const siteName = getSitename(initiator)
+		const appName = SITESTATS[siteName]?.appName
+		const app = APPSTATS[appName]
+
+		if (app?.isAuthenticated) {
+			result.result = "protocol warning"
+			result.level = Log.WARN
+			result.value = url.protocol
+			result.description = `use of protocol type '${url.protocol}' by '${appName}'`
+		}
 	}
 
 	if (url.password.isNotEmpty()) {
