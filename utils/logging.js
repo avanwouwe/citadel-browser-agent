@@ -122,7 +122,7 @@ class Log {
             Log.#maxUrlMaskLevel = Log.#levelnameToLevelvalue(config.logging.maskUrlLevel)
 
             console.log("minimum log level:", config.logging.logLevel)
-            console.log("minimum console level:", config.logging.logLevel)
+            console.log("minimum console level:", config.logging.consoleLevel)
         }
     }
 }
