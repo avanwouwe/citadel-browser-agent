@@ -500,4 +500,11 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	if (request.type === "user-interaction") {
 		registerInteraction(sender.url, sender);
 	}
+
+	if (request.type === "print-dialog") {
+		registerInteraction(sender.url, sender);
+
+		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id);
+	}
+
 });

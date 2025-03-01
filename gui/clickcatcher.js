@@ -8,4 +8,9 @@ document.addEventListener('DOMContentLoaded', () => {
             chrome.runtime.sendMessage({type: "user-interaction", event});
         }
     }, true);
+
+    window.addEventListener('beforeprint', function() {
+        chrome.runtime.sendMessage({type: 'print-dialog'});
+    });
+
 });

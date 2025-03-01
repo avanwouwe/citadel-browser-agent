@@ -12,7 +12,7 @@ It detects the following events in the browser:
 * IP or URL is blacklisted (configurable blacklist)
 * the browser has blocked the navigation to the site
 * user is using unencrypted protocols (e.g. FTP or HTTP)
-* user is using non-standard port numbers (i.e. not 443)
+* user has opened the print dialog for a page (n.b. it is unknown if the dialog was cancelled)
 * user is using URL with username or password in the URL
 * user has downloaded a file
 * the user is warned that the downloaded file is dangerous
