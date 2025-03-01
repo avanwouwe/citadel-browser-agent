@@ -285,11 +285,11 @@ function getAppname(details, headers) {
 	for (header of headers) {
 		const headerName = header.name.toLowerCase()
 		if (['origin', 'access-control-allow-origin'].includes(headerName)) {
-			return header.value.startsWith("http") ? header.value : null;
+			return header.value.startsWith("http") ? getSitename(header.value) : null;
 		}
 	}
 
-	if (isHttpUrl(details.initiator)) { return details.initiator; }
+	if (isHttpUrl(details.initiator)) { return getSitename(details.initiator); }
 }
 
 function markIsAuthenticated(appName, reason) {
