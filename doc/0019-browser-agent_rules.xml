@@ -91,6 +91,13 @@
         <description>$(browseragent.description)</description>
     </rule>
 
+    <rule id="463" level="5">
+        <if_sid>450</if_sid>
+        <field name="browseragent.event">^file select$</field>
+        <description>$(browseragent.description)</description>
+    </rule>
+
+
     <rule id="465" level="5">
         <if_sid>450</if_sid>
         <field name="browseragent.event">^agent start$</field>

@@ -507,4 +507,10 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id);
 	}
 
+	if (request.type === "file-select") {
+		registerInteraction(sender.url, sender);
+
+		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id);
+	}
+
 });

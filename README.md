@@ -11,10 +11,11 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
 It detects the following events in the browser:
 * IP or URL is blacklisted (configurable blacklist)
 * the browser has blocked the navigation to the site
-* user is using unencrypted protocols (e.g. FTP or HTTP)
-* user has opened the print dialog for a page (n.b. it is unknown if the dialog was cancelled)
+* user is using unencrypted protocols for an application (e.g. FTP or HTTP)
 * user is using URL with username or password in the URL
 * user has downloaded a file
+* user has selected a file (n.b. it is unknown if the file was uploaded)
+* user has opened the print dialog for a page (n.b. it is unknown if the dialog was cancelled)
 * the user is warned that the downloaded file is dangerous
 * user has accepted downloading of dangerous file
 * domain name does not match the SSL certificate
