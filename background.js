@@ -67,7 +67,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			stats.interactions = 0
 		}
 
-		SITESTATS.markDirty()
+		SITESTATS.isDirty = true
 
 		reportInteractions()
 	}
