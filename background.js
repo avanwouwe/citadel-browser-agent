@@ -358,19 +358,18 @@ function reportInteractions() {
 
 		for (const [date, appStats] of Object.entries(usagePerDayPerApp)) {
 			Object.entries(appStats)
-				.map(([appUrl, interactions]) => ({ appUrl, interactions }))
+				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
 				.slice(0, config.reporting.maxEntries)
 				.forEach(it => {
-					const appName = getSitename(it.appUrl);
 					logger.log(
 						`${date}T23:59:59.999Z`,
 						'report',
 						'usage report',
-						it.appUrl,
+						"https://" + it.appName,
 						Log.INFO,
 						it.interactions,
-						`'${appName}' received ${it.interactions} interactions on ${date}`
+						`'${it.appName}' received ${it.interactions} interactions on ${date}`
 					);
 				});
 		}
