@@ -9,7 +9,9 @@
     "downloads",
     "storage",
     "alarms",
-    "nativeMessaging"
+    "nativeMessaging",
+    "identity",
+    "identity.email"
   ],
   "host_permissions": [
     "<all_urls>"

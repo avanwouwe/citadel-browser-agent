@@ -60,6 +60,10 @@ class Log {
             }
         }
 
+        if (PROFILE_ADDRESS) {
+            logEntry.browseragent.profile = PROFILE_ADDRESS
+        }
+
         // if the value is an object, move it to the "details" node
         if (typeof value === 'object') {
             const details = value[event]
