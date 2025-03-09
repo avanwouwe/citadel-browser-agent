@@ -33,7 +33,7 @@ Port.onMessage("config",(newConfig) => {
 	new CombinedBlacklist().load(config.blacklist.url, URLBlacklist).then(blacklist => blacklistURL = blacklist)
 	ignorelist = new Ignorelist()
 
-	const configHash = config?.hashSHA256()
+	const configHash = config?.hashDJB2()
 
 	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started with config ${configHash}`, )
 })

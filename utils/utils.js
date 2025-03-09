@@ -142,7 +142,7 @@ Object.prototype.hashCode = function () {
 }
 
 
-Object.prototype.hashSHA256 = function () {
+Object.prototype.hashDJB2 = function () {
     const str = typeof this == 'string' ? this : JSON.stringify(this);
 
     let hash = 5381;

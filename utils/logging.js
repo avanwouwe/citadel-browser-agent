@@ -100,12 +100,12 @@ class Log {
         if (Log.#levelnameToLevelvalue(level) < Log.#maxUrlMaskLevel) {
             if (typeof url === 'string') { url = new URL(url) }
 
-            url.username ? url.username = url.username.hashSHA256() : undefined
-            url.password ? url.password = url.password.hashSHA256() : undefined
-            url.hostname ? url.hostname = url.hostname.hashSHA256() : undefined
-            url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashSHA256() : undefined
-            url.hash ? url.hash = url.hash.hashSHA256() : undefined
-            url.search ? url.search = url.search.hashSHA256() : undefined
+            url.username ? url.username = url.username.hashDJB2() : undefined
+            url.password ? url.password = url.password.hashDJB2() : undefined
+            url.hostname ? url.hostname = url.hostname.hashDJB2() : undefined
+            url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashDJB2() : undefined
+            url.hash ? url.hash = url.hash.hashDJB2() : undefined
+            url.search ? url.search = url.search.hashDJB2() : undefined
         }
         return url.toString()
     }
