@@ -49,10 +49,10 @@ class Log {
         const logEntry = {
             timestamp,
             id,
+            url,
             browseragent: {
                 event,
                 result,
-                url,
                 level,
                 value,
                 description,
