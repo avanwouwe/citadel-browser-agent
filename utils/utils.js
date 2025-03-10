@@ -156,7 +156,7 @@ function isObject(item) {
     return item && typeof item === 'object' && !Array.isArray(item);
 }
 
-function mergeDeep(target, source) {
+function mergeDeep(source, target) {
     for (const key in source) {
         if (Object.prototype.hasOwnProperty.call(source, key)) {
             if (isObject(source[key])) {
@@ -164,7 +164,7 @@ function mergeDeep(target, source) {
                 if (!target[key]) {
                     target[key] = {};
                 }
-                mergeDeep(target[key], source[key]);
+                mergeDeep(source[key], target[key]);
             } else {
                 // For primitive values or arrays, just copy the value from source
                 target[key] = source[key];
