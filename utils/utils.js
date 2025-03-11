@@ -79,6 +79,24 @@ async function getCached(url, replace = true) {
         throw error;
     }
 }
+function getDomain(hostname) {
+    const parts = hostname.split('.');
+
+    if (parts.length < 2) {
+        throw new Error(`Cannot retrieve TLD from ${hostname}`);
+    }
+
+    return parts.slice(-2).join('.');
+}
+
+function getSitename(url) {
+    return isHttpUrl(url) ? new URL(url).hostname : null
+}
+
+function isKnownApplication(sitename) {
+    const domain = getDomain(sitename)
+    return config.domain.isKnownApplication[domain] === true
+}
 
 function getRandomInt(min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {
     min = Math.ceil(min);
@@ -103,6 +121,18 @@ function nowDatestamp() {
 
     return `${year}-${month}-${day}`;
 }
+
+function daysSince(date) {
+    date = new Date(date);
+    if (isNaN(date)) {
+        throw new Error("Invalid date format. Must be in YYYY-MM-DD format.");
+    }
+
+    const today = new Date(nowDatestamp());
+    const diff = today - date;
+    return Math.floor(diff / (1000 * 60 * 60 * 24));
+}
+
 
 function isString(str) { return typeof str === 'string'; }
 

@@ -3,6 +3,7 @@ console.log("Service worker started.");
 importScripts('config.js');
 importScripts('utils/definitions.js');
 importScripts('utils/utils.js');
+importScripts('utils/passwords.js');
 importScripts('utils/eventaccumulator.js');
 importScripts('utils/alarm.js');
 importScripts('utils/schedule.js');
@@ -69,6 +70,23 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name === Alarm.DAILY) {
+		// daily cleaning up of application statistics to prevent infinite build-up of irrelevant data
+		for (const [appName, app] of Object.entries(APPSTATS)) {
+			// purge applications if they haven't been used for a while
+			if (daysSince(app.lastUsed) > config.application.retentionDays) {
+				delete APPSTATS[appName]
+				continue
+			}
+
+			// purge accounts if they haven't been used for a while
+			const accounts = app.getOrSet("accounts", {})
+			for (const [username, issues] of Object.entries(accounts)) {
+				if (daysSince(issues.lastConnected) > config.account.retentionDays) {
+					delete accounts[username]
+				}
+			}
+		}
+
 		// reset daily counters interactions with sites not (yet) allocated to applications
 		for (const stats of Object.values(SITESTATS)) {
 			stats.interactions = 0
@@ -77,6 +95,10 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 		SITESTATS.isDirty = true
 
 		reportInteractions()
+	}
+
+	if (alarm.name === Alarm.BIWEEKLY) {
+		reportApplications()
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {
@@ -290,9 +312,6 @@ const AUTH_COOKIE_PATTERN = /($|&)sessionid|auth|(session|auth(othiri[sz]ation))
 const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/;
 function isHttpUrl(url) { return url?.startsWith('http') }
 
-function getSitename(url) {
-	return isHttpUrl(url) ? new URL(url).hostname : null
-}
 
 function getAppname(details, headers) {
 	for (header of headers) {
@@ -307,6 +326,7 @@ function getAppname(details, headers) {
 
 function markIsAuthenticated(appName, reason) {
 	const appStats = APPSTATS.getOrSet(appName, { });
+	appStats.lastUsed = nowDatestamp();
 
 	if (! appStats['isAuthenticated']) {
 		appStats['isAuthenticated'] = reason;
@@ -367,7 +387,7 @@ function reportInteractions() {
 			Object.entries(appStats)
 				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
-				.slice(0, config.reporting.maxEntries)
+				.slice(0, config.reporting.maxInteractionEntries)
 				.forEach(it => {
 					logger.log(
 						`${date}T23:59:59.999Z`,
@@ -382,6 +402,7 @@ function reportInteractions() {
 		}
 	}
 
+	// run twice to prevent non-authenticated sites from crowding out the authenticated ones
 	if (config.reporting.onlyAuthenticated) {
 		report(true)
 	} else {
@@ -389,6 +410,76 @@ function reportInteractions() {
 		report(false)
 	}
 
+}
+
+function reportApplications() {
+	Config.assertIsLoaded()
+
+	function report(isAuthenticated) {
+		let appCnt = 0
+		const topIssues = []
+
+		for (const [appName, app] of Object.entries(APPSTATS)) {
+			if ((app.isAuthenticated === undefined) !== !isAuthenticated) { continue }
+
+			if (appCnt++ < config.reporting.maxApplicationEntries) {
+				const unusedDays = daysSince(app.lastUsed)
+				logger.log(
+					nowTimestamp(),
+					'report',
+					'application usage',
+					"https://" + appName,
+					Log.INFO,
+					unusedDays,
+					`'${appName}' was last used ${unusedDays} days ago, on ${app.lastUsed}`
+				)
+			}
+
+			const accounts = app.getOrSet("accounts", {})
+			for (const [username, issues] of Object.entries(accounts)) {
+				const domain = getDomainFromUsername(username)
+				if (issues && ! ignorePersonalAccount(domain)) {
+					topIssues.push(mergeDeep(issues,{
+						username,
+						appName,
+					}))
+				}
+			}
+		}
+
+		topIssues.sort((a, b) => b.count - a.count)
+			.slice(0, config.reporting.maxAccountEntries)
+			.forEach(it => {
+				logger.log(
+					nowTimestamp(),
+					'report',
+					'password issue',
+					"https://" + it.appName,
+					Log.WARN,
+					it.count,
+					`password for account '${it.username}' of '${it.appName}' has ${it.count} issues`
+				)
+			});
+
+		const lostAccounts = appCnt - config.reporting.maxAccountEntries
+		if (lostAccounts > 0) {
+			logger.log(nowTimestamp(), "report", "accounts lost", undefined, Log.ERROR, lostAccounts, `${lostAccounts} account reports were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`);
+		}
+
+		const lostIssues = topIssues.length - config.reporting.maxAccountEntries
+		if (lostIssues > 0) {
+			logger.log(nowTimestamp(), "report", "issues lost", undefined, Log.ERROR, lostIssues, `${lostIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} issues`);
+		}
+
+	}
+
+	// run twice to prevent non-authenticated sites from crowding out the authenticated ones
+	if (config.reporting.onlyAuthenticated) {
+		report(true)
+	} else {
+		report(true)
+		report(false)
+	}
 }
 
 
@@ -483,9 +574,48 @@ function incrementInteractionCounter(appName, increment = 1) {
 	const appStats = APPSTATS.getOrSet(appName, { });
 	const dates = appStats.getOrSet('usage', { });
 	const currInteractionCount = dates.getOrSet(today, 0);
+	appStats.lastUsed = today
 	dates[today] = currInteractionCount + increment;
-	console.log(`incremented ${appName} with ${increment} interactions`);
 	APPSTATS.isDirty = true;
+
+	console.log(`incremented ${appName} with ${increment} interactions`);
+}
+
+function registerAccountUsage(url, report) {
+	if (ignorePersonalAccount(report.domain)) {
+		return
+	}
+
+	const siteName = getSitename(url)
+	const appName = SITESTATS[siteName]?.appName
+	const appStats = APPSTATS.getOrSet(appName, {})
+	appStats.lastUsed = nowDatestamp()
+	appStats.lastConnected = nowDatestamp()
+	appStats.lastAccount = report.username
+
+	const issues = {
+		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
+		numberOfLetters: report.password.numberOfLetters < config.account.passwordPolicy.minNumberOfLetters ? 1 : null,
+		numberOfUpperCase: report.password.numberOfUpperCase < config.account.passwordPolicy.minNumberOfUpperCase ? 1 : null,
+		numberOfLowerCase: report.password.numberOfLowerCase < config.account.passwordPolicy.minNumberOfLowerCase ? 1 : null,
+		numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
+		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
+		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
+	}
+
+	Object.entries(issues).forEach(([key, value]) => {
+		if (!value) {
+			delete issues[key]
+		}
+	})
+
+	issues.count = Object.values(issues).length
+	issues.domain = report.domain
+	issues.lastConnected = nowDatestamp()
+
+	const accounts = appStats.getOrSet('accounts', {})
+	accounts[report.username] = issues.count > 0 ? issues : null
+	APPSTATS.isDirty = true
 }
 
 chrome.webNavigation.onCommitted.addListener((details) => {
@@ -517,6 +647,10 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		registerInteraction(sender.url, sender);
 
 		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id);
+	}
+
+	if (request.type === "account-usage") {
+		registerAccountUsage(sender.url, request.report);
 	}
 
 });
