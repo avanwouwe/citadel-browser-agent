@@ -1,7 +1,7 @@
 {
   "name": "citadel.browser.agent",
   "description": "Citadel browser agent",
-  "path": "/Library/Scripts/Chrome/citadel-browser-agent",
+  "path": "/Library/Scripts/Citadel/citadel-browser-agent",
   "type": "stdio",
   "allowed_origins": ["chrome-extension://anheildjmkfdkdpgbndmpjnmkfliefga/"]
 }
