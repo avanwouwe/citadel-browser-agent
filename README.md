@@ -38,7 +38,7 @@ The reports are generated as security events. Two types of reports are generated
 These usage reports can be aggregated in your SIEM / EDR and used to detect unexpected applications or unused licences.
 
 ## Password policy enforcement
-Any time a password is sent to a web application, Citadel checks whether the password is conforming to the policy you have configured. Once every two weeks a report is triggered that generates one even for every application, for every account that has a password that does not conform to the password policy.
+Any time a password is sent to a web application, Citadel checks whether the password is conforming to the policy you have configured. Once every two weeks a report is triggered that generates one event for every application, for every account that has a password that does not conform to the password policy.
 
 
 ## Privacy respecting
