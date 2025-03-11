@@ -14,11 +14,11 @@ It detects the following events in the browser:
 * user is using unencrypted protocols for an application (e.g. FTP or HTTP)
 * user is using URL with username or password in the URL
 * user has downloaded a file
-* user has used a password that does not conform to the password policy
 * user has selected a file (n.b. it is unknown if the file was uploaded)
 * user has opened the print dialog for a page (n.b. it is unknown if the dialog was cancelled)
 * the user is warned that the downloaded file is dangerous
 * user has accepted downloading of dangerous file
+* user has used a password that does not conform to the password policy
 * security-related network errors (see chrome://network-errors)
 
 It also reports on usage statistics of applications, allowing for detection of shadow IT.
@@ -31,7 +31,15 @@ Citadel inspects internet use and generates daily statistics per site. Citadel a
 
 The interaction analysis is based both on navigation events and on clicks, ensuring that it also works for Single Page Applications.
 
+The reports are generated as security events. Two types of reports are generated:
+* one event per day, per application, showing the number of interactions (triggered once per day)
+* one event per application, showing the number of days the application was not used (triggered once every two weeks)
+
 These usage reports can be aggregated in your SIEM / EDR and used to detect unexpected applications or unused licences.
+
+## Password policy enforcement
+Any time a password is sent to a web application, Citadel checks whether the password is conforming to the policy you have configured. Once every two weeks a report is triggered that generates one even for every application, for every account that has a password that does not conform to the password policy.
+
 
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.

@@ -1,7 +1,7 @@
 class Config {
     static config = {
         company: {
-            contact: 'Your IT support',
+            contact: 'it-support@yourcompany.com',
             name: 'Company',
         },
         warningProtocols: ['http:', 'ftp:'],
@@ -192,7 +192,15 @@ class Config {
             logLevel: 'DEBUG',
             consoleLevel: 'WARN',
             maskUrlLevel: 'INFO',
-            maxUrlLength: 500
+            maxUrlLength: 500,
+            domains: [
+                { startsWith: "whoz", logLevel: "INFO", maskUrlLevel: "DEBUG" },
+                { endsWith: "whoz.com", logLevel: "INFO", maskUrlLevel: "DEBUG" },
+                { endsWith: "whoz.io", logLevel: "INFO", maskUrlLevel: "DEBUG" },
+                { endsWith: "whoz.net", logLevel: "INFO", maskUrlLevel: "DEBUG" },
+                { endsWith: "whoz.tech", logLevel: "INFO", maskUrlLevel: "DEBUG" },
+                { endsWith: "biznet.io", logLevel: "INFO", maskUrlLevel: "DEBUG" },
+            ]
         }
     }
 

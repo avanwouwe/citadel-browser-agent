@@ -2,9 +2,10 @@
 Citadel comes with a [sensible default configuration](/config.js). You can override these configurations by creating a file `citadel-browser-agent.json` in the directory where the `citadel-browser-agent` file is placed. For example, to specify the e-mail address of your own IT department:
 
 ```
-{
-    "contact": "it-support@yourdomain.com",
-}
+    company: {
+        contact: 'it-support@yourcompany.com',
+        name: 'Company',
+    },
 ```
 
 ## blacklists
@@ -20,6 +21,45 @@ The IP blacklist is expected to contain one IPv4 address or one CIDR formatted s
 * [Romain Marcoux - malicious outgoing IP](https://github.com/romainmarcoux/malicious-outgoing-ip)
 
 In both cases lines starting with `#` are interpreted as comments.
+
+## passwords
+You can configure your own password policy: 
+
+```
+    account: {
+        checkPersonal: false,
+        passwordPolicy: {
+            minLength: 15,
+            minNumberOfDigits: 1,
+            minNumberOfLetters: 0,
+            minNumberOfUpperCase: 1,
+            minNumberOfLowerCase: 1,
+            minNumberOfSymbols: 1,
+            minEntropy: 2.5,
+            minSequence: 4
+        },
+    },
+```
+
+Note that:
+* the `minEntropy` setting refers to the [Shannon Entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
+* the `minSequence` setting measures the number of consecutive characters or numbers in the password, relative to the password length
+
+
+## reporting
+The reporting can be configured to report only on authenticated applications, or to include only a maximum number of applications. In the latter case, only the most important applications are listed (i.e. the most visited or the ones with the most password issues).
+
+```
+    reporting: {
+        maxInteractionEntries: 200,
+        maxApplicationEntries: 500,
+        maxAccountEntries: 500,
+        onlyAuthenticated: true
+    },
+```
+
+The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "last two weeks" and you will have exactly one event for every endpoint. Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant.
+
 
 ## logging
 The default logging settings are:
