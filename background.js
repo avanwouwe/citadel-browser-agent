@@ -307,9 +307,9 @@ const KNOWN_AUTH_HEADERS = {
 	'x-oauth-scopes' : true,
 	'x-csrf-Token' : true,
 }
+const AUTH_COOKIE_PATTERN = /($|&)sessionid|auth|(session|auth(othiri[sz]ation))_?token|jwt|password|secret|login/
+const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/
 
-const AUTH_COOKIE_PATTERN = /($|&)sessionid|auth|(session|auth(othiri[sz]ation))_?token|jwt|password|secret|login/;
-const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/;
 function isHttpUrl(url) { return url?.startsWith('http') }
 
 
