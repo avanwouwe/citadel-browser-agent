@@ -79,3 +79,8 @@ Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/exten
 
 ### what about performance?
 Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 20 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)
+
+### how much security does this provide?
+Citadel is mainly intended for policy enforcement, licence management and DFIR. It uses heuristics to analyze the traffic it observes, which may produce false positives or false negatives. Whilst it does offer a basic blacklisting functionality, it does not (yet) use heuristic behavioural analysis to detect unknown threat types.
+
+For more detail see the complete [list of limitations](/doc/limitations.md).
