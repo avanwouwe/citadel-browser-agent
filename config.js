@@ -4,7 +4,7 @@ class Config {
             contact: 'it-support@yourcompany.com',
             name: 'Company',
         },
-        warningProtocols: ['http:', 'ftp:'],
+        warningProtocols: ['http:', 'ftp:', 'ws:'],
         application: {
             retentionDays: 365,
         },
@@ -193,14 +193,6 @@ class Config {
             consoleLevel: 'WARN',
             maskUrlLevel: 'INFO',
             maxUrlLength: 500,
-            domains: [
-                { startsWith: "whoz", logLevel: "INFO", maskUrlLevel: "DEBUG" },
-                { endsWith: "whoz.com", logLevel: "INFO", maskUrlLevel: "DEBUG" },
-                { endsWith: "whoz.io", logLevel: "INFO", maskUrlLevel: "DEBUG" },
-                { endsWith: "whoz.net", logLevel: "INFO", maskUrlLevel: "DEBUG" },
-                { endsWith: "whoz.tech", logLevel: "INFO", maskUrlLevel: "DEBUG" },
-                { endsWith: "biznet.io", logLevel: "INFO", maskUrlLevel: "DEBUG" },
-            ]
         }
     }
 
