@@ -17,7 +17,7 @@ function showPopup(message, title = "Citadel browser agent"
 
 function blockPage(tabId, reason, value) {
     const url = chrome.runtime.getURL("gui/blocked.html");
-    const params = new URLSearchParams({ reason: reason, value: value, contact: config.contact });
+    const params = new URLSearchParams({ reason: reason, value: value, contact: config.company.contact });
 
     chrome.tabs.update(tabId, { 'url' : `${url}?${params.toString()}` });
 }

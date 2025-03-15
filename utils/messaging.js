@@ -57,7 +57,7 @@ class Port {
 
 
             const error = isString(Port.#lastError) ? ` with the error:\n\n${Port.#lastError.htmlMonospace()}` : "";
-            const message = `Unable to connect to native application. Please contact ${config.contact.htmlNowrap()}${error}`
+            const message = `Unable to connect to native application. Please contact ${config.company.contact.htmlNowrap()}${error}`
 
             rateLimit(Port.#LOST_EVENTS_POPUP, Port.#LOST_EVENTS_FREQ, (mustShowPopup) => {
                 if (mustShowPopup) {
