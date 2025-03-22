@@ -297,6 +297,7 @@ function handleError(details) {
 }
 chrome.webNavigation.onErrorOccurred.addListener(handleError);
 
+chrome.webRequest.onErrorOccurred.addListener(handleError, { urls: ["<all_urls>"] });
 
 
 const KNOWN_AUTH_HEADERS = {
