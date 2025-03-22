@@ -5,7 +5,7 @@ class PersistentObject {
     #interval;
     #timer;
 
-    #MAX_LIFETIME_SERVICE_WORKER = 10 * ONE_SECOND;   // it looks like native messaging prevents worker termination, but theoretically  https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle
+    #MAX_LIFETIME_SERVICE_WORKER = 20 * ONE_SECOND;   // it looks like native messaging prevents worker termination, but theoretically  https://developer.chrome.com/docs/extensions/develop/concepts/service-workers/lifecycle
 
     constructor(storageKey, object = { }, interval = this.#MAX_LIFETIME_SERVICE_WORKER) {
         this.#persistentObject = new ChangeTrackingObject(object);
@@ -43,6 +43,8 @@ class PersistentObject {
 
     #saveToStorage() {
         if (this.#persistentObject.isDirty) {
+            this.#persistentObject.isDirty = false;
+
             const object = { ...this.#persistentObject };
             delete object.isDirty;
 
