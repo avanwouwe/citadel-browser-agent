@@ -364,7 +364,6 @@ function detectAuthentication(appName, details, headers) {
 	}
 }
 
-const DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
 
 function reportInteractions() {
 	Config.assertIsLoaded()
@@ -380,7 +379,7 @@ function reportInteractions() {
 			const dailyUsage = appStats.usage ?? {};
 
 			for (const [date, interactions] of Object.entries(dailyUsage)) {
-				if (DATE_REGEX.test(date) && date < today) {
+				if (isDate(date) && date < today) {
 					usagePerDayPerApp.getOrSet(date, {})[appName] = interactions
 					delete dailyUsage[date];
 					APPSTATS.isDirty = true;

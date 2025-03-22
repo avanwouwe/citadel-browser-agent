@@ -203,3 +203,9 @@ function mergeDeep(source, target) {
     }
     return target;
 }
+
+const DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
+
+function isDate(str) {
+    return DATE_REGEX.test(str)
+}
