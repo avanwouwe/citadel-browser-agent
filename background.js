@@ -17,11 +17,11 @@ importScripts('blacklist/ipv4range.js');
 
 
 let PROFILE_ADDRESS
-
-chrome.identity.getProfileUserInfo((userInfo) => {
-	PROFILE_ADDRESS = userInfo.email
-})
-
+if (chrome.identity.getProfileUserInfo) {
+	chrome.identity.getProfileUserInfo((userInfo) => {
+		PROFILE_ADDRESS = userInfo?.email
+	})
+}
 
 let blacklistIP
 let blacklistURL
