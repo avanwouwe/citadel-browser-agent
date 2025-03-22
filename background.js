@@ -114,13 +114,13 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 
 function evaluateRequest(details) {
-	const { ip, initiator } = details;
 	const url = new URL(details.url);
+	const ip = details.ip ?? IPv4Range.isIPV4(url.hostname) ? url.hostname : undefined
 	const isNavigate = details.method === undefined
 
 	if (ignorelist?.find(details.url) ||
 		details.tabId < 0 ||
-		!isNavigate && ignorelist?.find(initiator)
+		!isNavigate && ignorelist?.find(details.initiator)
 	) return { result: "ignored" }
 
 	const result = {
@@ -145,7 +145,7 @@ function evaluateRequest(details) {
 	}
 
 	if (config.warningProtocols.includes(url.protocol)) {
-		const siteName = getSitename(initiator)
+		const siteName = details.initiator
 		const appName = SITESTATS[siteName]?.appName
 		const app = APPSTATS[appName]
 
