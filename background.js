@@ -128,6 +128,22 @@ function evaluateRequest(details) {
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
+	let blacklist = blacklistURL?.find(url.href)
+	if (blacklist) {
+		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
+		result.level = Log.ERROR
+		result.value = url.href
+		result.description = `${result.result} due to URL on blacklist '${blacklist}'`
+	}
+
+	blacklist = blacklistIP?.find(ip)
+	if (blacklist) {
+		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
+		result.level = Log.ERROR
+		result.value = ip
+		result.description = `${result.result} due to IP on blacklist '${blacklist}'`
+	}
+
 	if (config.warningProtocols.includes(url.protocol)) {
 		const siteName = getSitename(initiator)
 		const appName = SITESTATS[siteName]?.appName
@@ -146,22 +162,6 @@ function evaluateRequest(details) {
 		result.level = Log.WARN
 		result.value = url.username
 		result.description = `password of '${url.username}' in URL`
-	}
-
-	let blacklist = blacklistURL?.find(url.href)
-	if (blacklist) {
-		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
-		result.level = Log.ERROR
-		result.value = url.href
-		result.description = `${result.result} due to URL on blacklist '${blacklist}'`
-	}
-
-	blacklist = blacklistIP?.find(ip)
-	if (blacklist) {
-		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
-		result.level = Log.ERROR
-		result.value = ip
-		result.description = `${result.result} due to IP on blacklist '${blacklist}'`
 	}
 
 	return result
