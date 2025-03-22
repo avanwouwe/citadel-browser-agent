@@ -32,7 +32,7 @@ class Log {
         value,
         description = undefined,
         initiator = undefined,
-        id = getRandomInt()
+        id = undefined
     ){
         Log.#loadConfig()
 
@@ -47,22 +47,19 @@ class Log {
         initiator = truncateString(initiator, config.logging.maxUrlLength) ?? "".emptyToUndefined();
 
         const logEntry = {
-            timestamp,
-            id,
-            url,
+            timestamp: timestamp ?? nowTimestamp(),
+            id : id ?? getRandomInt(),
             browseragent: {
                 event,
-                result,
                 level,
                 value,
                 description,
-                initiator
             }
         }
-
-        if (PROFILE_ADDRESS) {
-            logEntry.browseragent.profile = PROFILE_ADDRESS
-        }
+        if (url) logEntry.url = url
+        if (initiator) logEntry.browseragent.initiator = initiator
+        if (result) logEntry.browseragent.result = result
+        if (PROFILE_ADDRESS) logEntry.browseragent.profile = PROFILE_ADDRESS
 
         // if the value is an object, move it to the "details" node
         if (typeof value === 'object') {
