@@ -1,7 +1,7 @@
 class Config {
     static config = {
         company: {
-            contact: 'it-support@yourcompany.com',
+            contact: 'Your IT support',         // replace with your support e-mail
             name: 'Company',
         },
         warningProtocols: ['http:', 'ftp:', 'ws:'],
