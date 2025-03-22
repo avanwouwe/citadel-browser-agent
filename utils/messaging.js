@@ -25,7 +25,7 @@ class Port {
 
             Port.#lostEvents.report()
         } catch (error) {
-            if (config.logging.failurePopup) {
+            if (config.logging.reportFailure && APPSTATS.isInstalled) {
                 Port.#lostEvents.increment()
             }
         }

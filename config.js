@@ -188,7 +188,7 @@ class Config {
             onlyAuthenticated: true
         },
         logging: {
-            failurePopup: true,
+            reportFailure: true,
             logLevel: 'DEBUG',
             consoleLevel: 'WARN',
             maskUrlLevel: 'INFO',

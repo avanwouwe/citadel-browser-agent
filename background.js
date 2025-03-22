@@ -41,6 +41,8 @@ Port.onMessage("config",(newConfig) => {
 	new CombinedBlacklist().load(config.blacklist.url, URLBlacklist).then(blacklist => blacklistURL = blacklist)
 	ignorelist = new Ignorelist()
 
+	APPSTATS.isInstalled = true          // Native Messaging was installed, from now on connection errors are reported
+
 	const configHash = config?.hashDJB2()
 
 	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started with config ${configHash}`, )
