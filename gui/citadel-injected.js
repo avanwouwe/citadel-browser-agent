@@ -1,11 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    function shallowClone(obj) {
+        const clone = {};
+
+        for (const [key, value] of Object.entries(obj)) {
+            if (typeof value !== 'function') {
+                clone[key] = value;
+            }
+        }
+
+        return clone;
+    }
+
     document.addEventListener('click', function(event) {
-        chrome.runtime.sendMessage({type: "user-interaction", event});
+        chrome.runtime.sendMessage({type: "user-interaction", event: shallowClone(event)});
     }, true);
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
-            chrome.runtime.sendMessage({type: "user-interaction", event});
+            chrome.runtime.sendMessage({type: "user-interaction", event: shallowClone(event)});
         }
     }, true);
 
@@ -13,17 +25,10 @@ document.addEventListener('DOMContentLoaded', () => {
         chrome.runtime.sendMessage({type: 'print-dialog'});
     }, true);
 
-    function copyFile(file) { return {
-        lastModifiedDate: file.lastModifiedDate,
-        name: file.name,
-        size: file.size,
-        type: file.type,
-    } }
-
     document.addEventListener('change', function(event) {
         if (event.target?.type === 'file') {
             for (const file of event.target.files) {
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'picked file', file: copyFile(file)
+                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'picked file', file: shallowClone(file)
              });
             }
         }
@@ -31,13 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('drop', function(event) {
         Array.from(event.dataTransfer.files).forEach(file => {
-            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: copyFile(file) });
+            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) });
         })
 
         Array.from(event.dataTransfer.items).forEach(item => {
             if (item.kind === 'file') {
                 const file = item.getAsFile();
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: copyFile(file) });
+                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) });
             }
         });
 
