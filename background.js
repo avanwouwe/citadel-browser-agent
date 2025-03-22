@@ -283,21 +283,26 @@ chrome.downloads.onChanged.addListener((delta) => {
 
 // only raise errors that deal with security issues, such as virus or SSL
 // for the full list of errors see : chrome://network-errors/
-const NAVIGATION_BLOCKED = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_CLIENT|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
-const NAVIGATION_SECURITY_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
-function handleError(details) {
-	if (details.error) {
-		if (details.error.match(NAVIGATION_BLOCKED)) {
-			logger.log(nowTimestamp(), "navigate", "navigation blocked", details.url, Log.ERROR, details.error,  `browser blocked navigation to ${details.url}`, undefined, details.tabId)
-		} else if (details.error.match(NAVIGATION_SECURITY_WARNING)) {
-			logger.log(nowTimestamp(), "navigate", "navigation error", details.url, Log.WARN , details.error,  `navigation error '${details.error}' when navigating to ${details.url}`, undefined, details.tabId)
+const EVENT_ERROR = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
+const EVENT_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
+function handleError(hook, eventType, filter) {
+	hook.addListener((details) => {
+		setInitiator(details)
+
+		if (details.error) {
+			if (details.error.match(EVENT_ERROR)) {
+				logger.log(nowTimestamp(), eventType, `${eventType} blocked`, details.url, Log.ERROR, details.error,  `browser blocked ${eventType} to ${details.url}`, details.initiator, details.tabId)
+			} else if (details.error.match(EVENT_WARNING)) {
+				logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, Log.WARN , details.error,  `browser error '${details.error}' when ${eventType} to ${details.url}`, details.initiator, details.tabId)
+			}
 		}
-	}
+
+	}, filter)
 
 }
-chrome.webNavigation.onErrorOccurred.addListener(handleError);
 
-chrome.webRequest.onErrorOccurred.addListener(handleError, { urls: ["<all_urls>"] });
+handleError(chrome.webNavigation.onErrorOccurred, "navigate")
+handleError(chrome.webRequest.onErrorOccurred, "request", { urls: ["<all_urls>"] })
 
 
 const KNOWN_AUTH_HEADERS = {
