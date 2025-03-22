@@ -216,25 +216,28 @@ function getDownload(downloadId) {
 	});
 }
 
-function logDownload(download, timestamp, result, level, description) {
+function logDownload(event, timestamp, result, level, description) {
 	// determine an id that is more globally unique than the original id
-	const uniqueId = { id: download.id, startTime: download.startTime }.hashCode()
+	const uniqueId = { id: event.id, startTime: event.startTime }.hashCode()
 
-	const url = download.url
-	const referrer = download.referrer
+	const url = event.url
+	const referrer = event.referrer
 
-	description = description.replace("@@URL@@", logger.maskUrl(download.url, level))
+	description = description.replace("@@URL@@", logger.maskUrl(event.url, level))
 
-	// do not log data not relevant for security, or duplicate
-	delete download.id;
-	delete download.url;
-	delete download.referrer;
-	delete download.finalUrl;
-	delete download.paused;
-	delete download.state;
-	delete download.canResume;
+	const download = {}
+	if (event.bytesReceived) download.bytesReceived = event.bytesReceived
+	if (event.danger) download.danger = event.danger
+	if (event.startTime) download.startTime = event.startTime
+	if (event.endTime) download.endTime = event.endTime
+	if (event.totalBytes) download.totalBytes = event.totalBytes
+	if (event.fileSize) download.fileSize = event.fileSize
+	if (event.filename) download.filename = event.filename
+	if (event.mime) download.mime = event.mime
+	if (event.exists) download.exists = event.exists
+	if (event.incognito) download.incognito = event.incognito
 
-	logger.log(timestamp, "download", result, url, level, { download: download }, description, referrer, uniqueId);
+	logger.log(timestamp, "download", result, url, level, { download }, description, referrer, uniqueId);
 }
 
 chrome.downloads.onChanged.addListener((delta) => {
