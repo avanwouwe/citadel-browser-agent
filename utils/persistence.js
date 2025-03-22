@@ -69,6 +69,11 @@ class PersistentObject {
             }
         });
     }
+
+    static clearAll() {
+        chrome.storage.local.clear()
+        chrome.runtime.reload()
+    }
 }
 
 class ChangeTrackingObject {
