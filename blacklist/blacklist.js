@@ -6,7 +6,7 @@ class CombinedBlacklist {
 	static #ERROR_REPORTING_FREQ = ONE_DAY;
 
 
-	static TEST_IPV4 = '192.0.2.1'
+	static TEST_IPV4 = '192.0.2.2'
 	static TEST_URL  = 'https://192.0.2.1/'
 
 
@@ -45,14 +45,14 @@ class CombinedBlacklist {
 	}
 
 	find(str) {
+		if (str ===	CombinedBlacklist.TEST_IPV4) { return 'test IPV4' }
+		if (str === CombinedBlacklist.TEST_URL) { return 'test URL' }
+
 		for (const [name, blacklist] of Object.entries(this.#blacklists)) {
 			if (blacklist.find(str) != null) {
 				return name
 			}
 		}
-
-		if (str ===	CombinedBlacklist.TEST_IPV4) { return 'test IPV4' }
-		if (str === CombinedBlacklist.TEST_URL) { return 'test URL' }
 	}
 }
 
