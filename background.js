@@ -75,7 +75,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 		// daily cleaning up of application statistics to prevent infinite build-up of irrelevant data
 		for (const [appName, app] of Object.entries(APPSTATS)) {
 			// purge applications if they haven't been used for a while
-			if (daysSince(app.lastUsed) > config.application.retentionDays) {
+			if (isDate(app.lastUsed) && daysSince(app.lastUsed) > config.application.retentionDays) {
 				delete APPSTATS[appName]
 				continue
 			}
@@ -83,7 +83,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			// purge accounts if they haven't been used for a while
 			const accounts = app.getOrSet("accounts", {})
 			for (const [username, issues] of Object.entries(accounts)) {
-				if (daysSince(issues.lastConnected) > config.account.retentionDays) {
+				if (isDate(issues.lastConnected) && daysSince(issues.lastConnected) > config.account.retentionDays) {
 					delete accounts[username]
 				}
 			}

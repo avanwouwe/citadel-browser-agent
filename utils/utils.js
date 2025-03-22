@@ -122,10 +122,10 @@ function nowDatestamp() {
     return `${year}-${month}-${day}`;
 }
 
-function daysSince(date) {
-    date = new Date(date);
+function daysSince(str) {
+    const date = new Date(str);
     if (isNaN(date)) {
-        throw new Error("Invalid date format. Must be in YYYY-MM-DD format.");
+        throw new Error(`Not in YYYY-MM-DD format : ${str}`);
     }
 
     const today = new Date(nowDatestamp());
