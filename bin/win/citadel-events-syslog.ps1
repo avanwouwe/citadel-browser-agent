@@ -57,7 +57,7 @@ function global:LogEvent {
 Add-Type -AssemblyName System.Core
 
 # Create event watcher
-$query = "*[System[Provider[@Name='Browser Agent'] and Level < 4]]"
+$query = "*[System[Provider[@Name='Browser Agent']]]"
 $eventQuery = [System.Diagnostics.Eventing.Reader.EventLogQuery]::new("Application", [System.Diagnostics.Eventing.Reader.PathType]::LogName, $query)
 $watcher = [System.Diagnostics.Eventing.Reader.EventLogWatcher]::new($eventQuery)
 
