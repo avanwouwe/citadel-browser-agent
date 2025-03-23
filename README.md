@@ -3,25 +3,24 @@
 </div>
 
 # Citadel browser agent
-Citadel is a browser agent that detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response (DFIR).
+Citadel is a browser agent that detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)).
 
-Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR.
+Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
 
 ## Security event detection
-It detects the following events in the browser:
-* IP or URL is blacklisted (configurable blacklist)
-* the browser has blocked the navigation to the site
-* user is using unencrypted protocols for an application (e.g. FTP or HTTP)
+Citadel detects the following events in the browser:
+* IP or URL is blacklisted (configurable blacklist, good defaults provided)
+* user is using unencrypted protocols for an application (e.g. FTP, HTTP or WS)
 * user is using URL with username or password in the URL
 * user has downloaded a file
-* user has selected a file (n.b. it is unknown if the file was uploaded)
-* user has opened the print dialog for a page (n.b. it is unknown if the dialog was cancelled)
+* user has selected a file (N.B. it is unknown if the file was uploaded)
+* user has opened the print dialog for a page (N.B. it is unknown if the dialog was cancelled)
 * the user is warned that the downloaded file is dangerous
 * user has accepted downloading of dangerous file
 * user has used a password that does not conform to the password policy
-* security-related network errors (see chrome://network-errors)
+* security-related network errors (e.g. certificate issues, detection of phishing or virus, etc. See [list](chrome://network-errors))
 
-It also reports on usage statistics of applications, allowing for detection of shadow IT.
+It also reports on usage statistics of applications, allowing for detection of shadow IT and unused licences.
 
 Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
 
@@ -48,9 +47,11 @@ The data is logged on your computer and is never sent across the network, unless
 
 
 ## Installation
-* [browser plugin](/doc/browser.md)
+There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless installation of Citadel should be relatively easy. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM.
+
 * [macOS](/doc/macos.md)
 * [Windows](/doc/windows.md)
+* [browser plugin](/doc/browser.md)
 * [configuration](/doc/configuration.md)
 * [integration into Wazuh](/doc/wazuh.md)
 
@@ -74,6 +75,8 @@ See the [configuration](/config.js) to understand the default settings.
 ### which browsers are supported?
 Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla, Edge and other Chromium-based browsers. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
 
+### does Citadel help me with my ISO 27001 certification?
+Citadel's many features cover a wide range of ISO 27001 controls. For more information, see the [dedicated page](/doc/ISO27001.md).
 
 ### what about performance?
 Citadel is designed to be very efficient. It only runs (very briefly) everytime when you click on a web page. All operations are asynchronous and are designed not to impact your browsing experience. With the default blacklist configuration the extension consumes only 20 Mb of memory and will download approximately 20 Mb every hour (roughly equivalent to 5 minutes of video conferencing)

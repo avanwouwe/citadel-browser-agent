@@ -3,23 +3,25 @@ The extension is available on the web stores of Chrome, Firefox, Opera and Edge.
 
 
 ## Windows
-For Chrome, Firefox and Edge, the [Citadel installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) force-installs the plugin for you using registry entries (see below). Opera does not support automated installation and so the plugin has to be installed manually by the user.
+For Chrome, Firefox and Edge, the [Citadel installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) force-installs the plugin for you using registry entries (see below). Opera does not support forced installation of plugins and so the plugin has to be installed manually on the endpoint.
 
 ```
-reg add "HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\ExtensionInstallForcelist" /v "1" /t REG_SZ /d "anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" /f
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\ExtensionInstallForcelist" /v "10" /t REG_SZ /d "anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" /f
 
-reg add "HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Install" /v "1" /t REG_SZ /d "{090510dc-b0ac-44dd-8e44-fee9b778180e}" /f
-reg add "HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Locked" /v "1" /t REG_SZ /d "{090510dc-b0ac-44dd-8e44-fee9b778180e}" /f
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Install" /v "10" /t REG_SZ /d "{090510dc-b0ac-44dd-8e44-fee9b778180e}" /f
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Locked" /v "10" /t REG_SZ /d "{090510dc-b0ac-44dd-8e44-fee9b778180e}" /f
 
-reg add "HKEY_LOCAL_MACHINE\Software\Policies\Edge\ExtensionInstallForcelist" /v "1" /t REG_SZ /d "eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx" /f
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Edge\ExtensionInstallForcelist" /v "10" /t REG_SZ /d "eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx" /f
 ```
 
 
 ## macOS
-On macOS the plugin can be force-installed by the administrator using the MDM, by deploying this [.mobileconfig](/bin/mac/CitadelBrowserAgent.mobileconfig). This works for Chrome, Firefox and Edge. But unfortunately Opera does not support automated installation and the plugin has to be manually installed.
+On macOS the plugin can be force-installed on all endpoints, by deploying this [.mobileconfig](/bin/mac/CitadelBrowserAgent.mobileconfig) using your MDM. This works for Chrome, Firefox and Edge. Unfortunately Opera does not support automated installation and the plugin has to be manually installed.
 
 > [!NOTE]  
-> If you have already force-installed another plugin via the Google Workspace admin,  provided Chrome profile will not work. You will need to add Citadel to in [Goole Workspace admin](https://admin.google.com/ac/chrome/apps/).
+> If you have already force-installed another plugin via the Google Workspace admin, you cannot force install using the provided profile. You will need to add Citadel in the same way as the other plugin, using the [Goole Workspace admin](https://admin.google.com/ac/chrome/apps/).
+
+For reference, these are the configurations for each browser.
 
 For Chrome : `com.google.Chrome`.
 ```

@@ -22,4 +22,4 @@ The commands accepted by the service are:
 You can verify that events are being created by checking `C:\Program Files\Citadel\logs\CitadelSvc.out.log`.
 
 ## configuration
-Citadel has sensible defaults, but you can change the configuration of Citadel, for example to change the logging and masking levels or to declare your own blacklist or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the [correct format](/doc/configuration.md) in the Citadel directory.
+Citadel has sensible defaults, but you can change the configuration of Citadel, for example to change the logging and masking levels or to declare your own blacklist or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the [correct format](/doc/configuration.md) in the Citadel directory. See the [configuration reference](/doc/configuration.md) for more information.
