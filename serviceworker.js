@@ -1,0 +1,15 @@
+importScripts('config.js');
+importScripts('utils/definitions.js');
+importScripts('utils/utils.js');
+importScripts('utils/passwords.js');
+importScripts('utils/eventaccumulator.js');
+importScripts('utils/alarm.js');
+importScripts('utils/schedule.js');
+importScripts('utils/persistence.js');
+importScripts('utils/messaging.js');
+importScripts('utils/logging.js');
+importScripts('gui/interface.js');
+importScripts('blacklist/blacklist.js');
+importScripts('blacklist/ignorelist.js');
+importScripts('blacklist/ipv4range.js');
+importScripts('background.js');

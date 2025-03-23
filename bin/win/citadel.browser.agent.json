@@ -3,5 +3,10 @@
   "description": "Citadel browser agent",
   "path": "C:\\Program Files\\Citadel\\citadel-browser-agent.exe",
   "type": "stdio",
-  "allowed_origins": ["chrome-extension://anheildjmkfdkdpgbndmpjnmkfliefga/"]
+  "allowed_origins": [
+    "chrome-extension://gaiabdglljkdhmekohlhdajbffpndkdd/",
+    "chrome-extension://anheildjmkfdkdpgbndmpjnmkfliefga/",
+    "chrome-extension://aebdgcmmffemnbmbadfbmjldfddmhacp/",
+    "chrome-extension://eanogkilbhfofmcplcoiflibdoomablj/"
+  ]
 }

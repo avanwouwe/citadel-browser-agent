@@ -5,6 +5,8 @@ Citadel **does not**:
 * protect against sophisticated malicious users
 * detect threats using heuristic analysis of behavior or page content
 * perform virus scans on files
+* filter *all* outgoing connections (HTTP and HTTPS, but not Web Sockets or QUIC)
+* filter IPV6 traffic (I haven't been able to find a reliable IPv6 blacklist, contact me if you know of one)
 * inspect Basic Auth passwords
 * detect perfectly if sites are authenticated (it uses heuristics based on headers and URLs)
 * detect all logins (it uses heuristics, such as OAuth pages and forms with "password" fields)

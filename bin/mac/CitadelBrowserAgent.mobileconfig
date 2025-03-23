@@ -1,0 +1,88 @@
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>ExtensionInstallForcelist</key>
+			<array>
+				<string>anheildjmkfdkdpgbndmpjnmkfliefga</string>
+			</array>
+			<key>NativeMessagingAllowlist</key>
+			<array>
+				<string>citadel.browser.agent</string>
+			</array>
+			<key>PayloadDisplayName</key>
+			<string>Google Chrome</string>
+			<key>PayloadIdentifier</key>
+			<string>com.google.Chrome.D7052C81-2641-44BE-AA9A-10772F38A986</string>
+			<key>PayloadType</key>
+			<string>com.google.Chrome</string>
+			<key>PayloadUUID</key>
+			<string>D7052C81-2641-44BE-AA9A-10772F38A986</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>ExtensionInstallForcelist</key>
+			<array>
+				<string>eanogkilbhfofmcplcoiflibdoomablj</string>
+			</array>
+			<key>NativeMessagingAllowlist</key>
+			<array>
+				<string>citadel.browser.agent</string>
+			</array>
+			<key>PayloadDisplayName</key>
+			<string>Microsoft Edge</string>
+			<key>PayloadIdentifier</key>
+			<string>com.microsoft.Edge.48FA5EEA-59B7-4851-806D-8EB886962490</string>
+			<key>PayloadType</key>
+			<string>com.microsoft.Edge</string>
+			<key>PayloadUUID</key>
+			<string>48FA5EEA-59B7-4851-806D-8EB886962490</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>EnterprisePoliciesEnabled</key>
+			<true/>
+            <key>ExtensionSettings</key>
+            <dict>
+                <key>{090510dc-b0ac-44dd-8e44-fee9b778180e}</key>
+                <dict>
+                    <key>installation_mode</key>
+                    <string>force_installed</string>
+                    <key>install_url</key>
+                    <string>https://addons.mozilla.org/firefox/downloads/latest/<NAME>>/latest.xpi</string>
+                </dict>
+            </dict>
+			<key>ExtensionUpdate</key>
+			<true/>
+			<key>PayloadDisplayName</key>
+			<string>Firefox</string>
+			<key>PayloadIdentifier</key>
+			<string>org.mozilla.firefox.DA1701A9-D568-4D42-A62C-17F5D7F60B7B</string>
+			<key>PayloadType</key>
+			<string>org.mozilla.firefox</string>
+			<key>PayloadUUID</key>
+			<string>DA1701A9-D568-4D42-A62C-17F5D7F60B7B</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Installs the Citadel Browser Agent for Chrome, Firefox and Edge.</string>
+	<key>PayloadDisplayName</key>
+	<string>Citadel browser agent</string>
+	<key>PayloadIdentifier</key>
+	<string>nl.vanwouwe.citadel</string>
+	<key>PayloadOrganization</key>
+	<string>Citadel</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>0C16D51E-7D82-48CF-B5AB-A47791AB5062</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

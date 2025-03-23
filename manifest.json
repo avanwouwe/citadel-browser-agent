@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Citadel browser agent",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Citadel is a browser agent that detects malware and shadow IT by analyzing and logging security events in a privacy-respecting way",
   "permissions": [
     "webNavigation",
@@ -11,13 +11,31 @@
     "alarms",
     "nativeMessaging",
     "identity",
-    "identity.email"
+    "identity.email",
+    "cookies"
   ],
   "host_permissions": [
     "<all_urls>"
   ],
   "background": {
-    "service_worker": "background.js"
+    "service_worker": "serviceworker.js",
+    "scripts": [
+      "config.js",
+      "utils/compatibility.js",
+      "utils/definitions.js",
+      "utils/utils.js",
+      "utils/passwords.js",
+      "utils/eventaccumulator.js",
+      "utils/alarm.js",
+      "utils/schedule.js",
+      "utils/persistence.js",
+      "utils/messaging.js",
+      "utils/logging.js",
+      "gui/interface.js",
+      "blacklist/blacklist.js",
+      "blacklist/ignorelist.js",
+      "blacklist/ipv4range.js",
+      "background.js"]
   },
   "content_scripts": [
     {
@@ -36,5 +54,13 @@
       "48": "gui/images/icon48.png",
       "128": "gui/images/icon128.png"
     }
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{090510dc-b0ac-44dd-8e44-fee9b778180e}",
+      "strict_min_version": "128.0"
+    }
   }
+
 }

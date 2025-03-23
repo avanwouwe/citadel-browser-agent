@@ -1,20 +1,4 @@
-console.log("Service worker started.");
-
-importScripts('config.js');
-importScripts('utils/definitions.js');
-importScripts('utils/utils.js');
-importScripts('utils/passwords.js');
-importScripts('utils/eventaccumulator.js');
-importScripts('utils/alarm.js');
-importScripts('utils/schedule.js');
-importScripts('utils/persistence.js');
-importScripts('utils/messaging.js');
-importScripts('utils/logging.js');
-importScripts('gui/interface.js');
-importScripts('blacklist/blacklist.js');
-importScripts('blacklist/ignorelist.js');
-importScripts('blacklist/ipv4range.js');
-
+console.log("Service worker starting.")
 
 let PROFILE_ADDRESS
 if (chrome.identity.getProfileUserInfo) {
@@ -168,10 +152,13 @@ function evaluateRequest(details) {
 }
 
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-	if (details.frameType !== 'outermost_frame' || details.documentLifecycle !== 'active') {
+	if (details.frameType && details.frameType !== 'outermost_frame' ||
+		details.documentLifecycle && details.documentLifecycle !== 'active'
+	) {
 		return
 	}
 
+	setInitiator(details)
 	const timestamp = timestampToISO(details.timeStamp)
 	const evaluation = evaluateRequest(details);
 
@@ -182,12 +169,13 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 			blockPage(details.tabId, evaluation.description, evaluation.value);
 	}
 
-	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined,  details.tabId);
+	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId);
 
-}, { urls: ["<all_urls>"] });
+});
 
 
 chrome.webRequest.onBeforeRequest.addListener((details) => {
+	setInitiator(details)
 	const timestamp = timestampToISO(details.timeStamp)
 	const evaluation = evaluateRequest(details);
 
@@ -199,6 +187,24 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
 	}
 
 	logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId);
+
+},  { urls: ["<all_urls>"] });
+
+
+// check for blacklist when finally connected, since at this time we have the IP address
+chrome.webRequest.onResponseStarted.addListener((details) => {
+	if (details.ip === undefined) return			// for example for cached entries
+
+	// the event was already logged before, only log a second event if there was a blacklist issue
+	setInitiator(details)
+	const timestamp = timestampToISO(details.timeStamp)
+	const evaluation = evaluateRequest(details);
+
+	if (evaluation.result === "request blacklisted") {
+		blockPage(details.tabId, evaluation.description, evaluation.value);
+
+		logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId);
+	}
 
 },  { urls: ["<all_urls>"] });
 
@@ -237,7 +243,7 @@ function logDownload(event, timestamp, result, level, description) {
 	if (event.exists) download.exists = event.exists
 	if (event.incognito) download.incognito = event.incognito
 
-	logger.log(timestamp, "download", result, url, level, { download }, description, referrer, uniqueId);
+	logger.log(timestamp, "download", result, url, level, { download }, description, getInitiator(referrer), uniqueId);
 }
 
 chrome.downloads.onChanged.addListener((delta) => {
@@ -285,7 +291,7 @@ chrome.downloads.onChanged.addListener((delta) => {
 // for the full list of errors see : chrome://network-errors/
 const EVENT_ERROR = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
 const EVENT_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
-function handleError(hook, eventType, filter) {
+function handleError(hook, eventType, filter = { }) {
 	hook.addListener((details) => {
 		setInitiator(details)
 
@@ -305,7 +311,7 @@ handleError(chrome.webNavigation.onErrorOccurred, "navigate")
 handleError(chrome.webRequest.onErrorOccurred, "request", { urls: ["<all_urls>"] })
 
 
-const KNOWN_AUTH_HEADERS = {
+const AUTH_HEADERS = {
 	'authorization' : true,
 	'api-key' : true,
 	'x-api-key' : true,
@@ -317,13 +323,11 @@ const KNOWN_AUTH_HEADERS = {
 	'x-oauth-scopes' : true,
 	'x-csrf-Token' : true,
 }
-const AUTH_COOKIE_PATTERN = /($|&)sessionid|auth|(session|auth(othiri[sz]ation))_?token|jwt|password|secret|login/
-const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/
-
-function isHttpUrl(url) { return url?.startsWith('http') }
+const AUTH_COOKIE_PATTERN = /(^|[_-])(session(id)?|auth|token|jwt|password|secret|login|access|refresh|sid|user[_-]?id|auth(othiri[sz]ation)?)([_-]|$)/i;
+const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/i
 
 
-function getAppname(details, headers) {
+function getAppnameFromHeaders(details, headers) {
 	for (header of headers) {
 		const headerName = header.name.toLowerCase()
 		if (['origin', 'access-control-allow-origin'].includes(headerName)) {
@@ -335,6 +339,8 @@ function getAppname(details, headers) {
 }
 
 function markIsAuthenticated(appName, reason) {
+	if (!appName) return
+
 	const appStats = APPSTATS.getOrSet(appName, { });
 	appStats.lastUsed = nowDatestamp();
 
@@ -344,30 +350,70 @@ function markIsAuthenticated(appName, reason) {
 	}
 }
 
-function detectAuthentication(appName, details, headers) {
-	if (!appName) {
-		return;
-	}
+chrome.webRequest.onAuthRequired.addListener(
+	function(details) {
+		setInitiator(details)
 
-	const urlMatch = details.url.match(AUTH_URL_PATTERN)
-	if (urlMatch) {
-		return markIsAuthenticated(appName, 'url:' + urlMatch[0])
-	}
+		const appName = getAppnameFromHeaders(details, details.responseHeaders);
 
-	for (let header of headers) {
-		const headerName = header.name.toLowerCase()
+		markIsAuthenticated(appName, "HTTP auth")
+	},
+	{ urls: ["<all_urls>"] } , ["responseHeaders"]
+);
 
-		if (KNOWN_AUTH_HEADERS[headerName]) {
-			return markIsAuthenticated(appName, 'header:' + headerName)
-		}
-		if (headerName === 'cookie') {
-			const cookieMatch = header.value.toLowerCase().match(AUTH_COOKIE_PATTERN)
-			if (cookieMatch) {
-				return markIsAuthenticated(appName, 'cookie:' + cookieMatch[0])
+
+function analyzeHeaders(hook, headers) {
+	hook.addListener(
+		function(details) {
+			if (! (details.frameType === 'outermost_frame' || details.type !== 'main_frame') ||
+				details.tabId < 0)
+			{
+				return
 			}
-		}
-	}
+
+			setInitiator(details)
+
+			const appName = getAppnameFromHeaders(details, details[headers])
+
+			if (appName) {
+				assignAppToSite(appName, details.initiator)
+
+				const urlMatch = details.url.match(AUTH_URL_PATTERN)
+				if (urlMatch) {
+					return markIsAuthenticated(appName, 'url:' + urlMatch[0])
+				}
+
+				for (let header of details[headers]) {
+					const headerName = header.name.toLowerCase()
+
+					if (AUTH_HEADERS[headerName]) {
+						return markIsAuthenticated(appName, 'header:' + headerName)
+					}
+				}
+
+			}
+		}, { urls: ["<all_urls>"] }, [headers]
+	)
 }
+
+analyzeHeaders(chrome.webRequest.onSendHeaders, "requestHeaders")
+analyzeHeaders(chrome.webRequest.onHeadersReceived, "responseHeaders")
+
+
+chrome.webRequest.onCompleted.addListener(
+	function (details) {
+		setInitiator(details)
+		const appName = getAppnameFromHeaders(details, details.responseHeaders)
+
+		chrome.cookies.getAll({ url: details.url }, cookies => {
+			for (const cookie of cookies.map(cookie => cookie.name)) {
+				if (cookie.match(AUTH_COOKIE_PATTERN)) {
+					return markIsAuthenticated(appName, 'cookie:' + cookie)
+				}
+			}
+		});
+	}, { urls: ["<all_urls>"] }, ["responseHeaders"]
+)
 
 
 function reportInteractions() {
@@ -492,53 +538,6 @@ function reportApplications() {
 }
 
 
-chrome.webRequest.onAuthRequired.addListener(
-	function(details) {
-		const appName = getAppname(details, details.responseHeaders);
-
-		markIsAuthenticated(appName)
-	},
-	{ urls: ["<all_urls>"] } , ["responseHeaders"]
-);
-
-
-chrome.webRequest.onSendHeaders.addListener(
-	function(details) {
-		if (details.initiator === undefined ||
-			details.frameType !== 'outermost_frame' ||
-			details.tabId < 0)
-		{
-			return;
-		}
-
-		const appName = getAppname(details, details.requestHeaders);
-
-		if (appName) {
-			detectAuthentication(appName, details, details.requestHeaders);
-			assignAppToSite(appName, details.initiator)
-		}
-	}, { urls: ["<all_urls>"] }, ["requestHeaders", "extraHeaders"]
-);
-
-chrome.webRequest.onHeadersReceived.addListener(
-	function(details) {
-		if (details.initiator === undefined ||
-			details.frameType !== 'outermost_frame' ||
-			details.tabId < 0)
-		{
-			return;
-		}
-
-		const appName = getAppname(details, details.responseHeaders)
-
-		if (appName) {
-			detectAuthentication(appName, details, details.responseHeaders);
-			assignAppToSite(appName, details.initiator)
-		}
-	},  { urls: ["<all_urls>"] }, ["responseHeaders", "extraHeaders"]
-);
-
-
 function assignAppToSite(appName, url) {
 	const site = SITESTATS.getOrSet(getSitename(url), { });
 	const prevAppName = site.appName;
@@ -560,7 +559,7 @@ function assignAppToSite(appName, url) {
 
 
 function registerInteraction(url, context) {
-	if (context.documentLifecycle !== 'active' ||
+	if (context.documentLifecycle && context.documentLifecycle !== 'active' ||
 		context.tabId < 0 ||
 		ignorelist?.find(context.url))
 	{
@@ -628,15 +627,18 @@ function registerAccountUsage(url, report) {
 }
 
 chrome.webNavigation.onCommitted.addListener((details) => {
-	if (details.transitionType === 'auto_subframe' ||
-		details.transitionType === 'generated' ||
-		details.transitionType === 'reload' ||
-		details.transitionQualifiers === 'server_redirect' ||
-		details.transitionQualifiers === 'client_redirect' ||
+	if (details?.transitionType === 'auto_subframe' ||
+		details?.transitionType === 'generated' ||
+		details?.transitionType === 'reload' ||
+		details?.transitionQualifiers === 'server_redirect' ||
+		details?.transitionQualifiers === 'client_redirect' ||
 		details.tabId < 0
 	) {
 		return;
 	}
+
+	setInitiator(details)
+
 	registerInteraction(details.url, details);
 });
 

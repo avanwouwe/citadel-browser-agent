@@ -6,7 +6,11 @@ You can use your MDM to distribute [the installer](https://github.com/avanwouwe/
 
 Alternatively: 
 1. copy the contents of [/bin/win](/bin/win) to `C:\Program Files\Citadel\`
-2. set registry entry `HKLM\SOFTWARE\Google\Chrome\NativeMessagingHosts\citadel.browser.agent` to `C:\Program Files\Citadel\citadel.browser.agent.json`.
+2. set the following keys to `C:\Program Files\Citadel\citadel.browser.agent.json`:
+   * `HKLM\SOFTWARE\Google\Chrome\NativeMessagingHosts\citadel.browser.agent`
+   * `HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser.agent`
+   * `HKLM\SOFTWARE\Opera Software\NativeMessagingHosts\citadel.browser.agent`
+   * `HKLM\SOFTWARE\Microsoft\Edge\NativeMessagingHosts\citadel.browser.agent`
 3. run `CitadelSvc.exe install` to install the service.
 
 The commands accepted by the service are:
@@ -19,7 +23,3 @@ You can verify that events are being created by checking `C:\Program Files\Citad
 
 ## configuration
 Citadel has sensible defaults, but you can change the configuration of Citadel, for example to change the logging and masking levels or to declare your own blacklist or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the [correct format](/doc/configuration.md) in the Citadel directory.
-
-
-> [!NOTE]  
-> Even if Native Messaging is supported on other Chromium browsers like Mozilla, be aware that the procedure is slightly different. Citadel has not been tested with any browsers other than Chrome.

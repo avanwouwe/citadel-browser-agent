@@ -122,6 +122,22 @@ function getDomain(hostname) {
     return twoPart
 }
 
+function isHttpUrl(url) { return url?.startsWith('http') }
+
+function getInitiator(url) {
+    if (url === undefined) return undefined
+
+    url = new URL(url)
+    const port = url.port === "" ? url.port : `:${url.port}`
+    return `${url.protocol}//${url.hostname}${port}`
+}
+
+function setInitiator(details) {
+    if (details.originUrl) {
+        details.initiator = getInitiator(details.originUrl)
+    }
+}
+
 function getSitename(url) {
     return isHttpUrl(url) ? new URL(url).hostname : null
 }

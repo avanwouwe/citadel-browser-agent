@@ -26,10 +26,8 @@ It also reports on usage statistics of applications, allowing for detection of s
 Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
 
 
-## Shadow IT detection
-Citadel inspects internet use and generates daily statistics per site. Citadel attempts to identify sites that are applications by separating authenticated and unauthenticated internet sites.
-
-The interaction analysis is based both on navigation events and on clicks, ensuring that it also works for Single Page Applications.
+## Application management
+Citadel helps you identify shadow IT and unused licences. It does this by inspecting internet use (navigation, clicking, application logins). Citadel attempts to identify sites that are applications by separating authenticated and unauthenticated internet sites.
 
 The reports are generated as security events. Two types of reports are generated:
 * one event per day, per application, showing the number of interactions (triggered once per day)
@@ -44,7 +42,7 @@ Any time a password is sent to a web application, Citadel checks whether the pas
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
 
-The shadow-IT detection only reports on interaction with (authenticated) applications, and only tracks the number of interactions per site, per day.
+The shadow IT detection only reports on interaction with (authenticated) applications, and only tracks the number of interactions per site, per day.
 
 The data is logged on your computer and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 

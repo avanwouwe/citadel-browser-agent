@@ -1,26 +1,27 @@
 # Browser plugin installation
-The extension is available on the Chrome web store.
+The extension is available on the web stores of Chrome, Firefox, Opera and Edge. This means it is updated automatically, and the installation consists of installing the plugin.
 
-Deployment to Chrome is most easily done by using the [Chrome management feature](https://admin.google.com/ac/chrome/apps/user) in the Google Workspace admin console, where you can [force the installation of the extension](https://support.google.com/chrome/a/answer/6306504?hl=en) to all profiles of managed browsers.
-
-If you do not use Google Workspace you can use Chrome Policy lists to set `ExtensionInstallForcelist`. Policy lists work differently depending on the platform (Windwos, Mac, Linux).
-
-<div align="left">
-  <a href="https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga">
-    <img alt="Citadel logo" src="/doc/chrome%20web%20store.png">
-  </a>
-</div>
 
 ## Windows
-On Windows you can force installation by using your MDM to set a registry entry.
+For Chrome, Firefox and Edge, the [Citadel installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) force-installs the plugin for you using registry entries (see below). Opera does not support automated installation and so the plugin has to be installed manually by the user.
+
 ```
 reg add "HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\ExtensionInstallForcelist" /v "1" /t REG_SZ /d "anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" /f
+
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Install" /v "1" /t REG_SZ /d "{090510dc-b0ac-44dd-8e44-fee9b778180e}" /f
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Mozilla\Firefox\Extensions\Locked" /v "1" /t REG_SZ /d "{090510dc-b0ac-44dd-8e44-fee9b778180e}" /f
+
+reg add "HKEY_LOCAL_MACHINE\Software\Policies\Edge\ExtensionInstallForcelist" /v "1" /t REG_SZ /d "eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx" /f
 ```
 
-If you are using GPO, you can use [Chrome Policy templates](https://support.google.com/chrome/a/answer/187202?hl=en).
 
 ## macOS
-You can force installation by using your MDM to set a profile for the domain `com.google.Chrome`.
+On macOS the plugin can be force-installed by the administrator using the MDM, by deploying this [.mobileconfig](/bin/mac/CitadelBrowserAgent.mobileconfig). This works for Chrome, Firefox and Edge. But unfortunately Opera does not support automated installation and the plugin has to be manually installed.
+
+> [!NOTE]  
+> If you have already force-installed another plugin via the Google Workspace admin,  provided Chrome profile will not work. You will need to add Citadel to in [Goole Workspace admin](https://admin.google.com/ac/chrome/apps/).
+
+For Chrome : `com.google.Chrome`.
 ```
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -29,6 +30,43 @@ You can force installation by using your MDM to set a profile for the domain `co
   <key>ExtensionInstallForcelist</key>
   <array>
     <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+  </array>
+</dict>
+</plist>
+```
+
+For Firefox : `org.mozilla.firefox`.
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>ExtensionSettings</key>
+    <dict>
+      <key>{090510dc-b0ac-44dd-8e44-fee9b778180e}</key>
+      <dict>
+        <key>installation_mode</key>
+        <string>force_installed</string>
+        <key>install_url</key>
+        <string>https://addons.mozilla.org/firefox/downloads/latest/[YOUR-EXTENSION-ID]/latest.xpi</string>
+      </dict>
+    </dict>
+    <key>EnterprisePoliciesEnabled</key>
+    <true/>
+  </dict>
+</plist>
+```
+
+
+For Edge : `com.microsoft.Edge`.
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>ExtensionInstallForcelist</key>
+  <array>
+    <string>eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx</string>
   </array>
 </dict>
 </plist>

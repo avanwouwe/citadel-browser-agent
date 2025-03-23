@@ -1,0 +1,7 @@
+{
+  "name": "citadel.browser.agent",
+  "description": "Citadel browser agent",
+  "path": "/Library/Scripts/Citadel/citadel-browser-agent",
+  "type": "stdio",
+  "allowed_extensions": ["{090510dc-b0ac-44dd-8e44-fee9b778180e}"]
+}
