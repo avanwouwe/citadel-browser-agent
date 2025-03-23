@@ -79,14 +79,47 @@ async function getCached(url, replace = true) {
         throw error;
     }
 }
+
+
+const CCTLD_WITH_SLD = [
+    "uk",
+    "jp",
+    "au",
+    "ca",
+    "fr",
+    "in",
+    "za"
+]
+
+const SLD_DOMAINS = [
+    "gouv.fr",
+    "govt.nz",
+    "info.au",
+    "nom.za",
+    "gob.mx"
+];
+
+
 function getDomain(hostname) {
     const parts = hostname.split('.');
+    const twoPart = parts.slice(-2).join('.')
+    const threePart = parts.slice(-3).join('.')
+    const tld = parts[parts.length - 1]
+    const sld = parts[parts.length - 2]
 
     if (parts.length < 2) {
         throw new Error(`Cannot retrieve TLD from ${hostname}`);
     }
 
-    return parts.slice(-2).join('.');
+    if (CCTLD_WITH_SLD.includes(tld) && sld.length <= 3) {
+        return threePart
+    }
+
+    if (SLD_DOMAINS.includes(twoPart)) {
+        return threePart
+    }
+
+    return twoPart
 }
 
 function getSitename(url) {
