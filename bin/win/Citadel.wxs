@@ -2,7 +2,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Package Name="Citadel" 
              Language="1033" 
-             Version="1.0.0.0" 
+             Version="1.2.0.0"
              Manufacturer="Arno van Wouwe" 
              UpgradeCode="529e989c-4563-48d0-b46d-952631849b75"
              Scope="perMachine">
@@ -71,6 +71,13 @@
                       KeyPath="yes" />
             </Component>
 
+            <Component Id="CitadelBrowserAgentJsonFirefox" Guid="*">
+                <File Id="CitadelBrowserAgentJsonFirefoxFile"
+                      Name="citadel.browser.agent-firefox.json"
+                      Source="citadel.browser.agent-firefox.json"
+                      KeyPath="yes" />
+            </Component>
+
             <Component Id="CitadelBrowserAgentExe" Guid="*">
                 <File Id="CitadelBrowserAgentExeFile"
                       Name="citadel-browser-agent.exe"
@@ -109,36 +116,36 @@
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser.agent">
-                <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent.json" />
+                <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent-firefox.json" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Opera Software\NativeMessagingHosts\citadel.browser.agent">
                 <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent.json" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
-                         Key="SOFTWARE\Microsoft\Edge\NativeMessagingHosts\\citadel.browser.agent">
+                         Key="SOFTWARE\Microsoft\Edge\NativeMessagingHosts\citadel.browser.agent">
                 <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent.json" />
             </RegistryKey>
 
         <!-- to force installation of the plugin -->
             <RegistryKey Root="HKLM"
-                         Key="Software\Policies\Google\Chrome\ExtensionInstallForcelist">
+                         Key="SOFTWARE\Policies\Google\Chrome\ExtensionInstallForcelist">
                 <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
-                         Key="Software\Policies\Mozilla\Firefox\Extensions\Install">
+                         Key="SOFTWARE\Policies\Mozilla\Firefox\Extensions\Install">
                 <RegistryValue Type="string" Name="10" Value="{090510dc-b0ac-44dd-8e44-fee9b778180e}" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
-                         Key="Software\Policies\Mozilla\Firefox\Extensions\Locked">
+                         Key="SOFTWARE\Policies\Mozilla\Firefox\Extensions\Locked">
                 <RegistryValue Type="string" Name="10" Value="{090510dc-b0ac-44dd-8e44-fee9b778180e}" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
-                         Key="Software\Policies\Opera Software\Opera\ExtensionInstallForcelist">
+                         Key="SOFTWARE\Policies\Opera Software\Opera\ExtensionInstallForcelist">
                 <RegistryValue Type="string" Name="10" Value="aebdgcmmffemnbmbadfbmjldfddmhacp;https://addons.opera.com" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
-                         Key="Software\Policies\Microsoft\Edge\ExtensionInstallForcelist">
+                         Key="SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallForcelist">
                 <RegistryValue Type="string" Name="10" Value="eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx" />
             </RegistryKey>
 
