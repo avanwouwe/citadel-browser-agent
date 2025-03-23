@@ -125,7 +125,7 @@ function getDomain(hostname) {
 function isHttpUrl(url) { return url?.startsWith('http') }
 
 function getInitiator(url) {
-    if (url === undefined) return undefined
+    if (!url) return undefined
 
     url = new URL(url)
     const port = url.port === "" ? url.port : `:${url.port}`
