@@ -133,6 +133,10 @@ function getInitiator(url) {
 }
 
 function setInitiator(details) {
+    if (details.initiator) {
+        return
+    }
+
     if (details.originUrl) {
         details.initiator = getInitiator(details.originUrl)
     }
