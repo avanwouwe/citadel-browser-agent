@@ -24,8 +24,9 @@ In the `ossec.conf` file that is deployed on agents, add the following `<localfi
 ```
   <!-- Browser Agent -->
   <localfile>
-    <location>C:\Program Files\Citadel\logs\CitadelSvc.out.log</location>
     <log_format>syslog</log_format>
+    <location>C:\Program Files\Citadel\logs\CitadelSvc.out.log</location>
+    <ignore>, "level": "(DEBUG|TRACE)", </ignore>
   </localfile>
 ```
 
