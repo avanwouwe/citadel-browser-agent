@@ -27,9 +27,10 @@ Port.onMessage("config",(newConfig) => {
 
 	APPSTATS.isInstalled = true          // Native Messaging was installed, from now on connection errors are reported
 
+	const version = chrome.runtime.getManifest().version
 	const configHash = config?.hashDJB2()
 
-	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started with config ${configHash}`, )
+	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, )
 })
 
 chrome.runtime.onUpdateAvailable.addListener(() => {
