@@ -293,20 +293,26 @@ chrome.downloads.onChanged.addListener((delta) => {
 // for the full list of errors see : chrome://network-errors/
 const EVENT_ERROR = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
 const EVENT_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
-function handleError(hook, eventType, filter = { }) {
-	hook.addListener((details) => {
-		setInitiator(details)
+function handleError(hook, eventType, filter) {
+    const listenerArgs = [
+        (details) => {
+            setInitiator(details)
 
-		if (details.error) {
-			if (details.error.match(EVENT_ERROR)) {
-				logger.log(nowTimestamp(), eventType, `${eventType} blocked`, details.url, Log.ERROR, details.error,  `browser blocked ${eventType} to ${details.url}`, details.initiator, details.tabId)
-			} else if (details.error.match(EVENT_WARNING)) {
-				logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, Log.WARN , details.error,  `browser error '${details.error}' when ${eventType} to ${details.url}`, details.initiator, details.tabId)
-			}
-		}
+            if (details.error) {
+                if (details.error.match(EVENT_ERROR)) {
+                    logger.log(nowTimestamp(), eventType, `${eventType} blocked`, details.url, Log.ERROR, details.error, `browser blocked ${eventType} to ${details.url}`, details.initiator, details.tabId)
+                } else if (details.error.match(EVENT_WARNING)) {
+                    logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, Log.WARN, details.error, `browser error '${details.error}' when ${eventType} to ${details.url}`, details.initiator, details.tabId)
+                }
+            }
+        }
+    ]
 
-	}, filter)
+    if (filter) {
+        listenerArgs.push(filter)
+    }
 
+    hook.addListener(...listenerArgs)
 }
 
 handleError(chrome.webNavigation.onErrorOccurred, "navigate")
