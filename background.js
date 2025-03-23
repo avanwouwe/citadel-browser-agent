@@ -110,6 +110,7 @@ function evaluateRequest(details) {
 
 	const result = {
 		result: "allowed",
+	    description: isNavigate ? "web navigation in browser" : "web request in browser",
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
