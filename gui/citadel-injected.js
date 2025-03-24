@@ -2,7 +2,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function shallowClone(obj) {
         const clone = {};
 
-        for (const [key, value] of Object.entries(obj)) {
+        for (const key in obj) {
+            const value = obj[key]
             if (typeof value !== 'function') {
                 clone[key] = value;
             }
