@@ -73,7 +73,7 @@ See the [configuration](/config.js) to understand the default settings.
 
 
 ### which browsers are supported?
-Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3). This is theoretically compatible with Mozilla, Edge and other Chromium-based browsers. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. If you nag me I may include support for other browsers.
+Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
 
 ### does Citadel help me with my ISO 27001 certification?
 Citadel's many features cover a wide range of ISO 27001 controls. For more information, see the [dedicated page](/doc/ISO27001.md).

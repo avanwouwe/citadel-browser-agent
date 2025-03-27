@@ -44,6 +44,26 @@
 			<integer>1</integer>
 		</dict>
 		<dict>
+			<key>ExtensionInstallForcelist</key>
+			<array>
+				<string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+			</array>
+			<key>NativeMessagingAllowlist</key>
+			<array>
+				<string>citadel.browser.agent</string>
+			</array>
+			<key>PayloadDisplayName</key>
+			<string>Brave Browser</string>
+			<key>PayloadIdentifier</key>
+			<string>com.brave.Browser.F3A52C81-3641-44BE-AA9A-10772F38B995</string>
+			<key>PayloadType</key>
+			<string>com.brave.Browser</string>
+			<key>PayloadUUID</key>
+			<string>F3A52C81-3641-44BE-AA9A-10772F38B995</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
 			<key>EnterprisePoliciesEnabled</key>
 			<true/>
             <key>ExtensionSettings</key>
@@ -53,7 +73,7 @@
                     <key>installation_mode</key>
                     <string>force_installed</string>
                     <key>install_url</key>
-                    <string>https://addons.mozilla.org/firefox/downloads/latest/<NAME>>/latest.xpi</string>
+                    <string>https://addons.mozilla.org/firefox/downloads/latest/name/latest.xpi</string>
                 </dict>
             </dict>
 			<key>ExtensionUpdate</key>
@@ -71,7 +91,7 @@
 		</dict>
 	</array>
 	<key>PayloadDescription</key>
-	<string>Installs the Citadel Browser Agent for Chrome, Firefox and Edge.</string>
+	<string>Installs the Citadel Browser Agent for Chrome, Firefox, Edge, and Brave.</string>
 	<key>PayloadDisplayName</key>
 	<string>Citadel browser agent</string>
 	<key>PayloadIdentifier</key>

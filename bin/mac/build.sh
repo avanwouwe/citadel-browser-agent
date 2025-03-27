@@ -13,6 +13,7 @@ mkdir -p "$BUILD_ROOT/root/Library/Google/Chrome/NativeMessagingHosts"
 mkdir -p "$BUILD_ROOT/root/Library/Application Support/Mozilla/NativeMessagingHosts"
 mkdir -p "$BUILD_ROOT/root/Library/Opera/NativeMessagingHosts"
 mkdir -p "$BUILD_ROOT/root/Library/Microsoft Edge/NativeMessagingHosts"
+mkdir -p "$BUILD_ROOT/root/Library/BraveSoftware/Brave-Browser/NativeMessagingHosts"
 mkdir -p "$BUILD_ROOT/root/Library/Scripts/Citadel"
 
 # Copy the files to the directory structure
@@ -20,7 +21,7 @@ cp citadel.browser.agent.json "$BUILD_ROOT/root/Library/Google/Chrome/NativeMess
 cp citadel.browser.agent-firefox.json "$BUILD_ROOT/root/Library/Application Support/Mozilla/NativeMessagingHosts/citadel.browser.agent.json"
 cp citadel.browser.agent.json "$BUILD_ROOT/root/Library/Opera/NativeMessagingHosts/"
 cp citadel.browser.agent.json "$BUILD_ROOT/root/Library/Microsoft Edge/NativeMessagingHosts/"
-cp ../citadel-browser-agent "$BUILD_ROOT/root/Library/Scripts/Citadel/"
+cp citadel.browser.agent.json "$BUILD_ROOT/root/Library/Library/BraveSoftware/NativeMessagingHosts/"
 
 # Run pkgbuild to create the package
 pkgbuild --root "$BUILD_ROOT/root" \

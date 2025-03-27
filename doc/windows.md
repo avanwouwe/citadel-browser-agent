@@ -8,9 +8,10 @@ Alternatively:
 1. copy the contents of [/bin/win](/bin/win) to `C:\Program Files\Citadel\`
 2. set the following keys to `C:\Program Files\Citadel\citadel.browser.agent.json`:
    * `HKLM\SOFTWARE\Google\Chrome\NativeMessagingHosts\citadel.browser.agent`
-   * `HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser-firefox.agent`
+   * `HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser-firefox.agent` (note [Firefox specific manifest](/bin/macos/citadel.browser.agent-firefox.json))
    * `HKLM\SOFTWARE\Opera Software\NativeMessagingHosts\citadel.browser.agent`
    * `HKLM\SOFTWARE\Microsoft\Edge\NativeMessagingHosts\citadel.browser.agent`
+   * `HKLM\SOFTWARE\BraveSoftware\Brave\NativeMessagingHosts\citadel.browser.agent`
 3. run `CitadelSvc.exe install` to install the service.
 
 The commands accepted by the service are:

@@ -4,11 +4,12 @@ Browser extensions are sandboxed and cannot access the local operating system. T
 
 You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest), which will take care of everything.
 
-Alternatively, place the [JSON manifest](/bin/win/citadel.browser.agent.json) in:
+Alternatively, place the [JSON manifest](/bin/macos/citadel.browser.agent.json) in:
 * `/Library/Google/Chrome/NativeMessagingHosts/citadel.browser.agent.json`
-* `/Library/Mozilla/NativeMessagingHosts/citadel.browser.agent.json`
+* `/Library/Mozilla/NativeMessagingHosts/citadel.browser.agent.json` (use the [Firefox specific manifest](/bin/macos/citadel.browser.agent-firefox.json))
 * `/Library/Opera/NativeMessagingHosts/citadel.browser.agent.json`
 * `/Library/Microsoft\ Edge/NativeMessagingHosts/citadel.browser.agent.json`
+* `/Library/BraveSoftware/Brave-Browser/citadel.browser.agent.json`
 
 Then ensure that [the messaging script](/bin/citadel-browser-agent) is deployed in `/Library/Scripts/Citadel/citadel-browser-agent` and marked executable.
 

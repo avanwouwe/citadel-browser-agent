@@ -126,6 +126,11 @@
                          Key="SOFTWARE\Microsoft\Edge\NativeMessagingHosts\citadel.browser.agent">
                 <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent.json" />
             </RegistryKey>
+            <RegistryKey Root="HKLM"
+                         Key="SOFTWARE\BraveSoftware\Brave\NativeMessagingHosts\citadel.browser.agent">
+                <RegistryValue Type="string" Value="[INSTALLFOLDER]citadel.browser.agent.json" />
+            </RegistryKey>
+
 
         <!-- to force installation of the plugin -->
             <RegistryKey Root="HKLM"
@@ -147,6 +152,10 @@
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallForcelist">
                 <RegistryValue Type="string" Name="10" Value="eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx" />
+            </RegistryKey>
+            <RegistryKey Root="HKLM"
+                         Key="SOFTWARE\Policies\BraveSoftware\Brave\ExtensionInstallForcelist">
+                <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
             </RegistryKey>
 
         </Component>
