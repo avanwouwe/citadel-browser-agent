@@ -1,0 +1,17 @@
+#!/bin/bash
+
+ARCH=$(arch)
+
+if [[ "$ARCH" == "arm64" ]]; then
+    SOURCE_DIR="/Library/Scripts/Citadel-arm64"
+    UNUSED_DIR="/Library/Scripts/Citadel-x86_64"
+else
+    SOURCE_DIR="/Library/Scripts/Citadel-x86_64"
+    UNUSED_DIR="/Library/Scripts/Citadel-arm64"
+fi
+
+rm -rf "/Library/Scripts/Citadel"
+mv "$SOURCE_DIR" "/Library/Scripts/Citadel"
+rm -rf "$UNUSED_DIR"
+
+chmod -R 755 "/Library/Scripts/Citadel"
