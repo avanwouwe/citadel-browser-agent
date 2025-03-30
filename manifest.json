@@ -21,7 +21,6 @@
     "service_worker": "serviceworker.js",
     "scripts": [
       "config.js",
-      "utils/compatibility.js",
       "utils/definitions.js",
       "utils/utils.js",
       "utils/passwords.js",
@@ -35,7 +34,8 @@
       "blacklist/blacklist.js",
       "blacklist/ignorelist.js",
       "blacklist/ipv4range.js",
-      "background.js"]
+      "background.js"
+    ]
   },
   "content_scripts": [
     {
