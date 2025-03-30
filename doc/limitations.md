@@ -13,3 +13,5 @@ Citadel **does not**:
 * know at all times which account is being used (just the last one that it detected)
 * guarantee that reports are generated as planned (ex. if machines are turned off, they only report when turned on again)
 * generate one report per user (since users may have multiple machines, or even just multiple profiles)
+
+Be aware that some browsers (Firefox) have a "safe mode" or "troubleshoot mode" that allows users to disable all extensions, even if they were "force installed".
