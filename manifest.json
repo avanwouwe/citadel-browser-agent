@@ -30,6 +30,7 @@
       "utils/persistence.js",
       "utils/messaging.js",
       "utils/logging.js",
+      "utils/browser.js",
       "gui/interface.js",
       "blacklist/blacklist.js",
       "blacklist/ignorelist.js",

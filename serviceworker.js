@@ -8,6 +8,7 @@ importScripts('utils/schedule.js');
 importScripts('utils/persistence.js');
 importScripts('utils/messaging.js');
 importScripts('utils/logging.js');
+importScripts('utils/browser.js');
 importScripts('gui/interface.js');
 importScripts('blacklist/blacklist.js');
 importScripts('blacklist/ignorelist.js');
