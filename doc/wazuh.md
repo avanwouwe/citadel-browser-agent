@@ -5,7 +5,7 @@ Follow the following steps to ship the syslog events to your Wazuh instance.
 ### macOS
 If you haven't already done so, install the [Native Messaging module](/doc/macos.md) that Citadel needs to communicate the events outside browser sandbox.
 
-In the `ossec.conf` file that is deployed on agents, edit the existing `<localfile>` entry to ensure that the syslog events are seen by Wazuh, by adding to the query: `or (process == "Python" and message beginsWith "browser agent : ")`
+In the `ossec.conf` file that is deployed on agents, edit the existing `<localfile>` entry to ensure that the syslog events are seen by Wazuh, by adding to the query: `or (process == "citadel-browser-agent" and message beginsWith "browser agent : ")`
 
 ```
   <localfile>

@@ -1,6 +1,6 @@
 <decoder name="browser-agent">
     <type>syslog</type>
-    <program_name>^Python|^BrowserAgent</program_name>
+    <program_name>^citadel-browser-agent|^BrowserAgent</program_name>
 </decoder>
 
 <decoder name="browser-agent-child">
