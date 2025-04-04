@@ -15,7 +15,7 @@ Then ensure that [the messaging script](/bin/citadel-browser-agent) is deployed 
 
 You can verify that events are being created by running the following command:
 ```
-log stream --process Python --predicate 'eventMessage BEGINSWITH "browser agent"' --level debug
+log stream --process citadel-browser-agent --predicate 'eventMessage BEGINSWITH "browser agent"' --level debug
 ```
 
 ## configuration
