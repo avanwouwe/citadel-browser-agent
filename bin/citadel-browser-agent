@@ -167,7 +167,7 @@ def sendConfig(config):
 
 
 def main():
-    config = readJsonFile("citadel-browser-agent.json")
+    config = readJsonFile("citadel-config.json")
     sendConfig(config)
 
     while True:
