@@ -81,7 +81,7 @@
             <Component Id="CitadelBrowserAgentExe" Guid="*">
                 <File Id="CitadelBrowserAgentExeFile"
                       Name="citadel-browser-agent.exe"
-                      Source="citadel-browser-agent.exe"
+                      Source="dist\citadel-browser-agent.exe"
                       KeyPath="yes" />
             </Component>
 
