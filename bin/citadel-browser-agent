@@ -8,7 +8,6 @@ import platform
 import json
 import struct
 import getpass
-import hashlib
 import traceback
 
 PROTOCOL_VERSION = 1
@@ -148,18 +147,6 @@ def sendMessage(type, message):
 
 
 
-def hashDownload(event):
-    filename = event.get('browseragent', {}).get('value', {}).get('download', {}).get('filename')
-    if not filename:
-        return
-
-    sha256_hash = hashlib.sha256()
-    with open(filename, "rb") as f:
-        for byte_block in iter(lambda: f.read(4096), b""):
-            sha256_hash.update(byte_block)
-    hash = sha256_hash.hexdigest()
-    event['browseragent']['value']['download']['sha256'] = hash
-
 def readJsonFile(file_path):
     try:
         with open(file_path, 'r', encoding='utf-8') as file:
@@ -186,9 +173,6 @@ def main():
     while True:
         try:
             event = readMessage("event")
-
-#            if event['browseragent']['event'] == "download" and event['browseragent']['result'] == "download completed":
-#                hashDownload(event)
 
             log(event)
         except Exception as e:
