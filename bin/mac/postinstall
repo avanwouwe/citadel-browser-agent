@@ -10,10 +10,11 @@ else
     UNUSED_DIR="/Library/Scripts/Citadel-arm64"
 fi
 
+mkdir -p "/Library/Scripts/Citadel/"
 rm -rf "/Library/Scripts/Citadel/_internal"
 rm -rf "/Library/Scripts/Citadel/citadel-browser-agent"
 
-mv "$SOURCE_DIR" "/Library/Scripts/Citadel"
+mv "$SOURCE_DIR"/* "/Library/Scripts/Citadel/"
 rm -rf "$UNUSED_DIR"
 
 chmod -R 755 "/Library/Scripts/Citadel"
