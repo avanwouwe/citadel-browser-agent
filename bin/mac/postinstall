@@ -10,7 +10,9 @@ else
     UNUSED_DIR="/Library/Scripts/Citadel-arm64"
 fi
 
-rm -rf "/Library/Scripts/Citadel"
+rm -rf "/Library/Scripts/Citadel/_internal"
+rm -rf "/Library/Scripts/Citadel/citadel-browser-agent"
+
 mv "$SOURCE_DIR" "/Library/Scripts/Citadel"
 rm -rf "$UNUSED_DIR"
 
