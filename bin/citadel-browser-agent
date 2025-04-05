@@ -139,8 +139,8 @@ def sendMessage(type, message):
         encoded_message = message_json.encode('utf-8')
         message_length = struct.pack('<I', len(encoded_message))
 
-        sys.stdout.write(message_length.decode('utf-8'))
-        sys.stdout.write(message_json)
+        sys.stdout.buffer.write(message_length)
+        sys.stdout.buffer.write(encoded_message)
         sys.stdout.flush()
     except Exception as e:
         error(f"unable to send message to agent: {message}")
