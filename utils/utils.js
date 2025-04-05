@@ -262,3 +262,42 @@ const DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
 function isDate(str) {
     return DATE_REGEX.test(str)
 }
+
+function cloneDeep(obj) {
+    if (obj === null || typeof obj !== 'object') {
+        return obj
+    }
+
+    if (Array.isArray(obj)) {
+        return obj.map(item => cloneDeep(item))
+    }
+
+    const clonedObj = {};
+    for (const key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            clonedObj[key] = cloneDeep(obj[key])
+        }
+    }
+    return clonedObj
+}
+
+
+/**
+ * Checks if a hostname matches any domain in a given object of domain patterns
+ * @param {string} hostname - The hostname to check (e.g., "host.domain.com")
+ * @param {Object} domainPatterns - Object with domain patterns as keys
+ * @returns {Object} - Returns value of matching domain key or null if no match
+ */
+function matchDomain(hostname, domainPatterns) {
+    let parts = hostname.split('.');
+
+    for (let i = 0; i < parts.length; i++) {
+        const domainToCheck = parts.slice(i).join('.')
+        const match = domainPatterns[domainToCheck]
+        if (match) {
+            return match
+        }
+    }
+
+    return null
+}

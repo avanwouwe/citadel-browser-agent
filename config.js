@@ -8,6 +8,7 @@ class Config {
         application: {
             retentionDays: 365,
         },
+        exceptions: [ ],
         domain: {
             isKnownApplication: {
                 "apple.com": true,
@@ -198,8 +199,40 @@ class Config {
 
     static #isLoaded = false
 
+    static #exceptionCompatible = [
+        'warningProtocols',
+        'account',
+        'logging'
+    ]
+
     static load(newConfig) {
         mergeDeep(newConfig, Config.config)
+
+        // for every defined exception, copy the global config and override with the fields defined in the exception
+        const exceptions = Config.config.exceptions
+        Config.config.exceptions = {}
+
+        for (const exception of exceptions) {
+            const mergedExceptionConfig = cloneDeep(Config.config)
+            delete mergedExceptionConfig.exceptions
+            mergeDeep(exception.config, mergedExceptionConfig)
+
+            for (const domain of exception.domains) {
+                Config.config.exceptions[domain] = mergedExceptionConfig
+            }
+
+            // but only copy settings that can be overridden
+            for (const key of Object.keys(mergedExceptionConfig)) {
+                if (! this.#exceptionCompatible.includes(key)) {
+                    if (exception.config.hasOwnProperty(key)) {
+                        console.warn(`cannot override configuration for setting '${key}'`)
+                    }
+                    delete mergedExceptionConfig[key]
+                }
+            }
+
+        }
+
         Config.#isLoaded = true
         Port.postMessage("config", "ok")
     }
@@ -208,6 +241,14 @@ class Config {
         if (! Config.#isLoaded) {
             throw new Error('the configuration has not yet been received from the native messaging port')
         }
+    }
+
+    static for(hostname) {
+        const exception = matchDomain(hostname, config.exceptions)
+        if (exception) {
+            return exception
+        }
+        return null
     }
 
 }
