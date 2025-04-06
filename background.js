@@ -364,7 +364,7 @@ chrome.webRequest.onAuthRequired.addListener(
 
 		const appName = getAppnameFromHeaders(details, details.responseHeaders);
 
-		markIsAuthenticated(appName, "HTTP auth")
+		markIsAuthenticated(appName, "HTTP auth req")
 	},
 	{ urls: ["<all_urls>"] } , ["responseHeaders"]
 );
@@ -608,6 +608,7 @@ function registerAccountUsage(url, report) {
 	appStats.lastUsed = nowDatestamp()
 	appStats.lastConnected = nowDatestamp()
 	appStats.lastAccount = report.username
+	appStats.isAuthenticated = appStats.isAuthenticated ?? "auth form submit"
 
 	const issues = {
 		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
