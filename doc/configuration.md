@@ -14,6 +14,7 @@ The configuration you provide will be override with the attributes of the existi
 The URL blacklists are expected to contain one URL per line. The blacklists configured by default are:
 * [URLhaus](https://urlhaus.abuse.ch/)
 * [Romain Marcoux - malicious domains](https://github.com/romainmarcoux/malicious-domains)
+* [Pi-hole Torrent Blacklist](https://github.com/sakib-m/Pi-hole-Torrent-Blocklist)
 
 
 The IP blacklist is expected to contain one IPv4 address or one CIDR formatted subnet per line. The blacklists configured by default are:
