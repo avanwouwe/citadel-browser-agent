@@ -648,8 +648,44 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 	setInitiator(details)
 
 	registerInteraction(details.url, details);
-});
+})
 
+chrome.cookies.onChanged.addListener((changeInfo) => {
+	if (changeInfo.removed || changeInfo.cause !== 'explicit')
+		return
+
+	const cookie = changeInfo.cookie
+	const protocol = cookie.secure ? 'https://' : 'http://'
+	const domain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : undefined
+	const url = `${protocol}${domain ?? cookie.domain}${cookie.path}`
+
+	const config = Config.forHostname(domain)
+	if (config.session.maxSessionDays <= 0)
+		return
+	if (config.session.onlyAuthCookies && ( ! cookie.secure || ! cookie.name?.match(AUTH_COOKIE_PATTERN)) )
+		return
+
+	const maxSessionExpirationDate = new Date()
+	maxSessionExpirationDate.setDate(maxSessionExpirationDate.getDate() + config.account.maxSessionDays)
+	const maxSessionExpirationTimestamp = Math.floor(maxSessionExpirationDate.getTime() / 1000)
+	if (!cookie.expirationDate || cookie.expirationDate <= maxSessionExpirationTimestamp)
+		return
+
+	const modifiedCookie = {
+		url: url,
+		domain: domain,
+		name: cookie.name,
+		value: cookie.value,
+		path: cookie.path,
+		secure: cookie.secure,
+		httpOnly: cookie.httpOnly,
+		sameSite: cookie.sameSite,
+		expirationDate: maxSessionExpirationTimestamp,
+		storeId: cookie.storeId
+	}
+
+	chrome.cookies.set(modifiedCookie)
+})
 
 chrome.runtime.onMessage.addListener(function(request, sender) {
 	if (request.type === "user-interaction") {
@@ -672,4 +708,4 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		registerAccountUsage(sender.url, request.report);
 	}
 
-});
+})

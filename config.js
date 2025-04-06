@@ -132,6 +132,10 @@ class Config {
                 "wanadoo.nl": true,
             }
         },
+        session: {
+            maxSessionDays: 14,
+            onlyAuthCookies: true
+        },
         account: {
             retentionDays: 90,
             checkPersonal: false,
