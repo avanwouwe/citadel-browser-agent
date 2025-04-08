@@ -667,7 +667,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 		return
 
 	const maxSessionExpirationDate = new Date()
-	maxSessionExpirationDate.setDate(maxSessionExpirationDate.getDate() + config.account.maxSessionDays)
+	maxSessionExpirationDate.setDate(maxSessionExpirationDate.getDate() + config.session.maxSessionDays)
 	const maxSessionExpirationTimestamp = Math.floor(maxSessionExpirationDate.getTime() / 1000)
 	if (!cookie.expirationDate || cookie.expirationDate <= maxSessionExpirationTimestamp)
 		return
