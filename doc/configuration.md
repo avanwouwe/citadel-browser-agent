@@ -1,11 +1,20 @@
 # Configuration
-Citadel comes with a [sensible default configuration](/config.js). You can override these configurations by creating a file `citadel-browser-agent.json` in the directory where the `citadel-browser-agent` file is placed. For example, to specify the e-mail address of your own IT department:
+Citadel comes with a [sensible default configuration](/config.js). You can override these configurations by creating a file `citadel-config.json` in the directory where the `citadel-browser-agent` file is placed. For example, you can specify the e-mail address of your own IT department so that warnings show your contact details. Or you can define what are your domains, which is used when determining if certain policies, such as password policy, should apply (external domains are excluded by default).
+
+Example:
 
 ```
+    ...
     company: {
-        contact: 'it-support@yourcompany.com',
-        name: 'Company',
+        'contact': 'it-support@yourcompany.com',
+        'name': 'Company',
+        'domains': {
+          'yourcompany.com': true,
+          'yourcompany.io': true,
+          'yourcompany.net': true
+        }
     },
+    ...
 ```
 
 ## blacklists
@@ -27,19 +36,21 @@ In both cases lines starting with `#` are interpreted as comments.
 You can configure your own password policy: 
 
 ```
-    account: {
-        checkPersonal: false,
-        passwordPolicy: {
-            minLength: 15,
-            minNumberOfDigits: 1,
-            minNumberOfLetters: 0,
-            minNumberOfUpperCase: 1,
-            minNumberOfLowerCase: 1,
-            minNumberOfSymbols: 1,
-            minEntropy: 2.5,
-            minSequence: 4
+    ...
+    'account': {
+        'checkExternal': false,
+        'passwordPolicy': {
+            'minLength': 15,
+            'minNumberOfDigits': 1,
+            'minNumberOfLetters': 0,
+            'minNumberOfUpperCase': 1,
+            'minNumberOfLowerCase': 1,
+            'minNumberOfSymbols': 1,
+            'minEntropy': 2.5,
+            'minSequence': 4
         },
     }
+    ...
 ```
 
 Note that:
@@ -52,22 +63,26 @@ Citadel can default session duration by forcing cookies to expire. This reduces 
 The default settings is `14` days, setting this to `0` turns off the feature. By default, Citadel tries to manage only cookies related to authentication.
 
 ```
-    session: {
-        maxSessionDays: 14,
-        onlyAuthCookies: true
+    ...
+    'session': {
+        'maxSessionDays': 14,
+        'onlyAuthCookies': true
     }
+    ...
 ```
 
 ## reporting
 The reporting can be configured to report only on authenticated applications, or to include only a maximum number of applications. In the latter case, only the most important applications are listed (i.e. the most visited or the ones with the most password issues).
 
 ```
-    reporting: {
-        maxInteractionEntries: 200,
-        maxApplicationEntries: 500,
-        maxAccountEntries: 500,
-        onlyAuthenticated: true
+    ...
+    'reporting': {
+        'maxInteractionEntries': 200,
+        'maxApplicationEntries': 500,
+        'maxAccountEntries': 500,
+        'onlyAuthenticated': true
     }
+    ...
 ```
 
 The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "last two weeks" and you will have exactly one event for every endpoint. Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant.
@@ -76,13 +91,15 @@ The bi-weekly frequency of some reports has been chosen so that in your SIEM you
 ## logging
 The default logging settings are:
 ```
-    logging: {
-        failurePopup: true,
-        logLevel: 'DEBUG',
-        consoleLevel: 'WARN',
-        maskUrlLevel: 'INFO',
-        maxUrlLength: 500
+    ...
+    'logging': {
+        'failurePopup': true,
+        'logLevel':     'DEBUG',
+        'consoleLevel': 'WARN',
+        'maskUrlLevel': 'INFO',
+        'maxUrlLength': 500
     }
+    ...
 ```
 * `failurePopup` : should end-users be notified if logging is broken? (so they can warn you)
 * `logLevel` : from which level onward should events be entered in the system log
