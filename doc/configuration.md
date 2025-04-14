@@ -26,7 +26,8 @@ You can override the global configuration for specific domains. This is possible
 * `logging` : ex. turn off logging for the development instances
 * `errors` : ex. do not log certificate issues for your development web servers
 
-For example, to prevent warnings about HTTP traffic over your VPN, you can override the `warningProtocols` setting:
+For example, to ignore warnings about HTTP traffic over your VPN, you can override the `warningProtocols` setting:
+
 ```
     ...
     "exceptions": {
@@ -84,7 +85,7 @@ Note that:
 ## session duration
 Citadel can default session duration by forcing cookies to expire. This reduces the risk of cookies being stolen, should the endpoint ever be compromised. Since it forces users to reconnect, it also ensures that Citadel has recent data bout password quality and account usage.
 
-The default settings is `14` days, setting this to `0` turns off the feature. By default, Citadel tries to manage only cookies related to authentication.
+The default settings is `14` days. Setting this to `0` turns off the feature. By default, Citadel tries to manage only cookies related to authentication.
 
 ```
     ...
@@ -112,9 +113,10 @@ Citadel can report on various aspects, such as application use and password poli
 The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "last two weeks" and you will have exactly one event for every endpoint. Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant.
 
 ## errors
-Citadel reports when certain security-sensitive errors are raised by the browser. This can be for example a user ignoring a virus warning, or issues with certificates. You can override the event level of each error type, should the default levels not work out for your specific environment.
+Citadel reports when certain security-sensitive errors are raised by the browser (see [chrome://network-errors](chrome://network-errors) for a list of all browser errors). This can be for example a user ignoring a virus warning, or issues with certificates. You can override the default event level of each error type, should the default levels not work out for your specific environment.
 
-For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM.
+For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM. Or you can manually configure an extreme logging level for an error that is not detected by default, such as `ERR_ACCESS_DENIED`:
+
 ```
     ...
     "errors": {
@@ -122,6 +124,7 @@ For example, you can lower the level of certificate issues to `DEBUG`, so that t
             "net::ERR_CERT_AUTHORITY_INVALID"   : "DEBUG",
             "net::ERR_CERT_COMMON_NAME_INVALID" : "DEBUG",
             "net::ERR_CERT_DATE_INVALID"        : "DEBUG",
+            "net::ERR_ACCESS_DENIED"            : "ERROR"
         }
     }
     ...
@@ -129,6 +132,7 @@ For example, you can lower the level of certificate issues to `DEBUG`, so that t
 
 ## logging
 The default logging settings are:
+
 ```
     ...
     "logging": {

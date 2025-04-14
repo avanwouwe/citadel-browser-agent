@@ -294,10 +294,10 @@ chrome.downloads.onChanged.addListener((delta) => {
 
 });
 
-// only raise errors that deal with security issues, such as virus or SSL
+// only raise events for browser errors that deal with security issues, such as virus or SSL
 // for the full list of errors see : chrome://network-errors/
-const EVENT_ERROR = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
-const EVENT_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
+const BROWSER_ERROR_ERROR = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
+const BROWSER_ERROR_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
 function handleError(hook, eventType, filter) {
     const listenerArgs = [
         (details) => {
@@ -305,14 +305,18 @@ function handleError(hook, eventType, filter) {
 
             if (details.error) {
 				const config = Config.forURL(details.url)
+				const exception = config.errors.exceptions[details.error]
 
-				const exception = details.url.startsWith('chrome://network-error/') ? Log.INFO : config.errors.exceptions[details.error]
+				let level
+				if (details.url.startsWith('chrome://network-error/')) level = Log.INFO
+				else if (exception) level = exception
+				else if (details.error.match(BROWSER_ERROR_ERROR)) level = Log.ERROR
+				else if (details.error.match(BROWSER_ERROR_WARNING)) level = Log.WARN
+				else level = undefined
 
-                if (details.error.match(EVENT_ERROR)) {
-                    logger.log(nowTimestamp(), eventType, `${eventType} blocked`, details.url, exception ?? Log.ERROR, details.error, `browser blocked ${eventType} to ${details.url}`, details.initiator, details.tabId)
-                } else if (details.error.match(EVENT_WARNING)) {
-                    logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, exception ?? Log.WARN, details.error, `browser error '${details.error}' when ${eventType} to ${details.url}`, details.initiator, details.tabId)
-                }
+				if (level) {
+					logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, level, details.error, `browser error ${details.error} [${level}] for ${eventType} to ${details.url}`, details.initiator, details.tabId)
+				}
             }
         }
     ]
