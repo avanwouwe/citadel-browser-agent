@@ -59,6 +59,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name === Alarm.DAILY) {
 		// daily cleaning up of application statistics to prevent infinite build-up of irrelevant data
 		for (const [appName, app] of Object.entries(APPSTATS)) {
+			const config = Config.forHostname(appName)
+
 			// purge applications if they haven't been used for a while
 			if (isDate(app.lastUsed) && daysSince(app.lastUsed) > config.application.retentionDays) {
 				delete APPSTATS[appName]
@@ -99,7 +101,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 
 function evaluateRequest(details) {
-	const url = new URL(details.url);
+	const url = details.url.toURL()
 	const ip = details.ip ?? IPv4Range.isIPV4(url.hostname) ? url.hostname : undefined
 	const isNavigate = details.method === undefined
 
@@ -114,7 +116,7 @@ function evaluateRequest(details) {
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
-	let blacklist = blacklistURL?.find(url.href)
+	let blacklist = blacklistURL?.find(url)
 	if (blacklist) {
 		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
 		result.level = Log.ERROR
@@ -348,7 +350,7 @@ function getAppnameFromHeaders(details, headers) {
 		}
 	}
 
-	if (isHttpUrl(details.initiator)) { return getSitename(details.initiator); }
+	return getSitename(details.initiator)
 }
 
 function markIsAuthenticated(appName, reason) {
@@ -488,6 +490,8 @@ function reportApplications() {
 		const topIssues = []
 
 		for (const [appName, app] of Object.entries(APPSTATS)) {
+			const config = Config.forHostname(appName)
+
 			if ((app.isAuthenticated === undefined) !== !isAuthenticated) { continue }
 
 			if (appCnt++ < config.reporting.maxApplicationEntries) {
@@ -506,7 +510,7 @@ function reportApplications() {
 			const accounts = app.getOrSet("accounts", {})
 			for (const [username, issues] of Object.entries(accounts)) {
 				const domain = getDomainFromUsername(username)
-				if (issues && ! ignorePersonalAccount(domain)) {
+				if (issues && (config.account.checkExternal || ! isExternalDomain(config, domain) )) {
 					topIssues.push(mergeDeep(issues,{
 						username,
 						appName,
@@ -603,7 +607,9 @@ function incrementInteractionCounter(appName, increment = 1) {
 }
 
 function registerAccountUsage(url, report) {
-	if (ignorePersonalAccount(report.domain)) {
+	const config = Config.forURL(url)
+
+	if (! config.account.checkExternal && isExternalDomain(config, report.domain)) {
 		return
 	}
 

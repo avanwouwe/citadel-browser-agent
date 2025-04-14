@@ -220,11 +220,15 @@ class Config {
     static #exceptionCompatible = [
         'warningProtocols',
         'account',
-        'logging'
+        'session',
+        'application',
+        'logging',
     ]
 
     static load(newConfig) {
         mergeDeep(newConfig, Config.config)
+
+        Log.init(Config.config)
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
         const exceptions = Config.config.exceptions
@@ -233,6 +237,9 @@ class Config {
         for (const exception of exceptions) {
             const mergedExceptionConfig = cloneDeep(Config.config)
             delete mergedExceptionConfig.exceptions
+
+            Log.init(exception.config)
+
             mergeDeep(exception.config, mergedExceptionConfig)
 
             for (const domain of exception.domains) {
@@ -261,12 +268,22 @@ class Config {
         }
     }
 
-    static for(hostname) {
+    static forHostname(hostname) {
+        Config.assertIsLoaded()
+
         const exception = matchDomain(hostname, config.exceptions)
         if (exception) {
             return exception
         }
-        return null
+        return Config.config
+    }
+
+    static forURL(url) {
+        if (isString(url)) {
+            url = url.toURL()
+        }
+
+        return Config.forHostname(url?.hostname)
     }
 
 }

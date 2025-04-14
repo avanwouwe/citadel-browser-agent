@@ -16,12 +16,7 @@ class Log {
         ERROR: 4,
         ALERT: 5,
         NONE: 6
-    };
-
-    static #minLogLevel
-    static #minConsoleLevel
-    static #maxUrlMaskLevel
-
+    }
 
     log(
         timestamp,
@@ -34,11 +29,11 @@ class Log {
         initiator = undefined,
         id = undefined
     ){
-        Log.#loadConfig()
+        const config = Config.forURL(url)
 
-        const levelvalue = Log.#levelnameToLevelvalue(level)
+        const levelvalue = Log.#levelValue[level]
 
-        if (levelvalue < Log.#minLogLevel && levelvalue < Log.#minConsoleLevel) { return }
+        if (levelvalue < config.logging.logLevel && levelvalue < config.logging.consoleLevel) { return }
 
         url = this.maskUrl(url, level)
         initiator = this.maskUrl(initiator, level)
@@ -72,11 +67,11 @@ class Log {
             delete logEntry['browseragent']['value']
         }
 
-        if (levelvalue >= Log.#minLogLevel) {
+        if (levelvalue >= config.logging.logLevel) {
             Port.postMessage("event", logEntry)
         }
 
-        if (levelvalue >= Log.#minConsoleLevel) {
+        if (levelvalue >= config.logging.consoleLevel) {
             switch (event.level) {
                 case Log.TRACE:
                     return console.trace(logEntry)
@@ -98,8 +93,13 @@ class Log {
     maskUrl(url, level) {
         if (!url) { return url }
 
-        if (Log.#levelnameToLevelvalue(level) < Log.#maxUrlMaskLevel) {
-            if (typeof url === 'string') { url = new URL(url) }
+        const config = Config.forURL(url)
+
+        if (Log.#levelValue[level] < config.logging.maskUrlLevel) {
+            if (isString(url)) {
+                url = url.toURL()
+                assert(url != null, "invalid URL", url)
+            }
 
             url.username ? url.username = url.username.hashDJB2() : undefined
             url.password ? url.password = url.password.hashDJB2() : undefined
@@ -112,19 +112,12 @@ class Log {
     }
 
 
-    static #levelnameToLevelvalue(level) { return Log.#levelValue[level] }
+    static init(config) {
+        const logging = config.logging
 
-    static #loadConfig() {
-        Config.assertIsLoaded()
-
-        if (Log.#minLogLevel === undefined) {
-            Log.#minLogLevel     = Log.#levelnameToLevelvalue(config.logging.logLevel)
-            Log.#minConsoleLevel = Log.#levelnameToLevelvalue(config.logging.consoleLevel)
-            Log.#maxUrlMaskLevel = Log.#levelnameToLevelvalue(config.logging.maskUrlLevel)
-
-            console.log("minimum log level:", config.logging.logLevel)
-            console.log("minimum console level:", config.logging.consoleLevel)
-        }
+        if (logging?.logLevel) logging.logLevel = Log.#levelValue[logging.logLevel]
+        if (logging?.consoleLevel) logging.consoleLevel = Log.#levelValue[logging.consoleLevel]
+        if (logging?.maskUrlLevel) logging.maskUrlLevel = Log.#levelValue[logging.maskUrlLevel]
     }
 }
 

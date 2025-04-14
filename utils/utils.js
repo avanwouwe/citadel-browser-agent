@@ -122,12 +122,22 @@ function getDomain(hostname) {
     return twoPart
 }
 
-function isHttpUrl(url) { return url?.startsWith('http') }
+const URL_REGEX = /^[a-z]{1,5}:\/\//i
+
+String.prototype.isURL = function () { return URL_REGEX.test(this) }
+
+String.prototype.toURL = function () {
+    try {
+        return new URL(this)
+    } catch (error) {
+        return null
+    }
+}
 
 function getInitiator(url) {
     if (!url) return undefined
 
-    url = new URL(url)
+    url = url.toURL()
     const port = url.port === "" ? url.port : `:${url.port}`
     return `${url.protocol}//${url.hostname}${port}`
 }
@@ -143,7 +153,7 @@ function setInitiator(details) {
 }
 
 function getSitename(url) {
-    return isHttpUrl(url) ? new URL(url).hostname : null
+    return url?.toURL()?.hostname
 }
 
 function isKnownApplication(sitename) {
@@ -186,7 +196,6 @@ function daysSince(str) {
     return Math.floor(diff / (1000 * 60 * 60 * 24));
 }
 
-
 function isString(str) { return typeof str === 'string'; }
 
 String.prototype.isEmpty = function () { return this !== undefined && this !== null && this.length === 0; };
@@ -223,7 +232,6 @@ Object.prototype.hashCode = function () {
     return Array.from(str)
         .reduce((s, c) => Math.imul(31, s) + c.charCodeAt(0) | 0, 0)
 }
-
 
 Object.prototype.hashDJB2 = function () {
     const str = typeof this == 'string' ? this : JSON.stringify(this);
@@ -289,6 +297,9 @@ function cloneDeep(obj) {
  * @returns {Object} - Returns value of matching domain key or null if no match
  */
 function matchDomain(hostname, domainPatterns) {
+    hostname = hostname ?? ""
+    domainPatterns = domainPatterns ?? {}
+
     let parts = hostname.split('.');
 
     for (let i = 0; i < parts.length; i++) {
