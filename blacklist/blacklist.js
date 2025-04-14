@@ -54,12 +54,12 @@ class CombinedBlacklist {
 		return this
 	}
 
-	find(str) {
-		if (str ===	CombinedBlacklist.TEST_IPV4) { return 'test IPV4' }
-		if (str === CombinedBlacklist.TEST_URL) { return 'test URL' }
+	find(query) {
+		if (query === CombinedBlacklist.TEST_IPV4) { return 'test IPV4' }
+		if (query === CombinedBlacklist.TEST_URL) { return 'test URL' }
 
 		for (const [name, blacklist] of Object.entries(this.#blacklists)) {
-			if (blacklist.find(str) != null) {
+			if (blacklist.find(query)) {
 				return name
 			}
 		}
@@ -109,8 +109,16 @@ class IPBlacklist {
 	size() { return this.#sortedCidrList.length }
 }
 
+/**
+ * Blacklist that contains a list of URLs and hostnames.
+ *
+ * It is possible to blacklist an entire domain by adding the name of the domain, or a specific URL by adding the URL.
+ *
+ * Matching is done in a case-insensitive way.
+ */
+
 class URLBlacklist {
-	
+
 	#urlSet = null
 
 	async load(url) {
@@ -118,17 +126,47 @@ class URLBlacklist {
 
 		const buffer = { }
 
-		await processTextStream(lines,line => { buffer[line] = true })
+		await processTextStream(lines,line => {
+			line = line.toLowerCase()
+			buffer[line] = true }
+		)
 
 		this.#urlSet = buffer
 
 		return this
 	}
-	
-	find(url) {
+
+	/**
+	 * Checks if a URL is in the blacklist. Checks:
+	 * - the exact URL or hostname
+	 * - (in the case of a URL) if the entire domain was blacklisted by a domain-level blacklist-entry
+	 * - (in the case of a URL) if the URL was blacklisted, but without the query or hash part
+	 * @param {Object} query - a string containing a hostname or URL, or a URL object
+	 * @returns {Boolean} - Returns true if a match was found and null if not
+	 */
+
+	find(query) {
 		assert(this.#urlSet != null, 'blacklist is not loaded')
 
-		if (this.#urlSet.hasOwnProperty(url)) {
+		if (query instanceof URL) {
+			query = new URL(query.href.toLowerCase())
+		}
+
+		if (isString(query)) {
+			query = query.toLowerCase()
+
+			if (! query.isURL()) {
+				return this.#urlSet.hasOwnProperty(query)
+			}
+
+			query = query.toURL()
+		}
+
+		if (
+			this.#urlSet.hasOwnProperty(query.href) ||
+			this.#urlSet.hasOwnProperty(query.domain) ||
+			this.#urlSet.hasOwnProperty(`${query.protocol}//${query.hostname}${query.port.length > 0 ? ':' + query.port : ""}${query.pathname}`)
+		) {
 			return true
 		}
 
