@@ -235,7 +235,7 @@ class Config {
         const exceptions = Config.config.exceptions
         Config.config.exceptions = {}
 
-        for (const exception of exceptions) {
+        for (const exception of Object.values(exceptions)) {
             const mergedExceptionConfig = cloneDeep(Config.config)
             delete mergedExceptionConfig.exceptions
 
