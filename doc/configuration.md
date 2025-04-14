@@ -5,13 +5,13 @@ Example:
 
 ```
     ...
-    company: {
-        'contact': 'it-support@yourcompany.com',
-        'name': 'Company',
-        'domains': {
-          'yourcompany.com': true,
-          'yourcompany.io': true,
-          'yourcompany.net': true
+    "company": {
+        "contact": "it-support@yourcompany.com",
+        "name": "Company",
+        "domains": {
+          "yourcompany.com" : true,
+          "yourcompany.io"  : true,
+          "yourcompany.net" : true
         }
     },
     ...
@@ -29,11 +29,11 @@ You can override the global configuration for specific domains. This is possible
 For example, to prevent warnings about HTTP traffic over your VPN, you can override the `warningProtocols` setting:
 ```
     ...
-    'exceptions': {
-        'VPN' : {
-          'domains': ['yourcompany.lan', 'yourcompany.local'],
-          'config': {
-            'warningProtocols': ['ftp:', 'ws:']
+    "exceptions": {
+        "VPN" : {
+          "domains": ["yourcompany.lan", "yourcompany.local"],
+          "config": {
+            "warningProtocols": ["ftp:", "ws:"]
           }
         }
     }
@@ -61,17 +61,17 @@ You can configure your own password policy:
 
 ```
     ...
-    'account': {
-        'checkExternal': false,
-        'passwordPolicy': {
-            'minLength': 15,
-            'minNumberOfDigits': 1,
-            'minNumberOfLetters': 0,
-            'minNumberOfUpperCase': 1,
-            'minNumberOfLowerCase': 1,
-            'minNumberOfSymbols': 1,
-            'minEntropy': 2.5,
-            'minSequence': 4
+    "account": {
+        "checkExternal": false,
+        "passwordPolicy": {
+            "minLength": 15,
+            "minNumberOfDigits": 1,
+            "minNumberOfLetters": 0,
+            "minNumberOfUpperCase": 1,
+            "minNumberOfLowerCase": 1,
+            "minNumberOfSymbols": 1,
+            "minEntropy": 2.5,
+            "minSequence": 4
         },
     }
     ...
@@ -88,9 +88,9 @@ The default settings is `14` days, setting this to `0` turns off the feature. By
 
 ```
     ...
-    'session': {
-        'maxSessionDays': 14,
-        'onlyAuthCookies': true
+    "session": {
+        "maxSessionDays": 14,
+        "onlyAuthCookies": true
     }
     ...
 ```
@@ -100,11 +100,11 @@ Citadel can report on various aspects, such as application use and password poli
 
 ```
     ...
-    'reporting': {
-        'maxInteractionEntries': 200,
-        'maxApplicationEntries': 500,
-        'maxAccountEntries': 500,
-        'onlyAuthenticated': true
+    "reporting": {
+        "maxInteractionEntries": 200,
+        "maxApplicationEntries": 500,
+        "maxAccountEntries": 500,
+        "onlyAuthenticated": true
     }
     ...
 ```
@@ -117,11 +117,11 @@ Citadel reports when certain security-sensitive errors are raised by the browser
 For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM.
 ```
     ...
-    'errors': {
-        'exceptions': {
-            'net::ERR_CERT_AUTHORITY_INVALID'   : 'DEBUG',
-            'net::ERR_CERT_COMMON_NAME_INVALID' : 'DEBUG',
-            'net::ERR_CERT_DATE_INVALID'        : 'DEBUG',
+    "errors": {
+        "exceptions": {
+            "net::ERR_CERT_AUTHORITY_INVALID"   : "DEBUG",
+            "net::ERR_CERT_COMMON_NAME_INVALID" : "DEBUG",
+            "net::ERR_CERT_DATE_INVALID"        : "DEBUG",
         }
     }
     ...
@@ -131,12 +131,12 @@ For example, you can lower the level of certificate issues to `DEBUG`, so that t
 The default logging settings are:
 ```
     ...
-    'logging': {
-        'failurePopup': true,
-        'logLevel':     'DEBUG',
-        'consoleLevel': 'WARN',
-        'maskUrlLevel': 'INFO',
-        'maxUrlLength': 500
+    "logging": {
+        "failurePopup"  : true,
+        "logLevel"      : "DEBUG",
+        "consoleLevel"  : "WARN",
+        "maskUrlLevel"  : "INFO",
+        "maxUrlLength"  : 500
     }
     ...
 ```
