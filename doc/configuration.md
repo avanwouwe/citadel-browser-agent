@@ -43,17 +43,18 @@ For example, to prevent warnings about HTTP traffic over your VPN, you can overr
 ## blacklists
 The configuration you provide will be overridden with the attributes of the existing configuration. Since the blacklist configurations are arrays, you must re-state the blacklist configuration if you want to add your own blacklists to it.
 
-The URL blacklists are expected to contain one URL per line. The blacklists configured by default are:
+The URL blacklists are expected to contain one domain or URL per line. The blacklists configured by default are:
 * [URLhaus](https://urlhaus.abuse.ch/)
 * [Romain Marcoux - malicious domains](https://github.com/romainmarcoux/malicious-domains)
 * [Pi-hole Torrent Blacklist](https://github.com/sakib-m/Pi-hole-Torrent-Blocklist)
 
+Blacklists containing domains block all URLs in that domain. Blacklists containing URLs block only that URL, whilst ignoring the query parameters and URI fragment (i.e. the "hash part"). In both cases the matching is done in a case insensitive manner.
 
 The IP blacklist is expected to contain one IPv4 address or one CIDR formatted subnet per line. The blacklists configured by default are:
 * [FireHOL (level 1)](https://iplists.firehol.org/?ipset=firehol_level1)
 * [Romain Marcoux - malicious outgoing IP](https://github.com/romainmarcoux/malicious-outgoing-ip)
 
-In both cases lines starting with `#` are interpreted as comments.
+Both blacklists can contain lines starting with `#`, which are interpreted as comments.
 
 ## passwords
 You can configure your own password policy: 
