@@ -40,10 +40,6 @@ function getDomainFromUsername(username) {
     return matches ? matches[1] : null;
 }
 
-function ignorePersonalAccount(domain) {
-    return config.account.checkPersonal && config.domain.isPublicMail[domain]
-}
-
 const keyboards = {
     'en-US': 'en',
     'en-UK': 'en',
