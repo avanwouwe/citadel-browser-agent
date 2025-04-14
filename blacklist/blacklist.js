@@ -3,7 +3,7 @@ class CombinedBlacklist {
 	#downloadStatus = { }
 
 	static #BLACKLIST_DOWNLOAD_ERRORS = 'blacklist-download-statistics-'
-	static #ERROR_REPORTING_FREQ = ONE_DAY;
+	static #ERROR_REPORTING_FREQ = 20		// perform error reporting only once we're had N downloads
 
 
 	static TEST_IPV4 = '192.0.2.2'
@@ -16,12 +16,22 @@ class CombinedBlacklist {
 
 			const blacklistName = conf.name
 
-			const failureEvents = new EventAccumulator(CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + blacklistName, CombinedBlacklist.#ERROR_REPORTING_FREQ, (eventCount) => {
-				const currStatus = status[blacklistName]
-				const level = (currStatus === "loaded" || eventCount < 3) ? Log.WARN : Log.ERROR
+			const failureEvents = new EventAccumulator(
+				CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + blacklistName,
+				CombinedBlacklist.#ERROR_REPORTING_FREQ * conf.freq * ONE_MINUTE,
+				(eventCount) => {
+					const currStatus = status[blacklistName]
+					const isLoaded = currStatus === "loaded"
+					const errorRate = eventCount / CombinedBlacklist.#ERROR_REPORTING_FREQ
 
-				logger.log(nowTimestamp(), "report", "blacklist download error", conf.url, level, eventCount, `blacklist '${blacklistName} could not be downloaded ${eventCount} times, current state is '${currStatus}'`);
-			});
+					let level
+					if (isLoaded || errorRate <= 0.1) level = Log.TRACE
+					else if (errorRate <= 0.25) level = Log.INFO
+					else if (errorRate <= 0.75) level = Log.WARN
+					else level = Log.ERROR
+
+					logger.log(nowTimestamp(), "report", "blacklist download error", conf.url, level, eventCount, `blacklist '${blacklistName} could not be downloaded ${eventCount} times, current state is '${currStatus}'`)
+				})
 
 			try {
 				blacklists[blacklistName] = await new blacklistClass().load(conf.url)
