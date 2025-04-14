@@ -304,6 +304,8 @@ function handleError(hook, eventType, filter) {
             setInitiator(details)
 
             if (details.error) {
+				const config = Config.forURL(details.url)
+
 				const exception = details.url.startsWith('chrome://network-error/') ? Log.INFO : config.errors.exceptions[details.error]
 
                 if (details.error.match(EVENT_ERROR)) {

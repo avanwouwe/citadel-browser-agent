@@ -223,6 +223,7 @@ class Config {
         'session',
         'application',
         'logging',
+        'errors',
     ]
 
     static load(newConfig) {
