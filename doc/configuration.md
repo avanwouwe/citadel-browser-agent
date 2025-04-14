@@ -17,6 +17,29 @@ Example:
     ...
 ```
 
+## exceptions
+You can override the global configuration for specific domains. This is possible for the following configuration elements:
+* `warningProtocols` : ex. allow HTTP for VPN traffic
+* `account` : ex. specific password policies for one application
+* `session` : ex. restrict session duration only for internal applications
+* `application` : ex. specific retention period
+* `logging` : ex. turn off logging for the development instances
+* `errors` : ex. do not log certificate issues for your development web servers
+
+For example, to prevent warnings about HTTP traffic over your VPN, you can override the `warningProtocols` setting:
+```
+    ...
+    'exceptions': {
+        'VPN' : {
+          'domains': ['yourcompany.lan', 'yourcompany.local'],
+          'config': {
+            'warningProtocols': ['ftp:', 'ws:']
+          }
+        }
+    }
+    ...
+```
+
 ## blacklists
 The configuration you provide will be overridden with the attributes of the existing configuration. Since the blacklist configurations are arrays, you must re-state the blacklist configuration if you want to add your own blacklists to it.
 
