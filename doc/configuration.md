@@ -111,6 +111,21 @@ Citadel can report on various aspects, such as application use and password poli
 
 The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "last two weeks" and you will have exactly one event for every endpoint. Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant.
 
+## errors
+Citadel reports when certain security-sensitive errors are raised by the browser. This can be for example a user ignoring a virus warning, or issues with certificates. You can override the event level of each error type, should the default levels not work out for your specific environment.
+
+For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM.
+```
+    ...
+    'errors': {
+        'exceptions': {
+            'net::ERR_CERT_AUTHORITY_INVALID'   : 'DEBUG',
+            'net::ERR_CERT_COMMON_NAME_INVALID' : 'DEBUG',
+            'net::ERR_CERT_DATE_INVALID'        : 'DEBUG',
+        }
+    }
+    ...
+```
 
 ## logging
 The default logging settings are:
