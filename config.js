@@ -3,6 +3,7 @@ class Config {
         company: {
             contact: 'Your IT support',         // replace with your support e-mail
             name: 'Company',
+            domains: { }
         },
         warningProtocols: ['http:', 'ftp:', 'ws:'],
         application: {
@@ -138,7 +139,7 @@ class Config {
         },
         account: {
             retentionDays: 90,
-            checkPersonal: false,
+            checkExternal: false,
             passwordPolicy: {
                 minLength: 15,
                 minNumberOfDigits: 1,
