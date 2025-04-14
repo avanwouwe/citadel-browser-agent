@@ -130,7 +130,10 @@ function evaluateRequest(details) {
 		result.description = `${result.result} due to IP on blacklist '${blacklist}'`
 	}
 
-	if (config.warningProtocols.includes(url.protocol)) {
+	if (
+		! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
+		Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
+	) {
 		const siteName = details.initiator
 		const appName = SITESTATS[siteName]?.appName
 		const app = APPSTATS[appName]

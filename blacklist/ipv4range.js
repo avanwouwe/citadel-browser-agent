@@ -24,6 +24,13 @@ class IPv4Range {
         return ip.split('.').reduce((acc, octet) => (acc << 8) | parseInt(octet, 10), 0);
     }
 
+    static #IPV4_LOOPBACK = new IPv4Range("127.0.0.0/8")
+
+    static isLoopback(ip) {
+        ip = IPv4Range.stringToNumber(ip)
+        return ip && this.#IPV4_LOOPBACK.contains(ip)
+    }
+
     static async parseList(stream) {
         const cidrList = [];
 
