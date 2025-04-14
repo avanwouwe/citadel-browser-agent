@@ -302,10 +302,12 @@ function handleError(hook, eventType, filter) {
             setInitiator(details)
 
             if (details.error) {
+				const exception = details.url.startsWith('chrome://network-error/') ? Log.INFO : config.errors.exceptions[details.error]
+
                 if (details.error.match(EVENT_ERROR)) {
-                    logger.log(nowTimestamp(), eventType, `${eventType} blocked`, details.url, Log.ERROR, details.error, `browser blocked ${eventType} to ${details.url}`, details.initiator, details.tabId)
+                    logger.log(nowTimestamp(), eventType, `${eventType} blocked`, details.url, exception ?? Log.ERROR, details.error, `browser blocked ${eventType} to ${details.url}`, details.initiator, details.tabId)
                 } else if (details.error.match(EVENT_WARNING)) {
-                    logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, Log.WARN, details.error, `browser error '${details.error}' when ${eventType} to ${details.url}`, details.initiator, details.tabId)
+                    logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, exception ?? Log.WARN, details.error, `browser error '${details.error}' when ${eventType} to ${details.url}`, details.initiator, details.tabId)
                 }
             }
         }

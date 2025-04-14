@@ -197,6 +197,14 @@ class Config {
             maxAccountEntries: 500,
             onlyAuthenticated: true
         },
+        errors: {
+            exceptions: {
+                'net::ERR_BLOCKED_BY_CLIENT' : 'DEBUG',
+                'net::ERR_BLOCKED_BY_ORB' : 'DEBUG',
+                'net::ERR_BLOCKED_BY_CSP': 'DEBUG',
+                'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'DEBUG',
+            }
+        },
         logging: {
             reportFailure: true,
             logLevel: 'DEBUG',
