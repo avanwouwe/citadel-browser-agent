@@ -18,7 +18,7 @@ Example:
 ```
 
 ## blacklists
-The configuration you provide will be override with the attributes of the existing configuration. Since the blacklist configurations are arrays, you must re-state the blacklist configuration if you want to add your own blacklists to it.
+The configuration you provide will be overridden with the attributes of the existing configuration. Since the blacklist configurations are arrays, you must re-state the blacklist configuration if you want to add your own blacklists to it.
 
 The URL blacklists are expected to contain one URL per line. The blacklists configured by default are:
 * [URLhaus](https://urlhaus.abuse.ch/)
@@ -72,7 +72,7 @@ The default settings is `14` days, setting this to `0` turns off the feature. By
 ```
 
 ## reporting
-The reporting can be configured to report only on authenticated applications, or to include only a maximum number of applications. In the latter case, only the most important applications are listed (i.e. the most visited or the ones with the most password issues).
+Citadel can report on various aspects, such as application use and password policy adherence. By default the reporting is configured to report only on authenticated applications. To prevent overloading the SIEM, the reporting only reports on the most important applications (i.e. the most visited or the ones with the most password issues).
 
 ```
     ...
@@ -108,10 +108,10 @@ The default logging settings are:
 * `maxUrlLength` : truncate URLs to which length (to prevent filling the logs too quickly)
 
 When specifying the logging level you can use the following log levels:
-* `TRACE` : low level events that are not necessarily user actions, for example `webRequest`. Not enabled by default.
-* `DEBUG` : standard user actions, for example `webNavigation`
-* `INFO` : standard user actions with potential security implications, such as `onDownload`. Also used for the shadow IT reporting
-* `WARN` : risky user actions with potential security implications, such as unencrypted or non-standard protocols
-* `ERROR` : risky user actions that require investigation, such as visiting a blacklisted URL or ignoring a download warning
+* `TRACE` : low level events that are not necessarily user actions, for example `webRequest`. Not enabled by default
+* `DEBUG` : standard user actions, for example `webNavigation`. Events could be useful for DFIR, but are too frequent for a SIEM
+* `INFO` : standard user actions with potential security implications, such as `onDownload`. Also used for reporting events.
+* `WARN` : potentially risky user actions with, such as unencrypted requests or invalid certificates. Perform a periodic statistical review.
+* `ERROR` : risky user actions that require immediate investigation, such as visiting a blacklisted URL or ignoring a virus warning
 
 The special log level `NONE` is even higher than `ERROR` and is used for example to never log something or to mask all events.
