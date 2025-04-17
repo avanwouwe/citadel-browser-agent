@@ -472,7 +472,7 @@ function reportInteractions() {
 			Object.entries(appStats)
 				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
-				.slice(0, config.reporting.maxInteractionEntries)
+				.slice(0, config.reporting.maxApplicationEntries)
 				.forEach(it => {
 					logger.log(
 						`${date}T23:59:59.999Z`,

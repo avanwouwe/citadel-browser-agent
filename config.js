@@ -196,7 +196,6 @@ class Config {
             ]
         },
         reporting: {
-            maxInteractionEntries: 200,
             maxApplicationEntries: 500,
             maxAccountEntries: 500,
             onlyAuthenticated: true
