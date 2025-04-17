@@ -49,35 +49,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }, true);
 
+    document.querySelectorAll('form').forEach((form) => {
+        form.addEventListener('submit', function(event) {
+            if (event.target.tagName === 'FORM') {
+                const formElements = event.target.elements;
+                let username = null
+                let password = null
+                let domain = null
 
-    document.addEventListener('submit', function(event) {
-        if (event.target.tagName === 'FORM') {
-            const formElements = event.target.elements;
-            let username = null
-            let password = null
-            let domain = null
+                for (let elem of formElements) {
+                    if (elem.type === 'password') {
+                        password = elem.value
+                    }
 
-            for (let elem of formElements) {
-                if (elem.type === 'password') {
-                    password = elem.value;
-                }
+                    if (domain == null && (elem.type === 'text' || elem.type === 'email')) {
+                        domain = getDomainFromUsername(elem.value)
 
-                if (domain == null && (elem.type === 'text' || elem.type === 'email')) {
-                    domain = getDomainFromUsername(elem.value)
-
-                    // Assume the first text field is the username, unless you find an email address somewhere else
-                    if (username == null || domain != null) {
-                        username = elem.value;
+                        // Assume the first text field is the username, unless you find an email address somewhere else
+                        if (username == null || domain != null) {
+                            username = elem.value
+                        }
                     }
                 }
-            }
 
-            const report = {
-                username,
-                domain,
-                password: analyzePassword(password)
+                const report = {
+                    username,
+                    domain,
+                    password: analyzePassword(password)
+                }
+                chrome.runtime.sendMessage({ type: 'account-usage', report })
             }
-            chrome.runtime.sendMessage({ type: 'account-usage', report });
-        }
-    }, true);
-});
+        }, true)
+    })
+})
