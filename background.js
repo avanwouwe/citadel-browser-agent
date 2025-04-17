@@ -256,8 +256,8 @@ function logDownload(event, timestamp, result, level, description) {
 chrome.downloads.onChanged.addListener((delta) => {
 	if (delta.state && delta.state.current === 'complete') {
 		getDownload(delta.id).then(download => {
-			logDownload(download, download.endTime, "download completed", Log.INFO, `completed download of @@URL@@ to '${download.filename}'`);
-		});
+			logDownload(download, download.endTime, "download completed", Log.INFO, `completed download of @@URL@@ to '${download.filename}'`)
+		})
 	}
 
 	if (delta.danger) {
@@ -268,13 +268,13 @@ chrome.downloads.onChanged.addListener((delta) => {
 			case 'deepScannedFailed':
 			case 'accepted':
 				getDownload(delta.id).then(download => {
-					logDownload(download, nowTimestamp(), "download accepted", Log.ERROR, `user accepted danger of type '${delta.danger.current}' of download of @@URL@@`);
-				});
+					logDownload(download, nowTimestamp(), "download accepted", Log.ERROR, `user accepted danger of type '${delta.danger.current}' of download of @@URL@@`)
+				})
 				break;
 			default:
 				getDownload(delta.id).then(download => {
-					logDownload(download, nowTimestamp(), "download warned", Log.WARN, `user notified danger of type '${danger}' of download of @@URL@@`);
-				});
+					logDownload(download, nowTimestamp(), "download warned", Log.WARN, `user notified danger of type '${danger}' of download of @@URL@@`)
+				})
 		}
 	}
 
@@ -285,10 +285,11 @@ chrome.downloads.onChanged.addListener((delta) => {
 			case 'FILE_BLOCKED':
 			case 'FILE_SECURITY_CHECK_FAILED':
 				getDownload(delta.id).then(download => {
-					logDownload(download, nowTimestamp(), "download blocked", Log.WARN, `navigator blocked of type '${error}' of download of @@URL@@`);
-				});
-				break;
+					logDownload(download, nowTimestamp(), "download blocked", Log.WARN, `navigator blocked of type '${error}' of download of @@URL@@`)
+				})
+				break
 			default:
+				// do nothing
 		}
 	}
 
