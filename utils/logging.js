@@ -6,7 +6,7 @@ class Log {
     static WARN  = "WARN"
     static ERROR = "ERROR"
     static ALERT = "ALERT"
-    static NONE = "NONE"
+    static NONE  = "NONE"
 
     static #levelValue = {
         TRACE: 0,
@@ -17,6 +17,8 @@ class Log {
         ALERT: 5,
         NONE: 6
     }
+
+    static #levelLabel = Object.fromEntries(Object.entries(this.#levelValue).map(([key, value]) => [value, key]))
 
     log(
         timestamp,
@@ -119,6 +121,29 @@ class Log {
         if (logging?.consoleLevel) logging.consoleLevel = Log.#levelValue[logging.consoleLevel]
         if (logging?.maskUrlLevel) logging.maskUrlLevel = Log.#levelValue[logging.maskUrlLevel]
     }
+
+    static downgrade(level) {
+        let value = this.#levelValue[level]
+        assert(value !== undefined, `unknown log level '${level}'`)
+
+        if (level !== Log.TRACE && level !== Log.NONE) {
+            value--
+        }
+
+        return this.#levelLabel[value]
+    }
+
+    static upgrade(level) {
+        let value = this.#levelValue[level]
+        assert(value !== undefined, `unknown log level '${level}'`)
+
+        if (level !== Log.ALERT && level !== Log.NONE) {
+            value++
+        }
+
+        return this.#levelLabel[value]
+    }
+
 }
 
 const logger = new Log()

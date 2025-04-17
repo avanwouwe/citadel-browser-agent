@@ -6,9 +6,7 @@ class CombinedBlacklist {
 	static #ERROR_REPORTING_FREQ = 20		// perform error reporting only once we're had N downloads
 
 
-	static TEST_IPV4 = '192.0.2.2'
-	static TEST_URL  = 'https://192.0.2.1/'
-
+	static TEST_BLACKLIST = '192.0.2.1'
 
 	async load (configs, blacklistClass) {
 		async function download(blacklists, conf, status) {
@@ -55,8 +53,7 @@ class CombinedBlacklist {
 	}
 
 	find(query) {
-		if (query === CombinedBlacklist.TEST_IPV4) { return 'test IPV4' }
-		if (query === CombinedBlacklist.TEST_URL) { return 'test URL' }
+		if (query === CombinedBlacklist.TEST_BLACKLIST) { return 'test blacklist' }
 
 		for (const [name, blacklist] of Object.entries(this.#blacklists)) {
 			if (blacklist.find(query)) {
@@ -121,17 +118,28 @@ class URLBlacklist {
 
 	#urlSet = null
 
-	async load(url) {
-		const lines = await getCached(url).then(res => res.body.pipeThrough(new TextDecoderStream()))
+	init() {
+		this.#urlSet = { }
+		return this
+	}
 
-		const buffer = { }
+	add(entry) {
+		this.#urlSet[entry] = true
+	}
+
+	remove(entry) {
+		delete this.#urlSet[entry]
+	}
+
+	async load(url) {
+		this.init()
+
+		const lines = await getCached(url).then(res => res.body.pipeThrough(new TextDecoderStream()))
 
 		await processTextStream(lines,line => {
 			line = line.toLowerCase()
-			buffer[line] = true }
-		)
-
-		this.#urlSet = buffer
+			this.add(line)
+		})
 
 		return this
 	}

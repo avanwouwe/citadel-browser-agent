@@ -57,6 +57,18 @@ The IP blacklist is expected to contain one IPv4 address or one CIDR formatted s
 
 Both blacklists can contain lines starting with `#`, which are interpreted as comments.
 
+## blacklist exceptions
+By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can bypass the blacklist for that hostname temporarily. The duration is stated in minutes, and setting it to `0` disables the possibility to ask for exceptions.
+
+```
+    ...
+    'blacklist": {
+        "exceptions": {
+            "duration": 0
+        },
+    ...
+```
+
 ## passwords
 You can configure your own password policy: 
 

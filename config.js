@@ -152,6 +152,9 @@ class Config {
             },
         },
         blacklist: {
+            exceptions: {
+                duration: 60
+            },
             ip: [
                 {
                     name: "FireHOL (level 1)",
@@ -202,7 +205,7 @@ class Config {
             exceptions: {
                 'net::ERR_BLOCKED_BY_CLIENT' : 'DEBUG',
                 'net::ERR_BLOCKED_BY_ORB' : 'DEBUG',
-                'net::ERR_BLOCKED_BY_CSP': 'DEBUG',
+                'net::ERR_BLOCKED_BY_CSP' : 'DEBUG',
                 'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'DEBUG',
             }
         },

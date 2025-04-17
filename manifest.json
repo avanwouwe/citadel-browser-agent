@@ -34,6 +34,7 @@
       "gui/interface.js",
       "blacklist/blacklist.js",
       "blacklist/ignorelist.js",
+      "blacklist/allowlist.js",
       "blacklist/ipv4range.js",
       "background.js"
     ]

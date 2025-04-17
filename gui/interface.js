@@ -15,9 +15,17 @@ function showPopup(message, title = "Citadel browser agent"
     });
 }
 
-function blockPage(tabId, reason, value) {
+function blockPage(tabId, reason, blockedPage) {
     const url = chrome.runtime.getURL("gui/blocked.html");
-    const params = new URLSearchParams({ reason: reason, value: value, contact: config.company.contact });
+    const params = new URLSearchParams({
+        reason,
+        value: blockedPage,
+        contact: config.company.contact,
+    })
 
-    chrome.tabs.update(tabId, { 'url' : `${url}?${params.toString()}` });
+    if (config.blacklist.exceptions.duration) {
+        params.set('e', 12)     // security by obscurity, magic number, all true.. but it's better than nothing
+    }
+
+    chrome.tabs.update(tabId, { 'url' : `${url}?${params.toString()}` })
 }

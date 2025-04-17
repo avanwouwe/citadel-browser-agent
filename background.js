@@ -9,6 +9,7 @@ if (chrome.identity.getProfileUserInfo) {
 
 let blacklistIP
 let blacklistURL
+let allowlist
 let ignorelist
 
 const APPLICATION_STATISTICS_KEY = 'application-statistics'
@@ -23,6 +24,7 @@ Port.onMessage("config",(newConfig) => {
 
 	new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist).then(blacklist => blacklistIP = blacklist)
 	new CombinedBlacklist().load(config.blacklist.url, URLBlacklist).then(blacklist => blacklistURL = blacklist)
+	allowlist = new AllowList().init()
 	ignorelist = new Ignorelist()
 
 	APPSTATS.isInstalled = true          // Native Messaging was installed, from now on connection errors are reported
@@ -116,22 +118,6 @@ function evaluateRequest(details) {
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
-	let blacklist = blacklistURL?.find(url)
-	if (blacklist) {
-		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
-		result.level = Log.ERROR
-		result.value = url.href
-		result.description = `${result.result} due to URL on blacklist '${blacklist}'`
-	}
-
-	blacklist = blacklistIP?.find(ip)
-	if (blacklist) {
-		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
-		result.level = Log.ERROR
-		result.value = ip
-		result.description = `${result.result} due to IP on blacklist '${blacklist}'`
-	}
-
 	if (
 		! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
 		Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
@@ -155,6 +141,20 @@ function evaluateRequest(details) {
 		result.description = `password of '${url.username}' in URL`
 	}
 
+	const blacklist = blacklistURL?.find(url) ?? blacklistIP?.find(ip)
+	if (blacklist) {
+		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
+		result.level = Log.ERROR
+		result.value = url.href
+		result.description = `${result.result} because target is on blacklist '${blacklist}'`
+	}
+
+	if (result.result.endsWith("blacklisted") && allowlist.find(details.url)) {
+		result.level = Log.downgrade(result.level)
+		result.result = result.result + ' (exception granted)'
+		result.description = result.description + ' (exception granted)'
+	}
+
 	return result
 }
 
@@ -167,13 +167,13 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 
 	setInitiator(details)
 	const timestamp = timestampToISO(details.timeStamp)
-	const evaluation = evaluateRequest(details);
+	const evaluation = evaluateRequest(details)
 
 	switch (evaluation.result) {
 		case "ignored":
-			return;
+			return
 		case "navigation blacklisted":
-			blockPage(details.tabId, evaluation.description, evaluation.value);
+			blockPage(details.tabId, evaluation.description, evaluation.value)
 	}
 
 	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId);
@@ -184,13 +184,13 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 chrome.webRequest.onBeforeRequest.addListener((details) => {
 	setInitiator(details)
 	const timestamp = timestampToISO(details.timeStamp)
-	const evaluation = evaluateRequest(details);
+	const evaluation = evaluateRequest(details)
 
 	switch (evaluation.result) {
 		case "ignored":
-			return;
+			return
 		case "request blacklisted":
-			blockPage(details.tabId, evaluation.description, evaluation.value);
+			blockPage(details.tabId, evaluation.description, evaluation.value)
 	}
 
 	logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId);
@@ -205,15 +205,15 @@ chrome.webRequest.onResponseStarted.addListener((details) => {
 	// the event was already logged before, only log a second event if there was a blacklist issue
 	setInitiator(details)
 	const timestamp = timestampToISO(details.timeStamp)
-	const evaluation = evaluateRequest(details);
+	const evaluation = evaluateRequest(details)
 
 	if (evaluation.result === "request blacklisted") {
-		blockPage(details.tabId, evaluation.description, evaluation.value);
+		blockPage(details.tabId, evaluation.description, evaluation.value)
 
-		logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId);
+		logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
 	}
 
-},  { urls: ["<all_urls>"] });
+},  { urls: ["<all_urls>"] })
 
 
 function getDownload(downloadId) {
@@ -665,7 +665,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 
 	setInitiator(details)
 
-	registerInteraction(details.url, details);
+	registerInteraction(details.url, details)
 })
 
 chrome.cookies.onChanged.addListener((changeInfo) => {
@@ -707,23 +707,29 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 
 chrome.runtime.onMessage.addListener(function(request, sender) {
 	if (request.type === "user-interaction") {
-		registerInteraction(sender.url, sender);
+		registerInteraction(sender.url, sender)
 	}
 
 	if (request.type === "print-dialog") {
-		registerInteraction(sender.url, sender);
+		registerInteraction(sender.url, sender)
 
-		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id);
+		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id)
 	}
 
 	if (request.type === "file-select") {
-		registerInteraction(sender.url, sender);
+		registerInteraction(sender.url, sender)
 
-		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id);
+		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
 	}
 
 	if (request.type === "account-usage") {
-		registerAccountUsage(sender.url, request.report);
+		registerAccountUsage(sender.url, request.report)
+	}
+
+	if (request.type === "allow-blacklist") {
+		allowlist.add(request.url.toURL()?.hostname, config.blacklist.exceptions.duration * ONE_MINUTE)
+
+		logger.log(nowTimestamp(), "exception", "blacklist exception granted", request.url, Log.ERROR, request.reason, "user requested exception: " + request.description)
 	}
 
 })
