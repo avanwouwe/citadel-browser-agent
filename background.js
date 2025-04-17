@@ -429,14 +429,19 @@ chrome.webRequest.onCompleted.addListener(
 	function (details) {
 		setInitiator(details)
 		const appName = getAppnameFromHeaders(details, details.responseHeaders)
+		const hostname = getSitename(details.initiator)
 
 		chrome.cookies.getAll({ url: details.url }, cookies => {
-			for (const cookie of cookies.map(cookie => cookie.name)) {
-				if (cookie.match(AUTH_COOKIE_PATTERN)) {
-					return markIsAuthenticated(appName, 'cookie:' + cookie)
+			for (const cookie of cookies) {
+				if (cookie.name?.match(AUTH_COOKIE_PATTERN)) {
+					const cookieDomain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain
+
+					if (matchDomain(hostname, { [cookieDomain] : true })) {
+						return markIsAuthenticated(appName, 'cookie:' + cookie.name)
+					}
 				}
 			}
-		});
+		})
 	}, { urls: ["<all_urls>"] }, ["responseHeaders"]
 )
 
