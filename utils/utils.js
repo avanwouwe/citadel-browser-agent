@@ -303,7 +303,7 @@ function matchDomain(hostname, domainPatterns) {
     return null
 }
 
-function isExternalDomain(config, domain) {
+function isExternalDomain(domain) {
     return Object.keys(config.company.domains).length > 0 && ! matchDomain(domain, config.company.domains
         || config.domain.isPublicMail[domain])
 }

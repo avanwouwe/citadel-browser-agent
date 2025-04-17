@@ -482,8 +482,6 @@ function reportInteractions() {
 						Log.INFO,
 						it.interactions,
 						`'${it.appName}' received ${it.interactions} interactions on ${date}`
-					);
-				});
 					)
 				})
 		}
@@ -513,8 +511,6 @@ function reportApplications() {
 		const topIssues = []
 
 		for (const [appName, app] of Object.entries(APPSTATS)) {
-			const config = Config.forHostname(appName)
-
 			if ((app.isAuthenticated === undefined) !== !isAuthenticated) { continue }
 
 			if (appCnt++ < config.reporting.maxApplicationEntries) {
@@ -531,9 +527,11 @@ function reportApplications() {
 			}
 
 			const accounts = app.getOrSet("accounts", {})
+			const checkExternal = Config.forHostname(appName).account.checkExternal
+
 			for (const [username, issues] of Object.entries(accounts)) {
 				const domain = getDomainFromUsername(username)
-				if (issues && (config.account.checkExternal || ! isExternalDomain(config, domain) )) {
+				if (issues && (checkExternal || ! isExternalDomain(domain) )) {
 					topIssues.push(mergeDeep(issues,{
 						username,
 						appName,
@@ -632,7 +630,7 @@ function incrementInteractionCounter(appName, increment = 1) {
 function registerAccountUsage(url, report) {
 	const config = Config.forURL(url)
 
-	if (! config.account.checkExternal && isExternalDomain(config, report.domain)) {
+	if (! config.account.checkExternal && isExternalDomain(report.domain)) {
 		return
 	}
 
