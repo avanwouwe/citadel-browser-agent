@@ -134,22 +134,12 @@ String.prototype.toURL = function () {
     }
 }
 
-function getInitiator(url) {
-    if (!url) return undefined
-
-    url = url.toURL()
-    const port = url.port === "" ? url.port : `:${url.port}`
-    return `${url.protocol}//${url.hostname}${port}`
-}
-
 function setInitiator(details) {
     if (details.initiator) {
         return
     }
 
-    if (details.originUrl) {
-        details.initiator = getInitiator(details.originUrl)
-    }
+    details.initiator = details.originUrl
 }
 
 function getSitename(url) {

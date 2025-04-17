@@ -250,7 +250,7 @@ function logDownload(event, timestamp, result, level, description) {
 	if (event.exists) download.exists = event.exists
 	if (event.incognito) download.incognito = event.incognito
 
-	logger.log(timestamp, "download", result, url, level, { download }, description, getInitiator(referrer), uniqueId);
+	logger.log(timestamp, "download", result, url, level, { download }, description, referrer, uniqueId)
 }
 
 chrome.downloads.onChanged.addListener((delta) => {
