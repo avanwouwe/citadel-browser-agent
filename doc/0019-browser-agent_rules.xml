@@ -105,31 +105,30 @@
         <description>$(browseragent.description)</description>
     </rule>
 
-    <rule id="465" level="5">
+    <rule id="465" level="2">
         <if_sid>450</if_sid>
         <field name="browseragent.event">^report$</field>
-        <field name="browseragent.result">^usage report$</field>
+        <field name="browseragent.level">^TRACE$</field>
         <description>$(browseragent.description)</description>
     </rule>
 
-    <rule id="466" level="10">
+    <rule id="466" level="3">
         <if_sid>450</if_sid>
         <field name="browseragent.event">^report$</field>
-        <field name="browseragent.result">^events lost$</field>
+        <field name="browseragent.level">^DEBUG$</field>
         <description>$(browseragent.description)</description>
     </rule>
 
-    <rule id="467" level="2">
+    <rule id="467" level="5">
         <if_sid>450</if_sid>
         <field name="browseragent.event">^report$</field>
-        <field name="browseragent.result">^blacklist downloaded$</field>
+        <field name="browseragent.level">^INFO$</field>
         <description>$(browseragent.description)</description>
     </rule>
 
     <rule id="468" level="7">
         <if_sid>450</if_sid>
         <field name="browseragent.event">^report$</field>
-        <field name="browseragent.result">^blacklist download error$</field>
         <field name="browseragent.level">^WARN$</field>
         <description>$(browseragent.description)</description>
     </rule>
@@ -137,7 +136,6 @@
     <rule id="469" level="10">
         <if_sid>450</if_sid>
         <field name="browseragent.event">^report$</field>
-        <field name="browseragent.result">^blacklist download error$</field>
         <field name="browseragent.level">^ERROR$</field>
         <description>$(browseragent.description)</description>
     </rule>
