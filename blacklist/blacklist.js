@@ -164,7 +164,7 @@ class URLBlacklist {
 
 		if (
 			this.#urlSet.hasOwnProperty(query.href) ||
-			this.#urlSet.hasOwnProperty(query.domain) ||
+			this.#urlSet.hasOwnProperty(query.hostname) ||
 			this.#urlSet.hasOwnProperty(`${query.protocol}//${query.hostname}${query.port.length > 0 ? ':' + query.port : ""}${query.pathname}`)
 		) {
 			return true
