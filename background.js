@@ -344,7 +344,7 @@ const AUTH_HEADERS = {
 	'x-oauth-scopes' : true,
 	'x-csrf-Token' : true,
 }
-const AUTH_COOKIE_PATTERN = /(^|[_-])(session(id)?|auth|token|jwt|password|secret|login|access|refresh|sid|user[_-]?id|auth(othiri[sz]ation)?)([_-]|$)/i;
+const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|user(id|name)?|auth(othiri[sz]ation)?)([_.-]|$)/i
 const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/i
 
 
@@ -393,6 +393,10 @@ function analyzeHeaders(hook, headers) {
 			}
 
 			setInitiator(details)
+
+			if (getSitename(details.url) !== getSitename(details.initiator)) {
+				return
+			}
 
 			const appName = getAppnameFromHeaders(details, details[headers])
 
