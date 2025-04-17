@@ -383,7 +383,7 @@ chrome.webRequest.onAuthRequired.addListener(
 );
 
 
-function analyzeHeaders(hook, headers) {
+function detectApplication(hook, headers) {
 	hook.addListener(
 		function(details) {
 			if (! (details.frameType === 'outermost_frame' || details.type !== 'main_frame') ||
@@ -421,8 +421,8 @@ function analyzeHeaders(hook, headers) {
 	)
 }
 
-analyzeHeaders(chrome.webRequest.onSendHeaders, "requestHeaders")
-analyzeHeaders(chrome.webRequest.onHeadersReceived, "responseHeaders")
+detectApplication(chrome.webRequest.onSendHeaders, "requestHeaders")
+detectApplication(chrome.webRequest.onHeadersReceived, "responseHeaders")
 
 
 chrome.webRequest.onCompleted.addListener(
