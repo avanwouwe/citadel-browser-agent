@@ -477,14 +477,22 @@ function reportInteractions() {
 					logger.log(
 						`${date}T23:59:59.999Z`,
 						'report',
-						'usage report',
+						'interaction report',
 						"https://" + it.appName,
 						Log.INFO,
 						it.interactions,
 						`'${it.appName}' received ${it.interactions} interactions on ${date}`
 					);
 				});
+					)
+				})
 		}
+
+		const unreportedApplications = Object.entries(usagePerDayPerApp).length - config.reporting.maxApplicationEntries
+		if (unreportedApplications > 0) {
+			logger.log(nowTimestamp(), "report", "unreported interactions", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`);
+		}
+
 	}
 
 	// run twice to prevent non-authenticated sites from crowding out the authenticated ones
@@ -546,16 +554,16 @@ function reportApplications() {
 					it.count,
 					`password for account '${it.username}' of '${it.appName}' has ${it.count} issues`
 				)
-			});
+			})
 
-		const lostAccounts = appCnt - config.reporting.maxAccountEntries
-		if (lostAccounts > 0) {
-			logger.log(nowTimestamp(), "report", "accounts lost", undefined, Log.ERROR, lostAccounts, `${lostAccounts} account reports were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`);
+		const unreportedApplications = appCnt - config.reporting.maxApplicationEntries
+		if (unreportedApplications > 0) {
+			logger.log(nowTimestamp(), "report", "unreported usage", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} application usage reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`);
 		}
 
-		const lostIssues = topIssues.length - config.reporting.maxAccountEntries
-		if (lostIssues > 0) {
-			logger.log(nowTimestamp(), "report", "issues lost", undefined, Log.ERROR, lostIssues, `${lostIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} issues`);
+		const unreportedIssues = topIssues.length - config.reporting.maxAccountEntries
+		if (unreportedIssues > 0) {
+			logger.log(nowTimestamp(), "report", "unreported account issues", undefined, Log.ERROR, unreportedIssues, `${unreportedIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`);
 		}
 
 	}
