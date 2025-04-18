@@ -346,6 +346,7 @@ const AUTH_HEADERS = {
 	'x-csrf-Token' : true,
 }
 const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|user(id|name)?|auth(othiri[sz]ation)?)([_.-]|$)/i
+const SESSION_COOKIE_PATTERN = /(session|token|([_.-]|^)[a-z]{0,4}id$)/i
 const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/i
 
 
@@ -696,7 +697,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 	const config = Config.forHostname(domain)
 	if (config.session.maxSessionDays <= 0)
 		return
-	if (config.session.onlyAuthCookies && ( ! cookie.secure || ! cookie.name?.match(AUTH_COOKIE_PATTERN)) )
+	if (config.session.onlyAuthCookies && ( ! cookie.name?.match(AUTH_COOKIE_PATTERN)) && ! cookie.name?.match(SESSION_COOKIE_PATTERN) )
 		return
 
 	const maxSessionExpirationDate = new Date()
