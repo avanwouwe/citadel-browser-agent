@@ -1,4 +1,4 @@
-<div style="display: flex; justify-content: center;">
+<div align="center">
   <img alt="Citadel logo" src="gui/images/logo.png" width="25%">
 </div>
 
