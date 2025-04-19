@@ -304,6 +304,7 @@ function matchDomain(hostname, domainPatterns) {
 }
 
 function isExternalDomain(domain) {
-    return Object.keys(config.company.domains).length > 0 && ! matchDomain(domain, config.company.domains
-        || config.domain.isPublicMail[domain])
+    return domain &&
+        Object.keys(config.company.domains)?.length > 0 &&
+        ! matchDomain(domain, config.company.domains || config.domain.isPublicMail[domain])
 }
