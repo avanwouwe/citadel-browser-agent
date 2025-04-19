@@ -361,15 +361,30 @@ function getAppnameFromHeaders(details, headers) {
 	return getSitename(details.initiator)
 }
 
+function markUsed(appName) {
+	if (!appName) return
+
+	const app = APPSTATS.getOrSet(appName, { })
+	app.lastUsed = nowDatestamp()
+	APPSTATS.isDirty = true
+}
+
+function isAuthenticated(appName) {
+	if (!appName) return
+
+	const app = APPSTATS.getOrSet(appName, { })
+	return app.isAuthenticated
+}
+
+
 function markIsAuthenticated(appName, reason) {
 	if (!appName) return
 
-	const appStats = APPSTATS.getOrSet(appName, { });
-	appStats.lastUsed = nowDatestamp();
+	const app = APPSTATS.getOrSet(appName, { })
 
-	if (! appStats['isAuthenticated']) {
-		appStats['isAuthenticated'] = reason;
-		APPSTATS.isDirty = true;
+	if (!app.isAuthenticated) {
+		app.isAuthenticated = reason
+		APPSTATS.isDirty = true
 	}
 }
 
@@ -378,7 +393,6 @@ chrome.webRequest.onAuthRequired.addListener(
 		setInitiator(details)
 
 		const appName = getAppnameFromHeaders(details, details.responseHeaders);
-
 		markIsAuthenticated(appName, "HTTP auth req")
 	},
 	{ urls: ["<all_urls>"] } , ["responseHeaders"]
@@ -404,6 +418,7 @@ function detectApplication(hook, headers) {
 
 			if (appName) {
 				assignAppToSite(appName, details.initiator)
+				markUsed(appName)
 
 				const urlMatch = details.url.match(AUTH_URL_PATTERN)
 				if (urlMatch) {
@@ -432,6 +447,10 @@ chrome.webRequest.onCompleted.addListener(
 		setInitiator(details)
 		const appName = getAppnameFromHeaders(details, details.responseHeaders)
 		const hostname = getSitename(details.initiator)
+
+		if (isAuthenticated(appName)) {
+			return
+		}
 
 		chrome.cookies.getAll({ url: details.url }, cookies => {
 			for (const cookie of cookies) {
@@ -579,21 +598,21 @@ function reportApplications() {
 
 
 function assignAppToSite(appName, url) {
-	const site = SITESTATS.getOrSet(getSitename(url), { });
-	const prevAppName = site.appName;
-	site.appName = appName;
+	const site = SITESTATS.getOrSet(getSitename(url), { })
+	const prevAppName = site.appName
+	site.appName = appName
 
 	if (appName !== prevAppName) {
 		if (prevAppName) {
-			console.error(`${site} changed from ${prevAppName} to ${appName}`);
+			console.error(`${site} changed from ${prevAppName} to ${appName}`)
 		}
-		SITESTATS.isDirty = true;
+		SITESTATS.isDirty = true
 	}
 
 	if (site.interactions > 0) {
-		incrementInteractionCounter(appName, site.interactions);
-		site.interactions = 0;
-		SITESTATS.isDirty = true;
+		incrementInteractionCounter(appName, site.interactions)
+		site.interactions = 0
+		SITESTATS.isDirty = true
 	}
 }
 
@@ -603,17 +622,17 @@ function registerInteraction(url, context) {
 		context.tabId < 0 ||
 		ignorelist?.find(context.url))
 	{
-		return;
+		return
 	}
 
-	const site = SITESTATS.getOrSet(getSitename(url), { interactions: 0 });
-	const appName = site.appName;
+	const site = SITESTATS.getOrSet(getSitename(url), { interactions: 0 })
+	const appName = site.appName
 
 	if (appName) {
-		incrementInteractionCounter(appName);
+		incrementInteractionCounter(appName)
 	} else {
-		site.interactions++;
-		SITESTATS.isDirty = true;
+		site.interactions++
+		SITESTATS.isDirty = true
 	}
 }
 
