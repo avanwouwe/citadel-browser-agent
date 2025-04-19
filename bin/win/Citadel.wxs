@@ -139,19 +139,19 @@
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Policies\Mozilla\Firefox\Extensions\Install">
-                <RegistryValue Type="string" Name="10" Value="{090510dc-b0ac-44dd-8e44-fee9b778180e}" />
+                <RegistryValue Type="string" Name="10" Value="{090510dc-b0ac-44dd-8e44-fee9b778180d}" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Policies\Mozilla\Firefox\Extensions\Locked">
-                <RegistryValue Type="string" Name="10" Value="{090510dc-b0ac-44dd-8e44-fee9b778180e}" />
+                <RegistryValue Type="string" Name="10" Value="{090510dc-b0ac-44dd-8e44-fee9b778180d}" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Policies\Opera Software\Opera\ExtensionInstallForcelist">
-                <RegistryValue Type="string" Name="10" Value="aebdgcmmffemnbmbadfbmjldfddmhacp;https://addons.opera.com" />
+                <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Policies\Microsoft\Edge\ExtensionInstallForcelist">
-                <RegistryValue Type="string" Name="10" Value="eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx" />
+                <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
             </RegistryKey>
             <RegistryKey Root="HKLM"
                          Key="SOFTWARE\Policies\BraveSoftware\Brave\ExtensionInstallForcelist">
