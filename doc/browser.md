@@ -20,6 +20,9 @@ reg add "HKEY_LOCAL_MACHINE\Software\Policies\BraveSoftware\Brave\ExtensionInsta
 ## macOS
 On macOS the plugin can be force-installed on all endpoints, by configuration profiles using your MDM. This works for Chrome, Firefox, Edge and Brave. Unfortunately Opera does not support automated installation and the plugin has to be manually installed, using the [Opera Addons site](https://addons.opera.com/fr/extensions/details/citadel-browser-agent/).
 
+> [!NOTE]  
+> If you have already force-installed another plugin via the Google Workspace admin, using profiles will override the Workspace list of force-installed extensions. If you add Citadel in using the [Google Workspace admin](https://admin.google.com/ac/chrome/apps/) this has the advantage that you can force the use of the extension in private sessions.
+
 You can use this profile for the following browsers:
 * Chrome : `com.google.Chrome`
 * Edge : `com.microsoft.Edge` 
