@@ -1,10 +1,6 @@
 window.onload = function() {
-    function getUrlParameter(name) {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get(name);
-    }
+    const urlParams = new URLSearchParams(window.location.search)
 
-    // Inject reason and contact into the page
-    document.getElementById('title').textContent = getUrlParameter('title') || '';
-    document.getElementById('message').innerHTML = getUrlParameter('message') || '';
-};
+    document.getElementById('title').textContent = urlParams.get('title') || ''
+    document.getElementById('message').innerHTML = urlParams.get('message') || ''
+}

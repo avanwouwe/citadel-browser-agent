@@ -1,16 +1,13 @@
 window.onload = function() {
-    function getUrlParameter(name) {
-        const urlParams = new URLSearchParams(window.location.search)
-        return urlParams.get(name)
-    }
+    const urlParams = new URLSearchParams(window.location.search)
 
     // Inject reason and contact into the page
-    const blacklistedUrl = getUrlParameter('value')
-    const blacklistReason = getUrlParameter('reason')
-    const allowException = getUrlParameter('e')
+    const blacklistedUrl = urlParams.get('value')
+    const blacklistReason = urlParams.get('reason')
+    const allowException = urlParams.get('e')
     document.getElementById('value').textContent = blacklistedUrl || 'Not specified'
     document.getElementById('reason').textContent = blacklistReason || 'Not specified'
-    document.getElementById('contact').textContent = getUrlParameter('contact') || 'your IT support'
+    document.getElementById('contact').textContent = urlParams.get('contact') || 'your IT support'
 
     const exceptionSectionToggle = document.getElementById('exceptionSectionToggle')
     const exceptionSection = document.getElementById('exceptionSection')
