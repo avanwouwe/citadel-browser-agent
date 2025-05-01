@@ -1,26 +1,18 @@
 class Ignorelist {
 
-    #ignoreList = { }
+    #ignoreList = new URLBlacklist()
 
     constructor() {
         for (const blacklist of [config.blacklist.url, config.blacklist.ip]) {
             for (const blacklistEntry of blacklist) {
-                this.#ignoreList[blacklistEntry.url] = true;
+                this.#ignoreList.add(blacklistEntry.url)
             }
         }
 
-        config.blacklist.ignore.forEach(url => {
-            this.#ignoreList[url] = true;
-        });
+        config.ignorelist.forEach(url => this.#ignoreList.add(url))
     }
 
     find(url) {
-        if (!isString(url)) return null
-
-        if (this.#ignoreList.hasOwnProperty(url)) {
-            return true
-        }
-
-        return null;
+        this.#ignoreList.find(url)
     }
 }
