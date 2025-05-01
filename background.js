@@ -763,7 +763,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 	if (request.type === "allow-blacklist") {
-		allowlist.add(request.url.toURL()?.hostname, config.blacklist.exceptions.duration * ONE_MINUTE)
+		exceptionList.add(request.url.toURL()?.hostname)
 
 		logger.log(nowTimestamp(), "exception", "blacklist exception granted", request.url, Log.ERROR, request.reason, "user requested exception: " + request.description)
 	}

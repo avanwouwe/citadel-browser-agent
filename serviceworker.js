@@ -12,6 +12,6 @@ importScripts('utils/browser.js');
 importScripts('gui/interface.js');
 importScripts('blacklist/blacklist.js');
 importScripts('blacklist/ignorelist.js');
-importScripts('blacklist/allowlist.js');
+importScripts('blacklist/exceptionlist.js');
 importScripts('blacklist/ipv4range.js');
 importScripts('background.js');
