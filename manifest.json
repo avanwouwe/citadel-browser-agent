@@ -17,6 +17,10 @@
   "host_permissions": [
     "<all_urls>"
   ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "web_accessible_resources": [],
   "background": {
     "service_worker": "serviceworker.js",
     "scripts": [
