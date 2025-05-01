@@ -71,8 +71,9 @@ class IPBlacklist {
 		const lines = await getCached(url)
 												.then(res => res.body.pipeThrough(new TextDecoderStream()))
 
-		this.#sortedCidrList = await IPv4Range.parseList(lines)
-										.then(list => list.sort((a, b) => a.start - b.start))
+		this.#sortedCidrList = await IPv4Range.parseStream(lines)
+		this.#sort()
+
 		return this
 	}
 

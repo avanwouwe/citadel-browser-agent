@@ -31,7 +31,7 @@ class IPv4Range {
         return ip && this.#IPV4_LOOPBACK.contains(ip)
     }
 
-    static async parseList(stream) {
+    static async parseStream(stream) {
         const cidrList = [];
 
         const parseLine = (line) => {
