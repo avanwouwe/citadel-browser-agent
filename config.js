@@ -189,12 +189,22 @@ class Config {
                     freq: 60 * 12
                 }
             ],
-            ignore: [
-                'about:blank',
-                'about:srcdoc',
-                'chrome://new-tab-page/'
-            ]
         },
+        whitelist: {
+            ip: [
+                "10.0.0.0/8",
+                "127.0.0.0/8",
+                "169.254.0.0/16",
+                "172.16.0.0/12",
+                "192.168.0.0/16"
+            ],
+            url: [ ],
+        },
+        ignorelist: [
+            'about:blank',
+            'about:srcdoc',
+            'chrome://new-tab-page/'
+        ],
         reporting: {
             maxApplicationEntries: 500,
             maxAccountEntries: 500,

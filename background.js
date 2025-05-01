@@ -9,7 +9,9 @@ if (chrome.identity.getProfileUserInfo) {
 
 let blacklistIP
 let blacklistURL
-let allowlist
+let whitelistIP
+let whitelistURL
+let exceptionList
 let ignorelist
 
 const APPLICATION_STATISTICS_KEY = 'application-statistics'
@@ -24,7 +26,12 @@ Port.onMessage("config",(newConfig) => {
 
 	new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist).then(blacklist => blacklistIP = blacklist)
 	new CombinedBlacklist().load(config.blacklist.url, URLBlacklist).then(blacklist => blacklistURL = blacklist)
-	allowlist = new AllowList().init()
+
+	whitelistIP = new IPBlacklist().init()
+	whitelistURL = new URLBlacklist().init()
+	config.whitelist.ip.forEach(entry => whitelistIP.add(entry))
+	config.whitelist.url.forEach(entry => whitelistURL.add(entry))
+	exceptionList = new ExceptionList()
 	ignorelist = new Ignorelist()
 
 	APPSTATS.isInstalled = true          // Native Messaging was installed, from now on connection errors are reported
@@ -143,17 +150,21 @@ function evaluateRequest(details) {
 
 	const blacklist = blacklistURL?.find(url) ?? blacklistIP?.find(ip)
 	if (blacklist) {
-		result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
-		result.level = Log.ERROR
-		result.value = url.href
-		result.description = `${result.result} because target is on blacklist '${blacklist}'`
+		let whitelist = whitelistURL?.find(url) ?? whitelistIP?.find(ip)
+		if (! whitelist) {
+			result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
+			result.level = Log.ERROR
+			result.value = url.href
+			result.description = `${result.result} because target is on blacklist '${blacklist}'`
+
+			if (exceptionList.find(details.url)) {
+				result.level = Log.downgrade(result.level)
+				result.result = result.result + ' (exception granted)'
+				result.description = result.description + ' (exception granted)'
+			}
+		}
 	}
 
-	if (result.result.endsWith("blacklisted") && allowlist.find(details.url)) {
-		result.level = Log.downgrade(result.level)
-		result.result = result.result + ' (exception granted)'
-		result.description = result.description + ' (exception granted)'
-	}
 
 	return result
 }

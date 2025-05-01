@@ -67,6 +67,32 @@ class IPBlacklist {
 
 	#sortedCidrList = null
 
+	#sort() {
+		this.#sortedCidrList.sort((a,b) => a.start - b.start || a.end - b.end)
+	}
+
+	init() {
+		if (!this.#sortedCidrList) {
+			this.#sortedCidrList = []
+		}
+
+		return this
+	}
+
+	add(cidr) {
+		this.init()
+
+		this.#sortedCidrList.push(new IPv4Range(cidr))
+		this.#sort()
+	}
+
+	remove(cidrStr) {
+		assert(this.#sortedCidrList != null, 'blacklist is not loaded')
+
+		const cidr = new IPv4Range(cidrStr)
+		this.#sortedCidrList = this.#sortedCidrList.filter(entry => entry.start = cidr.start && entry.end === cidr.end)
+	}
+
 	async load(url) {
 		const lines = await getCached(url)
 												.then(res => res.body.pipeThrough(new TextDecoderStream()))
@@ -120,21 +146,26 @@ class URLBlacklist {
 	#urlSet = null
 
 	init() {
-		this.#urlSet = { }
+		if (! this.#urlSet) {
+			this.#urlSet = { }
+		}
+
 		return this
 	}
 
 	add(entry) {
+		this.init()
+
 		this.#urlSet[entry] = true
 	}
 
 	remove(entry) {
+		assert(this.#urlSet != null, 'blacklist is not loaded')
+
 		delete this.#urlSet[entry]
 	}
 
 	async load(url) {
-		this.init()
-
 		const lines = await getCached(url).then(res => res.body.pipeThrough(new TextDecoderStream()))
 
 		await processTextStream(lines,line => {
@@ -156,6 +187,8 @@ class URLBlacklist {
 
 	find(query) {
 		assert(this.#urlSet != null, 'blacklist is not loaded')
+
+		if (query === undefined) return null
 
 		if (query instanceof URL) {
 			query = new URL(query.href.toLowerCase())
