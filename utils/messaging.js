@@ -8,11 +8,13 @@ class Port {
     static #port
     static #messageHandlers = { }
 
+    static #hasReceivedMessage = false      // used to only start counting errors once we have received at least one message
+
     static #retryDelay
     static #lastError
     static #lostEvents = new EventAccumulator(this.#LOST_EVENTS_STATISTICS, Port.#LOST_EVENTS_FREQ, (lostEvents) => {
-        logger.log(nowTimestamp(), "report", "events lost", undefined, Log.ERROR, lostEvents, `${lostEvents} events were lost due to native messaging issue`);
-    });
+        logger.log(nowTimestamp(), "report", "events lost", undefined, Log.ERROR, lostEvents, `${lostEvents} events were lost due to native messaging issue`)
+    })
 
 
     static postMessage(type, message) {
@@ -25,19 +27,21 @@ class Port {
 
             Port.#lostEvents.report()
         } catch (error) {
-            if (config.logging.reportFailure && APPSTATS.isInstalled) {
+            if (config.logging.reportFailure && this.#hasReceivedMessage) {
                 Port.#lostEvents.increment()
             }
         }
     }
 
     static onMessage(type, handler) {
-        Port.#messageHandlers[type] = handler;
+        Port.#messageHandlers[type] = handler
         Port.#port.onMessage.addListener((message) => {
+            this.#hasReceivedMessage = true
+
             if (message.type === type) {
                 handler(message.message)
             }
-        });
+        })
     }
 
     static #connect() {
@@ -52,11 +56,11 @@ class Port {
             }
 
             setTimeout(() => {
-                Port.#connect();
-            }, Port.#retryDelay);
+                Port.#connect()
+            }, Port.#retryDelay)
 
 
-            const error = isString(Port.#lastError) ? ` with the error:\n\n${Port.#lastError.htmlMonospace()}` : "";
+            const error = isString(Port.#lastError) ? ` with the error:\n\n${Port.#lastError.htmlMonospace()}` : ""
             const message = `Unable to connect to native application. Please contact ${config.company.contact.htmlNowrap()}${error}`
 
             rateLimit(Port.#LOST_EVENTS_POPUP, Port.#LOST_EVENTS_FREQ, (mustShowPopup) => {

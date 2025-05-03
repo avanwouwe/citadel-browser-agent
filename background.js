@@ -34,8 +34,6 @@ Port.onMessage("config",(newConfig) => {
 	exceptionList = new ExceptionList()
 	ignorelist = new Ignorelist()
 
-	APPSTATS.isInstalled = true          // Native Messaging was installed, from now on connection errors are reported
-
 	const version = chrome.runtime.getManifest().version
 	const configHash = config?.hashDJB2()
 
