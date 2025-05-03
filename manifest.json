@@ -23,25 +23,7 @@
   "web_accessible_resources": [],
   "background": {
     "service_worker": "serviceworker.js",
-    "scripts": [
-      "config.js",
-      "utils/definitions.js",
-      "utils/utils.js",
-      "utils/passwords.js",
-      "utils/eventaccumulator.js",
-      "utils/alarm.js",
-      "utils/schedule.js",
-      "utils/persistence.js",
-      "utils/messaging.js",
-      "utils/logging.js",
-      "utils/browser.js",
-      "gui/interface.js",
-      "blacklist/blacklist.js",
-      "blacklist/ignorelist.js",
-      "blacklist/exceptionlist.js",
-      "blacklist/ipv4range.js",
-      "background.js"
-    ]
+    "scripts": [ "serviceworker.js" ]
   },
   "content_scripts": [
     {
