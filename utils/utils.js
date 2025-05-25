@@ -310,3 +310,26 @@ function isExternalDomain(domain) {
 
     return matchDomain(domain, config.domain.isPublicMail) === true
 }
+
+function getPath(obj, path) {
+    return path.reduce((acc, key) => acc?.[key], obj)
+}
+
+function setPath(obj, path, value) {
+    let last = path.pop()
+    let target = path.reduce((acc, key) => acc[key], obj)
+    target[last] = value
+}
+
+function applyPath(obj, attributePaths, func) {
+    for (const dotPath of attributePaths) {
+        const path = dotPath.split(".")
+        const currValue = getPath(obj, path)
+
+        if (currValue === undefined) continue
+
+        const newValue = func(currValue)
+        setPath(obj, [...path], newValue)
+    }
+}
+
