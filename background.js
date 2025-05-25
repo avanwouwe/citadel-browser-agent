@@ -706,12 +706,34 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 	if (request.type === "account-usage") {
 		registerAccountUsage(sender.url, request.report)
+
+		const config = Config.forHostname(sender.url)
+
+		if (requiresMFA(sender.url, config)) {
+			const app = AppStats.forUrl(sender.url)
+			const account = AppStats.getAccount(app, request.report.username)
+
+			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
+				const showModal = account.lastMFA === undefined
+				delete account.lastMFA
+				startTimerMFA(sender.url, config.account.mfa.waitMinutes, showModal)
+			}
+		}
 	}
 
-	if (request.type === "allow-blacklist") {
-		exceptionList.add(request.url.toURL()?.hostname)
+	if (request.type === "mfa-received") {
+		cancelTimerMFA(sender.url)
+	}
 
-		logger.log(nowTimestamp(), "exception", "blacklist exception granted", request.url, Log.ERROR, request.reason, "user requested exception: " + request.description)
+	if (request.type === "allow-mfa") {
+		const app = AppStats.forUrl(sender.url)
+		const account = AppStats.getAccount(app, app.lastAccount)
+		account.lastMFA = nowDatestamp()
+		AppStats.markDirty()
+
+		forAllTabs(request.domain, () => location.reload())
+
+		logger.log(nowTimestamp(), "exception", "MFA exception granted", "https://" + request.domain, Log.ERROR, request.reason, `user requested MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 
 	if (request.type === "allow-blacklist") {

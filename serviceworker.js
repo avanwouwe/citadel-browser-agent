@@ -2,6 +2,7 @@ importScripts('config.js');
 importScripts('utils/definitions.js');
 importScripts('utils/utils.js');
 importScripts('utils/passwords.js');
+importScripts('utils/mfa.js');
 importScripts('utils/eventaccumulator.js');
 importScripts('utils/alarm.js');
 importScripts('utils/schedule.js');

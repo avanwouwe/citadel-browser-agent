@@ -151,6 +151,12 @@ class Config {
                 minEntropy: 2.5,
                 minSequence: 4
             },
+            mfa: {
+                maxSessionDays: 15,
+                waitMinutes: 10,
+                required: [],
+                exception: []
+            }
         },
         blacklist: {
             exceptions: {

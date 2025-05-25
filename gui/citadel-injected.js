@@ -1,84 +1,187 @@
+function analyzeForm(formElements) {
+    new SessionState(window.location.origin).load().then(sessionState =>  {
+        console.log("TAUPE analyzing form", sessionState.auth)
+
+        let formUsername, formPassword, formTOTP
+        const formHasPassword = formElements.some(elem => elem.type === 'password')
+
+        for (let elem of formElements) {
+            if (elem.value === "" || elem.value === undefined || elem.isHidden()) continue
+
+            console.log("TAUPE found elem", serializeElement(elem))
+
+            if (elem.type === 'password' || isMFA(elem.name) || isMFA(elem.id) || isMFA(window.location.pathname)) {
+                if (isTOTP(elem.value)) {
+                    console.log("TAUPE found TOTP", elem.value)
+
+                    formTOTP = elem.value
+                    continue
+                }
+            }
+
+            if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
+                if (! isTOTP(elem.value)) {
+                    console.log("TAUPE found password", elem.value)
+
+                    formPassword = elem.value
+                    continue
+                }
+            }
+
+            if (
+                (elem.type === 'text' || elem.type === 'email') && (
+                    formHasPassword &&  formUsername === undefined ||
+                    findAuthPattern(window.location.pathname) &&  (
+                        isUsernameField(elem.name) ||
+                        isUsernameField(elem.id) ||
+                        isEmailFormat(elem.value)
+                    )
+                )
+            ) {
+                console.log("TAUPE found username", elem.value)
+                formUsername = elem.value
+            }
+        }
+
+        console.log("TAUPE username var is ", formUsername)
+        console.log("TAUPE password var is ", formPassword)
+        console.log("TAUPE TOTP var is ", formTOTP)
+
+        if (formUsername === undefined && formPassword === undefined && formTOTP === undefined) return
+
+        if (formUsername !== undefined) {
+            sessionState.setUsername(formUsername)
+        }
+
+        if (formPassword !== undefined) {
+            if (sessionState.auth.username === undefined) {
+                sessionState.init()
+                return
+            } else {
+                sessionState.setPassword(formPassword)
+            }
+        }
+
+        if (formTOTP !== undefined) {
+            if (sessionState.auth.password === undefined) {
+                sessionState.init()
+            } else {
+                sessionState.setTOTP()
+            }
+        }
+
+        if (sessionState.auth.username !== undefined && sessionState.auth.password !== undefined) {
+            if (sessionState.auth.totp) {
+                chrome.runtime.sendMessage({ type: 'mfa-received' })
+                sessionState.init()
+            } else {
+                const report = {
+                    username: sessionState.auth.username,
+                    password: sessionState.auth.password
+                }
+                chrome.runtime.sendMessage({type: 'account-usage', report})
+            }
+        }
+
+        sessionState.save()
+    })
+
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     function shallowClone(obj) {
-        const clone = {};
+        const clone = {}
 
         for (const key in obj) {
             const value = obj[key]
             if (typeof value !== 'function') {
-                clone[key] = value;
+                clone[key] = value
             }
         }
 
-        return clone;
+        return clone
     }
-
-    document.addEventListener('click', function(event) {
-        chrome.runtime.sendMessage({type: "user-interaction"});
-    }, true);
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
-            chrome.runtime.sendMessage({type: "user-interaction"});
+            chrome.runtime.sendMessage({type: "user-interaction"})
         }
-    }, true);
+    }, true)
 
     window.addEventListener('beforeprint', function() {
         chrome.runtime.sendMessage({type: 'print-dialog'});
-    }, true);
+    }, true)
 
     document.addEventListener('change', function(event) {
         if (event.target?.type === 'file') {
             for (const file of event.target.files) {
                 chrome.runtime.sendMessage({ type: 'file-select', subtype : 'picked file', file: shallowClone(file)
-             });
+             })
             }
         }
-    }, true);
+    }, true)
 
     document.addEventListener('drop', function(event) {
         Array.from(event.dataTransfer.files).forEach(file => {
-            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) });
+            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) })
         })
 
         Array.from(event.dataTransfer.items).forEach(item => {
             if (item.kind === 'file') {
                 const file = item.getAsFile();
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) });
+                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) })
             }
-        });
+        })
 
-    }, true);
+    }, true)
 
-    document.querySelectorAll('form').forEach((form) => {
-        form.addEventListener('submit', function(event) {
-            if (event.target.tagName === 'FORM') {
-                const formElements = event.target.elements;
-                let username = null
-                let password = null
-                let domain = null
+    const originalSubmit = HTMLFormElement.prototype.submit
+    HTMLFormElement.prototype.submit = function() {
+        try {
+            analyzeForm(this.elements)
+        } catch (error) {
+            console.error("error while analyzing password", error)
+        }
 
-                for (let elem of formElements) {
-                    if (elem.type === 'password') {
-                        password = elem.value
-                    }
+        originalSubmit.apply(this, arguments)
+    }
 
-                    if (domain == null && (elem.type === 'text' || elem.type === 'email')) {
-                        domain = getDomainFromUsername(elem.value)
+    document.addEventListener("click", function(event) {
+        chrome.runtime.sendMessage({type: "user-interaction"})
 
-                        // Assume the first text field is the username, unless you find an email address somewhere else
-                        if (username == null || domain != null) {
-                            username = elem.value
-                        }
-                    }
-                }
+        let fields = []
 
-                const report = {
-                    username,
-                    domain,
-                    password: analyzePassword(password)
-                }
-                chrome.runtime.sendMessage({ type: 'account-usage', report })
+        const button = event.target.closest('button, input[type="button"], input[type="submit"]')
+        if (
+            !button ||
+            button.disabled ||
+            button.offsetParent === null ||
+            button.isHidden()
+        ) {
+            return
+        }
+
+        if (button.form) {
+            fields = Array.from(button.form.elements)
+        } else {
+            // Use the nearest ancestor that contains at least 1 relevant field (but not just the button itself)
+            let container = button.parentElement
+            while (container && container !== document.body) {
+                fields = Array.from(container.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]'))
+                if (fields.length > 0 && !fields.includes(button)) break
+                container = container.parentElement
             }
-        }, true)
-    })
+        }
+
+        analyzeForm(fields)
+
+    }, true)
 })
+
+function serializeElement(elem) {
+    const result = {}
+    for (const attr of elem.attributes) {
+        result[attr.name] = attr.value
+    }
+    return result
+}

@@ -12,7 +12,9 @@
     "nativeMessaging",
     "identity",
     "identity.email",
-    "cookies"
+    "cookies",
+    "scripting",
+    "tabs"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -20,7 +22,12 @@
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self'"
   },
-  "web_accessible_resources": [],
+  "web_accessible_resources": [
+    {
+      "resources": ["/gui/images/*"],
+      "matches": ["*://*/*"]
+    }
+  ],
   "background": {
     "service_worker": "serviceworker.js",
     "scripts": [ "serviceworker.js" ]
