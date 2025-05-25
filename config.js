@@ -1,9 +1,9 @@
 class Config {
     static config = {
         company: {
-            contact: 'Your IT support',         // replace with your support e-mail
             name: 'Company',
-            domains: { }
+            contact: 'Your IT support',         // replace with your support e-mail
+            logo: "",                           // replace with the URL of your logo
             domains: [ ],
         },
         warningProtocols: ['http:', 'ftp:', 'ws:'],
