@@ -356,7 +356,6 @@ const AUTH_HEADERS = {
 }
 const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|user(id|name)?|auth(othiri[sz]ation)?)([_.-]|$)/i
 const SESSION_COOKIE_PATTERN = /(session|token|([_.-]|^)[a-z]{0,4}id$)/i
-const AUTH_URL_PATTERN = /\/(login|signin|auth|saml|oauth|sso)/i
 
 
 function getAppnameFromHeaders(details, headers) {

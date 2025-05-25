@@ -37,7 +37,7 @@ function analyzeSequence(password, reference) {
 
 function getDomainFromUsername(username) {
     const matches = username?.match(/@([a-zA-Z0-9.-]+)$/);
-    return matches ? matches[1] : null;
+    return matches ? matches[1] : null
 }
 
 const keyboards = {
@@ -140,8 +140,8 @@ function shannonEntropy(str) {
         freqMap[char] = (freqMap[char] || 0) + 1
     }
 
-    const totalLength = str.length;
-    let entropy = 0;
+    const totalLength = str.length
+    let entropy = 0
 
     // Calculate entropy
     for (const freq of Object.values(freqMap)) {
@@ -149,12 +149,12 @@ function shannonEntropy(str) {
         entropy -= probability * Math.log2(probability)
     }
 
-    return entropy
+    return Math.round(entropy * 1000) / 1000
 }
 
 function analyzePassword(password) {
     const passwordAnalysis = {
-        length: password.length,
+        length: password !== undefined ? password.length : 0,
         numberOfDigits: 0,
         numberOfLetters: 0,
         numberOfUpperCase: 0,
@@ -165,22 +165,24 @@ function analyzePassword(password) {
             analyzeSequence(password, getKeyboardSequence(navigator.language)),
             analyzeSequence(password, sequences['alphabet']
             )),
-    };
+    }
 
     for (const char of password) {
-        if (/[0-9]/.test(char)) {
-            passwordAnalysis.numberOfDigits += 1;
-        } else if (/[a-zA-Z]/.test(char)) {
-            passwordAnalysis.numberOfLetters += 1;
-            if (/[A-Z]/.test(char)) {
-                passwordAnalysis.numberOfUpperCase += 1;
-            } else if (/[a-z]/.test(char)) {
-                passwordAnalysis.numberOfLowerCase += 1;
+        if (/\p{N}/u.test(char)) {
+            passwordAnalysis.numberOfDigits += 1
+        } else if (/\p{L}/u.test(char)) {
+            passwordAnalysis.numberOfLetters += 1
+            if (/\p{Lu}/u.test(char)) {
+                passwordAnalysis.numberOfUpperCase += 1
+            } else if (/\p{Ll}/u.test(char)) {
+                passwordAnalysis.numberOfLowerCase += 1
             }
         } else {
-            passwordAnalysis.numberOfSymbols += 1;
+            passwordAnalysis.numberOfSymbols += 1
         }
     }
 
-    return passwordAnalysis;
+    return passwordAnalysis
 }
+const AUTH_URL_REGEX = /(^|[/_.-])(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)|(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)([/_.-]|$)/i
+const findAuthPattern = (str) => str.match(AUTH_URL_REGEX)
