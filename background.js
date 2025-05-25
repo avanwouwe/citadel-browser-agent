@@ -71,10 +71,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			}
 		}
 
-		// reset daily counters interactions with sites not (yet) allocated to applications
-		for (const stats of Object.values(SITESTATS)) {
-			stats.interactions = 0
-		}
+		SessionState.purge()
 
 		AppStats.resetSitestats()
 
@@ -88,7 +85,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name === Alarm.MONTHLY) {
 		AppStats.purgeSitestats()
 	}
-});
+})
 
 
 function evaluateRequest(details) {
@@ -600,8 +597,9 @@ function registerInteraction(url, context) {
 
 function registerAccountUsage(url, report) {
 	const config = Config.forURL(url)
+	const domain = getDomainFromUsername(report.username)
 
-	if (! config.account.checkExternal && isExternalDomain(report.domain)) {
+	if (! config.account.checkExternal && isExternalDomain(domain)) {
 		return
 	}
 
@@ -708,6 +706,12 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 	if (request.type === "account-usage") {
 		registerAccountUsage(sender.url, request.report)
+	}
+
+	if (request.type === "allow-blacklist") {
+		exceptionList.add(request.url.toURL()?.hostname)
+
+		logger.log(nowTimestamp(), "exception", "blacklist exception granted", request.url, Log.ERROR, request.reason, "user requested exception: " + request.description)
 	}
 
 	if (request.type === "allow-blacklist") {

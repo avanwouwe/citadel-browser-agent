@@ -31,11 +31,11 @@
       "js": [
         "gui/citadel-injected.js",
         "utils/passwords.js"
+        "utils/session-state.js",
       ],
       "run_at": "document_start"
     }
   ],
-
   "action": {
     "default_icon": {
       "16": "gui/images/icon16.png",
