@@ -331,7 +331,7 @@ const AUTH_HEADERS = {
 	'x-oauth-scopes' : true,
 	'x-csrf-Token' : true,
 }
-const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|user(id|name)?|auth(othiri[sz]ation)?)([_.-]|$)/i
+const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|acct|user(id|name)?|auth(ori[sz]ation)?)([_.-]|$)/i
 const SESSION_COOKIE_PATTERN = /(session|token|([_.-]|^)[a-z]{0,4}id$)/i
 
 

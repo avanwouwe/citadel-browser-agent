@@ -29,9 +29,10 @@
     {
       "matches": ["<all_urls>"],
       "js": [
-        "gui/citadel-injected.js",
-        "utils/passwords.js"
+        "utils/injected-utils.js",
+        "utils/passwords.js",
         "utils/session-state.js",
+        "gui/citadel-injected.js"
       ],
       "run_at": "document_start"
     }
