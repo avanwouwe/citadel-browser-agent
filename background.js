@@ -14,12 +14,6 @@ let whitelistURL
 let exceptionList
 let ignorelist
 
-const APPLICATION_STATISTICS_KEY = 'application-statistics'
-const SITE_STATISTICS_KEY = 'site-statistics'
-
-const SITESTATS = new PersistentObject(SITE_STATISTICS_KEY).value();
-const APPSTATS = new PersistentObject(APPLICATION_STATISTICS_KEY).value();
-
 
 Port.onMessage("config",(newConfig) => {
 	Config.load(newConfig)
@@ -45,13 +39,8 @@ chrome.runtime.onUpdateAvailable.addListener(() => {
 
 	Alarm.clear()
 
-	// clear all storage except for application statistics
-	const appStats = new PersistentObject(APPLICATION_STATISTICS_KEY)
-	chrome.storage.local.clear()
-	appStats.markDirty()
-
-	chrome.runtime.reload();
-});
+	AppStats.clear()
+})
 
 chrome.runtime.onInstalled.addListener((details) => {
 	Alarm.start()
@@ -65,20 +54,19 @@ chrome.runtime.onInstalled.addListener((details) => {
 chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name === Alarm.DAILY) {
 		// daily cleaning up of application statistics to prevent infinite build-up of irrelevant data
-		for (const [appName, app] of Object.entries(APPSTATS)) {
+		for (const [appName, app] of AppStats.allApps()) {
 			const config = Config.forHostname(appName)
 
 			// purge applications if they haven't been used for a while
 			if (isDate(app.lastUsed) && daysSince(app.lastUsed) > config.application.retentionDays) {
-				delete APPSTATS[appName]
+				AppStats.deleteApp(appName)
 				continue
 			}
 
 			// purge accounts if they haven't been used for a while
-			const accounts = app.getOrSet("accounts", {})
-			for (const [username, issues] of Object.entries(accounts)) {
-				if (isDate(issues.lastConnected) && daysSince(issues.lastConnected) > config.account.retentionDays) {
-					delete accounts[username]
+			for (const [username, details] of AppStats.allAccounts(app)) {
+				if (isDate(details.lastConnected) && daysSince(details.lastConnected) > config.account.retentionDays) {
+					AppStats.deleteAccount(app, username)
 				}
 			}
 		}
@@ -88,7 +76,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			stats.interactions = 0
 		}
 
-		SITESTATS.isDirty = true
+		AppStats.resetSitestats()
 
 		reportInteractions()
 	}
@@ -98,11 +86,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {
-		// purge site statistics to prevent build-up of data and reset classifications
-		const siteStats = new PersistentObject(SITE_STATISTICS_KEY)
-		siteStats.clear()
-
-		chrome.runtime.reload();
+		AppStats.purgeSitestats()
 	}
 });
 
@@ -127,15 +111,11 @@ function evaluateRequest(details) {
 		! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
 		Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
 	) {
-		const siteName = details.initiator
-		const appName = SITESTATS[siteName]?.appName
-		const app = APPSTATS[appName]
-
-		if (app?.isAuthenticated) {
+		if (details.initiator && AppStats.forUrl(details.initiator)?.isAuthenticated) {
 			result.result = "protocol warning"
 			result.level = Log.WARN
 			result.value = url.protocol
-			result.description = `use of protocol type '${url.protocol}' by '${appName}'`
+			result.description = `use of protocol type '${url.protocol}' by '${getSitename(details.initiator)}'`
 		}
 	}
 
@@ -362,7 +342,7 @@ function getAppnameFromHeaders(details, headers) {
 	for (header of headers) {
 		const headerName = header.name.toLowerCase()
 		if (['origin', 'access-control-allow-origin'].includes(headerName)) {
-			return header.value.startsWith("http") ? getSitename(header.value) : null;
+			return header.value.startsWith("http") ? getSitename(header.value) : null
 		}
 	}
 
@@ -372,15 +352,16 @@ function getAppnameFromHeaders(details, headers) {
 function markUsed(appName) {
 	if (!appName) return
 
-	const app = APPSTATS.getOrSet(appName, { })
+	const app = AppStats.forAppName(appName)
 	app.lastUsed = nowDatestamp()
-	APPSTATS.isDirty = true
+
+	AppStats.markDirty()
 }
 
 function isAuthenticated(appName) {
 	if (!appName) return
 
-	const app = APPSTATS.getOrSet(appName, { })
+	const app = AppStats.forAppName(appName)
 	return app.isAuthenticated
 }
 
@@ -388,11 +369,11 @@ function isAuthenticated(appName) {
 function markIsAuthenticated(appName, reason) {
 	if (!appName) return
 
-	const app = APPSTATS.getOrSet(appName, { })
+	const app = AppStats.forAppName(appName)
 
 	if (!app.isAuthenticated) {
 		app.isAuthenticated = reason
-		APPSTATS.isDirty = true
+		AppStats.markDirty()
 	}
 }
 
@@ -425,10 +406,11 @@ function detectApplication(hook, headers) {
 			const appName = getAppnameFromHeaders(details, details[headers])
 
 			if (appName) {
-				assignAppToSite(appName, details.initiator)
+				AppStats.assignAppToSite(appName, details.initiator)
+
 				markUsed(appName)
 
-				const urlMatch = details.url.match(AUTH_URL_PATTERN)
+				const urlMatch = findAuthPattern(details.url.toURL()?.pathname)
 				if (urlMatch) {
 					return markIsAuthenticated(appName, 'url:' + urlMatch[0])
 				}
@@ -483,22 +465,22 @@ function reportInteractions() {
 		const today = nowDatestamp();
 
 		// aggregate interactions per date (only dates in the past)
-		for (const [appName, appStats] of Object.entries(APPSTATS)) {
-			if ((appStats.isAuthenticated === undefined) !== !isAuthenticated) { continue; }
+		for (const [appName, app] of AppStats.allApps()) {
+			if ((app.isAuthenticated === undefined) !== !isAuthenticated) { continue; }
 
-			const dailyUsage = appStats.usage ?? {};
+			const dailyUsage = app.usage ?? {}
 
 			for (const [date, interactions] of Object.entries(dailyUsage)) {
 				if (isDate(date) && date < today) {
 					usagePerDayPerApp.getOrSet(date, {})[appName] = interactions
-					delete dailyUsage[date];
-					APPSTATS.isDirty = true;
+					delete dailyUsage[date]
+					AppStats.markDirty()
 				}
 			}
 		}
 
-		for (const [date, appStats] of Object.entries(usagePerDayPerApp)) {
-			Object.entries(appStats)
+		for (const [date, app] of Object.entries(usagePerDayPerApp)) {
+			Object.entries(app)
 				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
 				.slice(0, config.reporting.maxApplicationEntries)
@@ -539,7 +521,7 @@ function reportApplications() {
 		let appCnt = 0
 		const topIssues = []
 
-		for (const [appName, app] of Object.entries(APPSTATS)) {
+		for (const [appName, app] of AppStats.allApps()) {
 			if ((app.isAuthenticated === undefined) !== !isAuthenticated) { continue }
 
 			if (appCnt++ < config.reporting.maxApplicationEntries) {
@@ -555,13 +537,12 @@ function reportApplications() {
 				)
 			}
 
-			const accounts = app.getOrSet("accounts", {})
 			const checkExternal = Config.forHostname(appName).account.checkExternal
 
-			for (const [username, issues] of Object.entries(accounts)) {
+			for (const [username, details] of AppStats.allAccounts(app)) {
 				const domain = getDomainFromUsername(username)
-				if (issues && (checkExternal || ! isExternalDomain(domain) )) {
-					topIssues.push(mergeDeep(issues,{
+				if (details?.issues && (checkExternal || ! isExternalDomain(domain) )) {
+					topIssues.push(mergeDeep(details.issues, {
 						username,
 						appName,
 					}))
@@ -605,26 +586,6 @@ function reportApplications() {
 }
 
 
-function assignAppToSite(appName, url) {
-	const site = SITESTATS.getOrSet(getSitename(url), { })
-	const prevAppName = site.appName
-	site.appName = appName
-
-	if (appName !== prevAppName) {
-		if (prevAppName) {
-			console.error(`${site} changed from ${prevAppName} to ${appName}`)
-		}
-		SITESTATS.isDirty = true
-	}
-
-	if (site.interactions > 0) {
-		incrementInteractionCounter(appName, site.interactions)
-		site.interactions = 0
-		SITESTATS.isDirty = true
-	}
-}
-
-
 function registerInteraction(url, context) {
 	if (context.documentLifecycle && context.documentLifecycle !== 'active' ||
 		context.tabId < 0 ||
@@ -633,28 +594,9 @@ function registerInteraction(url, context) {
 		return
 	}
 
-	const site = SITESTATS.getOrSet(getSitename(url), { interactions: 0 })
-	const appName = site.appName
-
-	if (appName) {
-		incrementInteractionCounter(appName)
-	} else {
-		site.interactions++
-		SITESTATS.isDirty = true
-	}
+	AppStats.incrementInteraction(url)
 }
 
-function incrementInteractionCounter(appName, increment = 1) {
-	const today = nowDatestamp();
-	const appStats = APPSTATS.getOrSet(appName, { });
-	const dates = appStats.getOrSet('usage', { });
-	const currInteractionCount = dates.getOrSet(today, 0);
-	appStats.lastUsed = today
-	dates[today] = currInteractionCount + increment;
-	APPSTATS.isDirty = true;
-
-	console.log(`incremented ${appName} with ${increment} interactions`);
-}
 
 function registerAccountUsage(url, report) {
 	const config = Config.forURL(url)
@@ -663,13 +605,14 @@ function registerAccountUsage(url, report) {
 		return
 	}
 
-	const siteName = getSitename(url)
-	const appName = SITESTATS[siteName]?.appName
-	const appStats = APPSTATS.getOrSet(appName, {})
-	appStats.lastUsed = nowDatestamp()
-	appStats.lastConnected = nowDatestamp()
-	appStats.lastAccount = report.username
-	appStats.isAuthenticated = appStats.isAuthenticated ?? "auth form submit"
+	const app = AppStats.forUrl(url)
+	app.lastUsed = nowDatestamp()
+	app.lastConnected = nowDatestamp()
+	app.lastAccount = report.username
+	app.isAuthenticated = app.isAuthenticated ?? "auth form submit"
+
+	const account = AppStats.getAccount(app, report.username)
+	account.lastConnected = nowDatestamp()
 
 	const issues = {
 		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
@@ -688,12 +631,9 @@ function registerAccountUsage(url, report) {
 	})
 
 	issues.count = Object.values(issues).length
-	issues.domain = report.domain
-	issues.lastConnected = nowDatestamp()
+	account.issues = issues.count > 0 ? issues : null
 
-	const accounts = appStats.getOrSet('accounts', {})
-	accounts[report.username] = issues.count > 0 ? issues : null
-	APPSTATS.isDirty = true
+	AppStats.markDirty()
 }
 
 chrome.webNavigation.onCommitted.addListener((details) => {
@@ -704,7 +644,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 		details?.transitionQualifiers === 'client_redirect' ||
 		details.tabId < 0
 	) {
-		return;
+		return
 	}
 
 	setInitiator(details)
