@@ -99,8 +99,9 @@ class Log {
 
         if (Log.#levelValue[level] < config.logging.maskUrlLevel) {
             if (isString(url)) {
-                url = url.toURL()
-                assert(url != null, "invalid URL", url)
+                const urlObj = url.toURL()
+                if (! urlObj) { return url }
+                url = urlObj
             }
 
             url.username ? url.username = url.username.hashDJB2() : undefined
