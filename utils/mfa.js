@@ -67,7 +67,7 @@ function cancelTimerMFA(url) {
 
     const elapsedTime = (Date.now() - waitingSince) / 1000
 
-    console.log(`MFA timer for ${domain} cancelled ${elapsedTime.toFixed(1)} seconds`)
+    debug(`MFA timer for ${domain} cancelled ${elapsedTime.toFixed(1)} seconds`)
 
     clearTimeout(mfaTimers[domain].timerId)
     delete mfaTimers[domain]

@@ -20,3 +20,7 @@ Element.prototype.isHidden = function() {
 
     return false
 }
+
+function debug(message, ...params) {
+    console.log("CITADEL : " + message, ...params)
+}

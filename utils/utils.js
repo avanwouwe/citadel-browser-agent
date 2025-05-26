@@ -333,3 +333,6 @@ function applyPath(obj, attributePaths, func) {
     }
 }
 
+function debug(...params) {
+    console.log(...params)
+}

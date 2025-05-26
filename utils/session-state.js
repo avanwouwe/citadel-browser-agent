@@ -24,7 +24,7 @@ class SessionState {
             totp: false,
         }
 
-        console.log("TAUPE init auth", this.auth)
+        debug("init auth", this.auth)
 
         return this
     }
@@ -43,12 +43,12 @@ class SessionState {
             console.error("cannot get session state", e)
         }
 
-        console.log("TAUPE loaded", this.auth)
+        debug("session state loaded", this.auth)
         return this
     }
 
     async save() {
-        console.log("TAUPE saving", this.auth)
+        debug("session state saving", this.auth)
 
         this.#lastSaved = Date.now()
 
@@ -67,20 +67,20 @@ class SessionState {
         this.auth.username = username
         this.auth.domain = getDomainFromUsername(username)
 
-        console.log("TAUPE setting username", username, this.auth)
+        debug("session state setting username", username, this.auth)
     }
 
     setPassword(password) {
         this.auth.password = analyzePassword(password)
         this.auth.totp = false
 
-        console.log("TAUPE setting password", password, this.auth)
+        debug("session state setting password", password, this.auth)
     }
 
     setTOTP(isTrue = true) {
         this.auth.totp = isTrue
 
-        console.log("TAUPE setting totp", isTrue, this.auth)
+        debug("session state setting TOTP", isTrue, this.auth)
     }
 
     static async purge() {

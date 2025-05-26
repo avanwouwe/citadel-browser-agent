@@ -1,6 +1,6 @@
 function analyzeForm(formElements) {
     new SessionState(window.location.origin).load().then(sessionState =>  {
-        console.log("TAUPE analyzing form", sessionState.auth)
+        debug("analyzing form")
 
         let formUsername, formPassword, formTOTP
         const formHasPassword = formElements.some(elem => elem.type === 'password')
@@ -8,11 +8,11 @@ function analyzeForm(formElements) {
         for (let elem of formElements) {
             if (elem.value === "" || elem.value === undefined || elem.isHidden()) continue
 
-            console.log("TAUPE found elem", serializeElement(elem))
+            debug("found element", serializeElement(elem))
 
             if (elem.type === 'password' || isMFA(elem.name) || isMFA(elem.id) || isMFA(window.location.pathname)) {
                 if (isTOTP(elem.value)) {
-                    console.log("TAUPE found TOTP", elem.value)
+                    debug("found TOTP", elem.value)
 
                     formTOTP = elem.value
                     continue
@@ -21,7 +21,7 @@ function analyzeForm(formElements) {
 
             if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
                 if (! isTOTP(elem.value)) {
-                    console.log("TAUPE found password", elem.value)
+                    debug("found password", elem.value)
 
                     formPassword = elem.value
                     continue
@@ -38,7 +38,7 @@ function analyzeForm(formElements) {
                     )
                 )
             ) {
-                console.log("TAUPE found username", elem.value)
+                debug("found username (in form)", elem.value)
                 formUsername = elem.value
             }
         }
@@ -46,6 +46,9 @@ function analyzeForm(formElements) {
         console.log("TAUPE username var is ", formUsername)
         console.log("TAUPE password var is ", formPassword)
         console.log("TAUPE TOTP var is ", formTOTP)
+        debug("formUsername is ", formUsername)
+        debug("formPassword is ", formPassword)
+        debug("formTOTP is ", formTOTP)
 
         if (formUsername === undefined && formPassword === undefined && formTOTP === undefined) return
 
