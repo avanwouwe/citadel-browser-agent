@@ -84,7 +84,7 @@ class SessionState {
     }
 
     static async purge() {
-        const cutoff = Date.now() - ONE_DAY
+        const cutoff = Date.now() - 4 * ONE_HOUR
 
         try {
             const allItems = await chrome.storage.local.get(null)
