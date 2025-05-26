@@ -4,8 +4,8 @@ const isUsernameField = (str) => USERNAME_NAME_REGEX.test(str)
 const PASSWORD_NAME_REGEX = /(^|[/_.-])password([/_.-]|$)/i
 const isPasswordField = (str) => PASSWORD_NAME_REGEX.test(str)
 
-const EMAIL_ADDRESS_FORMAT_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/u
-const isEmailFormat = (str) => EMAIL_ADDRESS_FORMAT_REGEX.test(str)
+const EMAIL_ADDRESS_FORMAT_REGEX = /[^\s@]+@[^\s@]+\.[^\s@]+/u
+const findEmailPattern = (str) => str.match(EMAIL_ADDRESS_FORMAT_REGEX)?.[0]
 
 Element.prototype.isHidden = function() {
     // Check if the element or any parent is hidden

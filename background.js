@@ -409,7 +409,7 @@ function detectApplication(hook, headers) {
 
 				const urlMatch = findAuthPattern(details.url.toURL()?.pathname)
 				if (urlMatch) {
-					return markIsAuthenticated(appName, 'url:' + urlMatch[0])
+					return markIsAuthenticated(appName, 'url:' + urlMatch)
 				}
 
 				for (let header of details[headers]) {

@@ -34,7 +34,7 @@ function analyzeForm(formElements) {
                     findAuthPattern(window.location.pathname) &&  (
                         isUsernameField(elem.name) ||
                         isUsernameField(elem.id) ||
-                        isEmailFormat(elem.value)
+                        findEmailPattern(elem.value)
                     )
                 )
             ) {
