@@ -3,6 +3,33 @@ s.src = chrome.runtime.getURL('/utils/credentials-interceptor.js');
 (document.head || document.documentElement).appendChild(s)
 s.remove()
 
+function findUsernameInAncestors(startNode) {
+    let node = startNode.parentElement
+
+    while (node && node !== document.body) {
+        const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null)
+        let el = walker.currentNode
+
+        while (el) {
+            if (el.offsetParent === null) { // skip hidden elements
+                el = walker.nextNode()
+                continue
+            }
+            if (el.children.length === 0) { // only leaf nodes
+                let text = el.textContent.trim()
+                if (text && text.length <= 100) {
+                    const email = findEmailPattern(text)
+                    if (email) return email
+                }
+            }
+            el = walker.nextNode()
+        }
+        node = node.parentElement
+    }
+
+    return null
+}
+
 function analyzeForm(formElements, submitButton) {
     new SessionState(window.location.origin).load().then(sessionState =>  {
         debug("analyzing form")
@@ -48,9 +75,12 @@ function analyzeForm(formElements, submitButton) {
             }
         }
 
-        console.log("TAUPE username var is ", formUsername)
-        console.log("TAUPE password var is ", formPassword)
-        console.log("TAUPE TOTP var is ", formTOTP)
+        if (formUsername === undefined && formHasPassword) {
+            formUsername = findUsernameInAncestors(submitButton)
+
+            if (formUsername) debug("found username (in page)", formUsername)
+        }
+
         debug("formUsername is ", formUsername)
         debug("formPassword is ", formPassword)
         debug("formTOTP is ", formTOTP)

@@ -711,7 +711,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 		if (requiresMFA(sender.url, config)) {
 			if (request.report.mfa) {
-				cancelTimerMFA(sender.url)
+				cancelTimerMFA(sender.url, 'TOTP in form')
 				return
 			}
 
