@@ -1,4 +1,9 @@
-function analyzeForm(formElements) {
+const s = document.createElement('script')
+s.src = chrome.runtime.getURL('/utils/credentials-interceptor.js');
+(document.head || document.documentElement).appendChild(s)
+s.remove()
+
+function analyzeForm(formElements, submitButton) {
     new SessionState(window.location.origin).load().then(sessionState =>  {
         debug("analyzing form")
 
@@ -138,6 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     }, true)
 
+    window.addEventListener("message", function(event) {
+        if (event.source !== window) return
+        if (event.data.type === "request-credential" && event.data.subtype === "public-key") {
+            debug("detected use of navigator.credentials API to get public key")
+            chrome.runtime.sendMessage({ type: event.data.type, subtype: event.data.subtype })
+        }
+    })
+
     const originalSubmit = HTMLFormElement.prototype.submit
     HTMLFormElement.prototype.submit = function() {
         try {
@@ -176,7 +189,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        analyzeForm(fields)
+        analyzeForm(fields, button)
 
     }, true)
 })

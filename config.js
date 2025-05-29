@@ -152,8 +152,8 @@ class Config {
                 minSequence: 4
             },
             mfa: {
-                maxSessionDays: 15,
                 waitMinutes: 10,
+                maxSessionDays: 14,
                 required: [],
                 exception: []
             }

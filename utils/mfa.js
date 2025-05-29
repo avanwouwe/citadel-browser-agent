@@ -50,8 +50,9 @@ Contact ${config.company.contact} if you need help.`
 /**
  * Called when MFA timer is cancelled (MFA received or password failed)
  * @param {string} url - The URL of the MFA timer
+ * @param {string} reason - The reason the timer was interrupted (TOTP, WebAuth, etc)
  */
-function cancelTimerMFA(url) {
+function cancelTimerMFA(url, reason) {
     const hostname = getSitename(url)
     const domain = getDomain(hostname)
     const waitingSince = mfaTimers[domain]?.timestamp
@@ -67,7 +68,7 @@ function cancelTimerMFA(url) {
 
     const elapsedTime = (Date.now() - waitingSince) / 1000
 
-    debug(`MFA timer for ${domain} cancelled ${elapsedTime.toFixed(1)} seconds`)
+    debug(`MFA timer for ${domain} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason}`)
 
     clearTimeout(mfaTimers[domain].timerId)
     delete mfaTimers[domain]
@@ -141,7 +142,7 @@ chrome.webRequest.onCompleted.addListener(
             (isMFA(url?.pathname) && details.statusCode >= 200 && details.statusCode < 300) ||
             (findAuthPattern(url?.pathname) && details.statusCode >= 400)
         ) {
-            cancelTimerMFA(details.initiator)
+            cancelTimerMFA(details.initiator, "POST to MFA-esque URL")
         }
     }, { urls: ["<all_urls>"] }
 )

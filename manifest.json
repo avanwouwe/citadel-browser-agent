@@ -24,7 +24,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["/gui/images/*"],
+      "resources": ["/gui/images/*", "/utils/credentials-interceptor.js"],
       "matches": ["*://*/*"]
     }
   ],

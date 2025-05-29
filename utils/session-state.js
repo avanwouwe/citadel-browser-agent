@@ -24,8 +24,6 @@ class SessionState {
             totp: false,
         }
 
-        debug("init auth", this.auth)
-
         return this
     }
 
@@ -84,6 +82,8 @@ class SessionState {
     }
 
     static async purge() {
+        debug("purging session state")
+
         const cutoff = Date.now() - 4 * ONE_HOUR
 
         try {

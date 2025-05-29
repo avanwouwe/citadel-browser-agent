@@ -726,6 +726,11 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		}
 	}
 
+	if (request.type === "request-credential" && request.subtype === "public-key") {
+		cancelTimerMFA(sender.url, "public key auth")
+	}
+
+
 	if (request.type === "allow-mfa") {
 		const app = AppStats.forUrl(sender.url)
 		const account = AppStats.getAccount(app, app.lastAccount)
