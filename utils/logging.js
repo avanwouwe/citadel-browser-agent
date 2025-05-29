@@ -58,6 +58,12 @@ class Log {
         if (result) logEntry.browseragent.result = result
         if (PROFILE_ADDRESS) logEntry.browseragent.profile = PROFILE_ADDRESS
 
+        // add a specific 'numvalue' if the value is numeric
+        const numvalue = Number(value ?? "null")
+        if (typeof numvalue === 'number' && !isNaN(numvalue) && isFinite(numvalue)) {
+            logEntry.browseragent.numvalue = numvalue
+        }
+
         // if the value is an object, move it to the "details" node
         if (typeof value === 'object') {
             const details = value[event]
