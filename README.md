@@ -3,11 +3,13 @@
 </div>
 
 # Citadel browser agent
-Citadel is a browser agent that detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)).
+Citadel is a browser agent that enforces IT policy and detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)).
 
 Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
 
 ## Overview
+Citadel can perform web filtering, limit the maximum duration of authenticated sessions, enforce your MFA policy, and help you enforce your password policy.
+
 Citadel detects the following events in the browser:
 * IP, URL or domain is blacklisted (good default blacklists provided, can be bypassable or not by users)
 * user is using unencrypted protocols for an application (e.g. FTP, HTTP or WS)
@@ -18,6 +20,7 @@ Citadel detects the following events in the browser:
 * the user is warned that the downloaded file is dangerous
 * user has accepted downloading of a dangerous file
 * user has used a password that does not conform to the password policy
+* user connected using a password but without MFA, when policy requires it for this particular application 
 * security-related browser errors (e.g. certificate issues, detection of phishing or virus, etc. See [list](chrome://network-errors))
 
 It also reports on usage statistics of applications, allowing for detection of shadow IT and unused licences.
@@ -27,8 +30,10 @@ Events and reports are written as syslog entries with a relevant level, and can 
 ## Blacklists
 Can blacklist URLs, IP ranges or domains, using lists periodically downloaded from the internet. By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can then temporarily bypass the blacklist for that hostname. The exception request is logged, as are the navigation and web requests that use the exception.
 
+If is possible to define a whitelist that will override the blacklist.
+
 ## Application management
-Citadel helps you identify shadow IT and unused licences. It does this by inspecting internet use (navigation, clicking, application logins). Citadel attempts to identify sites that are applications by separating authenticated and unauthenticated internet sites.
+Citadel helps you identify shadow IT and unused licences. It does this by inspecting internet use (navigation, clicking, application logins). Citadel attempts to identify sites that are "applications" by separating authenticated and unauthenticated internet sites.
 
 The reports are generated as security events. Two types of reports are generated:
 * one event per day, per application, showing the number of interactions (triggered once per day)
@@ -42,6 +47,15 @@ These usage reports can be aggregated in your SIEM / EDR and used to get an over
 Any time a password is sent to a web application via a form, Citadel checks whether the password conforms to the policy you have configured. 
 
 Once every two weeks a report is triggered that generates one event for every application, for every account that has a password that does not conform to the password policy.
+
+## MFA policy enforcement
+Citadel can check if MFA is used after a password is sent to a web application via a form. The idea being that generally non-password based authentication such as delegated authentication (OIDC, SAML, etc) will apply MFA. Detection of the MFA is based on various heuristics, such as the name of form fields, the structure of URLs and the content of the fields. Use of the navigator.credentials API to request for example use of WebAuthn or FIDO is detected.
+
+If a password is observed, users are allowed a couple of minutes to use or configure MFA. Failing that they are logged off from the application, and instructed to configure MFA. For urgent and exceptional cases they can request a temporary exception. Both events are logged.
+
+Sessions that are authenticated using MFA have a maximum duration. Once this duration is exceeded the user is logged off and is this forced to re-authenticate.
+
+Since MFA is not available for all sites, you have to list the sites for which you require MFA to be enabled.
 
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
@@ -82,7 +96,7 @@ If you do not reduce the default privacy-related measures and you have listed an
 Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
 
 ### I don't want to install external software
-Ofcourse you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/win/build.ps1) and [macOS](/bin/mac/build.sh). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browers). Or you can even make your own copy and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).
+Of course you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/win/build.ps1) and [macOS](/bin/mac/build.sh). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browsers). Or you can even make your own copy and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).
 
 ### what about performance?
 Citadel is designed to be very efficient. It only runs (very briefly) every time when you click on a web page. All operations are asynchronous and are optimized so as to have a minimal impact on your browsing experience. With the default blacklist configuration the extension consumes only 20 Mb of memory and will download approximately 20 Mb every hour. That is roughly equivalent to 5 minutes of video conferencing.

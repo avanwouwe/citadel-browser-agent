@@ -69,6 +69,25 @@ By default, users can request an exception if they are blocked by a blacklist. T
     ...
 ```
 
+## whitelists
+In some cases your blacklist may accidentally include IPs or URLs that are false positives. In this case you can define a whitelist to bypass the blacklist. Since the whitelist configurations are arrays, you must re-state the blacklist configuration if you want to add your own blacklists to it.
+
+This is for example the default configuration:
+```
+    ...
+    whitelist: {
+        ip: [
+            "10.0.0.0/8",
+            "127.0.0.0/8",
+            "169.254.0.0/16",
+            "172.16.0.0/12",
+            "192.168.0.0/16"
+        ],
+        url: [ ],
+    },
+    ...
+```
+
 ## passwords
 You can configure your own password policy: 
 
@@ -94,10 +113,36 @@ Note that:
 * the `minEntropy` setting refers to the [Shannon Entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
 * the `minSequence` setting measures the number of consecutive characters or numbers in the password, relative to the password length
 
+## Multi Factor Authentication
+You can ensure that whenever users send a password, they *also* use another factor (e.g. TOTP, WebAuthn). If they do not provide one within `waitMinutes` they are logged off. Once connected their session will remain valid for `maxSessionDays`.
+
+You have to enumerate the list of domains where you require MFA, and you can make exceptions for specific sub-domains:
+```
+    "account": {
+        "mfa": {
+          "waitMinutes": 10,
+          "maxSessionDays": 14,
+          "required": [
+            "yourcompany.com",
+            "1password.com",
+            "atlassian.com",
+            "business.apple.com",
+            "notion.so",
+            "openai.com",
+            "gitlab.com",
+            "github.com"
+          ],
+          "exception": [
+            "non-mfa.yourcompany.com"
+          ]
+        }
+    },
+```
+
 ## session duration
 Citadel can default session duration by forcing cookies to expire. This reduces the risk of cookies being stolen, should the endpoint ever be compromised. Since it forces users to reconnect, it also ensures that Citadel has recent data bout password quality and account usage.
 
-The default settings is `14` days. Setting this to `0` turns off the feature. By default, Citadel tries to manage only cookies related to authentication.
+The default settings is `14` days. Setting this to `0` turns off the feature. By default, Citadel tries to manage only cookies related to authentication, which can be modified using `onlyAuthCookies`.
 
 ```
     ...
@@ -109,7 +154,7 @@ The default settings is `14` days. Setting this to `0` turns off the feature. By
 ```
 
 ## reporting
-Citadel can report on various aspects, such as application use and password policy adherence. By default the reporting is configured to report only on authenticated applications. To prevent overloading the SIEM, the reporting only reports on the most important applications (i.e. the most visited or the ones with the most password issues).
+Citadel can report on various aspects, such as application use and password policy adherence. By default, the reporting is configured to report only on authenticated applications. To prevent overloading the SIEM, the reporting only reports on the most important applications (i.e. the most visited or the ones with the most password issues).
 
 ```
     ...
