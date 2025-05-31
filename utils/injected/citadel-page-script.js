@@ -24,7 +24,7 @@
             this.querySelector('button[type="submit"], input[type="submit"]') ||
             this.querySelector('button[type="button"], input[type="button"]') ||
             this.querySelector('button') ||
-            this.querySelector('[type="submit"], [type="button"]');
+            this.querySelector('[type="submit"], [type="button"]')
 
         try {
             analyzeForm(this.elements, submitButton)

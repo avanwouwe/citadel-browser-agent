@@ -596,7 +596,7 @@ function registerInteraction(url, context) {
 
 
 function registerAccountUsage(url, report) {
-	debug(`use of account '${report.username} for ${getSitename(url)}'`)
+	debug(`use of account '${report.username}' for ${getSitename(url)}'`)
 
 	const config = Config.forURL(url)
 	const domain = getDomainFromUsername(report.username)

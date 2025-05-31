@@ -1,5 +1,5 @@
 const s = document.createElement('script')
-s.src = chrome.runtime.getURL('/utils/credentials-interceptor.js');
+s.src = chrome.runtime.getURL('/utils/injected/citadel-page-script.js');
 (document.head || document.documentElement).appendChild(s)
 s.remove()
 
