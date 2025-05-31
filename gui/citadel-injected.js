@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     document.addEventListener("click", clickListener, true)
-
+    document.shadowRoot?.addEventListener("click", clickListener, true)
 }, true)
 
 
