@@ -313,11 +313,7 @@ class Config {
     }
 
     static forURL(url) {
-        if (isString(url)) {
-            url = url.toURL()
-        }
-
-        return Config.forHostname(url?.hostname)
+        return Config.forHostname(url?.toURL().hostname)
     }
 
 }

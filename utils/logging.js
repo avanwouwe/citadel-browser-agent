@@ -104,11 +104,9 @@ class Log {
         const config = Config.forURL(url)
 
         if (Log.#levelValue[level] < config.logging.maskUrlLevel) {
-            if (isString(url)) {
-                const urlObj = url.toURL()
-                if (! urlObj) { return url }
-                url = urlObj
-            }
+            const urlObj = url.toURL()
+            if (! urlObj) { return url }    // if we can't parse the URL, we can't mask it
+            url = urlObj
 
             url.username ? url.username = url.username.hashDJB2() : undefined
             url.password ? url.password = url.password.hashDJB2() : undefined
@@ -117,6 +115,7 @@ class Log {
             url.hash ? url.hash = url.hash.hashDJB2() : undefined
             url.search ? url.search = url.search.hashDJB2() : undefined
         }
+
         return url.toString()
     }
 
