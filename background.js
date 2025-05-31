@@ -677,6 +677,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 		value: cookie.value,
 		path: cookie.path,
 		secure: cookie.secure,
+		hostOnly: cookie.hostOnly,
 		httpOnly: cookie.httpOnly,
 		sameSite: cookie.sameSite,
 		expirationDate: maxSessionExpirationTimestamp,
@@ -696,13 +697,13 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	if (request.type === "print-dialog") {
 		registerInteraction(siteUrl, sender)
 
-		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id)
+		logger.log(nowTimestamp(), "print dialog", null, siteUrl, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id)
 	}
 
 	if (request.type === "file-select") {
 		registerInteraction(siteUrl, sender)
 
-		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
+		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
 	}
 
 	if (request.type === "account-usage") {
