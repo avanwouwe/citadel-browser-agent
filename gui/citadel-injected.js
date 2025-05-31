@@ -4,7 +4,7 @@ s.src = chrome.runtime.getURL('/utils/credentials-interceptor.js');
 s.remove()
 
 function findUsernameInAncestors(startNode) {
-    let node = startNode.parentElement
+    let node = startNode?.parentElement
 
     while (node && node !== document.body) {
         const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null)
@@ -181,18 +181,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     })
 
-    const originalSubmit = HTMLFormElement.prototype.submit
-    HTMLFormElement.prototype.submit = function() {
-        try {
-            analyzeForm(this.elements)
-        } catch (error) {
-            console.error("error while analyzing password", error)
-        }
 
-        originalSubmit.apply(this, arguments)
-    }
-
-    document.addEventListener("click", function(event) {
+    function clickListener(event) {
         chrome.runtime.sendMessage({type: "user-interaction"})
 
         let fields = []
@@ -220,9 +210,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         analyzeForm(fields, button)
+    }
 
-    }, true)
-})
+    document.addEventListener("click", clickListener, true)
+
+}, true)
+
 
 function serializeElement(elem) {
     const result = {}
