@@ -596,14 +596,11 @@ function registerInteraction(url, context) {
 
 
 function registerAccountUsage(url, report) {
+	debug(`use of account '${report.username} for ${getSitename(url)}'`)
+
 	const config = Config.forURL(url)
 	const domain = getDomainFromUsername(report.username)
-
-	if (! config.account.checkExternal && isExternalDomain(domain)) {
-		return
-	}
-
-	const app = AppStats.forUrl(url)
+	const app = AppStats.forURL(url)
 	app.lastUsed = nowDatestamp()
 	app.lastConnected = nowDatestamp()
 	app.lastAccount = report.username
@@ -611,6 +608,10 @@ function registerAccountUsage(url, report) {
 
 	const account = AppStats.getAccount(app, report.username)
 	account.lastConnected = nowDatestamp()
+
+	if (! config.account.checkExternal && isExternalDomain(domain)) {
+		return
+	}
 
 	const issues = {
 		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
