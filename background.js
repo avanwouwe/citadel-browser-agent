@@ -108,7 +108,7 @@ function evaluateRequest(details) {
 		! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
 		Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
 	) {
-		if (details.initiator && AppStats.forUrl(details.initiator)?.isAuthenticated) {
+		if (details.initiator && AppStats.forURL(details.initiator)?.isAuthenticated) {
 			result.result = "protocol warning"
 			result.level = Log.WARN
 			result.value = url.protocol
@@ -686,34 +686,38 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 })
 
 chrome.runtime.onMessage.addListener(function(request, sender) {
+	const siteUrl =  sender.url.toURL()
+
 	if (request.type === "user-interaction") {
-		registerInteraction(sender.url, sender)
+		registerInteraction(siteUrl, sender)
 	}
 
 	if (request.type === "print-dialog") {
-		registerInteraction(sender.url, sender)
+		registerInteraction(siteUrl, sender)
 
 		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id)
 	}
 
 	if (request.type === "file-select") {
-		registerInteraction(sender.url, sender)
+		registerInteraction(siteUrl, sender)
 
 		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
 	}
 
 	if (request.type === "account-usage") {
-		registerAccountUsage(sender.url, request.report)
+		registerAccountUsage(siteUrl, request.report)
 
-		const config = Config.forHostname(sender.url)
+		const config = Config.forURL(siteUrl)
 
-		if (requiresMFA(sender.url, config)) {
+		if (requiresMFA(siteUrl, config)) {
+			debug(`MFA required for ${siteUrl.hostname}`)
+
 			if (request.report.mfa) {
-				cancelTimerMFA(sender.url, 'TOTP in form')
+				cancelTimerMFA(siteUrl, 'TOTP in form')
 				return
 			}
 
-			const app = AppStats.forUrl(sender.url)
+			const app = AppStats.forURL(siteUrl)
 			const account = AppStats.getAccount(app, request.report.username)
 
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
@@ -725,19 +729,19 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 	if (request.type === "request-credential" && request.subtype === "public-key") {
-		cancelTimerMFA(sender.url, "public key auth")
+		cancelTimerMFA(siteUrl, "public key auth")
 	}
 
 
 	if (request.type === "allow-mfa") {
-		const app = AppStats.forUrl(sender.url)
+		const app = AppStats.forURL(siteUrl)
 		const account = AppStats.getAccount(app, app.lastAccount)
 		account.lastMFA = nowDatestamp()
 		AppStats.markDirty()
 
 		forAllTabs(request.domain, () => location.reload())
 
-		logger.log(nowTimestamp(), "exception", "MFA exception granted", "https://" + request.domain, Log.ERROR, request.reason, `user requested MFA exception for account ${app.lastAccount} for ${request.domain}`)
+		logger.log(nowTimestamp(), "exception", "MFA exception granted", sender.url, Log.ERROR, request.reason, `user requested MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 
 	if (request.type === "allow-blacklist") {

@@ -134,6 +134,10 @@ String.prototype.toURL = function () {
     }
 }
 
+URL.prototype.toURL = function () {
+    return this
+}
+
 function setInitiator(details) {
     if (details.initiator) {
         return

@@ -40,8 +40,8 @@ class Log {
         url = this.maskUrl(url, level)
         initiator = this.maskUrl(initiator, level)
 
-        url = truncateString(url, config.logging.maxUrlLength) ?? "".emptyToUndefined();
-        initiator = truncateString(initiator, config.logging.maxUrlLength) ?? "".emptyToUndefined();
+        url = truncateString(url, config.logging.maxUrlLength) ?? "".emptyToUndefined()
+        initiator = truncateString(initiator, config.logging.maxUrlLength) ?? "".emptyToUndefined()
 
         const logEntry = {
             timestamp: timestamp ?? nowTimestamp(),

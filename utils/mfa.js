@@ -61,7 +61,7 @@ function cancelTimerMFA(url, reason) {
         return
     }
 
-    const app = AppStats.forUrl(url)
+    const app = AppStats.forURL(url)
     const account = AppStats.getAccount(app, app.lastAccount)
     account.lastMFA = nowDatestamp()
     AppStats.markDirty()

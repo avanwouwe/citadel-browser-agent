@@ -6,7 +6,7 @@ class AppStats {
     static #SITESTATS = new PersistentObject(this.#SITE_STATISTICS_KEY).value()
     static #APPSTATS = new PersistentObject(this.#APPLICATION_STATISTICS_KEY).value()
 
-    static forUrl(url) {
+    static forURL(url) {
         assert(url, "must specify url")
 
         const siteName = getSitename(url)
@@ -103,7 +103,7 @@ class AppStats {
         usage[today] = currInteractionCount + increment
         AppStats.markDirty()
 
-        console.log(`incremented ${appName} with ${increment} interactions`)
+        debug(`incremented ${appName} with ${increment} interactions`)
     }
 
     static assignAppToSite(appName, url) {
