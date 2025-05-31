@@ -30,7 +30,7 @@ Events and reports are written as syslog entries with a relevant level, and can 
 ## Blacklists
 Can blacklist URLs, IP ranges or domains, using lists periodically downloaded from the internet. By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can then temporarily bypass the blacklist for that hostname. The exception request is logged, as are the navigation and web requests that use the exception.
 
-If is possible to define a whitelist that will override the blacklist.
+It is possible to define a whitelist that will override the blacklist.
 
 ## Application management
 Citadel helps you identify shadow IT and unused licences. It does this by inspecting internet use (navigation, clicking, application logins). Citadel attempts to identify sites that are "applications" by separating authenticated and unauthenticated internet sites.

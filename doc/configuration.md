@@ -8,6 +8,7 @@ Example:
     "company": {
         "contact": "it-support@yourcompany.com",
         "name": "Company",
+        "logo": "https://www.yourcompany.com/assets/images/company-logo.png",
         "domains": {
           "yourcompany.com" : true,
           "yourcompany.io"  : true,
