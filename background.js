@@ -671,7 +671,6 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 			value: cookie.value,
 			path: cookie.path,
 			secure: cookie.secure,
-			hostOnly: cookie.hostOnly,
 			httpOnly: cookie.httpOnly,
 			sameSite: cookie.sameSite,
 			expirationDate: maxSessionExpirationTimestamp,

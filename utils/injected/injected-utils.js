@@ -24,3 +24,10 @@ Element.prototype.isHidden = function() {
 function debug(message, ...params) {
     console.log("CITADEL : " + message, ...params)
 }
+
+function injectPageScript(scriptPath) {
+    const s = document.createElement('script')
+    s.src = chrome.runtime.getURL(scriptPath)
+    s.onload = () => s.remove();
+    (document.head || document.documentElement).appendChild(s)
+}

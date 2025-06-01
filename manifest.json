@@ -24,7 +24,11 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["/gui/images/*", "/utils/injected/citadel-page-script.js"],
+      "resources": [
+        "/gui/images/*",
+        "/utils/passwords.js",
+        "/utils/injected/citadel-page-script.js"
+      ],
       "matches": ["*://*/*"]
     }
   ],
@@ -37,9 +41,9 @@
       "matches": ["<all_urls>"],
       "all_frames": true,
       "js": [
-        "utils/injected/injected-utils.js",
         "utils/passwords.js",
         "utils/session-state.js",
+        "utils/injected/injected-utils.js",
         "utils/injected/citadel-content-script.js"
       ],
       "run_at": "document_start"

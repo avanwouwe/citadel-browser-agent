@@ -1,7 +1,5 @@
-const s = document.createElement('script')
-s.src = chrome.runtime.getURL('/utils/injected/citadel-page-script.js');
-(document.head || document.documentElement).appendChild(s)
-s.remove()
+injectPageScript('/utils/passwords.js')
+injectPageScript('/utils/injected/citadel-page-script.js')
 
 function findUsernameInAncestors(startNode) {
     let node = startNode?.parentElement
@@ -174,11 +172,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }, true)
 
     window.addEventListener("message", function(event) {
-        if (event.source !== window) return
+        if (event.source !== window || event.origin !== window.location.origin) return
+
         if (event.data.type === "request-credential" && event.data.subtype === "public-key") {
             debug("detected use of navigator.credentials API to get public key")
             chrome.runtime.sendMessage({ type: event.data.type, subtype: event.data.subtype })
         }
+
+        if (event.data.type === "request-credential" && event.data.subtype === "password") {
+            debug("detected use of navigator.credentials API to get password")
+            chrome.runtime.sendMessage({ type: "account-usage", report: event.data.report })
+        }
+
     })
 
 
