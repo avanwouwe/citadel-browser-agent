@@ -34,26 +34,47 @@
   ],
   "background": {
     "service_worker": "serviceworker.js",
-    "scripts": [ "serviceworker.js" ]
+    "scripts": [
+      "/config.js",
+      "/utils/definitions.js",
+      "/utils/utils.js",
+      "/utils/passwords.js",
+      "/utils/mfa.js",
+      "/utils/eventaccumulator.js",
+      "/utils/alarm.js",
+      "/utils/schedule.js",
+      "/utils/persistence.js",
+      "/utils/session-state.js",
+      "/utils/appstats.js",
+      "/utils/messaging.js",
+      "/utils/logging.js",
+      "/utils/browser.js",
+      "/gui/interface.js",
+      "/utils/blacklist/blacklist.js",
+      "/utils/blacklist/ignorelist.js",
+      "/utils/blacklist/exceptionlist.js",
+      "/utils/blacklist/ipv4range.js",
+      "/background.js"
+    ]
   },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "all_frames": true,
       "js": [
-        "utils/passwords.js",
-        "utils/session-state.js",
-        "utils/injected/injected-utils.js",
-        "utils/injected/citadel-content-script.js"
+        "/utils/passwords.js",
+        "/utils/session-state.js",
+        "/utils/injected/injected-utils.js",
+        "/utils/injected/citadel-content-script.js"
       ],
       "run_at": "document_start"
     }
   ],
   "action": {
     "default_icon": {
-      "16": "gui/images/icon16.png",
-      "48": "gui/images/icon48.png",
-      "128": "gui/images/icon128.png"
+      "16": "/gui/images/icon16.png",
+      "48": "/gui/images/icon48.png",
+      "128": "/gui/images/icon128.png"
     }
   },
 
