@@ -652,39 +652,34 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 })
 
 chrome.cookies.onChanged.addListener((changeInfo) => {
-	if (changeInfo.removed || changeInfo.cause !== 'explicit')
+	if (changeInfo.removed || changeInfo.cause !== 'explicit' || config.session.maxSessionDays <= 0)
 		return
 
 	const cookie = changeInfo.cookie
 	const protocol = cookie.secure ? 'https://' : 'http://'
 	const domain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : undefined
-	const url = `${protocol}${domain ?? cookie.domain}${cookie.path}`
-
-	const config = Config.forHostname(domain)
-	if (config.session.maxSessionDays <= 0)
-		return
-	if (config.session.onlyAuthCookies && ( ! cookie.name?.match(AUTH_COOKIE_PATTERN)) && ! cookie.name?.match(SESSION_COOKIE_PATTERN) )
-		return
 
 	const maxSessionExpirationTimestamp = Math.floor((Date.now() + config.session.maxSessionDays * ONE_DAY) / 1000)
 	if (!cookie.expirationDate || cookie.expirationDate <= maxSessionExpirationTimestamp)
 		return
 
-	const modifiedCookie = {
-		url: url,
-		domain: domain,
-		name: cookie.name,
-		value: cookie.value,
-		path: cookie.path,
-		secure: cookie.secure,
-		hostOnly: cookie.hostOnly,
-		httpOnly: cookie.httpOnly,
-		sameSite: cookie.sameSite,
-		expirationDate: maxSessionExpirationTimestamp,
-		storeId: cookie.storeId
-	}
+	if (matchDomain(cookie.domain, config.session.domains) && ! matchDomain(cookie.domain, config.session.exceptions)) {
+		const modifiedCookie = {
+			url: `${protocol}${domain ?? cookie.domain}${cookie.path}`,
+			domain: domain,
+			name: cookie.name,
+			value: cookie.value,
+			path: cookie.path,
+			secure: cookie.secure,
+			hostOnly: cookie.hostOnly,
+			httpOnly: cookie.httpOnly,
+			sameSite: cookie.sameSite,
+			expirationDate: maxSessionExpirationTimestamp,
+			storeId: cookie.storeId
+		}
 
-	chrome.cookies.set(modifiedCookie)
+		chrome.cookies.set(modifiedCookie)
+	}
 })
 
 chrome.runtime.onMessage.addListener(function(request, sender) {

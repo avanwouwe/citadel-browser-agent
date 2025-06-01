@@ -326,6 +326,8 @@ function setPath(obj, path, value) {
 }
 
 function applyPath(obj, attributePaths, func) {
+    assert(Array.isArray(attributePaths), "expecting an array", attributePaths)
+
     for (const dotPath of attributePaths) {
         const path = dotPath.split(".")
         const currValue = getPath(obj, path)

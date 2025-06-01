@@ -136,7 +136,8 @@ class Config {
         },
         session: {
             maxSessionDays: 14,
-            onlyAuthCookies: true
+            domains: [],
+            exceptions: [],
         },
         account: {
             retentionDays: 90,
@@ -155,7 +156,7 @@ class Config {
                 waitMinutes: 10,
                 maxSessionDays: 14,
                 required: [],
-                exception: []
+                exceptions: []
             }
         },
         blacklist: {
@@ -239,7 +240,6 @@ class Config {
     static #exceptionCompatible = [
         'warningProtocols',
         'account',
-        'session',
         'application',
         'logging',
         'errors',
@@ -247,10 +247,12 @@ class Config {
 
     static #domainPatterns = [
         "company.domains",
+        "session.domains",
+        "session.exceptions",
         "domain.isKnownApplication",
         "domain.isPublicMail",
         "account.mfa.required",
-        "account.mfa.exception",
+        "account.mfa.exceptions",
     ]
 
     static #init(config) {

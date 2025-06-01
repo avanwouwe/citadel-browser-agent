@@ -133,7 +133,7 @@ You have to enumerate the list of domains where you require MFA, and you can mak
             "gitlab.com",
             "github.com"
           ],
-          "exception": [
+          "exceptions": [
             "non-mfa.yourcompany.com"
           ]
         }
@@ -141,15 +141,16 @@ You have to enumerate the list of domains where you require MFA, and you can mak
 ```
 
 ## session duration
-Citadel can default session duration by forcing cookies to expire. This reduces the risk of cookies being stolen, should the endpoint ever be compromised. Since it forces users to reconnect, it also ensures that Citadel has recent data bout password quality and account usage.
+Citadel can be configured to limit authenticated session duration by forcing cookies to expire. This reduces the risk of cookies being stolen, should the endpoint ever be compromised. Since it forces users to reconnect, it also ensures that Citadel has recent data bout password quality and account usage.
 
-The default settings is `14` days. Setting this to `0` turns off the feature. By default, Citadel tries to manage only cookies related to authentication, which can be modified using `onlyAuthCookies`.
+The default settings is `14` days. You can list the domains to apply the rule to, and specify exceptions to that list. By default, no domains are specified and the feature is disabled.
 
 ```
     ...
     "session": {
         "maxSessionDays": 14,
-        "onlyAuthCookies": true
+        "domains": ["*"],
+        "exceptions": ["google.com","okta.com"]
     }
     ...
 ```

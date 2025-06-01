@@ -78,7 +78,7 @@ function requiresMFA(url, config) {
     const hostname = getSitename(url)
 
     const isRequired = matchDomain(hostname, config.account.mfa.required)
-    const isExempted = matchDomain(hostname, config.account.mfa.exception)
+    const isExempted = matchDomain(hostname, config.account.mfa.exceptions)
 
     return isRequired && !isExempted
 }
@@ -96,7 +96,7 @@ function logOffApplication(domain) {
                 name: cookie.name
             }
 
-            chrome.cookies.remove(cookieDetails, (removedCookie) => {
+            chrome.cookies.remove(cookieDetails, () => {
                 if (chrome.runtime.lastError) {
                     console.error(`Error removing cookie ${cookie.name}:`, chrome.runtime.lastError)
                 }
