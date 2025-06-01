@@ -706,7 +706,12 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		const config = Config.forURL(siteUrl)
 
 		if (requiresMFA(siteUrl, config)) {
-			debug(`MFA required for ${siteUrl.hostname}`)
+			const domain = getDomainFromUsername(request.report.username)
+			if (! config.account.checkExternal && isExternalDomain(domain)) {
+				return
+			}
+
+			debug(`MFA required for connection of '${request.report.username}' to ${siteUrl.hostname}`)
 
 			if (request.report.mfa) {
 				cancelTimerMFA(siteUrl, 'TOTP in form')
