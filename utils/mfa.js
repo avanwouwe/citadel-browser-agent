@@ -15,10 +15,10 @@ function startTimerMFA(url, minutes, showModal) {
         delete mfaTimers[domain]
     }
 
-    console.log(`MFA expected for ${domain}. Timer started`)
+    console.log(`MFA session missing for ${domain}, timer started`)
 
     const timerId = setTimeout(() => {
-        console.log(`MFA timeout for ${domain}.`)
+        console.log(`MFA timeout for ${domain}`)
 
         logOffApplication(domain)
 
