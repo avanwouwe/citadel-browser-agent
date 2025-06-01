@@ -190,8 +190,6 @@ document.addEventListener('DOMContentLoaded', () => {
     function clickListener(event) {
         chrome.runtime.sendMessage({type: "user-interaction"})
 
-        let fields = []
-
         const button = event.target.closest('button, input[type="button"], input[type="submit"]')
         if (
             !button ||
@@ -201,6 +199,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
             return
         }
+
+        let fields = []
 
         if (button.form) {
             fields = Array.from(button.form.elements)
@@ -214,7 +214,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        analyzeForm(fields, button)
+        if (fields.length > 0) {
+            analyzeForm(fields, button)
+        }
     }
 
     document.addEventListener("click", clickListener, true)
