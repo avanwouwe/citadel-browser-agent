@@ -316,21 +316,27 @@ handleError(chrome.webNavigation.onErrorOccurred, "navigate")
 handleError(chrome.webRequest.onErrorOccurred, "request", { urls: ["<all_urls>"] })
 
 
+const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|acct|user(id|name)?|auth(ori[sz]ation)?)([_.-]|$)/i
 const AUTH_HEADERS = {
-	'authorization' : true,
-	'api-key' : true,
-	'x-api-key' : true,
+	'access-token': true,
+	'x-access-token': true,
 	'auth-token' : true,
 	'x-auth-token' : true,
+	'authorization' : true,
+	'x-authorization' : true,
+	'api-key' : true,
+	'x-api-key' : true,
 	'current-token' : true,
 	'x-current-token' : true,
 	'x-accepted-oauth-scopes' : true,
 	'x-oauth-scopes' : true,
 	'x-csrf-Token' : true,
+	'bearer-token': true,
+	'x-bearer-token': true,
+	'jwt': true,
+	'x-jwt': true,
+	'x-xsrf-token': true,
 }
-const AUTH_COOKIE_PATTERN = /(^|[_.-])([cx]srf|jwt|password|secret|login|access|account|acct|user(id|name)?|auth(ori[sz]ation)?)([_.-]|$)/i
-const SESSION_COOKIE_PATTERN = /(session|token|([_.-]|^)[a-z]{0,4}id$)/i
-
 
 function getAppnameFromHeaders(details, headers) {
 	for (header of headers) {
