@@ -35,9 +35,13 @@ Port.onMessage("config",(newConfig) => {
 })
 
 chrome.runtime.onUpdateAvailable.addListener(() => {
-	reportInteractions()
+	try {
+		reportInteractions()
 
-	Alarm.clear()
+		Alarm.clear()
+	} catch (error) {
+		debug("error while preparing update of extension", error)
+	}
 
 	AppStats.clear()
 })
@@ -47,9 +51,9 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 	setTimeout(() => {
 		const version = chrome.runtime.getManifest().version
-		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`);
+		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`)
 	}, 5000)
-});
+})
 
 chrome.alarms.onAlarm.addListener((alarm) => {
 	if (alarm.name === Alarm.DAILY) {
@@ -140,7 +144,6 @@ function evaluateRequest(details) {
 		}
 	}
 
-
 	return result
 }
 
@@ -162,9 +165,8 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 			blockPage(details.tabId, evaluation.description, evaluation.value)
 	}
 
-	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId);
-
-});
+	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId)
+})
 
 
 chrome.webRequest.onBeforeRequest.addListener((details) => {
@@ -179,9 +181,8 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
 			blockPage(details.tabId, evaluation.description, evaluation.value)
 	}
 
-	logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId);
-
-},  { urls: ["<all_urls>"] });
+	logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
+},  { urls: ["<all_urls>"] })
 
 
 // check for blacklist when finally connected, since at this time we have the IP address
@@ -206,24 +207,18 @@ function getDownload(downloadId) {
 	return new Promise((resolve, reject) => {
 		chrome.downloads.search({ id: downloadId }, (results) => {
 			if (results && results.length > 0) {
-				const download = structuredClone(results[0]);
-				resolve(download);
+				const download = structuredClone(results[0])
+				resolve(download)
 			} else {
-				reject(new Error(`No download item found with ID: ${downloadId}`));
+				reject(new Error(`No download item found with ID: ${downloadId}`))
 			}
-		});
-	});
+		})
+	})
 }
 
 function logDownload(event, timestamp, result, level, description) {
 	// determine an id that is more globally unique than the original id
 	const uniqueId = { id: event.id, startTime: event.startTime }.hashCode()
-
-	const url = event.url
-	const referrer = event.referrer
-
-	description = description.replace("@@URL@@", logger.maskUrl(event.url, level))
-
 	const download = {}
 	if (event.bytesReceived) download.bytesReceived = event.bytesReceived
 	if (event.danger) download.danger = event.danger
@@ -236,7 +231,9 @@ function logDownload(event, timestamp, result, level, description) {
 	if (event.exists) download.exists = event.exists
 	if (event.incognito) download.incognito = event.incognito
 
-	logger.log(timestamp, "download", result, url, level, { download }, description, referrer, uniqueId)
+	description = description.replace("@@URL@@", logger.maskUrl(event.url, level))
+
+	logger.log(timestamp, "download", result, event.url, level, { download }, description, event.referrer, uniqueId)
 }
 
 chrome.downloads.onChanged.addListener((delta) => {
@@ -250,13 +247,13 @@ chrome.downloads.onChanged.addListener((delta) => {
 		const danger = delta.danger.current
 		switch (danger) {
 			case 'safe':
-				break;
+				break
 			case 'deepScannedFailed':
 			case 'accepted':
 				getDownload(delta.id).then(download => {
 					logDownload(download, nowTimestamp(), "download accepted", Log.ERROR, `user accepted danger of type '${delta.danger.current}' of download of @@URL@@`)
 				})
-				break;
+				break
 			default:
 				getDownload(delta.id).then(download => {
 					logDownload(download, nowTimestamp(), "download warned", Log.WARN, `user notified danger of type '${danger}' of download of @@URL@@`)
@@ -279,7 +276,7 @@ chrome.downloads.onChanged.addListener((delta) => {
 		}
 	}
 
-});
+})
 
 // only raise events for browser errors that deal with security issues, such as virus or SSL
 // for the full list of errors see : chrome://network-errors/
@@ -378,11 +375,11 @@ chrome.webRequest.onAuthRequired.addListener(
 	function(details) {
 		setInitiator(details)
 
-		const appName = getAppnameFromHeaders(details, details.responseHeaders);
+		const appName = getAppnameFromHeaders(details, details.responseHeaders)
 		markIsAuthenticated(appName, "HTTP auth req")
 	},
 	{ urls: ["<all_urls>"] } , ["responseHeaders"]
-);
+)
 
 
 function detectApplication(hook, headers) {
@@ -459,7 +456,7 @@ function reportInteractions() {
 
 	function report(isAuthenticated) {
 		const usagePerDayPerApp = { }
-		const today = nowDatestamp();
+		const today = nowDatestamp()
 
 		// aggregate interactions per date (only dates in the past)
 		for (const [appName, app] of AppStats.allApps()) {
@@ -496,15 +493,15 @@ function reportInteractions() {
 
 		const unreportedApplications = Object.entries(usagePerDayPerApp).length - config.reporting.maxApplicationEntries
 		if (unreportedApplications > 0) {
-			logger.log(nowTimestamp(), "report", "unreported interactions", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`);
+			logger.log(nowTimestamp(), "report", "unreported interactions", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`)
 		}
 
 	}
 
-	// run twice to prevent non-authenticated sites from crowding out the authenticated ones
 	if (config.reporting.onlyAuthenticated) {
 		report(true)
 	} else {
+		// run twice to prevent non-authenticated sites from crowding out the authenticated ones
 		report(true)
 		report(false)
 	}
@@ -563,20 +560,19 @@ function reportApplications() {
 
 		const unreportedApplications = appCnt - config.reporting.maxApplicationEntries
 		if (unreportedApplications > 0) {
-			logger.log(nowTimestamp(), "report", "unreported usage", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} application usage reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`);
+			logger.log(nowTimestamp(), "report", "unreported usage", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} application usage reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`)
 		}
 
 		const unreportedIssues = topIssues.length - config.reporting.maxAccountEntries
 		if (unreportedIssues > 0) {
-			logger.log(nowTimestamp(), "report", "unreported account issues", undefined, Log.ERROR, unreportedIssues, `${unreportedIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`);
-		}
+			logger.log(nowTimestamp(), "report", "unreported account issues", undefined, Log.ERROR, unreportedIssues, `${unreportedIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`)}
 
 	}
 
-	// run twice to prevent non-authenticated sites from crowding out the authenticated ones
 	if (config.reporting.onlyAuthenticated) {
 		report(true)
 	} else {
+		// run twice to prevent non-authenticated sites from crowding out the authenticated ones
 		report(true)
 		report(false)
 	}
