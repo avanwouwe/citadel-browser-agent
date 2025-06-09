@@ -37,23 +37,4 @@
 
         return credentials
     }
-
-
-    const originalSubmit = HTMLFormElement.prototype.submit
-
-    HTMLFormElement.prototype.submit = function() {
-        try {
-            const submitButton =
-                this.querySelector('button[type="submit"], input[type="submit"]') ||
-                this.querySelector('button[type="button"], input[type="button"]') ||
-                this.querySelector('button') ||
-                this.querySelector('[type="submit"], [type="button"]')
-
-            analyzeForm(this.elements, submitButton)
-        } catch (error) {
-            console.error("error while analyzing form", error)
-        }
-
-        originalSubmit.apply(this, arguments)
-    }
 })()
