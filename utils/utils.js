@@ -139,11 +139,7 @@ URL.prototype.toURL = function () {
 }
 
 function setInitiator(details) {
-    if (details.initiator) {
-        return
-    }
-
-    details.initiator = details.originUrl
+    details.initiator = details.documentUrl ?? details.initiator
 }
 
 function getSitename(url) {
