@@ -13,6 +13,6 @@ class Ignorelist {
     }
 
     find(url) {
-        this.#ignoreList.find(url)
+        return this.#ignoreList.find(url)
     }
 }
