@@ -1,6 +1,23 @@
 injectPageScript('/utils/passwords.js')
 injectPageScript('/utils/injected/citadel-page-script.js')
 
+function findFormElements(element) {
+    if (element.form) {
+        return Array.from(element.form.elements)
+    }
+
+    // Use the nearest ancestor that contains at least one relevant input field (password, e-mail, etc)
+    let fields = []
+    let container = element.parentElement ?? document.body
+    do {
+        fields = Array.from(container.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]'))
+        if (fields.length > 0 && !fields.includes(element)) break
+        container = container.parentElement
+    } while (container && container !== document.body)
+
+    return fields
+}
+
 function findUsernameInAncestors(startNode) {
     let node = startNode?.parentElement
 
@@ -28,7 +45,15 @@ function findUsernameInAncestors(startNode) {
     return null
 }
 
-function analyzeForm(formElements, submitButton) {
+function serializeElement(elem) {
+    const result = {}
+    for (const attr of elem.attributes) {
+        result[attr.name] = attr.value
+    }
+    return result
+}
+
+function analyzeForm(formElements, eventElement) {
     new SessionState(window.location.origin).load().then(sessionState =>  {
         debug("analyzing form")
 
@@ -58,9 +83,8 @@ function analyzeForm(formElements, submitButton) {
                 }
             }
 
-            if (
-                (elem.type === 'text' || elem.type === 'email') && (
-                    formHasPassword &&  formUsername === undefined ||
+            if ((elem.type === 'text' || elem.type === 'email') && (
+                    formHasPassword && formUsername === undefined ||
                     findAuthPattern(window.location.pathname) &&  (
                         isUsernameField(elem.name) ||
                         isUsernameField(elem.id) ||
@@ -74,7 +98,7 @@ function analyzeForm(formElements, submitButton) {
         }
 
         if (formUsername === undefined && formHasPassword) {
-            formUsername = findUsernameInAncestors(submitButton)
+            formUsername = findUsernameInAncestors(eventElement)
 
             if (formUsername) debug("found username (in page)", formUsername)
         }
@@ -186,7 +210,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     })
 
-
     function clickListener(event) {
         chrome.runtime.sendMessage({type: "user-interaction"})
 
@@ -200,20 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return
         }
 
-        let fields = []
-
-        if (button.form) {
-            fields = Array.from(button.form.elements)
-        } else {
-            // Use the nearest ancestor that contains at least 1 relevant field (but not just the button itself)
-            let container = button.parentElement
-            while (container && container !== document.body) {
-                fields = Array.from(container.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]'))
-                if (fields.length > 0 && !fields.includes(button)) break
-                container = container.parentElement
-            }
-        }
-
+        const fields = findFormElements(button)
         if (fields.length > 0) {
             analyzeForm(fields, button)
         }
@@ -221,13 +231,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener("click", clickListener, true)
     document.shadowRoot?.addEventListener("click", clickListener, true)
+
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' &&
+            (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'BUTTON')
+        ) {
+            const fields= findFormElements(event.target)
+            analyzeForm(fields, event.target)
+        }
+    })
+
 }, true)
-
-
-function serializeElement(elem) {
-    const result = {}
-    for (const attr of elem.attributes) {
-        result[attr.name] = attr.value
-    }
-    return result
-}
