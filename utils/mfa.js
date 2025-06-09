@@ -136,6 +136,8 @@ function logOffApplication(domain) {
 chrome.webRequest.onCompleted.addListener(
     function (details) {
         if (details.method !== "POST") return
+
+        setInitiator(details)
         const url = details.url?.toURL()
 
         if (
