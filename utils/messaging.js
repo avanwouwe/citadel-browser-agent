@@ -13,7 +13,7 @@ class Port {
     static #retryDelay
     static #lastError
     static #lostEvents = new EventAccumulator(this.#LOST_EVENTS_STATISTICS, Port.#LOST_EVENTS_FREQ, (lostEvents) => {
-        logger.log(nowTimestamp(), "report", "events lost", undefined, Log.ERROR, lostEvents, `${lostEvents} events were lost due to native messaging issue`)
+        logger.log(nowTimestamp(), "report", "events lost", undefined, Log.ERROR, lostEvents, `lost ${lostEvents} event due to native messaging issue`)
     })
 
 

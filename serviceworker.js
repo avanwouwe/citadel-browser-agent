@@ -10,6 +10,7 @@ importScripts('utils/persistence.js');
 importScripts('utils/session-state.js');
 importScripts('utils/appstats.js');
 importScripts('utils/messaging.js');
+importScripts('utils/ratethrottle.js');
 importScripts('utils/logging.js');
 importScripts('utils/browser.js');
 importScripts('gui/interface.js');

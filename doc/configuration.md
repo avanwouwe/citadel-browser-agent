@@ -216,3 +216,27 @@ When specifying the logging level you can use the following log levels:
 * `ERROR` : risky user actions that require immediate investigation, such as visiting a blacklisted URL or ignoring a virus warning
 
 The special log level `NONE` is even higher than `ERROR` and is used for example to never log something or to mask all events.
+
+## rate throttling
+Citadel performs rate throttling to ensure that one issue does not overwhelm the storage of the local machine or your SIEM. Throttling is triggered if more than the specified number of events arrive within a `windowDuration` minutes, and on a per-level basis. Throttling stopped if no more events arrive during the window.
+
+If throttling is triggered, warnings are issued at the level just above the original level. One warning is raised at the start of throttling, and periodic warnings are raised every `reportFrequency` to report on the number of lost events.
+
+```
+    ...
+    "logging": {
+        "throttle": {
+            "windowDuration": 10,
+            "reportFrequency": 60,
+            "rates": {
+                "TRACE": 1000,
+                "DEBUG": 100,
+                "INFO": 50,
+                "WARN": 25,
+                "ERROR": 10,
+                "ALERT": 5,
+            }
+        },
+   },
+   ...
+```

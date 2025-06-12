@@ -20,6 +20,8 @@ class Log {
 
     static #levelLabel = Object.fromEntries(Object.entries(this.#levelValue).map(([key, value]) => [value, key]))
 
+    static #throttles
+
     log(
         timestamp,
         event,
@@ -32,10 +34,11 @@ class Log {
         id = undefined
     ){
         const config = Config.forURL(url)
+        const levelValue = Log.#levelValue[level]
 
-        const levelvalue = Log.#levelValue[level]
+        if (Log.#throttles !== undefined && Log.#throttles[levelValue].throttle()) { return }
 
-        if (levelvalue < config.logging.logLevel && levelvalue < config.logging.consoleLevel) { return }
+        if (levelValue < config.logging.logLevel && levelValue < config.logging.consoleLevel) { return }
 
         url = this.maskUrl(url, level)
         initiator = this.maskUrl(initiator, level)
@@ -75,11 +78,11 @@ class Log {
             delete logEntry['browseragent']['value']
         }
 
-        if (levelvalue >= config.logging.logLevel) {
+        if (levelValue >= config.logging.logLevel) {
             Port.postMessage("event", logEntry)
         }
 
-        if (levelvalue >= config.logging.consoleLevel) {
+        if (levelValue >= config.logging.consoleLevel) {
             switch (event.level) {
                 case Log.TRACE:
                     return console.trace(logEntry)
@@ -128,6 +131,27 @@ class Log {
         if (logging?.maskUrlLevel) logging.maskUrlLevel = Log.#levelValue[logging.maskUrlLevel]
     }
 
+    static start() {
+        const throttling = config.logging.throttle
+
+        Log.#throttles = []
+
+        Object.entries(this.#levelValue).forEach(([levelLabel, levelValue]) => {
+            const rate = throttling.rates[levelLabel]
+            const reportLevel = Log.upgrade(levelLabel)
+
+            const warningCallback = () => {
+                logger.log(nowTimestamp(), "report", "events lost", undefined, reportLevel, 0, `more than ${rate} messages of level ${levelLabel} in ${throttling.throttle.windowDuration} minutes, starting throttling`)
+            }
+
+            const reportCallback = (lostEvents) => {
+                logger.log(nowTimestamp(), "report", "events lost", undefined, reportLevel, lostEvents, `lost ${lostEvents} events of level ${levelLabel} were due to throttling`)
+            }
+
+            this.#throttles[levelValue] = new RateThrottle(rate, throttling.windowDuration, throttling.reportFrequency, warningCallback, reportCallback)
+        })
+    }
+
     static downgrade(level) {
         let value = this.#levelValue[level]
         assert(value !== undefined, `unknown log level '${level}'`)
@@ -139,11 +163,11 @@ class Log {
         return this.#levelLabel[value]
     }
 
-    static upgrade(level) {
-        let value = this.#levelValue[level]
-        assert(value !== undefined, `unknown log level '${level}'`)
+    static upgrade(levelLabel) {
+        let value = this.#levelValue[levelLabel]
+        assert(value !== undefined, `unknown log level '${levelLabel}'`)
 
-        if (level !== Log.ALERT && level !== Log.NONE) {
+        if (levelLabel !== Log.ALERT && levelLabel !== Log.NONE) {
             value++
         }
 

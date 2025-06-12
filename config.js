@@ -210,6 +210,7 @@ class Config {
         },
         ignorelist: [
             'about:blank',
+            'about:newtab',
             'about:srcdoc',
             'chrome://new-tab-page/'
         ],
@@ -232,6 +233,18 @@ class Config {
             consoleLevel: 'WARN',
             maskUrlLevel: 'INFO',
             maxUrlLength: 500,
+            throttle: {
+                windowDuration: 10,
+                reportFrequency: 60,
+                rates: {
+                    TRACE: 1000,
+                    DEBUG: 100,
+                    INFO: 50,
+                    WARN: 25,
+                    ERROR: 10,
+                    ALERT: 5,
+                }
+            },
         }
     }
 
@@ -294,6 +307,7 @@ class Config {
 
         }
 
+        Log.start()
         Config.#isLoaded = true
         Port.postMessage("config", "ok")
     }
@@ -308,14 +322,11 @@ class Config {
         Config.assertIsLoaded()
 
         const exception = matchDomain(hostname, config.exceptions)
-        if (exception) {
-            return exception
-        }
-        return Config.config
+        return exception ?? Config.config
     }
 
     static forURL(url) {
-        return Config.forHostname(url?.toURL().hostname)
+        return Config.forHostname(url?.toURL()?.hostname)
     }
 
 }

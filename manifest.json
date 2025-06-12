@@ -47,6 +47,7 @@
       "/utils/session-state.js",
       "/utils/appstats.js",
       "/utils/messaging.js",
+      "/utils/ratethrottle.js",
       "/utils/logging.js",
       "/utils/browser.js",
       "/gui/interface.js",
