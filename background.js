@@ -77,8 +77,6 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 		SessionState.purge()
 
-		AppStats.resetSitestats()
-
 		reportInteractions()
 	}
 
@@ -87,7 +85,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {
-		AppStats.purgeSitestats()
+		// do nothing for now
 	}
 })
 
@@ -148,7 +146,7 @@ function evaluateRequest(details) {
 }
 
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
-	if (details.frameType && details.frameType !== 'outermost_frame' ||
+	if (details.parentFrameId >= 0 ||
 		details.documentLifecycle && details.documentLifecycle !== 'active'
 	) {
 		return
@@ -338,31 +336,11 @@ const AUTH_HEADERS = {
 	'x-xsrf-token': true,
 }
 
-function getAppnameFromHeaders(details, headers) {
-	for (header of headers) {
-		const headerName = header.name.toLowerCase()
-		if (['origin', 'access-control-allow-origin'].includes(headerName)) {
-			return header.value.startsWith("http") ? getSitename(header.value) : null
-		}
-	}
-
-	return getSitename(details.initiator)
-}
-
-function markUsed(appName) {
-	if (!appName) return
-
-	const app = AppStats.forAppName(appName)
-	app.lastUsed = nowDatestamp()
-
-	AppStats.markDirty()
-}
-
 function isAuthenticated(appName) {
 	if (!appName) return
 
 	const app = AppStats.forAppName(appName)
-	return app.isAuthenticated
+	return app?.isAuthenticated === true
 }
 
 
@@ -370,49 +348,56 @@ function markIsAuthenticated(appName, reason) {
 	if (!appName) return
 
 	const app = AppStats.forAppName(appName)
-
-	if (!app.isAuthenticated) {
+	if (app && ! app.isAuthenticated) {
 		app.isAuthenticated = reason
 		AppStats.markDirty()
 	}
 }
 
 chrome.webRequest.onAuthRequired.addListener(
-	function(details) {
-		setInitiator(details)
-
-		const appName = getAppnameFromHeaders(details, details.responseHeaders)
+	function() {
 		markIsAuthenticated(appName, "HTTP auth req")
 	},
-	{ urls: ["<all_urls>"] } , ["responseHeaders"]
+	{ urls: ["<all_urls>"] }
 )
 
+async function getFrameUrl(tabId, frameId) {
+	return new Promise((resolve, reject) => {
+		chrome.webNavigation.getFrame({ tabId, frameId }, (frameInfo) => {
+			if (!frameInfo) return
+
+			if (!frameInfo.url) {
+				console.error("no frameInfo", frameInfo)
+				reject(chrome.runtime.lastError || new Error("No frameInfo/url found"))
+			} else {
+				resolve(frameInfo.url)
+			}
+		})
+	})
+}
 
 function detectApplication(hook, headers) {
 	hook.addListener(
-		function(details) {
-			if (! (details.frameType === 'outermost_frame' || details.type !== 'main_frame') ||
-				details.tabId < 0)
-			{
+		async function(details) {
+			if (details.tabId < 0) {
 				return
 			}
 
 			setInitiator(details)
+			const mainFrameUrl = details.frameId === 0 ? details.initiator : await getFrameUrl(details.tabId, 0)
+			const appName = getSitename(mainFrameUrl)
 
-			if (getSitename(details.url) !== getSitename(details.initiator)) {
+			if (getSitename(details.initiator) !== appName || ignorelist?.find(details.url)) {
 				return
 			}
 
-			const appName = getAppnameFromHeaders(details, details[headers])
-
 			if (appName) {
-				AppStats.assignAppToSite(appName, details.initiator)
+				const app = AppStats.getOrCreateApp(appName)
+				AppStats.markUsed(app)
 
-				markUsed(appName)
-
-				const urlMatch = findAuthPattern(details.url.toURL()?.pathname)
-				if (urlMatch) {
-					return markIsAuthenticated(appName, 'url:' + urlMatch)
+				const authPattern = findAuthPattern(details.url.toURL()?.pathname)
+				if (authPattern) {
+					return markIsAuthenticated(appName, 'url:' + authPattern)
 				}
 
 				for (let header of details[headers]) {
@@ -435,8 +420,7 @@ detectApplication(chrome.webRequest.onHeadersReceived, "responseHeaders")
 chrome.webRequest.onCompleted.addListener(
 	function (details) {
 		setInitiator(details)
-		const appName = getAppnameFromHeaders(details, details.responseHeaders)
-		const hostname = getSitename(details.initiator)
+		const appName = getSitename(details.initiator)
 
 		if (isAuthenticated(appName)) {
 			return
@@ -447,7 +431,7 @@ chrome.webRequest.onCompleted.addListener(
 				if (cookie.name?.match(AUTH_COOKIE_PATTERN)) {
 					const cookieDomain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain
 
-					if (matchDomain(hostname, { [cookieDomain] : true })) {
+					if (matchDomain(appName, { [cookieDomain] : true })) {
 						return markIsAuthenticated(appName, 'cookie:' + cookie.name)
 					}
 				}
@@ -588,7 +572,7 @@ function reportApplications() {
 function registerInteraction(url, context) {
 	if (context.documentLifecycle && context.documentLifecycle !== 'active' ||
 		context.tabId < 0 ||
-		ignorelist?.find(context.url))
+		ignorelist?.find(url))
 	{
 		return
 	}
@@ -602,7 +586,8 @@ function registerAccountUsage(url, report) {
 
 	const config = Config.forURL(url)
 	const domain = getDomainFromUsername(report.username)
-	const app = AppStats.forURL(url)
+	const appName = getSitename(url)
+	const app = AppStats.getOrCreateApp(appName)
 	app.lastUsed = nowDatestamp()
 	app.lastConnected = nowDatestamp()
 	app.lastAccount = report.username
@@ -641,8 +626,8 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 	if (details?.transitionType === 'auto_subframe' ||
 		details?.transitionType === 'generated' ||
 		details?.transitionType === 'reload' ||
-		details?.transitionQualifiers === 'server_redirect' ||
-		details?.transitionQualifiers === 'client_redirect' ||
+		details?.transitionQualifiers?.includes('server_redirect') ||
+		details?.transitionQualifiers?.includes('client_redirect') ||
 		details.tabId < 0
 	) {
 		return
