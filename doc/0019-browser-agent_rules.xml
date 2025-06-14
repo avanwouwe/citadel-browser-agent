@@ -171,7 +171,14 @@
     <rule id="474" level="10">
         <if_sid>450</if_sid>
         <field name="browseragent.level">^ERROR$</field>
-        <field name="browseragent.result">^blacklist exception granted$</field>
+        <field name="browseragent.event">^exception$</field>
+        <description>$(browseragent.description)</description>
+    </rule>
+
+    <rule id="475" level="7">
+        <if_sid>450</if_sid>
+        <field name="browseragent.level">^WARN</field>
+        <field name="browseragent.event">^block$</field>
         <description>$(browseragent.description)</description>
     </rule>
 
