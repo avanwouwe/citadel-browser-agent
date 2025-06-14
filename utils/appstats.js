@@ -95,6 +95,10 @@ class AppStats {
 
     static incrementInteraction(url) {
         const appName = getSitename(url)
+        if (!appName) {
+            return
+        }
+
         const app = AppStats.forAppName(appName)
 
         if (app) {

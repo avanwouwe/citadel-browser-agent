@@ -60,7 +60,7 @@ function blockDomainModal(domain, message, exceptionMessage) {
                 white-space: pre-wrap;
             }
             .icon {
-                width:48px;
+                width:100px;
                 margin-right:1em;
             }
             .column {

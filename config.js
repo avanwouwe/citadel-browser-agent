@@ -209,6 +209,7 @@ class Config {
             url: [ ],
         },
         ignorelist: [
+            'about:home',
             'about:blank',
             'about:newtab',
             'about:srcdoc',
