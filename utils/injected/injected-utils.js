@@ -9,8 +9,7 @@ const findEmailPattern = (str) => str.match(EMAIL_ADDRESS_FORMAT_REGEX)?.[0]
 
 Element.prototype.isHidden = function() {
     // Check if the element or any parent is hidden
-    if (this.type && this.type === "hidden") return true
-    if (this.hasAttribute('hidden')) return true
+    if (this.type === "hidden" || this.hasAttribute('hidden')) return true
 
     const style = window.getComputedStyle(this)
     if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") return true
@@ -28,6 +27,7 @@ function debug(message, ...params) {
 function injectPageScript(scriptPath) {
     const s = document.createElement('script')
     s.src = chrome.runtime.getURL(scriptPath)
+    s.type = 'module'
     s.onload = () => s.remove();
     (document.head || document.documentElement).appendChild(s)
 }
