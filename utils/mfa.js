@@ -20,6 +20,8 @@ function startTimerMFA(url, minutes, showModal) {
     const timerId = setTimeout(() => {
         console.log(`MFA timeout for ${domain}`)
 
+        logger.log(nowTimestamp(), "block", "MFA blocked", url, Log.WARN, undefined, `blocked access to ${domain} due to missing MFA`)
+
         logOffApplication(domain)
 
         forAllTabs(domain, () => location.reload())
