@@ -49,24 +49,24 @@ Any time a password is sent to a web application via a form, Citadel checks whet
 Once every two weeks a report is triggered that generates one event for every application, for every account that has a password that does not conform to the password policy.
 
 ## MFA policy enforcement
-Citadel can check if MFA is used after a password is sent to a web application via a form. The idea being that generally non-password based authentication such as delegated authentication (OIDC, SAML, etc) will apply MFA. Detection of the MFA is based on various heuristics, such as the name of form fields, the structure of URLs and the content of the fields. Use of the navigator.credentials API to request for example use of WebAuthn or FIDO is detected.
+Citadel can check if MFA is used after a password is sent to a web application via a form. The idea being that generally non-password based authentication such as delegated authentication (OIDC, SAML, etc) will require MFA. Detection of the MFA is based on various heuristics, such as the name of form fields, the structure of URLs and the content of the fields. Use of the navigator.credentials API to request for example use of WebAuthn or FIDO is detected.
 
-If a password is observed, users are allowed a couple of minutes to use or configure MFA. Failing that they are logged off from the application, and instructed to configure MFA. For urgent and exceptional cases they can request a temporary exception. Both events are logged.
+If a password is observed, users are allowed a couple of minutes to use or configure MFA. Failing that they are disconnected from the application, and instructed to configure MFA. For urgent and exceptional cases they can request a temporary exception. Both events are logged.
 
-Sessions that are authenticated using MFA have a maximum duration. Once this duration is exceeded the user is logged off and is this forced to re-authenticate.
+Sessions that are authenticated using MFA have a maximum duration. Once this duration is exceeded the user is disconnected and is this forced to re-authenticate.
 
-Since MFA is not available for all sites, you have to list the sites for which you require MFA to be enabled.
+Since MFA is not available for all sites, the list of sites for which MFA is required must be explicitly configured.
 
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
 
 The shadow IT detection only reports on interaction with (authenticated) applications, and only tracks the number of interactions per site, per day.
 
-The data is logged on your computer and is never sent across the network, unless of course you choose to ship the events to your SIEM.
+The data is logged on the local machine and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 
 
 ## Installation
-There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless installation of Citadel should be relatively easy. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM.
+There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM.
 
 * [macOS](/doc/macos.md)
 * [Windows](/doc/windows.md)
@@ -90,21 +90,21 @@ Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) 
 
 See the [configuration](/config.js) to understand the default settings.
 
-If you do not reduce the default privacy-related measures and you have listed an entry for "logging and monitoring" in your Records of Processing Activities, you are in compliance with the GDPR.
+If you do not reduce the default privacy-related measures, you restrict access to the log entries, and you have listed an entry for "logging and monitoring" in your Records of Processing Activities, you are in compliance with the GDPR.
 
 ### which browsers are supported?
 Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
 
 ### I don't want to install external software
-Of course you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/win/build.ps1) and [macOS](/bin/mac/build.sh). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browsers). Or you can even make your own copy and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).
+Of course, you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/win/build.ps1) and [macOS](/bin/mac/build.sh). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browsers). Or you can even take the locally built plugin and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).
 
 ### what about performance?
-Citadel is designed to be very efficient. It only runs (very briefly) every time when you click on a web page. All operations are asynchronous and are optimized so as to have a minimal impact on your browsing experience. With the default blacklist configuration the extension consumes only 20 Mb of memory and will download approximately 20 Mb every hour. That is roughly equivalent to 5 minutes of video conferencing.
+Citadel is designed to be very efficient. It only runs (very briefly) every time when you click on a web page. All operations are asynchronous and are optimized so as to have a minimal impact on the browsing experience of the user. With the default blacklist configuration the extension consumes about 35 Mb of memory and will download approximately 20 Mb every hour. That is roughly equivalent to 5 minutes of video conferencing.
 
-In fact, other solutions that address the same problem generally shunt all the traffic via a web proxy. Not only does this add a Single Point of Failure to your architecture, or require more compute since all traffic has to be parsed and analyzed, but it also requires that compute to be centralized. Moreover, forcing all traffic via proxy adds significant network latency to any and all use of the Internet. By running in your user's browser and hooking into existing events, Citadel sidesteps all of these issues.
+In fact, other solutions that address the same problem generally shunt all the traffic via a web proxy. This will log the traffic, but it will not cover other events, such as browser errors, password quality, use of MFA, etc. And not only does this add a Single Point of Failure to your architecture, or require more compute since all traffic has to be parsed and analyzed, but it also requires that compute to be centralized. Moreover, forcing all traffic via proxy adds significant network latency to any and all use of the Internet. By running in your user's browser and hooking into existing events, Citadel sidesteps all of these issues.
 
 ### how much security does this provide?
-Citadel is mainly intended for policy enforcement, licence management and DFIR. It uses heuristics to analyze the traffic it observes, which may produce false positives or false negatives. Whilst it does offer a basic blacklisting functionality, it does not (yet) use heuristic behavioural analysis to detect unknown threat types. It reports when the browser detects malware, but it does not itself analyze the content of uploads or downloads.
+Citadel is mainly intended for policy enforcement, licence management and DFIR. It uses heuristics to analyze the traffic it observes, which may produce false positives or false negatives. Whilst it does offer a basic blacklisting functionality, it does not (yet) use heuristic behavioural analysis to detect unknown threat types. It reports when the browser detects malware (thus making you more aware), but it does not itself analyze the content of uploads or downloads.
 
 For more detail see the complete [list of limitations](/doc/limitations.md).
 

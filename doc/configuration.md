@@ -14,7 +14,7 @@ Example:
           "yourcompany.io"  : true,
           "yourcompany.net" : true
         }
-    },
+    }
     ...
 ```
 
@@ -67,6 +67,7 @@ By default, users can request an exception if they are blocked by a blacklist. T
         "exceptions": {
             "duration": 0
         },
+    }        
     ...
 ```
 
@@ -85,7 +86,7 @@ This is for example the default configuration:
             "192.168.0.0/16"
         ],
         url: [ ],
-    },
+    }
     ...
 ```
 
@@ -105,7 +106,7 @@ You can configure your own password policy:
             "minNumberOfSymbols": 1,
             "minEntropy": 2.5,
             "minSequence": 4
-        },
+        }
     }
     ...
 ```
@@ -137,7 +138,7 @@ You have to enumerate the list of domains where you require MFA, and you can mak
             "non-mfa.yourcompany.com"
           ]
         }
-    },
+    }
 ```
 
 ## session duration
@@ -217,8 +218,8 @@ When specifying the logging level you can use the following log levels:
 
 The special log level `NONE` is even higher than `ERROR` and is used for example to never log something or to mask all events.
 
-## rate throttling
-Citadel performs rate throttling to ensure that one issue does not overwhelm the storage of the local machine or your SIEM. Throttling is triggered if more than the specified number of events arrive within a `windowDuration` minutes, and on a per-level basis. Throttling stopped if no more events arrive during the window.
+## log rate throttling
+Citadel performs rate throttling on logging to ensure that one issue does not overwhelm the storage of the local machine or your SIEM. Throttling is triggered if more than the specified number of events arrive within a `windowDuration` minutes, and on a per-level basis. Throttling stopped if no more events arrive during the window.
 
 If throttling is triggered, warnings are issued at the level just above the original level. One warning is raised at the start of throttling, and periodic warnings are raised every `reportFrequency` to report on the number of lost events.
 
@@ -234,9 +235,9 @@ If throttling is triggered, warnings are issued at the level just above the orig
                 "INFO": 50,
                 "WARN": 25,
                 "ERROR": 10,
-                "ALERT": 5,
+                "ALERT": 5
             }
-        },
-   },
+        }
+   }
    ...
 ```

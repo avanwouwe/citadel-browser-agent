@@ -17,7 +17,11 @@ class RateThrottle {
         this.warningCallback = warningCallback
         this.reportCount = 0
 
-        this.state = null
+        this.state = {
+            count: 0,
+            windowEnd: 0,
+            throttled: false,
+        }
     }
 
     #startReporting() {
@@ -49,13 +53,12 @@ class RateThrottle {
     }
 
     #startWindow(setThrottled) {
+        let s = this.state
         const currThrottled = this?.state?.throttled ?? false
 
-        this.state = {
-            count: 1,
-            windowEnd: Date.now() + this.windowDuration,
-            throttled: setThrottled,
-        }
+        s.count = 0
+        s.windowEnd = Date.now() + this.windowDuration
+        s.throttled = setThrottled
 
         if (currThrottled && !setThrottled) {
             this.#stopReporting()
@@ -74,22 +77,21 @@ class RateThrottle {
         const now = Date.now()
         let s = this.state
 
-        // outside of a window
-        if (!s || now > s.windowEnd) {
-            return this.#startWindow(false)
+        // outside of a window, or first window
+        if (now > s.windowEnd) {
+            this.#startWindow(false)
         }
 
+        // in a window, but over the limit, so start a new window
+        if (s.count >= this.limit) {
+            this.#startWindow(true)
+        }
+
+        s.count++
         if (s.throttled) {
             this.reportCount++
         }
-        s.count++
 
-        // in window, within limit, stay in current window and state
-        if (s.count <= this.limit) {
-            return s.throttled
-        }
-
-        // exceeded limit, start a new (throttled) window
-        return this.#startWindow(true)
+        return s.throttled
     }
 }
