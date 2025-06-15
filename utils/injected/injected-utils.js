@@ -31,3 +31,16 @@ function injectPageScript(scriptPath) {
     s.onload = () => s.remove();
     (document.head || document.documentElement).appendChild(s)
 }
+
+function shallowClone(obj) {
+    const clone = {}
+
+    for (const key in obj) {
+        const value = obj[key]
+        if (typeof value !== 'function') {
+            clone[key] = value
+        }
+    }
+
+    return clone
+}

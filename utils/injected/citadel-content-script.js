@@ -149,14 +149,14 @@ function analyzeForm(formElements, eventElement) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    function shallowClone(obj) {
-        const clone = {}
+    function cloneFile(file) {
+        const clone = shallowClone(file)
+        delete clone.lastModifiedDate
 
-        for (const key in obj) {
-            const value = obj[key]
-            if (typeof value !== 'function') {
-                clone[key] = value
-            }
+        try {
+            clone.lastModified = new Date(clone.lastModified).toISOString()
+        } catch {
+            clone.lastModified = ""
         }
 
         return clone
@@ -175,7 +175,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('change', function(event) {
         if (event.target?.type === 'file') {
             for (const file of event.target.files) {
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'picked file', file: shallowClone(file)
+                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'picked file', file: cloneFile(file)
              })
             }
         }
@@ -183,13 +183,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('drop', function(event) {
         Array.from(event.dataTransfer.files).forEach(file => {
-            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) })
+            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: cloneFile(file) })
         })
 
         Array.from(event.dataTransfer.items).forEach(item => {
             if (item.kind === 'file') {
                 const file = item.getAsFile();
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: shallowClone(file) })
+                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: cloneFile(file) })
             }
         })
 
