@@ -73,7 +73,7 @@ class Log {
             const details = value[event]
             if (details && typeof details === 'object'  ) {
                 logEntry['browseragent']['detail'] = {};
-                logEntry['browseragent']['detail'][event] = details
+                logEntry['browseragent']['detail'][event.replaceAll(' ','_')] = details
             }
 
             delete logEntry['browseragent']['value']
