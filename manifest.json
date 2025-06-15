@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Citadel browser agent",
-  "version": "1.2",
-  "description": "Citadel is a browser agent that detects malware and shadow IT by analyzing and logging security events in a privacy-respecting way",
+  "version": "1.3",
+  "description": "Citadel is a browser agent that enforces your IT policies, and detects malware and shadow IT by analyzing and logging security events in a privacy-respecting way",
   "permissions": [
     "webNavigation",
     "webRequest",

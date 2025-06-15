@@ -7,6 +7,18 @@ Citadel is a browser agent that enforces IT policy and detects malware and shado
 
 Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
 
+# Citadel browser agent
+Citadel is a browser agent that enforces IT policy and detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)).
+
+Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
+
+<table>
+  <tr>
+    <td><img src="/doc/screenshot wazuh.png" width="100%" alt="screenshot Wazuh"></td>
+    <td><img src="/doc/screenshot-mfa-blocked.png" width="100%" alt="screenshot MFA blocking">></td>
+  </tr>
+</table>
+
 ## Overview
 Citadel can perform web filtering, limit the maximum duration of authenticated sessions, enforce your MFA policy, and help you enforce your password policy.
 
