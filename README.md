@@ -23,7 +23,7 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
 Citadel can perform web filtering, limit the maximum duration of authenticated sessions, enforce your MFA policy, and help you enforce your password policy.
 
 Citadel detects the following events in the browser:
-* IP, URL or domain is blacklisted (good default blacklists provided, can be bypassable or not by users)
+* IP, URL or domain is blacklisted (good default blacklists provided, can be made bypassable by users)
 * user is using unencrypted protocols for an application (e.g. FTP, HTTP or WS)
 * user is using URL with username or password in the URL
 * user has downloaded a file

@@ -1,4 +1,4 @@
-class ExceptionList extends URLBlacklist {
+class Exceptionlist extends URLBlacklist {
 
     constructor() {
         super()

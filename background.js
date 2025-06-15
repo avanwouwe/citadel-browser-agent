@@ -25,7 +25,7 @@ Port.onMessage("config",(newConfig) => {
 	whitelistURL = new URLBlacklist().init()
 	config.whitelist.ip.forEach(entry => whitelistIP.add(entry))
 	config.whitelist.url.forEach(entry => whitelistURL.add(entry))
-	exceptionList = new ExceptionList()
+	exceptionList = new Exceptionlist()
 	ignorelist = new Ignorelist()
 
 	const version = chrome.runtime.getManifest().version
