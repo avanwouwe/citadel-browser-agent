@@ -241,9 +241,9 @@ class Config {
                     TRACE: 1000,
                     DEBUG: 100,
                     INFO: 50,
-                    WARN: 25,
+                    WARN: 50,
                     ERROR: 10,
-                    ALERT: 5,
+                    ALERT: 10,
                 }
             },
         }

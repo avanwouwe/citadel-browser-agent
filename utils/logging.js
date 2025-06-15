@@ -31,12 +31,13 @@ class Log {
         value,
         description = undefined,
         initiator = undefined,
-        id = undefined
+        id = undefined,
+        throttle = true
     ){
         const config = Config.forURL(url)
         const levelValue = Log.#levelValue[level]
 
-        if (Log.#throttles !== undefined && Log.#throttles[levelValue].throttle()) { return }
+        if (throttle && Log.#throttles?.[levelValue]?.throttle()) { return }
 
         if (levelValue < config.logging.logLevel && levelValue < config.logging.consoleLevel) { return }
 
@@ -141,11 +142,11 @@ class Log {
             const reportLevel = Log.upgrade(levelLabel)
 
             const warningCallback = () => {
-                logger.log(nowTimestamp(), "report", "events lost", undefined, reportLevel, 0, `more than ${rate} messages of level ${levelLabel} within ${throttling.windowDuration} minutes, starting throttling`)
+                logger.log(nowTimestamp(), "report", "events lost", undefined, reportLevel, 0, `more than ${rate} messages of level ${levelLabel} within ${throttling.windowDuration} minutes, starting throttling`, undefined, undefined, false)
             }
 
             const reportCallback = (lostEvents) => {
-                logger.log(nowTimestamp(), "report", "events lost", undefined, reportLevel, lostEvents, `lost ${lostEvents} events of level ${levelLabel} due to throttling`)
+                logger.log(nowTimestamp(), "report", "events lost", undefined, reportLevel, lostEvents, `lost ${lostEvents} events of level ${levelLabel} due to throttling`, undefined, undefined, false)
             }
 
             this.#throttles[levelValue] = new RateThrottle(rate, throttling.windowDuration, throttling.reportFrequency, warningCallback, reportCallback)

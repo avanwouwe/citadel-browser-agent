@@ -233,9 +233,9 @@ If throttling is triggered, warnings are issued at the level just above the orig
                 "TRACE": 1000,
                 "DEBUG": 100,
                 "INFO": 50,
-                "WARN": 25,
+                "WARN": 50,
                 "ERROR": 10,
-                "ALERT": 5
+                "ALERT": 10
             }
         }
    }
