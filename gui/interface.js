@@ -31,7 +31,7 @@ function blockPage(tabId, reason, blockedPage) {
 }
 
 function blockDomainModal(domain, message, exceptionMessage) {
-    const logo = config.company.logo || chrome.runtime.getURL('/gui/images/icon64.png')
+    const logo = config.company.logo || chrome.runtime.getURL('/gui/images/icon128.png')
 
     forAllTabs(domain, (message, logo, exceptionMessage) => {
         if (document.getElementById('blockOverlayShadowRootHost')) return
