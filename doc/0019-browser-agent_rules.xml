@@ -178,7 +178,7 @@
     <rule id="475" level="7">
         <if_sid>450</if_sid>
         <field name="browseragent.level">^WARN</field>
-        <field name="browseragent.event">^block$</field>
+        <field name="browseragent.event">^policy violation$</field>
         <description>$(browseragent.description)</description>
     </rule>
 
