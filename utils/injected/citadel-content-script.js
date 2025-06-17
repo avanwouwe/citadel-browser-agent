@@ -156,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             clone.lastModified = new Date(clone.lastModified).toISOString()
         } catch {
-            clone.lastModified = ""
+            delete clone.lastModified
         }
 
         return clone

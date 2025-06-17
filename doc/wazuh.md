@@ -30,6 +30,53 @@ In the `ossec.conf` file that is deployed on agents, add the following `<localfi
   </localfile>
 ```
 
+# add index template
+When the OpenSearch database in Wazuh encounters a new field, it creates the field as "keyword", instead of as "date" or "integer". This prevents them from being used in aggregations functions in dashboards. In order to ensure that the fields are created with the correct types, they have to be defined in the **index template**. Wazuh has a default template that takes care of the standard Wazuh fields, and a second template has to be added that will be merged with the default Wazuh one.
+
+Go to `Indexer management` > `Dev Tools` and call the OpenSearch API with this snippet:
+```
+PUT _template/wazuh-browseragent
+{
+  "index_patterns": ["wazuh-alerts-*"],
+  "order": 50,
+  "mappings": {
+    "properties": {
+      "data": {
+        "properties": {
+          "browseragent": {
+            "properties": {
+              "detail": {
+                "properties": {
+                  "download": {
+                    "properties": {
+                      "bytesReceived": { "type": "long" },
+                      "fileSize":      { "type": "long" },
+                      "totalBytes":    { "type": "long" },
+                      "startTime":     { "type": "date" },
+                      "endTime":       { "type": "date" }
+                    }
+                  },
+                  "file_select": {
+                    "properties": {
+                      "size":         { "type": "long" },
+                      "lastModified": { "type": "date" }
+                    }
+                  }
+                }
+              },
+              "numvalue": { "type": "double" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+> [!NOTE]  
+> This template will only be applied when the **next** index is created, which is generally the next day. If events are injected in the current index, the fields will not be the correct type, and the same field will have different types in different indexes. This may cause strange behaviour elsewhere. You may want to wait until the next index is created, or delete the current index (if it does not contain important information)
+
 # add decoder
 In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` > `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [/doc/0590-browser-agent_decoder.xml](/doc/0590-browser-agent_decoder.xml).
 
