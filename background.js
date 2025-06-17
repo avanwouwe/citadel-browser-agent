@@ -652,7 +652,6 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 		return
 
 	const cookie = changeInfo.cookie
-	const protocol = cookie.secure ? 'https://' : 'http://'
 	const hostname = cookie.domain.startsWith('.') ? cookie.domain.slice(1) : cookie.domain
 
 	const maxSessionExpirationTimestamp = Math.floor((Date.now() + config.session.maxSessionDays * ONE_DAY) / 1000)
@@ -661,7 +660,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 
 	if (matchDomain(cookie.domain, config.session.domains) && ! matchDomain(cookie.domain, config.session.exceptions)) {
 		const modifiedCookie = {
-			url: `${protocol}${hostname}${cookie.path}`,
+			url: `https://${hostname}${cookie.path}`,
 			name: cookie.name,
 			value: cookie.value,
 			path: cookie.path,
