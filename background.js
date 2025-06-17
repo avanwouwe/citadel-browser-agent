@@ -31,7 +31,7 @@ Port.onMessage("config",(newConfig) => {
 	const version = chrome.runtime.getManifest().version
 	const configHash = config?.hashDJB2()
 
-	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, )
+	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, undefined, undefined, false)
 })
 
 chrome.runtime.onUpdateAvailable.addListener(() => {
@@ -51,7 +51,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 	setTimeout(() => {
 		const version = chrome.runtime.getManifest().version
-		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`)
+		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`, undefined, undefined, false)
 	}, 5000)
 })
 
@@ -477,13 +477,16 @@ function reportInteractions() {
 						Log.INFO,
 						it.interactions,
 						`'${it.appName}' received ${it.interactions} interactions on ${date}`
+						, undefined
+						, undefined
+						, false
 					)
 				})
 		}
 
 		const unreportedApplications = Object.entries(usagePerDayPerApp).length - config.reporting.maxApplicationEntries
 		if (unreportedApplications > 0) {
-			logger.log(nowTimestamp(), "report", "unreported interactions", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`)
+			logger.log(nowTimestamp(), "report", "unreported interactions", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`, undefined, undefined, false)
 		}
 
 	}
@@ -518,6 +521,9 @@ function reportApplications() {
 					Log.INFO,
 					unusedDays,
 					`'${appName}' was last used ${unusedDays} days ago, on ${app.lastUsed}`
+					, undefined
+					, undefined
+					, false
 				)
 			}
 
@@ -545,6 +551,9 @@ function reportApplications() {
 					Log.WARN,
 					it.count,
 					`password for account '${it.username}' of '${it.appName}' has ${it.count} issues`
+					, undefined
+					, undefined
+					, false
 				)
 			})
 
@@ -644,7 +653,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 
 	const cookie = changeInfo.cookie
 	const protocol = cookie.secure ? 'https://' : 'http://'
-	const domain = cookie.domain.startsWith('.') ? cookie.domain.substring(1) : undefined
+	const hostname = cookie.domain.startsWith('.') ? cookie.domain.slice(1) : cookie.domain
 
 	const maxSessionExpirationTimestamp = Math.floor((Date.now() + config.session.maxSessionDays * ONE_DAY) / 1000)
 	if (!cookie.expirationDate || cookie.expirationDate <= maxSessionExpirationTimestamp)
@@ -652,8 +661,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 
 	if (matchDomain(cookie.domain, config.session.domains) && ! matchDomain(cookie.domain, config.session.exceptions)) {
 		const modifiedCookie = {
-			url: `${protocol}${domain ?? cookie.domain}${cookie.path}`,
-			domain: domain,
+			url: `${protocol}${hostname}${cookie.path}`,
 			name: cookie.name,
 			value: cookie.value,
 			path: cookie.path,
@@ -662,6 +670,10 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 			sameSite: cookie.sameSite,
 			expirationDate: maxSessionExpirationTimestamp,
 			storeId: cookie.storeId
+		}
+
+		if (cookie.domain.startsWith('.')) {
+			modifiedCookie.domain = hostname
 		}
 
 		chrome.cookies.set(modifiedCookie)
