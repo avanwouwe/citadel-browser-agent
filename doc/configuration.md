@@ -9,11 +9,11 @@ Example:
         "contact": "it-support@yourcompany.com",
         "name": "Company",
         "logo": "https://www.yourcompany.com/assets/images/company-logo.png",
-        "domains": {
-          "yourcompany.com" : true,
-          "yourcompany.io"  : true,
-          "yourcompany.net" : true
-        }
+        "domains": [
+          "yourcompany.com",
+          "yourcompany.io",
+          "yourcompany.net"
+        ]
     }
     ...
 ```
