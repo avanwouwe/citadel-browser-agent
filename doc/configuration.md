@@ -216,7 +216,7 @@ When specifying the logging level you can use the following log levels:
 * `WARN` : potentially risky user actions with, such as unencrypted requests or invalid certificates. Perform a periodic statistical review.
 * `ERROR` : risky user actions that require immediate investigation, such as visiting a blacklisted URL or ignoring a virus warning
 
-The special log level `NONE` is even higher than `ERROR` and is used for example to never log something or to mask all events.
+The special log level `NEVER` is used to never log something.
 
 ## log rate throttling
 Citadel performs rate throttling on logging to ensure that one issue does not overwhelm the storage of the local machine or your SIEM. Throttling is triggered if more than the specified number of events arrive within a `windowDuration` minutes, and on a per-level basis. Throttling stopped if no more events arrive during the window.

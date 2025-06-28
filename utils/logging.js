@@ -1,21 +1,21 @@
 class Log {
 
+    static NEVER  = "NEVER"
     static TRACE = "TRACE"
     static DEBUG = "DEBUG"
     static INFO  = "INFO"
     static WARN  = "WARN"
     static ERROR = "ERROR"
     static ALERT = "ALERT"
-    static NONE  = "NONE"
 
     static #levelValue = {
-        TRACE: 0,
-        DEBUG: 1,
-        INFO:  2,
-        WARN:  3,
-        ERROR: 4,
-        ALERT: 5,
-        NONE: 6
+        NEVER: 0,
+        TRACE: 1,
+        DEBUG: 2,
+        INFO:  3,
+        WARN:  4,
+        ERROR: 5,
+        ALERT: 6,
     }
 
     static #levelLabel = Object.fromEntries(Object.entries(this.#levelValue).map(([key, value]) => [value, key]))
@@ -79,11 +79,11 @@ class Log {
             delete logEntry['browseragent']['value']
         }
 
-        if (levelValue >= config.logging.logLevel) {
+        if (config.logging.logLevel > 0 && levelValue >= config.logging.logLevel) {
             Port.postMessage("event", logEntry)
         }
 
-        if (levelValue >= config.logging.consoleLevel) {
+        if (config.logging.consoleLevel > 0 && levelValue >= config.logging.consoleLevel) {
             switch (event.level) {
                 case Log.TRACE:
                     return console.trace(logEntry)
@@ -157,7 +157,7 @@ class Log {
         let value = this.#levelValue[level]
         assert(value !== undefined, `unknown log level '${level}'`)
 
-        if (level !== Log.TRACE && level !== Log.NONE) {
+        if (level !== Log.NEVER) {
             value--
         }
 
@@ -168,7 +168,7 @@ class Log {
         let value = this.#levelValue[levelLabel]
         assert(value !== undefined, `unknown log level '${levelLabel}'`)
 
-        if (levelLabel !== Log.ALERT && levelLabel !== Log.NONE) {
+        if (levelLabel !== Log.ALERT && levelLabel !== Log.NEVER) {
             value++
         }
 

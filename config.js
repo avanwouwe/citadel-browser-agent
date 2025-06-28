@@ -222,7 +222,8 @@ class Config {
         },
         errors: {
             exceptions: {
-                'net::ERR_BLOCKED_BY_CLIENT' : 'DEBUG',
+                'net::ERR_BLOCKED_BY_CLIENT' : 'NEVER',
+                'net::ERR_SSL_CLIENT_AUTH_CERT_NEEDED' : 'NEVER',
                 'net::ERR_BLOCKED_BY_ORB' : 'DEBUG',
                 'net::ERR_BLOCKED_BY_CSP' : 'DEBUG',
                 'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'DEBUG',
