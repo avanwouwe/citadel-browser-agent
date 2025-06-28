@@ -143,6 +143,8 @@ class IPBlacklist {
 
 class URLBlacklist {
 
+	static #SUPPORTED_URL_SCHEMES = ["https:", "http:", "wss:", "ws:", "ftp:"]
+
 	#urlSet = null
 
 	init() {
@@ -202,6 +204,10 @@ class URLBlacklist {
 			}
 
 			query = query.toURL()
+		}
+
+		if (! query.protocol in URLBlacklist.#SUPPORTED_URL_SCHEMES) {
+			return null
 		}
 
 		if (
