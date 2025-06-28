@@ -25,12 +25,9 @@ class RateThrottle {
     }
 
     #startReporting() {
-        if (this.timer !== undefined) {
-            return
-        }
-
         this.warningCallback()
-        this.timer = setInterval(this.#report, Date.now() + this.reportFrequency)
+        
+        this.timer = this.timer ?? setInterval(this.#report, Date.now() + this.reportFrequency)
     }
 
     #stopReporting() {
@@ -82,12 +79,13 @@ class RateThrottle {
             this.#startWindow(false)
         }
 
+        s.count++
+
         // in a window, but over the limit, so start a new window
         if (s.count >= this.limit) {
             this.#startWindow(true)
         }
 
-        s.count++
         if (s.throttled) {
             this.reportCount++
         }
