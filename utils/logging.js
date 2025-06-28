@@ -37,9 +37,9 @@ class Log {
         const config = Config.forURL(url)
         const levelValue = Log.#levelValue[level]
 
-        if (throttle && Log.#throttles?.[levelValue]?.throttle()) { return }
+        if (level === Log.NEVER || levelValue < config.logging.logLevel && levelValue < config.logging.consoleLevel) { return }
 
-        if (levelValue < config.logging.logLevel && levelValue < config.logging.consoleLevel) { return }
+        if (throttle && Log.#throttles?.[levelValue]?.throttle()) { return }
 
         url = this.maskUrl(url, level)
         initiator = this.maskUrl(initiator, level)
