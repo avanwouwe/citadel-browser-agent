@@ -5,7 +5,7 @@ Browser extensions are sandboxed and cannot access the local operating system. T
 You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest).
 
 Alternatively: 
-1. copy the contents of [/bin/win](/bin/win) to `C:\Program Files\Citadel\`
+1. copy the contents of [/bin/win](/bin/build/win) to `C:\Program Files\Citadel\`
 2. set the following keys to `C:\Program Files\Citadel\citadel.browser.agent.json`:
    * `HKLM\SOFTWARE\Google\Chrome\NativeMessagingHosts\citadel.browser.agent`
    * `HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser-firefox.agent` (note [Firefox specific manifest](/bin/macos/citadel.browser.agent-firefox.json))

@@ -14,7 +14,7 @@ mkdir -p "/Library/Scripts/Citadel/"
 rm -rf "/Library/Scripts/Citadel/_internal"
 rm -rf "/Library/Scripts/Citadel/citadel-browser-agent"
 
-mv "$SOURCE_DIR"/* "/Library/Scripts/Citadel/"
+cp -r "$SOURCE_DIR"/* "/Library/Scripts/Citadel/"
 rm -rf "$SOURCE_DIR"
 rm -rf "$UNUSED_DIR"
 

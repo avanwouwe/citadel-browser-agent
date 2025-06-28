@@ -1,7 +1,9 @@
 #!/bin/bash
 
+set -eu
+
 PACKAGE_ID="nl.vanwouwe.citadel"
-VERSION="1.2"
+VERSION="1.4"
 BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 OUTPUT_PKG="citadel-browser-agent-$VERSION.pkg"
 

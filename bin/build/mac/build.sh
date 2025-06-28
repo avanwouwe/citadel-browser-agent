@@ -1,7 +1,6 @@
 #!/bin/bash
 
 PACKAGE_ID="nl.vanwouwe.citadel"
-VERSION="1.2"
 
 rm -rf binaries
 
@@ -50,7 +49,7 @@ build_for_arch() {
     $ARCH_CMD pyinstaller --clean --strip --optimize 2 \
         --osx-bundle-identifier $PACKAGE_ID \
         --onedir \
-        ../citadel-browser-agent
+        ../../citadel-browser-agent
 
     deactivate
 
