@@ -9,10 +9,27 @@ import json
 import struct
 import getpass
 import traceback
+import os
+import time
+import subprocess
+import threading
 
-PROTOCOL_VERSION = 1
+match platform.system().lower():
+    case "windows":
+        SYSTEM_OS = "windows"
+    case "darwin":
+        SYSTEM_OS = "macos"
+    case _:
+        SYSTEM_OS = "unsupported"
+
+PROTOCOL_VERSION = 2
+CONFIG_PATH = "citadel-config.json"
+PERIODIC_CHECK_FREQUENCY = 60 * 60 # every hour
+DEFAULT_OSQUERY_PATH = "C:\\Program Files\\osquery\\osqueryi.exe" if SYSTEM_OS == "windows" else "/usr/local/bin/osqueryi"
+DEFAULT_UPTIME_DAYS = 30
+
+config = {}
 username = getpass.getuser()
-
 logger = None
 
 def log(event):
@@ -38,10 +55,12 @@ def createEvent(event, result, level, description):
     return {
         "timestamp" : datetime.now().isoformat(),
         "id" : random.randint(-sys.maxsize, sys.maxsize),
-        "event" : event,
-        "result" : result,
-        "level": level,
-        "description": description
+        "browseragent" : {
+            "event" : event,
+            "level": level,
+            "result" : result,
+            "description": description
+        }
     }
 
 def warning(msg):
@@ -49,14 +68,19 @@ def warning(msg):
     log(event)
 
 def error(msg):
-    event = createEvent("messaging error", "messaging error", "ERROR", msg)
+    event = createEvent("messaging error", "messaging error", "WARN", msg)
     log(event)
+    print(msg)
+    time.sleep(60 * 60)     # keep running so that the browser does not start immediately
     sys.exit(1)
 
-# create a platform-dependant logger
-current_os = platform.system()
+def exception(msg, e):
+    tb = traceback.TracebackException.from_exception(e)
+    frame = list(tb.stack)[-1]
+    warning(f"{msg} : {type(e).__name__} at {frame.filename}:{frame.lineno} in {frame.name}")
 
-if current_os == 'Darwin':  # macOS
+# create a platform-dependant logger
+if SYSTEM_OS == 'macos':
     import syslog
 
     class SyslogHandler(logging.Handler):
@@ -84,7 +108,7 @@ if current_os == 'Darwin':  # macOS
     syslog_handler.setFormatter(formatter)
     logger.addHandler(syslog_handler)
 
-elif current_os == 'Windows':
+elif SYSTEM_OS == 'windows':
     from logging.handlers import NTEventLogHandler
 
     class CustomWindowsHandler(NTEventLogHandler):
@@ -102,7 +126,6 @@ elif current_os == 'Windows':
 
             super().emit(record)
 
-
     logger = logging.getLogger('BrowserAgentLogger')
     logger.setLevel(logging.DEBUG)
     event_log_handler = CustomWindowsHandler('Browser Agent')
@@ -114,13 +137,50 @@ else:
     error("unsupported OS")
 
 
+def checkFileRights(path):
+    if not os.path.isfile(path):
+        return
+
+    if SYSTEM_OS == "macos":
+        stat_info = os.stat(path)
+        if stat_info.st_uid != 0:
+            error(f"file '{path}' is not owned by root (uid=0).")
+        if stat_info.st_gid != 0:
+            error(f"file '{path}' is not owned by group wheel (gid=0).")
+        if stat_info.st_mode & 0o002:
+            error(f"file '{path}' is writable by others (world-writable).")
+
+    elif SYSTEM_OS == "windows":
+        import win32security
+        import win32con
+
+        sd = win32security.GetFileSecurity(path, win32security.OWNER_SECURITY_INFORMATION | win32security.DACL_SECURITY_INFORMATION)
+        owner_sid = sd.GetSecurityDescriptorOwner()
+        name, dom, acc_type = win32security.LookupAccountSid(None, owner_sid)
+        if name not in ("Administrators", "SYSTEM"):
+            error(f"file '{path}' is not owned by Administrators or SYSTEM. (Owner: {name})")
+
+        # Check for "Everyone" write access
+        dacl = sd.GetSecurityDescriptorDacl()
+        everyone, _, _ = win32security.LookupAccountName(None, "Everyone")
+
+        for i in range(dacl.GetAceCount()):
+            ace = dacl.GetAce(i)
+            ace_sid = ace[2]
+            access_mask = ace[1]
+
+            if ace_sid == everyone and (access_mask & (win32con.FILE_GENERIC_WRITE | win32con.GENERIC_WRITE)):
+                error(f"file '{path}' is writable by Everyone (world-writable).")
+    else:
+        error("unsupported OS")
+
 
 def readMessage(type):
     raw_length = sys.stdin.buffer.read(4)
 
     if len(raw_length) == 0:
         sys.exit(0)
-    
+
     messageLength = struct.unpack('@I', raw_length)[0]
     message = sys.stdin.buffer.read(messageLength).decode('utf-8')
     message = json.loads(message)
@@ -131,7 +191,7 @@ def readMessage(type):
     return message.get('message')
 
 
-def sendMessage(type, message):
+def sendMessage(type, message = None):
     try:
         message = {'type': type, 'version': PROTOCOL_VERSION, 'message': message}
         message_json = json.dumps(message)
@@ -143,43 +203,235 @@ def sendMessage(type, message):
         sys.stdout.buffer.write(encoded_message)
         sys.stdout.flush()
     except Exception as e:
-        error(f"unable to send message to agent: {message}")
+        exception("unable to send message to agent", e)
 
-
-
-def readJsonFile(file_path):
+def readJsonFile(path):
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        checkFileRights(path)
+        with open(path, 'r', encoding='utf-8') as file:
             return json.load(file)
     except FileNotFoundError:
         return None
-    except json.JSONDecodeError:
-        error(f"config file '{file_path}' does not contain valid JSON.")
+    except json.JSONDecodeError as e:
+        error(f"config file '{path}' does not contain valid JSON. Reason: {e.msg} at line {e.lineno}, column {e.colno}.")
     except Exception as e:
-        error(f"unexpected error {e} occurred while reading config '{file_path}'")
+        error(f"unexpected error {e} occurred while reading config file '{path}'")
 
-def sendConfig(config):
-    sendMessage("config", config or { })
+def loadConfig():
+    global last_config_change, config
 
-    confirmation = readMessage("config")
-    if confirmation != 'ok':
-        warning(f"agent did not confirm config : {confirmation}")
+    try:
+        mtime = os.path.getmtime(CONFIG_PATH)
+    except FileNotFoundError:
+        mtime = -1
 
+    if mtime != last_config_change:
+        if last_config_change:
+            sendMessage("restart")
+        else:
+            config = readJsonFile(CONFIG_PATH) or { }
+            sendMessage("config", config)
+
+        last_config_change = mtime
+
+
+def osquery(query):
+    path = config.get("devicetrust", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
+    proc = subprocess.run([path, '--json', '--', query], capture_output=True, text=True)
+    if proc.returncode != 0:
+        raise Exception(proc.stderr)
+    return json.loads(proc.stdout)
+
+def loadControlPacks():
+    controlsSpec = config.get("devicetrust", {}).get("controls", {}).get("packs", [])
+    controlsSpec.append({"type": "windows", "path": "controls/windows-default.json"})
+    controlsSpec.append({"type": "macos",  "path": "controls/macos-default.json"})
+
+    packs = []
+    filteredSpecs = [c for c in controlsSpec if c.get("type") == SYSTEM_OS]
+    for cSpec in filteredSpecs:
+        packPath = cSpec.get("path")
+        try:
+            controlPack = readJsonFile(packPath)
+
+            if not controlPack:
+                raise FileNotFoundError(packPath)
+
+            for controlName, controlObj in controlPack.get("controls", {}).items():
+                queryStr = controlObj.get("query")
+                if not queryStr:
+                    continue
+                packs.append((controlName, queryStr))
+        except Exception as e:
+            exception(f"failed to load control pack {packPath}", e)
+
+
+    return packs
+
+def checkSystemPatched():
+    report = { }
+
+    try:
+        if SYSTEM_OS == "macos":
+            result = subprocess.run(["softwareupdate", "--list"], capture_output=True, text=True, check=True)
+            out = result.stdout + result.stderr
+            isPatched = "No new software available" in out
+            addReport(report, "SystemPatched", [] if isPatched else [''])
+
+        elif SYSTEM_OS == "windows":
+            missingPatches = getErrors("SELECT title FROM windows_update_history WHERE result_code NOT IN (2, 3);")
+            addReport(report, "SystemPatched", missingPatches)
+
+        else:
+            raise Exception("unsupported OS")
+    except Exception as e:
+        exception("failed to check OS patching", e)
+
+    return report
+
+def reportBrowsers():
+    try:
+        if SYSTEM_OS == "macos":
+            browser_ids = [
+                'com.google.Chrome',
+                'org.mozilla.firefox',
+                'com.brave.Browser',
+                'com.microsoft.edgemac',
+                'com.operasoftware.Opera'
+            ]
+            in_clause = ', '.join(f"'{bid}'" for bid in browser_ids)
+            query = (f"SELECT bundle_identifier AS name, path, bundle_short_version AS version FROM apps WHERE bundle_identifier IN ({in_clause}) AND last_opened_time > 0;")
+            return list(osquery(query))
+
+        elif SYSTEM_OS == "windows":
+            browser_ids = [
+                'Google Chrome',
+                'Mozilla Firefox',
+                'Brave',
+                'Microsoft Edge',
+                'Opera'
+            ]
+            in_clause = ', '.join(f"'{bid}'" for bid in browser_ids)
+            query = (f"SELECT name, install_location AS path, version FROM programs WHERE name IN ({in_clause});")
+            return list(osquery(query))
+
+        else:
+            return []
+
+    except Exception as e:
+        exception("Failed to perform browser check", e)
+
+
+def checkUptime():
+    report = { }
+
+    try:
+        maxUpDays = config.get("devicetrust", {}).get("controls", {}).get("maxUptimeDays", DEFAULT_UPTIME_DAYS)
+        errors = getErrors(f"SELECT '' AS error FROM uptime WHERE total_seconds / 60 / 60 / 24 > {maxUpDays};")
+
+        addReport(report, "MaxUptime", errors)
+    except Exception as e:
+        exception("Failed to check uptime", e)
+
+    return report
+
+def checkBlacklist(type, forbiddenLabel, requiredLabel, query):
+    report = { }
+
+    try:
+        blacklistConfig = config.get("devicetrust", {}).get(type, {})
+        required = set(blacklistConfig.get("required", []))
+        forbidden = set(blacklistConfig.get("forbidden", []))
+
+        detected = set()
+        results = osquery(query)
+        values = (v for row in results for v in row.values() if v)
+        detected.update(values)
+
+        addReport(report, forbiddenLabel, sorted(list(forbidden & detected)))
+        addReport(report, requiredLabel, sorted(list(required - detected)))
+    except Exception as e:
+        exception(f"failed to list {type}", e)
+
+    return report
+
+
+def checkApplications():
+    if SYSTEM_OS == "macos":
+        query = "SELECT name, bundle_executable, bundle_identifier, bundle_name, display_name, category FROM apps;"
+    elif SYSTEM_OS == "windows":
+        query = "SELECT name FROM programs;"
+    else:
+        warning("unsupported OS")
+        return { }
+
+    return checkBlacklist("applications", "ForbiddenApplications", "MissingApplications", query)
+
+def checkProcesses():
+    query = "SELECT name FROM processes;"
+    return checkBlacklist("processes", "ForbiddenProcesses", "MissingProcesses", query)
+
+def addReport(report, control, errors):
+    passed = len(errors) == 0
+    report[control] = {
+        "name": control,
+        "passed" : passed,
+        "timestamp": datetime.now().isoformat()
+    }
+
+    if not passed:
+        errors = { e for e in errors if e != "" }
+        report[control]["errors"] = list(errors)
+
+    return report
+
+def getErrors(query):
+    queryResults = osquery(query)
+    errors = [ d['error'] if 'error' in d else str(d) for d in queryResults ]
+    return errors
+
+def generateReport():
+    controlReport = { }
+    for controlName, queryStr in loadControlPacks():
+        try:
+            errors = getErrors(queryStr)
+
+            addReport(controlReport, controlName, errors)
+        except Exception as e:
+            exception(f"query '{controlName}' failed", e)
+
+    controlReport.update(checkApplications())
+    controlReport.update(checkProcesses())
+    controlReport.update(checkUptime())
+    controlReport.update(checkSystemPatched())
+
+    return { "controls": controlReport, "browsers": reportBrowsers() }
+
+
+last_periodic_run = 0
+last_config_change = None
+
+def periodicChecksWorker():
+    while True:
+        try:
+            loadConfig()
+            sendMessage("devicetrust", generateReport())
+        except Exception as e:
+            exception("error during periodic check", e)
+
+        time.sleep(PERIODIC_CHECK_FREQUENCY)
 
 def main():
-    config = readJsonFile("citadel-config.json")
-    sendConfig(config)
+    loadConfig()
+
+    threading.Thread(target=periodicChecksWorker, daemon=True).start()
 
     while True:
         try:
             event = readMessage("event")
-
             log(event)
         except Exception as e:
-            error(traceback.format_exc())
+            exception("error while reading event", e)
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        error(traceback.format_exc())
+    main()

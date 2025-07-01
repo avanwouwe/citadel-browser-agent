@@ -1,7 +1,7 @@
 console.log("Service worker starting.")
 
 let PROFILE_ADDRESS
-if (chrome.identity.getProfileUserInfo) {
+if (chrome.identity?.getProfileUserInfo) {
 	chrome.identity.getProfileUserInfo((userInfo) => {
 		PROFILE_ADDRESS = userInfo?.email
 	})
@@ -13,6 +13,7 @@ let whitelistIP
 let whitelistURL
 let exceptionList
 let ignorelist
+let devicetrust
 
 
 Port.onMessage("config",(newConfig) => {
@@ -28,10 +29,21 @@ Port.onMessage("config",(newConfig) => {
 	exceptionList = new Exceptionlist()
 	ignorelist = new Ignorelist()
 
+	devicetrust = new DeviceTrust()
+
 	const version = chrome.runtime.getManifest().version
 	const configHash = config?.hashDJB2()
 
 	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, undefined, undefined, false)
+})
+
+Port.onMessage("restart",() => {
+	chrome.runtime.reload()
+})
+
+Port.onMessage("devicetrust",(report) => {
+	debug("received device trust report", report)
+	devicetrust.addReport(report)
 })
 
 chrome.runtime.onUpdateAvailable.addListener(() => {
@@ -78,6 +90,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 		SessionState.purge()
 
 		reportInteractions()
+
+		devicetrust.report()
 	}
 
 	if (alarm.name === Alarm.BIWEEKLY) {
@@ -550,7 +564,7 @@ function reportApplications() {
 					"https://" + it.appName,
 					Log.WARN,
 					it.count,
-					`password for account '${it.username}' of '${it.appName}' has ${it.count} issues`
+					`password of '${it.username}' / '${it.appName}' has ${it.count} issues`
 					, undefined
 					, undefined
 					, false
@@ -648,7 +662,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 })
 
 chrome.cookies.onChanged.addListener((changeInfo) => {
-	if (changeInfo.removed || changeInfo.cause !== 'explicit' || config.session.maxSessionDays <= 0)
+	if (changeInfo.removed || changeInfo.cause !== 'explicit' || config.session.maxSessionDays <= 0 || Object.keys(config.session.domains).length === 0)
 		return
 
 	const cookie = changeInfo.cookie
