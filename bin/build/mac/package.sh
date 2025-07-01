@@ -24,7 +24,9 @@ mkdir -p "$BUILD_ROOT/scripts"
 
 # Copy the different architecture builds
 cp -r binaries/arm64 "$BUILD_ROOT/root/Library/Scripts/Citadel-arm64/"
+cp -r ../../controls "$BUILD_ROOT/root/Library/Scripts/Citadel-arm64/"
 cp -r binaries/x86_64 "$BUILD_ROOT/root/Library/Scripts/Citadel-x86_64/"
+cp -r ../../controls "$BUILD_ROOT/root/Library/Scripts/Citadel-x86_64/"
 
 # Copy the Native Messaging manifest files to the directory structure
 cp citadel.browser.agent.json "$BUILD_ROOT/root/Library/Google/Chrome/NativeMessagingHosts/"

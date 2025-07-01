@@ -1,0 +1,48 @@
+{
+  "controls": {
+    "DriveEncryption": {
+      "description": "Your device is not encrypted",
+      "query": "SELECT device_id AS error FROM bitlocker_info WHERE encrypted != 1;"
+    },
+    "LockScreen": {
+      "description": "Your screen locking configuration has issues",
+      "query": "SELECT 'Screen lock not required on resume' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure' AND data != '1'\nUNION ALL\nSELECT 'Screen lock timeout too high: ' || data AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut' AND CAST(data AS INTEGER) > 600;"
+    },
+    "Firewall": {
+      "description": "Firewall is disabled or not healthy",
+      "query": "SELECT '' AS error FROM windows_security_center WHERE type = 'FIREWALL' AND state != 'Good';"
+    },
+    "ProtectionStatus": {
+      "description": "Some Windows protection features are not working",
+      "query": "SELECT type || ' status is ' || state AS error FROM windows_security_center WHERE type != 'FIREWALL' AND state != 'Good';"
+    },
+    "AutoUpdates": {
+      "description": "Automatic updates are disabled",
+      "query": "SELECT '' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions' AND data != '4';"
+    },
+    "SharingPreferences": {
+      "description": "The following system sharing services are enabled",
+      "query": "SELECT 'Remote Desktop is enabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' AND data = '0'\nUNION ALL\nSELECT 'File and Printer Sharing is enabled' FROM services WHERE name = 'LanmanServer' AND start_type != 'DISABLED'\nUNION ALL\nSELECT 'Remote Registry is enabled' FROM services WHERE name = 'RemoteRegistry' AND start_type != 'DISABLED';"
+    },
+    "GuestLogin": {
+      "description": "Guest login is enabled",
+      "query": "SELECT '' AS error FROM users WHERE username = 'Guest' AND disabled = 0;"
+    },
+    "SSHKeys": {
+      "description": "Some SSH private keys are not secured",
+      "query": "SELECT path AS error FROM user_ssh_keys WHERE encrypted = 0;"
+    },
+    "BootOptions": {
+      "description": "Some boot options are insecure",
+      "query": "SELECT 'UEFI secure boot is disabled' AS error FROM uefi_secureboot WHERE secure_boot != 1;"
+    },
+    "WirelessNetworking": {
+      "description": "Connections to insecure wireless networking connections",
+      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');"
+    },
+    "RemovableStorage": {
+      "description": "USB mass storage devices are connected",
+      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;"
+    }
+  }
+}

@@ -13,6 +13,7 @@ fi
 mkdir -p "/Library/Scripts/Citadel/"
 rm -rf "/Library/Scripts/Citadel/_internal"
 rm -rf "/Library/Scripts/Citadel/citadel-browser-agent"
+rm -rf "/Library/Scripts/Citadel/controls/"*"-default.json"
 
 cp -r "$SOURCE_DIR"/* "/Library/Scripts/Citadel/"
 rm -rf "$SOURCE_DIR"

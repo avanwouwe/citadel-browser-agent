@@ -201,6 +201,7 @@ function unblockDomainModal(domain) {
         if (host) host.remove()
     })
 }
+
 function forAllTabs(domain, func, args = []) {
     chrome.tabs.query({url: [`*://*.${domain}/*`]}, (tabs) => {
         tabs.forEach((tab) => {
@@ -208,3 +209,32 @@ function forAllTabs(domain, func, args = []) {
         })
     })
 }
+
+function setWarning(warning) {
+    if (warning) {
+        chrome.action.setBadgeText({ text: "⚠️" })
+        chrome.action.setBadgeBackgroundColor({ color: "#FF0000" })
+    } else {
+        chrome.action.setBadgeText({ text: "" })
+        chrome.action.setBadgeBackgroundColor({ color: "#808080" })
+    }
+}
+
+function raiseAlert(id, title, message) {
+    chrome.notifications.create(id, {
+        type: "basic",
+        iconUrl: chrome.runtime.getURL('/gui/images/icon128.png'),
+        title: title,
+        message: message,
+        requireInteraction: true
+    })
+}
+
+function cancelAlert(id) {
+    chrome.notifications.clear(id)
+}
+
+chrome.notifications.onClicked.addListener(function(notificationId) {
+    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/dashboard.html") })
+    chrome.notifications.clear(notificationId)
+})

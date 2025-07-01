@@ -6,6 +6,25 @@ class Config {
             logo: "",                           // replace with the URL of your logo
             domains: [ ],
         },
+        logging: {
+            reportFailure: true,
+            logLevel: 'DEBUG',
+            consoleLevel: 'WARN',
+            maskUrlLevel: 'INFO',
+            maxUrlLength: 500,
+            throttle: {
+                windowDuration: 10,
+                reportFrequency: 60,
+                rates: {
+                    TRACE: 1000,
+                    DEBUG: 100,
+                    INFO: 50,
+                    WARN: 50,
+                    ERROR: 10,
+                    ALERT: 10,
+                }
+            },
+        },
         warningProtocols: ['http:', 'ftp:', 'ws:'],
         application: {
             retentionDays: 365,
@@ -234,24 +253,38 @@ class Config {
                 'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'DEBUG',
             }
         },
-        logging: {
-            reportFailure: true,
-            logLevel: 'DEBUG',
-            consoleLevel: 'WARN',
-            maskUrlLevel: 'INFO',
-            maxUrlLength: 500,
-            throttle: {
-                windowDuration: 10,
-                reportFrequency: 60,
-                rates: {
-                    TRACE: 1000,
-                    DEBUG: 100,
-                    INFO: 50,
-                    WARN: 50,
-                    ERROR: 10,
-                    ALERT: 10,
-                }
+        devicetrust: {
+            trigger: {
+                warn: 2,
+                block: 7
             },
+            actions: {
+                "default": "WARN",
+                "NOTHING": [],
+                "NOTIFY": ["MaxUptime", "SSHKeys"],
+                "WARN": [],
+                "BLOCK": ["DriveEncryption", "RemovableStorage"]
+            },
+            controls: {
+                maxUptimeDays: 30,
+                applications: {
+                    forbidden: [],
+                    required: []
+                },
+                processes: {
+                    forbidden: [],
+                    required: []
+                },
+                packs: [
+                    { "type": "windows", "path": "controls/windows-custom.json" },
+                    { "type": "macos", "path": "controls/macos-custom.json" },
+                ]
+            },
+            osqueryPath: {
+                windows: undefined,
+                macos: undefined
+            },
+
         }
     }
 
@@ -316,7 +349,6 @@ class Config {
 
         Log.start()
         Config.#isLoaded = true
-        Port.postMessage("config", "ok")
     }
 
     static assertIsLoaded() {

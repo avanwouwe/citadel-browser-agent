@@ -135,6 +135,10 @@ String.prototype.toURL = function () {
     }
 }
 
+String.prototype.capitalize = function () {
+    return this[0].toUpperCase() + this.slice(1).toLowerCase()
+}
+
 URL.prototype.toURL = function () {
     return this
 }

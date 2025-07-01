@@ -26,7 +26,7 @@ class RateThrottle {
 
     #startReporting() {
         this.warningCallback()
-        
+
         this.timer = this.timer ?? setInterval(this.#report, Date.now() + this.reportFrequency)
     }
 

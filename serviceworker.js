@@ -13,6 +13,8 @@ importScripts('utils/messaging.js');
 importScripts('utils/ratethrottle.js');
 importScripts('utils/logging.js');
 importScripts('utils/browser.js');
+importScripts('utils/devicetrust/devicetrust.js');
+importScripts('utils/devicetrust/devicecontrol.js');
 importScripts('gui/interface.js');
 importScripts('utils/blacklist/blacklist.js');
 importScripts('utils/blacklist/ignorelist.js');

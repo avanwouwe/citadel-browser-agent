@@ -14,7 +14,8 @@
     "identity.email",
     "cookies",
     "scripting",
-    "tabs"
+    "tabs",
+    "notifications"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -50,6 +51,8 @@
       "/utils/ratethrottle.js",
       "/utils/logging.js",
       "/utils/browser.js",
+      "/utils/devicetrust/devicetrust.js",
+      "/utils/devicetrust/devicecontrol.js",
       "/gui/interface.js",
       "/utils/blacklist/blacklist.js",
       "/utils/blacklist/ignorelist.js",
@@ -72,6 +75,8 @@
     }
   ],
   "action": {
+    "default_title": "Click to see security report",
+    "default_popup": "/gui/dashboard.html",
     "default_icon": {
       "16": "/gui/images/icon16.png",
       "48": "/gui/images/icon48.png",
