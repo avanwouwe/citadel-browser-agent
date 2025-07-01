@@ -192,6 +192,11 @@ class Config {
                     freq: 60
                 },
                 {
+                    name: "https://github.com/romainmarcoux/malicious-domains (AC)",
+                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ac.txt",
+                    freq: 60
+                },
+                {
                     name: "Known Torrent Sites",
                     url: "https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackres.txt",
                     freq: 60 * 12
