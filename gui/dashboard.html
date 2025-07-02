@@ -12,21 +12,42 @@
         .failing  { background:#999; }
         .compliance { font-weight:bold; margin-bottom:11px; }
         table { width:100%; border-collapse:collapse; font-size:95%; }
-        td, th { padding:4px 6px;text-align: center; }
         th { background:#f5f5f5; }
-        td.state, td.nextstate, td.days { font-weight:bold; }
+        td, th { padding:4px 6px; }
+        td.state, td.nextstate, td.days { text-align: center; font-weight:bold; }
         td.passing   { color:#43d25e; }
         td.warning   { background-color:#ffa800; }
         td.blocking  { background-color:#e23a3a; }
         td.failing   { background-color:#999; }
+
+        #update-button:hover { background-color: rgba(0, 0, 0, 0.05); }
+        #update-button.refreshing .refresh-icon { display: none !important; }
+        #update-button.refreshing .spinner-icon { display: block !important;}
     </style>
 </head>
 <body>
 <h2>Device Trust Dashboard</h2>
-<div>
+
+<div style="display: flex; align-items: center;">
     <span class="state-dot" id="dot"></span>
-    <span id="status-label">-</span>
+    <span id="status-label" style="margin-right: 8px;">-</span>
+    <button id="update-button" style="background: none; border: none; cursor: pointer; padding: 2px; border-radius: 50%;">
+        <!-- Refresh Icon -->
+        <svg class="refresh-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: block;">
+            <path d="M23 4v6h-6"></path>
+            <path d="M1 20v-6h6"></path>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
+            <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+
+        <!-- Spinner -->
+        <svg class="spinner-icon" width="16" height="16" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+            <style>.spinner_V8m1{transform-origin:center;animation:spinner_zKoa 2s linear infinite}.spinner_V8m1 circle{stroke-linecap:round;animation:spinner_YpZS 1.5s ease-in-out infinite}@keyframes spinner_zKoa{100%{transform:rotate(360deg)}}@keyframes spinner_YpZS{0%{stroke-dasharray:0 150;stroke-dashoffset:0}47.5%{stroke-dasharray:42 150;stroke-dashoffset:-16}95%,100%{stroke-dasharray:42 150;stroke-dashoffset:-59}}</style>
+            <g class="spinner_V8m1"><circle cx="12" cy="12" r="9.5" fill="none" stroke-width="3"></circle></g>
+        </svg>
+    </button>
 </div>
+
 <div class="compliance">Compliance: <span id="compliance">-</span>%</div>
 <table>
     <thead>

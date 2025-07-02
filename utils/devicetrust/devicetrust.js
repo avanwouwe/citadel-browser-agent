@@ -23,31 +23,6 @@ class DeviceTrust {
     #deviceState
     #lastNotification = 0
 
-    constructor() {
-        chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-            if (message.type !== "GetDeviceTrustStatus") {
-                return
-            }
-
-            const status = {
-                controls: { },
-                state: this.getState(),
-                nextState: this.getNextState(),
-                compliance: this.getCompliance()
-            }
-
-            Object.values(this.#devicecontrols).forEach((control) => {
-                status.controls[control.getName()] = {
-                    name: control.getName(),
-                    state: control.getState(),
-                    nextState: control.getNextState(),
-                }
-            })
-
-            sendResponse(status)
-        })
-    }
-
     addReport(report) {
         for (const controlReport of Object.values(report.controls)) {
             const control = this.#devicecontrols.getOrSet(controlReport.name, new DeviceControl(controlReport.name))
@@ -62,7 +37,6 @@ class DeviceTrust {
         this.#deviceState = DeviceTrust.State.values[worstState]
 
         this.#notify()
-        setWarning(this.#deviceState === DeviceTrust.State.WARNING || this.#deviceState === DeviceTrust.State.BLOCKING)
     }
 
     getControls() {
@@ -107,20 +81,18 @@ class DeviceTrust {
         logger.log(nowTimestamp(), "report", "devicetrust compliance", undefined, Log.INFO, this.getCompliance(), `endpoint compliance rate = ${this.getCompliance()} %`, undefined, undefined, false)
     }
 
-    requestUpdate() {
-
-    }
-
     #notify() {
+        setWarning(this.#deviceState === DeviceTrust.State.WARNING || this.#deviceState === DeviceTrust.State.BLOCKING)
+
+        const alertId = "devicetrust"
+        const title = "Device security issues"
+        const timeSinceLastNotification = Date.now() - this.#lastNotification
+
         if (this.#deviceState === DeviceTrust.State.PASSING) {
             cancelAlert(alertId)
             this.#lastNotification = Date.now()
             return
         }
-
-        const alertId = "devicetrust"
-        const title = "Device security issues"
-        const timeSinceLastNotification = Date.now() - this.#lastNotification
 
         if (DeviceTrust.State.FAILING && timeSinceLastNotification >= ONE_DAY * 7) {
             raiseAlert(alertId, title, `Your device has security issues. Click to fix them.`)

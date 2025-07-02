@@ -41,10 +41,48 @@ Port.onMessage("restart",() => {
 	chrome.runtime.reload()
 })
 
+let dashboard
+chrome.runtime.onConnect.addListener((port) => {
+	port.onDisconnect.addListener(() => {
+		dashboard = null
+		console.debug("Dashboard port disconnected")
+	})
+
+	dashboard = port
+})
+
 Port.onMessage("devicetrust",(report) => {
 	debug("received device trust report", report)
 	devicetrust.addReport(report)
+	dashboard?.postMessage({type: "RefreshSecurityStatus"})
 })
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	switch(message.type) {
+		case "GetSecurityStatus":
+			const status = {
+				controls: { },
+				state: devicetrust.getState(),
+				nextState: devicetrust.getNextState(),
+				compliance: devicetrust.getCompliance()
+			}
+
+			Object.values(devicetrust.getControls()).forEach((control) => {
+				status.controls[control.getName()] = {
+					name: control.getName(),
+					state: control.getState(),
+					nextState: control.getNextState(),
+				}
+			})
+
+			sendResponse(status)
+			return
+		case "RefreshSecurityStatus":
+			debug("dashboard requested update")
+			Port.postMessage("devicetrust", { request: "update" } )
+	}
+})
+
 
 chrome.runtime.onUpdateAvailable.addListener(() => {
 	try {
