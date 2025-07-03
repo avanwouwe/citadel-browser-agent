@@ -24,9 +24,13 @@ class DeviceTrust {
     #lastNotification = 0
 
     addReport(report) {
+        const browserUpdated = Browser.isUpdated(report.browsers)
+        this.getControl("BrowserUpdated")
+            .addReport({name: "BrowserUpdated", passed: browserUpdated, timestamp: nowTimestamp()})
+
         for (const controlReport of Object.values(report.controls)) {
-            const control = this.#devicecontrols.getOrSet(controlReport.name, new DeviceControl(controlReport.name))
-            control.addReport(controlReport)
+            this.getControl(controlReport.name)
+                .addReport(controlReport)
         }
 
         let worstState = DeviceTrust.State.indexOf(DeviceTrust.State.PASSING)
@@ -39,13 +43,11 @@ class DeviceTrust {
         this.#notify()
     }
 
-    getControls() {
-        return this.#devicecontrols
-    }
+    getControl(name) { return this.#devicecontrols.getOrSet(name, new DeviceControl(name)) }
 
-    getState() {
-        return this.#deviceState
-    }
+    getControls() { return this.#devicecontrols }
+
+    getState() { return this.#deviceState }
 
     getNextState() {
         let worstState = { state: DeviceTrust.State.PASSING }

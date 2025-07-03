@@ -273,24 +273,24 @@ def loadControlPacks():
 
     return packs
 
-def checkSystemPatched():
+def checkSystemUpdated():
     report = { }
 
     try:
         if SYSTEM_OS == "macos":
             result = subprocess.run(["softwareupdate", "--list"], capture_output=True, text=True, check=True)
             out = result.stdout + result.stderr
-            isPatched = "No new software available" in out
-            addReport(report, "SystemPatched", [] if isPatched else [''])
+            isUpdated = "No new software available" in out
+            addReport(report, "SystemUpdated", [] if isUpdated else [''])
 
         elif SYSTEM_OS == "windows":
-            missingPatches = getErrors("SELECT title FROM windows_update_history WHERE result_code NOT IN (2, 3);")
-            addReport(report, "SystemPatched", missingPatches)
+            missingUpdates = getErrors("SELECT title FROM windows_update_history WHERE result_code NOT IN (2, 3);")
+            addReport(report, "SystemUpdated", missingUpdates)
 
         else:
             raise Exception("unsupported OS")
     except Exception as e:
-        exception("failed to check OS patching", e)
+        exception("failed to check OS updates", e)
 
     return report
 
@@ -305,7 +305,7 @@ def reportBrowsers():
                 'com.operasoftware.Opera'
             ]
             in_clause = ', '.join(f"'{bid}'" for bid in browser_ids)
-            query = (f"SELECT bundle_identifier AS name, path, bundle_short_version AS version FROM apps WHERE bundle_identifier IN ({in_clause}) AND last_opened_time > 0;")
+            query = (f"SELECT bundle_identifier AS brand, path, bundle_short_version AS version FROM apps WHERE bundle_identifier IN ({in_clause}) AND last_opened_time > 0;")
             return list(osquery(query))
 
         elif SYSTEM_OS == "windows":
@@ -317,7 +317,7 @@ def reportBrowsers():
                 'Opera'
             ]
             in_clause = ', '.join(f"'{bid}'" for bid in browser_ids)
-            query = (f"SELECT name, install_location AS path, version FROM programs WHERE name IN ({in_clause});")
+            query = (f"SELECT name AS brand, install_location AS path, version FROM programs WHERE name IN ({in_clause});")
             return list(osquery(query))
 
         else:
@@ -429,7 +429,7 @@ def generateReport():
     controlReport.update(checkApplications())
     controlReport.update(checkProcesses())
     controlReport.update(checkUptime())
-    controlReport.update(checkSystemPatched())
+    controlReport.update(checkSystemUpdated())
 
     return { "controls": controlReport, "browsers": reportBrowsers() }
 

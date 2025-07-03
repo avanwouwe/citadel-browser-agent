@@ -221,13 +221,18 @@ function setWarning(warning) {
 }
 
 function raiseAlert(id, title, message) {
-    chrome.notifications.create(id, {
+    const notification = {
         type: "basic",
         iconUrl: chrome.runtime.getURL('/gui/images/icon128.png'),
         title: title,
-        message: message,
-        requireInteraction: true
-    })
+        message: message
+    }
+
+    if (Browser.version.brand !== Browser.Firefox) {
+        notification.requireInteraction = true
+    }
+
+    chrome.notifications.create(id, notification)
 }
 
 function cancelAlert(id) {
