@@ -15,11 +15,11 @@
     "ForbiddenApplications": {
       "text": {
         "en": {
-          "label": "No forbidden applications running",
+          "label": "No forbidden applications installed",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ForbiddenApplications"
         },
         "fr": {
-          "label": "Aucune application interdite active",
+          "label": "Aucune application interdite installée",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ForbiddenApplications"
         }
       }
@@ -27,11 +27,11 @@
     "MissingApplications": {
       "text": {
         "en": {
-          "label": "All required applications present",
+          "label": "All required applications installed",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MissingApplications"
         },
         "fr": {
-          "label": "Toutes applications requises présentes",
+          "label": "Toutes applications requises installées",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MissingApplications"
         }
       }
