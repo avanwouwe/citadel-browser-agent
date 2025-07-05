@@ -262,6 +262,7 @@ class Config {
             },
             actions: {
                 "default": "WARN",
+                "SKIP": [],
                 "NOTHING": [],
                 "NOTIFY": ["MaxUptime", "SSHKeys"],
                 "WARN": [],

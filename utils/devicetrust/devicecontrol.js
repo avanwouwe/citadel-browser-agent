@@ -7,6 +7,9 @@ class DeviceControl {
     #action
 
     constructor(controlName) {
+        const isSkipped = config.devicetrust.actions[DeviceTrust.Action.SKIP].includes(controlName)
+        assert(!isSkipped, `tried to create skipped control ${controlName}`)
+
         this.#controlName = controlName
         for (const action of DeviceTrust.Action.values) {
             if (config.devicetrust.actions[action].includes(controlName)) {

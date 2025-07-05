@@ -11,6 +11,7 @@ class DeviceTrust {
     }
 
     static Action = class {
+        static SKIP = "SKIP"
         static NOTHING = "NOTHING"
         static NOTIFY = "NOTIFY"
         static WARN = "WARN"
@@ -29,8 +30,11 @@ class DeviceTrust {
             .addReport({name: "BrowserUpdated", passed: browserUpdated, timestamp: nowTimestamp()})
 
         for (const controlReport of Object.values(report.controls)) {
-            this.getControl(controlReport.name)
-                .addReport(controlReport)
+            const isSkipped = config.devicetrust.actions[DeviceTrust.Action.SKIP].includes(controlReport.name)
+            if (!isSkipped) {
+                this.getControl(controlReport.name)
+                    .addReport(controlReport)
+            }
         }
 
         let worstState = DeviceTrust.State.indexOf(DeviceTrust.State.PASSING)
