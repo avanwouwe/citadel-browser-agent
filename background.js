@@ -71,6 +71,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				status.controls[control.name] = {
 					name: control.name,
 					definition: control.definition,
+					passing: control.report.passed,
 					state: control.getState(),
 					nextState: control.getNextState(),
 				}

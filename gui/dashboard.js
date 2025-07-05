@@ -11,15 +11,21 @@ I8N.loadPage('/utils/i8n', (i8n) => {
 function renderDashboard() {
     chrome.runtime.sendMessage({type: "GetSecurityStatus"}, function(devicetrust) {
         const state = devicetrust.state
+        const errorsOnly = getQueryParam("errorsOnly") !== null
+
         document.getElementById("status-label").textContent = t("control.state." + state) || "-"
         document.getElementById("dot").className = "state-dot " + state.toLowerCase()
 
         document.getElementById("compliance").textContent = devicetrust.compliance
 
+        if (devicetrust.compliance === 100) { return }
+
         const tb = document.getElementById("controls")
         tb.innerHTML = ""
         const controls = Object.values(devicetrust.controls)
         for (const ctrl of controls) {
+            if (errorsOnly && ctrl.passing) { continue }
+
             const next = ctrl.nextState
             let ctrlText = ctrl.definition?.text ?? {}
             ctrlText = ctrlText[I8N.getLanguage()] ?? ctrlText[I8N.defaultLanguage] ?? {}
