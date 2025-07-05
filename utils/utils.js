@@ -151,9 +151,9 @@ function getSitename(url) {
     return url?.toURL()?.hostname
 }
 
-function isKnownApplication(sitename) {
+function isApplication(sitename) {
     const domain = getDomain(sitename)
-    return config.domain.isKnownApplication[domain] === true
+    return config.domain.isApplication[domain] === true || matchDomain(domain, config.company.applications) === true
 }
 
 function getRandomInt(min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {

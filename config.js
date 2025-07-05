@@ -5,6 +5,7 @@ class Config {
             contact: 'Your IT support',         // replace with your support e-mail
             logo: "",                           // replace with the URL of your logo
             domains: [ ],
+            applications: [ ]                   // put your applications
         },
         logging: {
             reportFailure: true,
@@ -31,7 +32,7 @@ class Config {
         },
         exceptions: [ ],
         domain: {
-            isKnownApplication: [
+            isApplication: [
                 "apple.com",
                 "google.com",
                 "microsoft.com",
@@ -161,6 +162,7 @@ class Config {
         account: {
             retentionDays: 90,
             checkExternal: false,
+            checkOnlyApplications: true,
             passwordPolicy: {
                 minLength: 15,
                 minNumberOfDigits: 1,
@@ -300,6 +302,7 @@ class Config {
 
     static #domainPatterns = [
         "company.domains",
+        "company.applications",
         "session.domains",
         "session.exceptions",
         "domain.isKnownApplication",
