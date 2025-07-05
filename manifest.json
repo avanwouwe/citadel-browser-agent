@@ -27,6 +27,8 @@
     {
       "resources": [
         "/gui/images/*",
+        "/gui/utils.js",
+        "/utils/i8n/*.json",
         "/utils/passwords.js",
         "/utils/injected/citadel-page-script.js"
       ],

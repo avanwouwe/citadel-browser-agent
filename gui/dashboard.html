@@ -2,9 +2,9 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Device Trust Dashboard</title>
+    <title data-i18n="dashboard.title">Device Trust Dashboard</title>
     <style>
-        body {font-family:sans-serif; margin:18px; }
+        body {font-family:sans-serif; margin:18px; min-width: 420px }
         .state-dot { display:inline-block; width:13px; height:13px; border-radius:50%; margin-right:6px; }
         .passing  { background:#43d25e; }
         .warning  { background:#ffa800; }
@@ -26,7 +26,7 @@
     </style>
 </head>
 <body>
-<h2>Device Trust Dashboard</h2>
+<h2 data-i18n="dashboard.title">Device Trust Dashboard</h2>
 
 <div style="display: flex; align-items: center;">
     <span class="state-dot" id="dot"></span>
@@ -48,18 +48,20 @@
     </button>
 </div>
 
-<div class="compliance">Compliance: <span id="compliance">-</span>%</div>
+<div class="compliance"><span data-i18n="dashboard.compliance">Compliance</span>: <span id="compliance">-</span>%</div>
 <table>
     <thead>
     <tr>
-        <th>Control</th>
-        <th>State</th>
-        <th>Next State</th>
-        <th>In Days</th>
+        <th data-i18n="dashboard.control">Control</th>
+        <th data-i18n="dashboard.state">State</th>
+        <th data-i18n="dashboard.next-state">Next State</th>
+        <th data-i18n="dashboard.in-days">In Days</th>
     </tr>
     </thead>
     <tbody id="controls"></tbody>
 </table>
+<script src="/gui/utils.js"></script>
+<script src="/utils/i8n/i8n.js"></script>
 <script src="/gui/dashboard.js"></script>
 </body>
 </html>

@@ -1,7 +1,17 @@
+let t
+
+I8N.loadPage('/utils/i8n', (i8n) => {
+    document.getElementById('update-button').addEventListener('click', refreshStatus)
+
+    t = i8n.getTranslator()
+    i8n.translatePage()
+    renderDashboard()
+})()
+
 function renderDashboard() {
     chrome.runtime.sendMessage({type: "GetSecurityStatus"}, function(devicetrust) {
         const state = devicetrust.state
-        document.getElementById("status-label").textContent = state || "-"
+        document.getElementById("status-label").textContent = t("control.state." + state) || "-"
         document.getElementById("dot").className = "state-dot " + state.toLowerCase()
 
         document.getElementById("compliance").textContent = devicetrust.compliance
@@ -13,9 +23,9 @@ function renderDashboard() {
             const next = ctrl.nextState
             const tr = document.createElement("tr")
             tr.innerHTML =
-                `<td>${ctrl.name}</td>` +
-                `<td class="state ${ctrl.state.toLowerCase()}">${ctrl.state.toLowerCase()}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${next.state?.toLowerCase() || "-"}</td>` +
+                `<td>${t("control.name."+ ctrl. name)}</td>` +
+                `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
+                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
                 `<td class="days">${next.days ?? ""}</td>`
             tb.appendChild(tr)
         }
@@ -46,12 +56,6 @@ function refreshStatus() {
     chrome.runtime.sendMessage({ type: "RefreshSecurityStatus" })
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('update-button').addEventListener('click', refreshStatus)
-})
-
-document.addEventListener("DOMContentLoaded", renderDashboard)
-
 const updateBtn = document.getElementById('update-button')
 updateBtn.addEventListener('click', function () {
     if (updateBtn.classList.contains('refreshing')) return
@@ -59,7 +63,4 @@ updateBtn.addEventListener('click', function () {
     updateBtn.classList.add('refreshing')
 
     refreshStatus()
-
-    // If you have existing update logic: call it, and when it completes, remove 'refreshing'
-    // e.g., somePromise().finally(() => updateBtn.classList.remove('refreshing'));
 })

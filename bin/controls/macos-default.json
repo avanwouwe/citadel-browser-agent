@@ -1,52 +1,124 @@
 {
   "controls": {
     "DriveEncryption": {
-      "description": "Your disk is not encrypted",
-      "query": "SELECT '' AS error FROM disk_encryption WHERE name = '/' AND encrypted != '1';"
+      "query": "SELECT '' AS error FROM disk_encryption WHERE name = '/' AND encrypted != '1';",
+      "text": {
+        "en": {
+          "label": "Disk is encrypted",
+          "error": "Your disk is not encrypted",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/DriveEncryption"
+        }
+      }
     },
     "LockScreen": {
-      "description": "Your screen locking configuration has the following issues",
-      "query": "SELECT 'askForPassword is NOT set' AS error FROM preferences WHERE domain = 'com.apple.screensaver' AND key = 'askForPassword' AND value != 1\nUNION ALL\nSELECT 'askForPasswordDelay too high: ' || value AS error FROM preferences WHERE domain = 'com.apple.screensaver' AND key = 'askForPasswordDelay' AND CAST(value AS INTEGER) > 600;"
+      "query": "SELECT 'askForPassword is NOT set' AS error FROM preferences WHERE domain = 'com.apple.screensaver' AND key = 'askForPassword' AND value != 1\nUNION ALL\nSELECT 'askForPasswordDelay too high: ' || value AS error FROM preferences WHERE domain = 'com.apple.screensaver' AND key = 'askForPasswordDelay' AND CAST(value AS INTEGER) > 600;",
+      "text": {
+        "en": {
+          "label": "Screen locking is enabled",
+          "error": "Your screen locking configuration has the following issues",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/LockScreen"
+        }
+      }
     },
     "SystemIntegrityProtection": {
-      "description": "Some SIP controls are disabled",
-      "query": "SELECT 'SIP flag ' || CAST(config_flag AS TEXT) || ' is enabled' AS error FROM sip_config WHERE config_flag == 1;"
+      "query": "SELECT 'SIP flag ' || CAST(config_flag AS TEXT) || ' is enabled' AS error FROM sip_config WHERE config_flag == 1;",
+      "text": {
+        "en": {
+          "label": "System Integrity Protection is enabled",
+          "error": "Some SIP controls are disabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SystemIntegrityProtection"
+        }
+      }
     },
     "Firewall": {
-      "description": "Firewall is disabled",
-      "query": "SELECT '' AS error FROM alf WHERE global_state == 0;"
+      "query": "SELECT '' AS error FROM alf WHERE global_state == 0;",
+      "text": {
+        "en": {
+          "label": "Firewall is enabled",
+          "error": "Firewall is disabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Firewall"
+        }
+      }
     },
     "GatekeeperEnabled": {
-      "description": "Gatekeeper is disabled",
-      "query": "SELECT '' AS error FROM gatekeeper WHERE assessments_enabled != 1;"
+      "query": "SELECT '' AS error FROM gatekeeper WHERE assessments_enabled != 1;",
+      "text": {
+        "en": {
+          "label": "Gatekeeper is enabled",
+          "error": "Gatekeeper is disabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GatekeeperEnabled"
+        }
+      }
     },
     "AutoUpdates": {
-      "description": "Automatic updates are disabled",
-      "query": "SELECT '' AS error FROM preferences WHERE domain='com.apple.SoftwareUpdate' AND key='AutomaticCheckEnabled' AND value != 1;"
+      "query": "SELECT '' AS error FROM preferences WHERE domain='com.apple.SoftwareUpdate' AND key='AutomaticCheckEnabled' AND value != 1;",
+      "text": {
+        "en": {
+          "label": "Automatic updates are enabled",
+          "error": "Automatic updates are disabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/AutoUpdates"
+        }
+      }
     },
     "SharingPreferences": {
-      "description": "The following system sharing services are enabled",
-      "query": "SELECT 'Screen Sharing is enabled' AS error FROM sharing_preferences WHERE screen_sharing = 1\nUNION ALL\nSELECT 'File Sharing is enabled' FROM sharing_preferences WHERE file_sharing = 1\nUNION ALL\nSELECT 'Printer Sharing is enabled' FROM sharing_preferences WHERE printer_sharing = 1\nUNION ALL\nSELECT 'Remote Login (SSH) is enabled' FROM sharing_preferences WHERE remote_login = 1\nUNION ALL\nSELECT 'Remote Management is enabled' FROM sharing_preferences WHERE remote_management = 1\nUNION ALL\nSELECT 'Remote Apple Events is enabled' FROM sharing_preferences WHERE remote_apple_events = 1\nUNION ALL\nSELECT 'Internet Sharing is enabled' FROM sharing_preferences WHERE internet_sharing = 1\nUNION ALL\nSELECT 'Bluetooth Sharing is enabled' FROM sharing_preferences WHERE bluetooth_sharing = 1\nUNION ALL\nSELECT 'Content Caching is enabled' FROM sharing_preferences WHERE content_caching = 1;"
+      "query": "SELECT 'Screen Sharing is enabled' AS error FROM sharing_preferences WHERE screen_sharing = 1\nUNION ALL\nSELECT 'File Sharing is enabled' FROM sharing_preferences WHERE file_sharing = 1\nUNION ALL\nSELECT 'Printer Sharing is enabled' FROM sharing_preferences WHERE printer_sharing = 1\nUNION ALL\nSELECT 'Remote Login (SSH) is enabled' FROM sharing_preferences WHERE remote_login = 1\nUNION ALL\nSELECT 'Remote Management is enabled' FROM sharing_preferences WHERE remote_management = 1\nUNION ALL\nSELECT 'Remote Apple Events is enabled' FROM sharing_preferences WHERE remote_apple_events = 1\nUNION ALL\nSELECT 'Internet Sharing is enabled' FROM sharing_preferences WHERE internet_sharing = 1\nUNION ALL\nSELECT 'Bluetooth Sharing is enabled' FROM sharing_preferences WHERE bluetooth_sharing = 1\nUNION ALL\nSELECT 'Content Caching is enabled' FROM sharing_preferences WHERE content_caching = 1;",
+      "text": {
+        "en": {
+          "label": "Sharing services are disabled",
+          "error": "The following system sharing services are enabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SharingPreferences"
+        }
+      }
     },
     "GuestLogin": {
-      "description": "Guest login is enabled",
-      "query": "SELECT '' AS error FROM plist WHERE path = '/Library/Preferences/com.apple.loginwindow.plist' AND key = 'GuestEnabled' AND value = 1;"
+      "query": "SELECT '' AS error FROM plist WHERE path = '/Library/Preferences/com.apple.loginwindow.plist' AND key = 'GuestEnabled' AND value = 1;",
+      "text": {
+        "en": {
+          "label": "Guest login is disabled",
+          "error": "Guest login is enabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
+        }
+      }
     },
     "SSHKeys": {
-      "description": "Some SSH private keys are not secured",
-      "query": "SELECT path AS error FROM user_ssh_keys WHERE encrypted = 0;"
+      "query": "SELECT path AS error FROM user_ssh_keys WHERE encrypted = 0;",
+      "text": {
+        "en": {
+          "label": "SSH private keys are secured",
+          "error": "Some SSH private keys are not secured",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SSHKeys"
+        }
+      }
     },
     "BootOptions": {
-      "description": "Some boot options are insecure",
-      "query": "SELECT name || ' is set to ' || value AS error FROM nvram WHERE name = 'csr-active-config' AND value != '0';"
+      "query": "SELECT name || ' is set to ' || value AS error FROM nvram WHERE name = 'csr-active-config' AND value != '0';",
+      "text": {
+        "en": {
+          "label": "Boot options are secure",
+          "error": "Some boot options are insecure",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BootOptions"
+        }
+      }
     },
     "WirelessNetworking": {
-      "description": "Connections to insecure wireless networking connections",
-      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');"
+      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');",
+      "text": {
+        "en": {
+          "label": "No insecure wireless networks",
+          "error": "Connections to insecure wireless networking connections",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
+        }
+      }
     },
     "RemovableStorage": {
-      "description": "USB mass storage devices are connected",
-      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;"
+      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;",
+      "text": {
+        "en": {
+          "label": "No USB storage devices connected",
+          "error": "USB mass storage devices are connected",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
+        }
+      }
     }
   }
 }
