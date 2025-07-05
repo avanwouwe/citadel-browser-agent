@@ -78,7 +78,7 @@ class Browser {
         const pa = a.split('.').map(Number)
         const pb = b.split('.').map(Number)
 
-        assert(pa.length !== pb.length, `tried to compare version ${a} with different structure ${b}`)
+        assert(pa.length === pb.length, `tried to compare version ${a} with different structure ${b}`)
 
         const len = pa.length
         for (let i = 0; i < len; i++) {
