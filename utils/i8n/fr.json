@@ -1,0 +1,18 @@
+{
+  "control": {
+    "state": {
+      "PASSING": "RÉUSSI",
+      "FAILING": "ÉCHEC",
+      "WARNING": "AVERTISSEMENT",
+      "BLOCKING": "BLOQUANT"
+    }
+  },
+  "dashboard": {
+    "title": "Tableau de confiance de l'appareil",
+    "compliance": "Conformité",
+    "control": "Contrôle",
+    "state": "État",
+    "next-state": "Suivant",
+    "in-days": "En jours"
+  }
+}
