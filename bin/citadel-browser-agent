@@ -205,7 +205,7 @@ def sendMessage(type, message = None):
             sys.stdout.flush()
 
     except Exception as e:
-        exception("unable to send message to agent", e)
+        exception(f"unable to send message of type '${type}' to agent", e)
 
 def readJsonFile(path):
     try:
@@ -249,10 +249,10 @@ def osquery(query):
 
 def loadControlPacks():
     controlsSpec = config.get("devicetrust", {}).get("controls", {}).get("packs", [])
-    controlsSpec.append({"type": "windows", "path": "controls/windows-default.json"})
-    controlsSpec.append({"type": "macos",  "path": "controls/macos-default.json"})
+    controlsSpec.insert(0, {"type": "windows", "path": "controls/windows-default.json"})
+    controlsSpec.insert(0, {"type": "macos",  "path": "controls/macos-default.json"})
 
-    packs = []
+    controls = {}
     filteredSpecs = [c for c in controlsSpec if c.get("type") == SYSTEM_OS]
     for cSpec in filteredSpecs:
         packPath = cSpec.get("path")
@@ -262,16 +262,11 @@ def loadControlPacks():
             if not controlPack:
                 raise FileNotFoundError(packPath)
 
-            for controlName, controlObj in controlPack.get("controls", {}).items():
-                queryStr = controlObj.get("query")
-                if not queryStr:
-                    continue
-                packs.append((controlName, queryStr))
+            controls.update(controlPack.get("controls", {}))
         except Exception as e:
             exception(f"failed to load control pack {packPath}", e)
 
-
-    return packs
+    return controls
 
 def checkSystemUpdated():
     report = { }
@@ -417,21 +412,24 @@ def generateAndSendReport():
 
 
 def generateReport():
-    controlReport = { }
-    for controlName, queryStr in loadControlPacks():
+    results = { }
+    definitions = loadControlPacks()
+    for controlName, controlDefinition in definitions.items():
         try:
-            errors = getErrors(queryStr)
+            queryStr = controlDefinition.get("query")
 
-            addReport(controlReport, controlName, errors)
+            if queryStr:
+                errors = getErrors(queryStr)
+                addReport(results, controlName, errors)
         except Exception as e:
             exception(f"query '{controlName}' failed", e)
 
-    controlReport.update(checkApplications())
-    controlReport.update(checkProcesses())
-    controlReport.update(checkUptime())
-    controlReport.update(checkSystemUpdated())
+    results.update(checkApplications())
+    results.update(checkProcesses())
+    results.update(checkUptime())
+    results.update(checkSystemUpdated())
 
-    return { "controls": controlReport, "browsers": reportBrowsers() }
+    return { "controls": { "definitions":  definitions, "results": results }, "browsers": reportBrowsers() }
 
 def periodicChecksWorker():
     while True:

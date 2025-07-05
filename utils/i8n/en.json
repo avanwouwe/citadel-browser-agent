@@ -1,26 +1,5 @@
 {
   "control": {
-    "name": {
-      "BrowserUpdated": "Browser is updated",
-      "DriveEncryption": "Disk is encrypted",
-      "LockScreen": "Screen locking is enabled",
-      "SystemIntegrityProtection": "System Integrity Protection is enabled",
-      "Firewall": "Firewall is enabled",
-      "GatekeeperEnabled": "Gatekeeper is enabled",
-      "AutoUpdates": "Automatic updates are enabled",
-      "SharingPreferences": "Sharing services are disabled",
-      "GuestLogin": "Guest login is disabled",
-      "SSHKeys": "SSH private keys are secured",
-      "BootOptions": "Boot options are secure",
-      "WirelessNetworking": "No insecure wireless networks",
-      "RemovableStorage": "No USB storage devices connected",
-      "ForbiddenApplications": "No forbidden applications running",
-      "MissingApplications": "All required applications present",
-      "ForbiddenProcesses": "No forbidden processes running",
-      "MissingProcesses": "All required processes running",
-      "MaxUptime": "System was restarted recently",
-      "SystemPatched": "System is up to date"
-    },
     "state": {
       "PASSING": "PASSING",
       "FAILING": "FAILING",

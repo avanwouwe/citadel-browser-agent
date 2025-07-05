@@ -1,11 +1,59 @@
 {
   "controls": {
-    "DriveEncryption": {
+    "BrowserUpdated": {
+      "text": {
+        "en": {
+          "label": "Browser is updated"
+        }
+      }
+    },
+    "ForbiddenApplications": {
+      "text": {
+        "en": {
+          "label": "No forbidden applications running"
+        }
+      }
+    },
+    "MissingApplications": {
+      "text": {
+        "en": {
+          "label": "All required applications present"
+        }
+      }
+    },
+    "ForbiddenProcesses": {
+      "text": {
+        "en": {
+          "label": "No forbidden processes running"
+        }
+      }
+    },
+    "MissingProcesses": {
+      "text": {
+        "en": {
+          "label": "All required processes running"
+        }
+      }
+    },
+    "MaxUptime": {
+      "text": {
+        "en": {
+          "label": "System was restarted recently"
+        }
+      }
+    },
+    "SystemUpdated": {
+      "text": {
+        "en": {
+          "label": "System is up to date"
+        }
+      }
+    },
+  "DriveEncryption": {
       "query": "SELECT '' AS error FROM disk_encryption WHERE name = '/' AND encrypted != '1';",
       "text": {
         "en": {
           "label": "Disk is encrypted",
-          "error": "Your disk is not encrypted",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/DriveEncryption"
         }
       }
@@ -15,7 +63,6 @@
       "text": {
         "en": {
           "label": "Screen locking is enabled",
-          "error": "Your screen locking configuration has the following issues",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/LockScreen"
         }
       }
@@ -25,7 +72,6 @@
       "text": {
         "en": {
           "label": "System Integrity Protection is enabled",
-          "error": "Some SIP controls are disabled",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SystemIntegrityProtection"
         }
       }
@@ -35,7 +81,6 @@
       "text": {
         "en": {
           "label": "Firewall is enabled",
-          "error": "Firewall is disabled",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Firewall"
         }
       }
@@ -45,7 +90,6 @@
       "text": {
         "en": {
           "label": "Gatekeeper is enabled",
-          "error": "Gatekeeper is disabled",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GatekeeperEnabled"
         }
       }
@@ -55,7 +99,6 @@
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
-          "error": "Automatic updates are disabled",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/AutoUpdates"
         }
       }
@@ -65,7 +108,6 @@
       "text": {
         "en": {
           "label": "Sharing services are disabled",
-          "error": "The following system sharing services are enabled",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SharingPreferences"
         }
       }
@@ -75,7 +117,6 @@
       "text": {
         "en": {
           "label": "Guest login is disabled",
-          "error": "Guest login is enabled",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
         }
       }
@@ -85,7 +126,6 @@
       "text": {
         "en": {
           "label": "SSH private keys are secured",
-          "error": "Some SSH private keys are not secured",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SSHKeys"
         }
       }
@@ -95,7 +135,6 @@
       "text": {
         "en": {
           "label": "Boot options are secure",
-          "error": "Some boot options are insecure",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BootOptions"
         }
       }
@@ -105,7 +144,6 @@
       "text": {
         "en": {
           "label": "No insecure wireless networks",
-          "error": "Connections to insecure wireless networking connections",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
         }
       }
@@ -115,7 +153,6 @@
       "text": {
         "en": {
           "label": "No USB storage devices connected",
-          "error": "USB mass storage devices are connected",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
         }
       }

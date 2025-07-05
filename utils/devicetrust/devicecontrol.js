@@ -1,7 +1,8 @@
 class DeviceControl {
 
-    #controlName
-    #lastReport
+    name
+    definition
+    report
     #lastDayStart
     #failedDays = 0
     #action
@@ -10,7 +11,7 @@ class DeviceControl {
         const isSkipped = config.devicetrust.actions[DeviceTrust.Action.SKIP].includes(controlName)
         assert(!isSkipped, `tried to create skipped control ${controlName}`)
 
-        this.#controlName = controlName
+        this.name = controlName
         for (const action of DeviceTrust.Action.values) {
             if (config.devicetrust.actions[action].includes(controlName)) {
                 this.#action = action
@@ -23,10 +24,10 @@ class DeviceControl {
     }
 
     addReport(report) {
-        assert(report.name === this.#controlName, `sent report for "${report.name}" to control "${this.#controlName}"`)
+        assert(report.name === this.name, `sent report for "${report.name}" to control "${this.name}"`)
 
         if (report.passing) {
-            this.#lastReport = report
+            this.report = report
             this.#lastDayStart = report.timestamp
             this.#failedDays = 0
             return
@@ -37,19 +38,11 @@ class DeviceControl {
             this.#failedDays++
         }
 
-        this.#lastReport = report
-    }
-
-    getReport() {
-        return this.#lastReport
-    }
-
-    getName() {
-        return this.#controlName
+        this.report = report
     }
 
     getState() {
-        if (this.#lastReport.passed) {
+        if (this.report.passed) {
             return DeviceTrust.State.PASSING
         } else if (this.#action === DeviceTrust.Action.NOTHING || this.#action === DeviceTrust.Action.NOTIFY) {
             return DeviceTrust.State.FAILING
@@ -63,7 +56,7 @@ class DeviceControl {
     }
 
     getNextState() {
-        if (this.#lastReport.passed) {
+        if (this.report.passed) {
             return {state: DeviceTrust.State.PASSING}
         } else if (this.#action === DeviceTrust.Action.NOTHING || this.#action === DeviceTrust.Action.NOTIFY) {
             return { state: DeviceTrust.State.FAILING }

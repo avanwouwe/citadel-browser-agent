@@ -21,9 +21,12 @@ function renderDashboard() {
         const controls = Object.values(devicetrust.controls)
         for (const ctrl of controls) {
             const next = ctrl.nextState
+            let ctrlText = ctrl.definition?.text ?? {}
+            ctrlText = ctrlText[I8N.getLanguage()] ?? ctrlText[I8N.defaultLanguage] ?? {}
+
             const tr = document.createElement("tr")
             tr.innerHTML =
-                `<td>${t("control.name."+ ctrl. name)}</td>` +
+                `<td>${ctrlText.label ?? ctrl.name}</td>` +
                 `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
                 `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
                 `<td class="days">${next.days ?? ""}</td>`

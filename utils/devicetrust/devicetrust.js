@@ -20,25 +20,27 @@ class DeviceTrust {
         static values= [this.NOTHING, this.NOTIFY, this.WARN, this.BLOCK]
     }
 
-    #devicecontrols = { }
+    #controls = { }
     #deviceState
     #lastNotification = 0
 
     addReport(report) {
         const browserUpdated = Browser.isUpdated(report.browsers)
-        this.getControl("BrowserUpdated")
-            .addReport({name: "BrowserUpdated", passed: browserUpdated, timestamp: nowTimestamp()})
+        const browserControl = this.getControl("BrowserUpdated")
+        browserControl.addReport({name: "BrowserUpdated", passed: browserUpdated, timestamp: nowTimestamp()})
+        browserControl.definition = report.controls.definitions["BrowserUpdated"]
 
-        for (const controlReport of Object.values(report.controls)) {
+        for (const controlReport of Object.values(report.controls.results)) {
             const isSkipped = config.devicetrust.actions[DeviceTrust.Action.SKIP].includes(controlReport.name)
             if (!isSkipped) {
-                this.getControl(controlReport.name)
-                    .addReport(controlReport)
+                const control = this.getControl(controlReport.name)
+                control.addReport(controlReport)
+                control.definition = report.controls.definitions[controlReport.name]
             }
         }
 
         let worstState = DeviceTrust.State.indexOf(DeviceTrust.State.PASSING)
-        Object.values(this.#devicecontrols).forEach(control => {
+        Object.values(this.#controls).forEach(control => {
             const controlState = DeviceTrust.State.indexOf(control.getState())
             worstState = Math.max(worstState, controlState)
         })
@@ -47,16 +49,16 @@ class DeviceTrust {
         this.#notify()
     }
 
-    getControl(name) { return this.#devicecontrols.getOrSet(name, new DeviceControl(name)) }
+    getControl(name) { return this.#controls.getOrSet(name, new DeviceControl(name)) }
 
-    getControls() { return this.#devicecontrols }
+    getControls() { return this.#controls }
 
     getState() { return this.#deviceState }
 
     getNextState() {
         let worstState = { state: DeviceTrust.State.PASSING }
 
-        Object.values(this.#devicecontrols).forEach(control => {
+        Object.values(this.#controls).forEach(control => {
             const currState = control.getNextState()
             if (
                 DeviceTrust.State.indexOf(currState.state) > DeviceTrust.State.indexOf(worstState.state) ||
@@ -71,7 +73,7 @@ class DeviceTrust {
     }
 
     getCompliance() {
-        const controls = Object.values(this.#devicecontrols)
+        const controls = Object.values(this.#controls)
         let compliant = 0
 
         controls.forEach(control => { if (control.getState() === DeviceTrust.State.PASSING) compliant++ })
@@ -81,8 +83,8 @@ class DeviceTrust {
     }
 
     report() {
-        Object.values(this.#devicecontrols).forEach(control => {
-            logger.log(nowTimestamp(), "report", "devicetrust control", undefined, Log.INFO, control.getState(), `control ${control.getName()} = ${control.getState()}`, undefined, undefined, false)
+        Object.values(this.#controls).forEach(control => {
+            logger.log(nowTimestamp(), "report", "devicetrust control", undefined, Log.INFO, control.getState(), `control ${control.name} = ${control.getState()}`, undefined, undefined, false)
         })
         logger.log(nowTimestamp(), "report", "devicetrust compliance", undefined, Log.INFO, this.getCompliance(), `endpoint compliance rate = ${this.getCompliance()} %`, undefined, undefined, false)
     }

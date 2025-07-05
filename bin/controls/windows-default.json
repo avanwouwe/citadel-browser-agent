@@ -1,48 +1,152 @@
 {
   "controls": {
+    "BrowserUpdated": {
+      "text": {
+        "en": {
+          "label": "Browser is updated"
+        }
+      }
+    },
+    "ForbiddenApplications": {
+      "text": {
+        "en": {
+          "label": "No forbidden applications running"
+        }
+      }
+    },
+    "MissingApplications": {
+      "text": {
+        "en": {
+          "label": "All required applications present"
+        }
+      }
+    },
+    "ForbiddenProcesses": {
+      "text": {
+        "en": {
+          "label": "No forbidden processes running"
+        }
+      }
+    },
+    "MissingProcesses": {
+      "text": {
+        "en": {
+          "label": "All required processes running"
+        }
+      }
+    },
+    "MaxUptime": {
+      "text": {
+        "en": {
+          "label": "System was restarted recently"
+        }
+      }
+    },
+    "SystemUpdated": {
+      "text": {
+        "en": {
+          "label": "System is up to date"
+        }
+      }
+    },
     "DriveEncryption": {
-      "description": "Your device is not encrypted",
-      "query": "SELECT device_id AS error FROM bitlocker_info WHERE encrypted != 1;"
+      "query": "SELECT device_id AS error FROM bitlocker_info WHERE encrypted != 1;",
+      "text": {
+        "en": {
+          "label": "Disk is encrypted",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/DriveEncryption"
+        }
+      }
     },
     "LockScreen": {
-      "description": "Your screen locking configuration has issues",
-      "query": "SELECT 'Screen lock not required on resume' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure' AND data != '1'\nUNION ALL\nSELECT 'Screen lock timeout too high: ' || data AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut' AND CAST(data AS INTEGER) > 600;"
+      "query": "SELECT 'Screen lock not required on resume' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure' AND data != '1'\nUNION ALL\nSELECT 'Screen lock timeout too high: ' || data AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut' AND CAST(data AS INTEGER) > 600;",
+      "text": {
+        "en": {
+          "label": "Screen locking is enabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/LockScreen"
+        }
+      }
     },
     "Firewall": {
-      "description": "Firewall is disabled or not healthy",
-      "query": "SELECT '' AS error FROM windows_security_center WHERE type = 'FIREWALL' AND state != 'Good';"
+      "query": "SELECT '' AS error FROM windows_security_center WHERE type = 'FIREWALL' AND state != 'Good';",
+      "text": {
+        "en": {
+          "label": "Firewall is enabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Firewall"
+        }
+      }
     },
     "ProtectionStatus": {
-      "description": "Some Windows protection features are not working",
-      "query": "SELECT type || ' status is ' || state AS error FROM windows_security_center WHERE type != 'FIREWALL' AND state != 'Good';"
+      "query": "SELECT type || ' status is ' || state AS error FROM windows_security_center WHERE type != 'FIREWALL' AND state != 'Good';",
+      "text": {
+        "en": {
+          "label": "Windows protection features are active",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ProtectionStatus"
+        }
+      }
     },
     "AutoUpdates": {
-      "description": "Automatic updates are disabled",
-      "query": "SELECT '' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions' AND data != '4';"
+      "query": "SELECT '' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions' AND data != '4';",
+      "text": {
+        "en": {
+          "label": "Automatic updates are enabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/AutoUpdates"
+        }
+      }
     },
     "SharingPreferences": {
-      "description": "The following system sharing services are enabled",
-      "query": "SELECT 'Remote Desktop is enabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' AND data = '0'\nUNION ALL\nSELECT 'File and Printer Sharing is enabled' FROM services WHERE name = 'LanmanServer' AND start_type != 'DISABLED'\nUNION ALL\nSELECT 'Remote Registry is enabled' FROM services WHERE name = 'RemoteRegistry' AND start_type != 'DISABLED';"
+      "query": "SELECT 'Remote Desktop is enabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' AND data = '0'\nUNION ALL\nSELECT 'File and Printer Sharing is enabled' FROM services WHERE name = 'LanmanServer' AND start_type != 'DISABLED'\nUNION ALL\nSELECT 'Remote Registry is enabled' FROM services WHERE name = 'RemoteRegistry' AND start_type != 'DISABLED';",
+      "text": {
+        "en": {
+          "label": "Sharing services are disabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SharingPreferences"
+        }
+      }
     },
     "GuestLogin": {
-      "description": "Guest login is enabled",
-      "query": "SELECT '' AS error FROM users WHERE username = 'Guest' AND disabled = 0;"
+      "query": "SELECT '' AS error FROM users WHERE username = 'Guest' AND disabled = 0;",
+      "text": {
+        "en": {
+          "label": "Guest login is disabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
+        }
+      }
     },
     "SSHKeys": {
-      "description": "Some SSH private keys are not secured",
-      "query": "SELECT path AS error FROM user_ssh_keys WHERE encrypted = 0;"
+      "query": "SELECT path AS error FROM user_ssh_keys WHERE encrypted = 0;",
+      "text": {
+        "en": {
+          "label": "SSH private keys are secured",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SSHKeys"
+        }
+      }
     },
     "BootOptions": {
-      "description": "Some boot options are insecure",
-      "query": "SELECT 'UEFI secure boot is disabled' AS error FROM uefi_secureboot WHERE secure_boot != 1;"
+      "query": "SELECT 'UEFI secure boot is disabled' AS error FROM uefi_secureboot WHERE secure_boot != 1;",
+      "text": {
+        "en": {
+          "label": "Boot options are secure",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BootOptions"
+        }
+      }
     },
     "WirelessNetworking": {
-      "description": "Connections to insecure wireless networking connections",
-      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');"
+      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');",
+      "text": {
+        "en": {
+          "label": "No insecure wireless networks",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
+        }
+      }
     },
     "RemovableStorage": {
-      "description": "USB mass storage devices are connected",
-      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;"
+      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;",
+      "text": {
+        "en": {
+          "label": "No USB storage devices connected",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
+        }
+      }
     }
   }
 }

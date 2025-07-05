@@ -68,8 +68,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			}
 
 			Object.values(devicetrust.getControls()).forEach((control) => {
-				status.controls[control.getName()] = {
-					name: control.getName(),
+				status.controls[control.name] = {
+					name: control.name,
+					definition: control.definition,
 					state: control.getState(),
 					nextState: control.getNextState(),
 				}

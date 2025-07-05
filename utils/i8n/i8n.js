@@ -1,5 +1,7 @@
 class I8N {
 
+    static defaultLanguage = "en"
+
     #translations
 
     constructor(translations) {
@@ -42,8 +44,8 @@ class I8N {
             i8n.#translations = await readJsonFile(filename)
         } catch (err) {
             console.warn(`cannot load i8n file ${filename}: ${err}`)
-            if (lang !== "en") {
-                return await I8N.fromFile(path, "en")
+            if (lang !== I8N.defaultLanguage) {
+                return await I8N.fromFile(path, I8N.defaultLanguage)
             }
         }
         return i8n
@@ -54,12 +56,12 @@ class I8N {
 
         let translations = obj[lang]
         if (! translations) {
-            console.warn(`cannot load i8n translations for "${lang}", falling back to "en"`)
+            console.warn(`cannot load i8n translations for "${lang}", falling back to "${I8N.defaultLanguage}"`)
             translations = obj.en
         }
 
         if (! translations) {
-            console.warn(`cannot load i8n translations for "en"`)
+            console.warn(`cannot load i8n fallback translations using language "${I8N.defaultLanguage}"`)
         }
 
         return new I8N(translations)
