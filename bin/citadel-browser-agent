@@ -284,8 +284,8 @@ def checkSystemUpdated():
             addReport(report, "SystemUpdated", [] if isUpdated else [''])
 
         elif SYSTEM_OS == "windows":
-            missingUpdates = getErrors("SELECT title FROM windows_update_history WHERE result_code NOT IN (2, 3);")
-            addReport(report, "SystemUpdated", missingUpdates)
+            errors = getErrors("SELECT '' AS error FROM windows_security_center WHERE autoupdate != 'Good'")
+            addReport(report, "SystemUpdated", errors)
 
         else:
             raise Exception("unsupported OS")
@@ -406,7 +406,7 @@ def generateAndSendReport():
         return
 
     if not os.path.isfile(osqueryPath):
-        warning(f"device trust report not generated, osquery not found at '${osqueryPath}'")
+        warning(f"device trust report not generated, osquery not found at '{osqueryPath}'")
         return
 
     try:

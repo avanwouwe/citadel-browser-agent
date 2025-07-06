@@ -85,7 +85,7 @@
       }
     },
     "DriveEncryption": {
-      "query": "SELECT device_id AS error FROM bitlocker_info WHERE encrypted != 1;",
+      "query": "SELECT '' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\BitlockerStatus\\BootStatus' AND data != '1';",
       "text": {
         "en": {
           "label": "Disk is encrypted",
@@ -98,7 +98,7 @@
       }
     },
     "LockScreen": {
-      "query": "SELECT 'Screen lock not required on resume' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure' AND data != '1'\nUNION ALL\nSELECT 'Screen lock timeout too high: ' || data AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut' AND CAST(data AS INTEGER) > 600;",
+      "query": "SELECT 'Screen lock not required on resume' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure' AND data != '1'\nUNION ALL\nSELECT 'Screen lock timeout too high: ' || data AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut' AND CAST(data AS INTEGER) > 600\nUNION ALL\nSELECT 'Screen lock disabled' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveActive' AND data != '1'\nUNION ALL\nSELECT 'No screen saver program specified' AS error \nWHERE NOT EXISTS (\n  SELECT 1 \n  FROM registry \n  WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\SCRNSAVE.EXE' \n);",
       "text": {
         "en": {
           "label": "Screen locking is enabled",
@@ -111,7 +111,7 @@
       }
     },
     "Firewall": {
-      "query": "SELECT '' AS error FROM windows_security_center WHERE type = 'FIREWALL' AND state != 'Good';",
+      "query": "SELECT '' AS error FROM windows_security_center WHERE firewall != 'Good';",
       "text": {
         "en": {
           "label": "Firewall is enabled",
@@ -124,7 +124,7 @@
       }
     },
     "ProtectionStatus": {
-      "query": "SELECT type || ' status is ' || state AS error FROM windows_security_center WHERE type != 'FIREWALL' AND state != 'Good';",
+      "query": "SELECT 'internet settings = ' || internet_settings AS error FROM windows_security_center WHERE internet_settings != 'Good'\nUNION ALL\nSELECT 'Windows Security Center = ' || windows_security_center_service AS error FROM windows_security_center WHERE windows_security_center_service != 'Good'\nUNION ALL\nSELECT 'User Account Control = ' || user_account_control AS error FROM windows_security_center WHERE user_account_control != 'Good';",
       "text": {
         "en": {
           "label": "Windows Security Centre features are active",
@@ -137,7 +137,7 @@
       }
     },
     "AutoUpdates": {
-      "query": "SELECT '' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions' AND data != '4';",
+        "query": "SELECT 'AUOptions = ' || data AS error\nFROM (\n  SELECT\n    CASE\n      WHEN policies.name IS NOT NULL THEN policies.data\n      ELSE normal.data\n    END AS data\n  FROM\n    (\n      SELECT name,data FROM registry\n      WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions'\n    ) AS policies\n  FULL OUTER JOIN\n    (\n\t\t  SELECT name,data FROM registry\n\t\t  WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions'\n    ) AS normal\n  ON 1=1\n) AS update_policy\nWHERE CAST(data AS INTEGER) < 4\n\nUNION ALL \n\nSELECT 'NoAutoUpdate = ' || data AS error\nFROM registry\nWHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' AND data = '1'\n\nUNION ALL\n\nSELECT 'Windows Update service = ' || status AS error\nFROM services\nWHERE name = 'wuauserv' AND status != 'RUNNING';",
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
@@ -146,6 +146,19 @@
         "fr": {
           "label": "Mises à jour automatiques sont activées",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/AutoUpdates"
+        }
+      }
+    },
+    "Antivirus": {
+      "query": "SELECT '' AS error FROM windows_security_center WHERE antivirus != 'Good'",
+      "text": {
+        "en": {
+          "label": "Antivirus protection is enabled",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Antivirus"
+        },
+        "fr": {
+          "label": "Protection antivirus est activée",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Antivirus"
         }
       }
     },
@@ -159,19 +172,6 @@
         "fr": {
           "label": "Services de partage sont désactivés",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SharingPreferences"
-        }
-      }
-    },
-    "GuestLogin": {
-      "query": "SELECT '' AS error FROM users WHERE username = 'Guest' AND disabled = 0;",
-      "text": {
-        "en": {
-          "label": "Guest login is disabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
-        },
-        "fr": {
-          "label": "Session Invité est désactivée",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
         }
       }
     },
@@ -189,7 +189,7 @@
       }
     },
     "BootOptions": {
-      "query": "SELECT 'UEFI secure boot is disabled' AS error FROM uefi_secureboot WHERE secure_boot != 1;",
+      "query": "SELECT 'UEFI secure boot is disabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State\\UEFISecureBootEnabled' AND data != 1;",
       "text": {
         "en": {
           "label": "Boot options are secure",
@@ -201,21 +201,8 @@
         }
       }
     },
-    "WirelessNetworking": {
-      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');",
-      "text": {
-        "en": {
-          "label": "No insecure wireless networks",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
-        },
-        "fr": {
-          "label": "Aucun réseau sans fil non sécurisé",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
-        }
-      }
-    },
     "RemovableStorage": {
-      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;",
+      "query": "SELECT device_id AS error FROM logical_drives WHERE description LIKE '%removable%';",
       "text": {
         "en": {
           "label": "No USB storage devices",
