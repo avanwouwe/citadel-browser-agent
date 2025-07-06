@@ -1,10 +1,10 @@
 {
   "control": {
     "state": {
-      "PASSING": "RÉUSSI",
+      "PASSING": "VALIDÉ",
       "FAILING": "ÉCHEC",
-      "WARNING": "AVERTISSEMENT",
-      "BLOCKING": "BLOQUANT"
+      "WARNING": "ALERTE",
+      "BLOCKING": "BLOQUÉ"
     }
   },
   "dashboard": {
@@ -13,6 +13,6 @@
     "control": "Contrôle",
     "state": "État",
     "next-state": "Suivant",
-    "in-days": "En jours"
+    "in-days": "Jours restants"
   }
 }
