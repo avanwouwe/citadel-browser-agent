@@ -10,7 +10,7 @@
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />
 
-        <Icon Id="icon.ico" SourceFile="..\..\gui\images\icon32.ico"/>
+        <Icon Id="icon.ico" SourceFile="..\..\..\gui\images\icon32.ico"/>
         <Property Id="ARPPRODUCTICON" Value="icon.ico" />
 
         <Feature Id="ProductFeature" Title="Citadel" Level="1">
@@ -115,7 +115,7 @@
         <Component Id="ControlsWindowsDefaultJson" Guid="*" Directory="CONTROLSFOLDER">
             <File Id="ControlsWindowsDefaultJsonFile"
                   Name="windows-default.json"
-                  Source="..\controls\windows-default.json"
+                  Source="..\..\controls\windows-default.json"
                   KeyPath="yes" />
         </Component>
 

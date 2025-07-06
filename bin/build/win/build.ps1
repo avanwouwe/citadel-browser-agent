@@ -5,8 +5,8 @@ Remove-Item -Path "obj" -Force -Recurse -ErrorAction SilentlyContinue
 
 $PYTHON_PATH = "$env:LOCALAPPDATA\Programs\Python\Python313"
 
-& "$PYTHON_PATH\Scripts\pip" install --upgrade pyinstall
+& "$PYTHON_PATH\Scripts\pip" install --upgrade pyinstaller pywin32
 
-& "$PYTHON_PATH\Scripts\pyinstaller" --clean --optimize 2 --onefile ../citadel-browser-agent
+& "$PYTHON_PATH\Scripts\pyinstaller" --clean --optimize 2 --onefile ../../citadel-browser-agent
 
 dotnet build -c Release -p:Platform=x64
