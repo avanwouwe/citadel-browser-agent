@@ -19,7 +19,9 @@
         </Feature>
 
         <StandardDirectory Id="ProgramFiles64Folder">
-            <Directory Id="INSTALLFOLDER" Name="Citadel" />
+            <Directory Id="INSTALLFOLDER" Name="Citadel">
+                <Directory Id="CONTROLSFOLDER" Name="controls" />
+            </Directory>
         </StandardDirectory>
 
         <Property Id="InstallCitadelSvcExe" Value="&quot;C:\Program Files\Citadel\CitadelSvc.exe&quot; install" />
@@ -106,7 +108,16 @@
                       KeyPath="yes" />
             </Component>
 
+            <ComponentRef Id="ControlsWindowsDefaultJson" />
+
         </ComponentGroup>
+
+        <Component Id="ControlsWindowsDefaultJson" Guid="*" Directory="CONTROLSFOLDER">
+            <File Id="ControlsWindowsDefaultJsonFile"
+                  Name="windows-default.json"
+                  Source="..\controls\windows-default.json"
+                  KeyPath="yes" />
+        </Component>
 
         <Component Id="RegistryEntries" Guid="*" Directory="INSTALLFOLDER">
         <!-- for native messaging -->
