@@ -240,6 +240,6 @@ function cancelAlert(id) {
 }
 
 chrome.notifications.onClicked.addListener(function(notificationId) {
-    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/dashboard.html") })
+    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/devicetrust.html") })
     chrome.notifications.clear(notificationId)
 })
