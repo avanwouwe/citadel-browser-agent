@@ -44,11 +44,13 @@ class DeviceControl {
     getState() {
         if (this.report.passed) {
             return DeviceTrust.State.PASSING
+        } else if (this.#action === DeviceTrust.Action.BLOCK) {
+            return DeviceTrust.State.BLOCKING
         } else if (this.#action === DeviceTrust.Action.NOTHING || this.#action === DeviceTrust.Action.NOTIFY) {
             return DeviceTrust.State.FAILING
         } else if (this.#failedDays >= config.devicetrust.trigger.block) {
             return DeviceTrust.State.BLOCKING
-        } else if (this.#action === DeviceTrust.Action.WARN && this.#failedDays >= config.devicetrust.trigger.warn) {
+        } else if (this.#failedDays >= config.devicetrust.trigger.warn) {
             return DeviceTrust.State.WARNING
         } else {
             return DeviceTrust.State.FAILING
@@ -58,14 +60,16 @@ class DeviceControl {
     getNextState() {
         if (this.report.passed) {
             return {state: DeviceTrust.State.PASSING}
+        } else if (this.#action === DeviceTrust.Action.BLOCK) {
+            return { state: DeviceTrust.State.BLOCKING }
         } else if (this.#action === DeviceTrust.Action.NOTHING || this.#action === DeviceTrust.Action.NOTIFY) {
             return { state: DeviceTrust.State.FAILING }
-        } else if (this.#action === DeviceTrust.Action.WARN && this.#failedDays < config.devicetrust.trigger.warn) {
+        } else if (this.#failedDays < config.devicetrust.trigger.warn) {
             return { state: DeviceTrust.State.WARNING, days: config.devicetrust.trigger.warn - this.#failedDays }
         } else if (this.#failedDays < config.devicetrust.trigger.block) {
             return { state: DeviceTrust.State.BLOCKING, days: config.devicetrust.trigger.block - this.#failedDays }
         } else {
-            return { state: DeviceTrust.State.FAILING }
+            return { state: DeviceTrust.State.BLOCKING }
         }
     }
 
