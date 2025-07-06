@@ -29,6 +29,7 @@ DEFAULT_OSQUERY_PATH = "C:\\Program Files\\osquery\\osqueryi.exe" if SYSTEM_OS =
 DEFAULT_UPTIME_DAYS = 30
 REPORT_TIMEOUT = 60   # seconds
 
+osqueryPath = DEFAULT_OSQUERY_PATH
 config = {}
 username = getpass.getuser()
 logger = None
@@ -223,7 +224,7 @@ def readJsonFile(path):
 last_config_change = None
 
 def loadConfig():
-    global last_config_change, config
+    global last_config_change, config, osqueryPath
 
     try:
         mtime = os.path.getmtime(CONFIG_PATH)
@@ -239,11 +240,12 @@ def loadConfig():
 
         last_config_change = mtime
 
+        oqsueryPath = config.get("devicetrust", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
+
+
 
 def osquery(query):
     path = config.get("devicetrust", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
-    if not os.path.isfile(path):
-        raise FileNotFoundError(path)
 
     proc = subprocess.run([path, '--json', '--', query], capture_output=True, text=True)
     if proc.returncode != 0:
@@ -402,10 +404,14 @@ def generateAndSendReport():
     now = time.time()
     if devicereport_running and now - last_devicereport < REPORT_TIMEOUT:
         return
-    devicereport_running = True
-    last_devicereport = now
+
+    if not os.path.isfile(osqueryPath):
+        warning(f"device trust report not generated, osquery not found at '${osqueryPath}'")
+        return
 
     try:
+        devicereport_running = True
+        last_devicereport = now
         report = generateReport()
         sendMessage("devicetrust", report)
     except Exception as e:
