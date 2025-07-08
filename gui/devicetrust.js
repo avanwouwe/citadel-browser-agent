@@ -1,8 +1,8 @@
 let t
 
-I8N.loadPage('/utils/i8n', (i8n) => {
-    t = i8n.getTranslator()
-    i8n.translatePage()
+I18n.loadPage('/utils/i18n', (i18n) => {
+    t = i18n.getTranslator()
+    i18n.translatePage()
     renderDashboard()
 })()
 
@@ -26,7 +26,7 @@ function renderDashboard() {
 
             const next = ctrl.nextState
             let ctrlText = ctrl.definition?.text ?? {}
-            ctrlText = ctrlText[I8N.getLanguage()] ?? ctrlText[I8N.defaultLanguage] ?? {}
+            ctrlText = ctrlText[I18n.getLanguage()] ?? ctrlText[I18n.defaultLanguage] ?? {}
 
             const tr = document.createElement("tr")
             tr.innerHTML =

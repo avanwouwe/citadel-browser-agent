@@ -16,7 +16,7 @@ let ignorelist
 let devicetrust
 let t
 
-I8N.fromFile('/utils/i8n').then(i18n => t = i18n.getTranslator())
+I18n.fromFile('/utils/i18n').then(i18n => t = i18n.getTranslator())
 
 Port.onMessage("config",(newConfig) => {
 	Config.load(newConfig)

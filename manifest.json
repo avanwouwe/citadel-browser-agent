@@ -28,7 +28,7 @@
       "resources": [
         "/gui/images/*",
         "/gui/utils.js",
-        "/utils/i8n/*.json",
+        "/utils/i18n/*.json",
         "/utils/passwords.js",
         "/utils/injected/citadel-page-script.js"
       ],
@@ -55,7 +55,7 @@
       "/utils/browser.js",
       "/gui/interface.js",
       "/gui/utils.js",
-      "/utils/i8n/i8n.js",
+      "/utils/i18n/i18n.js",
       "/utils/devicetrust/devicetrust.js",
       "/utils/devicetrust/devicecontrol.js",
       "/utils/blacklist/blacklist.js",

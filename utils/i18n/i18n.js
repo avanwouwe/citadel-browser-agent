@@ -1,4 +1,4 @@
-class I8N {
+class I18n {
 
     static defaultLanguage = "en"
 
@@ -13,7 +13,7 @@ class I8N {
 
         let template = key.split('.').reduce((o, k) => (o ? o[k] : undefined), this.#translations)
         if (!template) {
-            console.warn(`missing key "${key}" for language ${I8N.getLanguage()}`)
+            console.warn(`missing key "${key}" for language ${I18n.getLanguage()}`)
             return key
         }
 
@@ -41,34 +41,34 @@ class I8N {
         return this.t.bind(this)
     }
 
-    static async fromFile(path, lang = I8N.getLanguage()) {
-        const i8n = new I8N()
+    static async fromFile(path, lang = I18n.getLanguage()) {
+        const i18n = new I18n()
         const filename = `${path}/${lang}.json`
         try {
-            i8n.#translations = await readJsonFile(filename)
+            i18n.#translations = await readJsonFile(filename)
         } catch (err) {
-            console.warn(`cannot load i8n file ${filename}: ${err}`)
-            if (lang !== I8N.defaultLanguage) {
-                return await I8N.fromFile(path, I8N.defaultLanguage)
+            console.warn(`cannot load i18n file ${filename}: ${err}`)
+            if (lang !== I18n.defaultLanguage) {
+                return await I18n.fromFile(path, I18n.defaultLanguage)
             }
         }
-        return i8n
+        return i18n
     }
 
     static fromObject(obj) {
-        const lang = I8N.getLanguage()
+        const lang = I18n.getLanguage()
 
         let translations = obj[lang]
         if (! translations) {
-            console.warn(`cannot load i8n translations for "${lang}", falling back to "${I8N.defaultLanguage}"`)
+            console.warn(`cannot load i18n translations for "${lang}", falling back to "${I18n.defaultLanguage}"`)
             translations = obj.en
         }
 
         if (! translations) {
-            console.warn(`cannot load i8n fallback translations using language "${I8N.defaultLanguage}"`)
+            console.warn(`cannot load i18n fallback translations using language "${I18n.defaultLanguage}"`)
         }
 
-        return new I8N(translations)
+        return new I18n(translations)
     }
 
     static loadPage(path, callback) {
@@ -84,11 +84,11 @@ class I8N {
 
         return async () => {
             const domPromise = domReady()
-            const i8nPromise = I8N.fromFile(path)
+            const i18nPromise = I18n.fromFile(path)
 
-            const [_, i8n] = await Promise.all([domPromise, i8nPromise])
+            const [_, i18n] = await Promise.all([domPromise, i18nPromise])
 
-            callback(i8n)
+            callback(i18n)
         }
     }
 }
