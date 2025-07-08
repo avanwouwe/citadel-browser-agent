@@ -215,7 +215,7 @@
       }
     },
     "WirelessNetworking": {
-      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'Unknown', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');",
+      "query": "SELECT '\"' || ssid || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Personal Mixed', 'WPA Enterprise');",
       "text": {
         "en": {
           "label": "No insecure wireless networks",
