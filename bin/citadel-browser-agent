@@ -245,9 +245,7 @@ def loadConfig():
 
 
 def osquery(query):
-    path = config.get("devicetrust", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
-
-    proc = subprocess.run([path, '--json', '--', query], capture_output=True, text=True)
+    proc = subprocess.run([osqueryPath, '--json', '--', query], capture_output=True, text=True)
     if proc.returncode != 0:
         raise Exception(proc.stderr)
     return json.loads(proc.stdout)
