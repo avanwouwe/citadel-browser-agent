@@ -93,7 +93,7 @@ class DeviceTrust {
         setWarning(this.#deviceState === DeviceTrust.State.WARNING || this.#deviceState === DeviceTrust.State.BLOCKING)
 
         const alertId = "devicetrust"
-        const title = "Device security issues"
+        const title = t("devicetrust.notification.title")
         const timeSinceLastNotification = Date.now() - this.#lastNotification
 
         if (this.#deviceState === DeviceTrust.State.PASSING) {
@@ -103,13 +103,14 @@ class DeviceTrust {
         }
 
         if (DeviceTrust.State.FAILING && timeSinceLastNotification >= ONE_DAY * 7) {
-            raiseAlert(alertId, title, `Your device has security issues. Click to fix them.`)
+            raiseAlert(alertId, title, t("devicetrust.notification.failing"))
             this.#lastNotification = Date.now()
         } else if (DeviceTrust.State.WARNING && timeSinceLastNotification >= ONE_DAY * 1) {
-            raiseAlert(alertId, title, `⚠️ Your device is not is securely configured. In ${this.getNextState().days ?? "a few"} days your device will be blocked. Click to fix issues.`)
+            const days = this.getNextState().days ?? "a few"
+            raiseAlert(alertId, title, t("devicetrust.notification.failing", {days}))
             this.#lastNotification = Date.now()
         } else if (DeviceTrust.State.BLOCKING && timeSinceLastNotification >= ONE_DAY * 1) {
-            raiseAlert(alertId, title, `⚠️ Your device is insecure and has been blocked. Click to fix issues.`)
+            raiseAlert(alertId, title, t("devicetrust.notification.blocking"))
             this.#lastNotification = Date.now()
         }
     }

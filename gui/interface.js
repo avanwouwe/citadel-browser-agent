@@ -33,7 +33,15 @@ function blockPage(tabId, reason, blockedPage) {
 function blockDomainModal(domain, message, exceptionMessage) {
     const logo = config.company.logo || chrome.runtime.getURL('/gui/images/icon128.png')
 
-    forAllTabs(domain, (message, logo, exceptionMessage) => {
+    const text = {
+        message: message,
+        request_exception: t("block-modal.request-exception"),
+        request_exception_header: t("block-modal.request-exception-header"),
+        provide_reason: t("block-modal.provide-reason"),
+        submit_request: t("block-modal.submit-request"),
+    }
+
+    forAllTabs(domain, (text, logo, exceptionMessage) => {
         if (document.getElementById('blockOverlayShadowRootHost')) return
 
         const host = document.createElement('div')
@@ -133,12 +141,12 @@ function blockDomainModal(domain, message, exceptionMessage) {
 
         const messageDiv = document.createElement('div')
         messageDiv.className = "message"
-        messageDiv.innerHTML = message
+        messageDiv.innerHTML = text.message
 
         // --- Exception Request UI ---
         const toggle = document.createElement('div')
         toggle.className = 'exception-toggle'
-        toggle.innerHTML = 'In urgent and exceptional cases you can <span class="clickable">request an exception</span> if you are blocked.'
+        toggle.innerHTML = text.request_exception
 
         // Exception Section
         const exceptionSection = document.createElement('div')
@@ -146,15 +154,15 @@ function blockDomainModal(domain, message, exceptionMessage) {
 
         const label = document.createElement('div')
         label.className = 'exception-title'
-        label.textContent = "Request an Exception"
+        label.textContent = text.request_exception_header
 
         const textarea = document.createElement('textarea')
         textarea.className = 'exception-reason'
-        textarea.placeholder = "Please provide your reason for requesting an exception"
+        textarea.placeholder = text.provide_reason
 
         const submit = document.createElement('button')
         submit.className = 'exception-submit'
-        submit.textContent = 'Submit Request'
+        submit.textContent = text.submit_request
 
         submit.disabled = true
         textarea.addEventListener('input', function() {
@@ -192,7 +200,7 @@ function blockDomainModal(domain, message, exceptionMessage) {
         shadow.appendChild(style)
         shadow.appendChild(overlay)
         document.body.appendChild(host)
-    }, [message, logo, exceptionMessage])
+    }, [text, logo, exceptionMessage])
 }
 
 function unblockDomainModal(domain) {

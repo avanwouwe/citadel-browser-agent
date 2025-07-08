@@ -2,7 +2,7 @@ class Config {
     static config = {
         company: {
             name: 'Company',
-            contact: 'Your IT support',         // replace with your support e-mail
+            contact: 'your IT support',         // replace with your support e-mail
             logo: "",                           // replace with the URL of your logo
             domains: [ ],
             applications: [ ]                   // put your applications

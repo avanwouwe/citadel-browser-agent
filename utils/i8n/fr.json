@@ -1,18 +1,54 @@
 {
-  "control": {
-    "state": {
-      "PASSING": "VALIDÉ",
-      "FAILING": "ÉCHEC",
-      "WARNING": "ALERTE",
-      "BLOCKING": "BLOQUÉ"
+  "devicetrust": {
+    "control": {
+      "state": {
+        "PASSING": "VALIDÉ",
+        "FAILING": "ÉCHEC",
+        "WARNING": "ALERTE",
+        "BLOCKING": "BLOQUÉ"
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard de Device Trust",
+      "compliance": "Conformité",
+      "control": "Contrôle",
+      "state": "État",
+      "next-state": "Suivant",
+      "in-days": "Jours restants"
+    },
+    "notification": {
+      "title": "Problèmes de sécurité",
+      "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger.",
+      "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée. Dans {{days}} jours, votre appareil sera bloqué. Cliquez pour corriger les problèmes.",
+      "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et a été bloqué. Cliquez pour corriger les problèmes."
     }
   },
-  "dashboard": {
-    "title": "Tableau de confiance de l'appareil",
-    "compliance": "Conformité",
-    "control": "Contrôle",
-    "state": "État",
-    "next-state": "Suivant",
-    "in-days": "Jours restants"
+  "errors": {
+    "messaging": {
+      "please-contact": "Impossible de se connecter à l’application native. Veuillez contacter {{contact}}",
+      "with-error": "avec l’erreur :\n\n{{error}}"
+    }
+  },
+  "mfa": {
+    "disconnected": "Vous avez été déconnecté car vous vous êtes authentifié uniquement avec un mot de passe.\n\nReconnectez-vous et configurez votre compte pour utiliser l’authentification multifacteur (MFA), comme un mot de passe à usage unique basé sur le temps (TOTP).\nContactez {{contact}} si vous avez besoin d’aide."
+  },
+  "block-page": {
+    "not-specified": "Non spécifié",
+    "page-blocked-header": "Cette page a été bloquée",
+    "page-blocked-text": "Le site Web que vous essayez de visiter est bloqué pour des raisons de sécurité.",
+    "reason-label": "Raison:",
+    "target-label": "Cible:",
+    "contact-label": "Contact:",
+    "request-exception": "Si vous êtes <b><u>certain</u></b> qu’il n’y a aucun problème de sécurité, vous pouvez <span id=\"clickable\">demander une exception temporaire</span>",
+    "request-exception-header": "Demander une exception",
+    "provide-reason": "Veuillez fournir la raison pour laquelle vous demandez une exception",
+    "submit-request": "Envoyer la demande",
+    "request-submitted-popup": "Votre demande d’exception a été soumise. Vous pouvez réessayer l’opération."
+  },
+  "block-modal": {
+    "request-exception": "En cas d’urgence ou de situation exceptionnelle, vous pouvez <span class=\"clickable\">demander une exception</span> si vous êtes bloqué.",
+    "request-exception-header": "Demander une exception",
+    "provide-reason": "Veuillez préciser la raison de votre demande d’exception",
+    "submit-request": "Envoyer la demande"
   }
 }

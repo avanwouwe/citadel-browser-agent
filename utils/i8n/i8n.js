@@ -31,6 +31,10 @@ class I8N {
             const key = el.getAttribute('data-i18n')
             el.textContent = this.t(key)
         })
+        document.querySelectorAll('[data-i18n-html]').forEach(el => {
+            const key = el.getAttribute('data-i18n-html')
+            el.innerHTML = this.t(key)
+        })
     }
 
     getTranslator() {
@@ -87,6 +91,4 @@ class I8N {
             callback(i8n)
         }
     }
-
-
 }

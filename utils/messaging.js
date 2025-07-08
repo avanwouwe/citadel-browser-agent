@@ -1,7 +1,7 @@
 class Port {
     static #MIN_RETRY_DELAY = ONE_SECOND
     static #MAX_RETRY_DELAY = 10 * ONE_MINUTE
-    static #LOST_EVENTS_FREQ = ONE_DAY;
+    static #LOST_EVENTS_FREQ = ONE_DAY
     static #LOST_EVENTS_POPUP = 'lost-event-popup'
     static #LOST_EVENTS_STATISTICS = 'lost-event-statistics'
 
@@ -52,7 +52,7 @@ class Port {
             Port.#lastError = chrome.runtime.lastError?.message
 
             if (Port.#retryDelay < Port.#MAX_RETRY_DELAY) {
-                Port.#retryDelay *= 2;
+                Port.#retryDelay *= 2
             }
 
             setTimeout(() => {
@@ -60,15 +60,15 @@ class Port {
             }, Port.#retryDelay)
 
 
-            const error = isString(Port.#lastError) ? ` with the error:\n\n${Port.#lastError.htmlMonospace()}` : ""
-            const message = `Unable to connect to native application. Please contact ${config.company.contact.htmlNowrap()}${error}`
+            const error = isString(Port.#lastError) ? " " + t("errors.messaging.with-error", { error: Port.#lastError.htmlMonospace() }) : ""
+            const message = t("errors.messaging.please-contact", {contact: config.company.contact.htmlNowrap()})
 
             rateLimit(Port.#LOST_EVENTS_POPUP, Port.#LOST_EVENTS_FREQ, (mustShowPopup) => {
                 if (mustShowPopup) {
-                    showPopup(message)
+                    showPopup(message + error)
                 }
-            });
-        });
+            })
+        })
 
         Object.entries(Port.#messageHandlers).forEach(([type, handler]) => { Port.onMessage(type, handler) })
     }

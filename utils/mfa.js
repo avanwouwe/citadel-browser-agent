@@ -28,10 +28,7 @@ function startTimerMFA(url, minutes, showModal) {
 
         if (showModal) {
             setTimeout(() => {
-                const message = `You have been disconnected because you authenticated using only a password. 
-
-Reconnect and configure your account to use Multi Factor Authentication (MFA) such as a Time-based One-Time Password (TOTP).
-Contact ${config.company.contact} if you need help.`
+                const message = t("mfa.disconnected", { contact: config.company.contact })
 
                 const exceptionMessage = { type: 'allow-mfa', domain }
 

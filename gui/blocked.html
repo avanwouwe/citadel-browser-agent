@@ -55,24 +55,26 @@
     </style>
 </head>
 <body>
-<h1>This page has been blocked</h1>
-<p>The website you are trying to visit is blocked for security reasons.</p>
+<h1 data-i18n="block-page.page-blocked-header">This page has been blocked</h1>
+<p data-i18n="block-page.page-blocked-text">The website you are trying to visit is blocked for security reasons.</p>
 
 <div class="content">
-    <p><span class="title">Reason:</span> <span id="reason"></span></p>
-    <p><span class="title">Target:</span> <span id="value"></span></p>
-    <p><span class="title">Contact:</span> <span id="contact"></span></p>
+    <p><span class="title" data-i18n="block-page.reason-label">Reason:</span> <span id="reason"></span></p>
+    <p><span class="title" data-i18n="block-page.target-label">Target:</span> <span id="value"></span></p>
+    <p><span class="title" data-i18n="block-page.contact-label">Contact:</span> <span id="contact"></span></p>
 
-    <p id="exceptionSectionToggle" style="display: none">If you are <b><u>sure</u></b> there is no security issue you can <span id="clickable">request a temporary exception</span></p>
+    <p id="exceptionSectionToggle" data-i18n-html="block-page.request-exception" style="display: none">If you are <b><u>sure</u></b> there is no security issue you can <span id="clickable">request a temporary exception</span></p>
 
     <div id="exceptionSection" style="display: none">
-        <label for="exceptionReason" style="font-size: 1.25em; font-weight: bold;">Request an Exception</label>
-        <textarea id="exceptionReason" placeholder="Please provide your reason for requesting an exception"></textarea>
-        <button id="submitException">Submit Request</button>
+        <label for="exceptionReason" data-i18n="block-page.request-exception-header" style="font-size: 1.25em; font-weight: bold;">Request an Exception</label>
+        <textarea id="exceptionReason" data-i18n="block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
+        <button id="submitException" data-i18n="block-page.submit-request">Submit Request</button>
     </div>
 
 </div>
 
-<script src="blocked.js"></script>
+<script src="/gui/utils.js"></script>
+<script src="/utils/i8n/i8n.js"></script>
+<script src="/gui/blocked.js"></script>
 </body>
 </html>

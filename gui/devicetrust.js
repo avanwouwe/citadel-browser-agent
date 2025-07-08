@@ -11,7 +11,7 @@ function renderDashboard() {
         const state = devicetrust.state
         const errorsOnly = getQueryParam("errorsOnly") !== null
 
-        document.getElementById("status-label").textContent = t("control.state." + state) || "-"
+        document.getElementById("status-label").textContent = t("devicetrust.control.state." + state) || "-"
         document.getElementById("dot").className = "state-dot " + state.toLowerCase()
 
         document.getElementById("compliance").textContent = devicetrust.compliance
@@ -31,8 +31,8 @@ function renderDashboard() {
             const tr = document.createElement("tr")
             tr.innerHTML =
                 `<td>${ctrlText.label ?? ctrl.name}</td>` +
-                `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
+                `<td class="state ${ctrl.state.toLowerCase()}">${t("devicetrust.control.state." + ctrl.state)}</td>` +
+                `<td class="nextstate ${next.state.toLowerCase()}">${t("devicetrust.control.state." + next.state) || "-"}</td>` +
                 `<td class="days">${next.days ?? ""}</td>`
             tb.appendChild(tr)
         }

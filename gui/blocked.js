@@ -1,13 +1,19 @@
-window.onload = function() {
+I8N.loadPage('/utils/i8n', (i8n) => {
+    t = i8n.getTranslator()
+    i8n.translatePage()
+    renderPage()
+})()
+
+function renderPage() {
     const urlParams = new URLSearchParams(window.location.search)
 
     // Inject reason and contact into the page
     const blacklistedUrl = urlParams.get('value')
     const blacklistReason = urlParams.get('reason')
     const allowException = urlParams.get('e')
-    document.getElementById('value').textContent = blacklistedUrl || 'Not specified'
-    document.getElementById('reason').textContent = blacklistReason || 'Not specified'
-    document.getElementById('contact').textContent = urlParams.get('contact') || 'your IT support'
+    document.getElementById('value').textContent = blacklistedUrl || t("block-page.not-specified")
+    document.getElementById('reason').textContent = blacklistReason || t("block-page.not-specified")
+    document.getElementById('contact').textContent = urlParams.get('contact')
 
     const exceptionSectionToggle = document.getElementById('exceptionSectionToggle')
     const exceptionSection = document.getElementById('exceptionSection')
@@ -40,7 +46,7 @@ window.onload = function() {
                 reason: exceptionReason
             })
 
-            alert('Your exception request has been submitted. You can retry the operation.')
+            alert(t("block-page.request-submitted-popup"))
 
             history.go(-2)
         })

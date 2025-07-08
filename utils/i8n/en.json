@@ -1,18 +1,54 @@
 {
-  "control": {
-    "state": {
-      "PASSING": "PASSING",
-      "FAILING": "FAILING",
-      "WARNING": "WARNING",
-      "BLOCKING": "BLOCKING"
+  "devicetrust": {
+    "control": {
+      "state": {
+        "PASSING": "PASSING",
+        "FAILING": "FAILING",
+        "WARNING": "WARNING",
+        "BLOCKING": "BLOCKING"
+      }
+    },
+    "dashboard": {
+      "title": "Device Trust Dashboard",
+      "compliance": "Compliance",
+      "control": "Control",
+      "state": "State",
+      "next-state": "Next",
+      "in-days": "In Days"
+    },
+    "notification": {
+      "title": "Device security issues",
+      "failing": "Your device has security issues. Click to fix them.",
+      "warning": "⚠\uFE0F Your device is not is securely configured. In {{days}} days your device will be blocked. Click to fix issues.",
+      "blocking": "⚠\uFE0F Your device is insecure and has been blocked. Click to fix issues."
     }
   },
-  "dashboard": {
-    "title": "Device Trust Dashboard",
-    "compliance": "Compliance",
-    "control": "Control",
-    "state": "State",
-    "next-state": "Next",
-    "in-days": "In Days"
+  "errors": {
+    "messaging": {
+      "please-contact": "Unable to connect to native application. Please contact {{contact}}",
+      "with-error": "with the error:\n\n{{error}}"
+    }
+  },
+  "mfa": {
+    "disconnected": "You have been disconnected because you authenticated using only a password. \n\nReconnect and configure your account to use Multi Factor Authentication (MFA) such as a Time-based One-Time Password (TOTP).\nContact {{contact}} if you need help."
+  },
+  "block-page": {
+    "not-specified": "Not specified",
+    "page-blocked-header": "This page has been blocked",
+    "page-blocked-text": "The website you are trying to visit is blocked for security reasons.",
+    "reason-label": "Reason:",
+    "target-label": "Target:",
+    "contact-label": "Contact:",
+    "request-exception": "If you are <b><u>sure</u></b> there is no security issue you can <span id=\"clickable\">request a temporary exception</span>",
+    "request-exception-header": "Request an Exception",
+    "provide-reason": "Please provide your reason for requesting an exception",
+    "submit-request": "Submit Request",
+    "request-submitted-popup": "Your exception request has been submitted. You can retry the operation."
+  },
+  "block-modal": {
+    "request-exceptions": "In urgent and exceptional cases you can <span class=\"clickable\">request an exception</span> if you are blocked.",
+    "request-exception-header": "Request an Exception",
+    "provide-reason": "Please provide your reason for requesting an exception",
+    "submit-request": "Submit Request"
   }
 }
