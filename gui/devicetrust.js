@@ -1,8 +1,6 @@
 let t
 
 I8N.loadPage('/utils/i8n', (i8n) => {
-    document.getElementById('update-button').addEventListener('click', refreshStatus)
-
     t = i8n.getTranslator()
     i8n.translatePage()
     renderDashboard()
