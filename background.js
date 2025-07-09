@@ -62,32 +62,10 @@ Port.onMessage("devicetrust",(report) => {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	switch(message.type) {
 		case 'GetAccountIssues':
-			const accounts = [ ]
-			for (const [system, app] of AppStats.allApps()) {
-				for (const [username, report] of AppStats.allAccounts(app)) {
-					if (report.issues?.count > 0) {
-						report.state = DeviceTrust.State.FAILING
-						const description = {
-							numberOfDigits:   t("accounttrust.password.quality.number-digits",    { min: config.account.passwordPolicy.minNumberOfDigits }),
-							numberOfLetters:  t("accounttrust.password.quality.number-letters",   { min: config.account.passwordPolicy.minNumberOfLetters }),
-							numberOfUpperCase:t("accounttrust.password.quality.number-uppercase", { min: config.account.passwordPolicy.minNumberOfUpperCase }),
-							numberOfLowerCase:t("accounttrust.password.quality.number-lowercase", { min: config.account.passwordPolicy.minNumberOfLowerCase }),
-							numberOfSymbols:  t("accounttrust.password.quality.number-symbols",   { min: config.account.passwordPolicy.minNumberOfSymbols }),
-							entropy:          t("accounttrust.password.quality.entropy"),
-							sequence:         t("accounttrust.password.quality.sequence"),
-						}
-
-						const lines = Object.keys(report.issues)
-							.filter(key => description[key])
-							.map(key => `• ${description[key]}`)
-						console.log(Object.keys(report.issues))
-						report.issues.description = lines.length ? `${t("accounttrust.password.quality.title")}:\n${lines.join('\n')}` : ''
-						accounts.push({ username, system, report })
-					}
-				}
-			}
+			const accounts = AccountTrust.failingAccounts()
 			sendResponse({ accounts })
 			break
+
 		case "GetDeviceStatus":
 			const status = {
 				controls: { },
@@ -108,6 +86,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 			sendResponse(status)
 			break
+
 		case "RefreshDeviceStatus":
 			debug("dashboard requested update")
 			Port.postMessage("devicetrust", { request: "update" } )
@@ -610,11 +589,8 @@ function reportApplications() {
 				)
 			}
 
-			const checkExternal = Config.forHostname(appName).account.checkExternal
-
 			for (const [username, details] of AppStats.allAccounts(app)) {
-				const domain = getDomainFromUsername(username)
-				if (details?.issues && (checkExternal || ! isExternalDomain(domain) )) {
+				if (details?.issues && AccountTrust.checkFor(username, appName)) {
 					topIssues.push(mergeDeep(details.issues, {
 						username,
 						appName,
@@ -677,7 +653,6 @@ function registerAccountUsage(url, report) {
 	debug(`use of account '${report.username}' for ${getSitename(url)}'`)
 
 	const config = Config.forURL(url)
-	const domain = getDomainFromUsername(report.username)
 	const appName = getSitename(url)
 	const app = AppStats.getOrCreateApp(appName)
 	app.lastUsed = nowDatestamp()
@@ -688,7 +663,7 @@ function registerAccountUsage(url, report) {
 	const account = AppStats.getAccount(app, report.username)
 	account.lastConnected = nowDatestamp()
 
-	if (! config.account.checkExternal && isExternalDomain(domain)) {
+	if (! AccountTrust.checkFor(report.username, appName)) {
 		return
 	}
 
@@ -787,8 +762,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		const config = Config.forURL(siteUrl)
 
 		if (requiresMFA(siteUrl, config)) {
-			const domain = getDomainFromUsername(request.report.username)
-			if (! config.account.checkExternal && isExternalDomain(domain)) {
+			if (config.account.checkOnlyInternal && isExternalUser(request.report.username)) {
 				return
 			}
 

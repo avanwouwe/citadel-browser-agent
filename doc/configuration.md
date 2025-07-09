@@ -96,7 +96,8 @@ You can configure your own password policy:
 ```
     ...
     "account": {
-        "checkExternal": false,
+        "checkOnlyInternal": true,
+        "checkOnlyApplications": true,
         "passwordPolicy": {
             "minLength": 15,
             "minNumberOfDigits": 1,

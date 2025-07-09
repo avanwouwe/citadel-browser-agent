@@ -56,8 +56,9 @@
       "/gui/interface.js",
       "/gui/utils.js",
       "/utils/i18n/i18n.js",
-      "/utils/devicetrust/devicetrust.js",
-      "/utils/devicetrust/devicecontrol.js",
+      "/utils/trust/accounttrust.js",
+      "/utils/trust/devicetrust.js",
+      "/utils/trust/devicecontrol.js",
       "/utils/blacklist/blacklist.js",
       "/utils/blacklist/ignorelist.js",
       "/utils/blacklist/exceptionlist.js",
@@ -80,7 +81,7 @@
   ],
   "action": {
     "default_title": "Click to see security report",
-    "default_popup": "/gui/devicetrust.html?errorsOnly=1",
+    "default_popup": "/gui/dashboard.html?errorsOnly=1",
     "default_icon": {
       "16": "/gui/images/icon16.png",
       "48": "/gui/images/icon48.png",

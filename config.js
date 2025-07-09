@@ -161,7 +161,7 @@ class Config {
         },
         account: {
             retentionDays: 90,
-            checkExternal: false,
+            checkOnlyInternal: true,
             checkOnlyApplications: true,
             passwordPolicy: {
                 minLength: 15,
@@ -306,7 +306,7 @@ class Config {
         "company.applications",
         "session.domains",
         "session.exceptions",
-        "domain.isKnownApplication",
+        "domain.isApplication",
         "domain.isPublicMail",
         "account.mfa.required",
         "account.mfa.exceptions",

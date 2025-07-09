@@ -152,8 +152,7 @@ function getSitename(url) {
 }
 
 function isApplication(sitename) {
-    const domain = getDomain(sitename)
-    return config.domain.isApplication[domain] === true || matchDomain(domain, config.company.applications) === true
+    return matchDomain(sitename, config.domain.isApplication)  === true || matchDomain(sitename, config.company.applications) === true
 }
 
 function getRandomInt(min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {
@@ -308,7 +307,9 @@ function matchDomain(hostname, domainPatterns) {
     return domainPatterns["*"]
 }
 
-function isExternalDomain(domain) {
+function isExternalUser(username) {
+    const domain = getDomainFromUsername(username)
+
     if (! domain) return false
 
     if (Object.keys(config.company.domains)?.length > 0) return ! matchDomain(domain, config.company.domains)
