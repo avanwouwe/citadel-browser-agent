@@ -50,7 +50,6 @@ class AppStats {
         return Object.entries(accounts)
     }
 
-
     static deleteApp(appName) {
         assert(appName, "must specify app name")
 

@@ -1,15 +1,18 @@
 {
+  "control": {
+    "state": {
+      "PASSING": "VALIDÉ",
+      "FAILING": "ÉCHEC",
+      "WARNING": "ALERTE",
+      "BLOCKING": "BLOQUÉ"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard de Sécurité"
+  },
   "devicetrust": {
-    "control": {
-      "state": {
-        "PASSING": "VALIDÉ",
-        "FAILING": "ÉCHEC",
-        "WARNING": "ALERTE",
-        "BLOCKING": "BLOQUÉ"
-      }
-    },
     "dashboard": {
-      "title": "Dashboard de Device Trust",
+      "title": "État Appareil",
       "compliance": "Conformité",
       "control": "Contrôle",
       "state": "État",
@@ -21,6 +24,27 @@
       "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger.",
       "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée. Dans {{days}} jours, votre appareil sera bloqué. Cliquez pour corriger les problèmes.",
       "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et a été bloqué. Cliquez pour corriger les problèmes."
+    }
+  },
+  "accounttrust": {
+    "dashboard": {
+      "title": "Comptes",
+      "username": "Nom d'utilisateur",
+      "system": "Système",
+      "state": "État",
+      "issue": "Problème"
+    },
+    "password": {
+      "quality": {
+        "title": "Problème(s) avec le mot de passe",
+        "number-digits": "Doit contenir au moins {{min}} chiffre(s)",
+        "number-letters": "Doit contenir au moins {{min}} lettre(s)",
+        "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",
+        "number-lowercase": "Doit contenir au moins {{min}} lettre(s) minuscule(s)",
+        "number-symbols": "Doit contenir au moins {{min}} symbole(s)",
+        "entropy": "Ne contient pas assez de caractères différents",
+        "sequence": "Est trop répétitif"
+      }
     }
   },
   "errors": {

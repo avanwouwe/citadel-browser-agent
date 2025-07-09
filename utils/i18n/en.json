@@ -1,15 +1,18 @@
 {
+  "control": {
+    "state": {
+      "PASSING": "PASSING",
+      "FAILING": "FAILING",
+      "WARNING": "WARNING",
+      "BLOCKING": "BLOCKING"
+    }
+  },
+  "dashboard": {
+    "title": "Security Dashboard"
+  },
   "devicetrust": {
-    "control": {
-      "state": {
-        "PASSING": "PASSING",
-        "FAILING": "FAILING",
-        "WARNING": "WARNING",
-        "BLOCKING": "BLOCKING"
-      }
-    },
     "dashboard": {
-      "title": "Device Trust Dashboard",
+      "title": "Device Status",
       "compliance": "Compliance",
       "control": "Control",
       "state": "State",
@@ -21,6 +24,27 @@
       "failing": "Your device has security issues. Click to fix them.",
       "warning": "⚠\uFE0F Your device is not is securely configured. In {{days}} days your device will be blocked. Click to fix issues.",
       "blocking": "⚠\uFE0F Your device is insecure and has been blocked. Click to fix issues."
+    }
+  },
+  "accounttrust": {
+    "dashboard": {
+      "title": "Account Issues",
+      "username": "Username",
+      "system": "System",
+      "state": "State",
+      "issue": "Issue"
+    },
+    "password": {
+      "quality": {
+        "title": "Password issue(s)",
+        "number-digits": "Must contain at least {{min}} digit(s)",
+        "number-letters": "Must contain at least {{min}} letter(s)",
+        "number-uppercase": "Must contain at least {{min}} uppercase letter(s)",
+        "number-lowercase": "Must contain at least {{min}} lowercase letter(s)",
+        "number-symbols": "Must contain at least {{min}} symbol(s)",
+        "entropy": "Does not have enough different characters",
+        "sequence": "Is too repetitive"
+      }
     }
   },
   "errors": {

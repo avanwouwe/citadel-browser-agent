@@ -1,24 +1,38 @@
-let t
+window.addEventListener('DOMContentLoaded', function () {
+    const tabButtons = document.querySelectorAll('.tab')
+    const tabContents = document.querySelectorAll('.tab-content')
+    tabButtons.forEach((btn, i) => {
+        btn.addEventListener('click', function () {
+            tabButtons.forEach((b, j) => {
+                b.classList.toggle('active', i === j)
+                tabContents[j].classList.toggle('active', i === j)
+            })
+        })
+    })
+    // (Optional) Keyboard navigation for tabs ...
+})
 
+let t
 I18n.loadPage('/utils/i18n', (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
-    renderDashboard()
+    renderDeviceDashboard()
+    renderAccountIssues()
 })()
 
-function renderDashboard() {
-    chrome.runtime.sendMessage({type: "GetSecurityStatus"}, function(devicetrust) {
+function renderDeviceDashboard() {
+    chrome.runtime.sendMessage({type: "GetDeviceStatus"}, function(devicetrust) {
         const state = devicetrust.state
         const errorsOnly = getQueryParam("errorsOnly") !== null
 
-        document.getElementById("status-label").textContent = t("devicetrust.control.state." + state) || "-"
+        document.getElementById("status-label").textContent = t("control.state." + state) || "-"
         document.getElementById("dot").className = "state-dot " + state.toLowerCase()
 
         document.getElementById("compliance").textContent = devicetrust.compliance
 
         if (devicetrust.compliance === 100) { return }
 
-        const tb = document.getElementById("controls")
+        const tb = document.getElementById("devicetrust-issues")
         tb.innerHTML = ""
         const controls = Object.values(devicetrust.controls)
         for (const ctrl of controls) {
@@ -31,9 +45,30 @@ function renderDashboard() {
             const tr = document.createElement("tr")
             tr.innerHTML =
                 `<td>${ctrlText.label ?? ctrl.name}</td>` +
-                `<td class="state ${ctrl.state.toLowerCase()}">${t("devicetrust.control.state." + ctrl.state)}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${t("devicetrust.control.state." + next.state) || "-"}</td>` +
+                `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
+                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
                 `<td class="days">${next.days ?? ""}</td>`
+            tb.appendChild(tr)
+        }
+    })
+}
+
+function renderAccountIssues() {
+    chrome.runtime.sendMessage({type: "GetAccountIssues"}, function(accounttrust) {
+        console.log(accounttrust)
+        const tb = document.getElementById("accounttrust-issues")
+        tb.innerHTML = ""
+
+        for (const acct of accounttrust.accounts) {
+            const issue = acct.report.issues?.count > 0 ? `has ${acct.report.issues?.count} issues` : ""
+            const description = acct.report.issues?.description
+
+            const tr = document.createElement("tr")
+            tr.innerHTML =
+                `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
+                `<td><span class="ellipsis" title="${acct.system}">${acct.system}</span></td>` +
+                `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
+                `<td${description ? ` title="${description.escapeHtmlAttr()}"` : ''}>${issue}</td>`
             tb.appendChild(tr)
         }
     })
@@ -45,9 +80,9 @@ function connect() {
     port = chrome.runtime.connect({name: "SecurityDashboard"})
     port.onDisconnect.addListener(reconnect)
     port.onMessage.addListener((msg) => {
-        if (msg.type === 'RefreshSecurityStatus') {
+        if (msg.type === 'RefreshDeviceStatus') {
             updateBtn.classList.remove('refreshing')
-            renderDashboard()
+            renderDeviceDashboard()
         }
     })
 }
@@ -60,7 +95,7 @@ function reconnect() {
 connect()
 
 function refreshStatus() {
-    chrome.runtime.sendMessage({ type: "RefreshSecurityStatus" })
+    chrome.runtime.sendMessage({ type: "RefreshDeviceStatus" })
 }
 
 const updateBtn = document.getElementById('update-button')

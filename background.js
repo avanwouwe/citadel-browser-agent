@@ -56,12 +56,39 @@ chrome.runtime.onConnect.addListener((port) => {
 Port.onMessage("devicetrust",(report) => {
 	debug("received device trust report", report)
 	devicetrust.addReport(report)
-	dashboard?.postMessage({type: "RefreshSecurityStatus"})
+	dashboard?.postMessage({type: "RefreshDeviceStatus"})
 })
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 	switch(message.type) {
-		case "GetSecurityStatus":
+		case 'GetAccountIssues':
+			const accounts = [ ]
+			for (const [system, app] of AppStats.allApps()) {
+				for (const [username, report] of AppStats.allAccounts(app)) {
+					if (report.issues?.count > 0) {
+						report.state = DeviceTrust.State.FAILING
+						const description = {
+							numberOfDigits:   t("accounttrust.password.quality.number-digits",    { min: config.account.passwordPolicy.minNumberOfDigits }),
+							numberOfLetters:  t("accounttrust.password.quality.number-letters",   { min: config.account.passwordPolicy.minNumberOfLetters }),
+							numberOfUpperCase:t("accounttrust.password.quality.number-uppercase", { min: config.account.passwordPolicy.minNumberOfUpperCase }),
+							numberOfLowerCase:t("accounttrust.password.quality.number-lowercase", { min: config.account.passwordPolicy.minNumberOfLowerCase }),
+							numberOfSymbols:  t("accounttrust.password.quality.number-symbols",   { min: config.account.passwordPolicy.minNumberOfSymbols }),
+							entropy:          t("accounttrust.password.quality.entropy"),
+							sequence:         t("accounttrust.password.quality.sequence"),
+						}
+
+						const lines = Object.keys(report.issues)
+							.filter(key => description[key])
+							.map(key => `• ${description[key]}`)
+						console.log(Object.keys(report.issues))
+						report.issues.description = lines.length ? `${t("accounttrust.password.quality.title")}:\n${lines.join('\n')}` : ''
+						accounts.push({ username, system, report })
+					}
+				}
+			}
+			sendResponse({ accounts })
+			break
+		case "GetDeviceStatus":
 			const status = {
 				controls: { },
 				state: devicetrust.getState(),
@@ -80,8 +107,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 			})
 
 			sendResponse(status)
-			return
-		case "RefreshSecurityStatus":
+			break
+		case "RefreshDeviceStatus":
 			debug("dashboard requested update")
 			Port.postMessage("devicetrust", { request: "update" } )
 	}
