@@ -175,7 +175,7 @@ function evaluateRequest(details) {
 		! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
 		Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
 	) {
-		if (details.initiator && AppStats.forURL(details.initiator)?.isAuthenticated) {
+		if (getDomain(details.initiator?.toURL()?.hostname) === getDomain(url.hostname) && AppStats.forURL(details.initiator)?.isAuthenticated) {
 			result.result = "protocol warning"
 			result.level = Log.WARN
 			result.value = url.protocol
@@ -811,6 +811,6 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 })
 
-chrome.action.onClicked.addListener((tab) => {
+chrome.action.onClicked.addListener(() => {
 	chrome.tabs.create({ url: chrome.runtime.getURL('/gui/dashboard.html') })
 })

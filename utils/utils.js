@@ -102,6 +102,8 @@ const SLD_DOMAINS = [
 
 
 function getDomain(hostname) {
+    if (!hostname) return
+
     const parts = hostname.split('.');
     const twoPart = parts.slice(-2).join('.')
     const threePart = parts.slice(-3).join('.')
