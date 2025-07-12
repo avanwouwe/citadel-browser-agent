@@ -29,8 +29,15 @@ class I18n {
     translatePage() {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n')
-            el.textContent = this.t(key)
+            const translated = this.t(key)
+
+            if (el.hasAttribute('placeholder')) {
+                el.setAttribute('placeholder', translated)
+            } else {
+                el.textContent = translated
+            }
         })
+
         document.querySelectorAll('[data-i18n-html]').forEach(el => {
             const key = el.getAttribute('data-i18n-html')
             el.innerHTML = this.t(key)
@@ -55,13 +62,13 @@ class I18n {
         return i18n
     }
 
-    static fromObject(obj) {
+    static fromObject(obj = { }) {
         const lang = I18n.getLanguage()
 
         let translations = obj[lang]
         if (! translations) {
             console.warn(`cannot load i18n translations for "${lang}", falling back to "${I18n.defaultLanguage}"`)
-            translations = obj.en
+            translations = obj[I18n.defaultLanguage]
         }
 
         if (! translations) {
