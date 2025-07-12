@@ -807,3 +807,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 })
+
+chrome.action.onClicked.addListener((tab) => {
+	chrome.tabs.create({ url: chrome.runtime.getURL('/gui/dashboard.html') })
+})

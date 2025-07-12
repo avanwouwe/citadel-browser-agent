@@ -81,7 +81,6 @@
   ],
   "action": {
     "default_title": "Click to see security report",
-    "default_popup": "/gui/dashboard.html?errorsOnly=1",
     "default_icon": {
       "16": "/gui/images/icon16.png",
       "48": "/gui/images/icon48.png",

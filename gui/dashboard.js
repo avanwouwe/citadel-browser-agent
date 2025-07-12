@@ -23,7 +23,6 @@ I18n.loadPage('/utils/i18n', (i18n) => {
 function renderDeviceDashboard() {
     chrome.runtime.sendMessage({type: "GetDeviceStatus"}, function(devicetrust) {
         const state = devicetrust.state
-        const errorsOnly = getQueryParam("errorsOnly") !== null
 
         document.getElementById("status-label").textContent = t("control.state." + state) || "-"
         document.getElementById("dot").className = "state-dot " + state.toLowerCase()
@@ -36,8 +35,6 @@ function renderDeviceDashboard() {
         tb.innerHTML = ""
         const controls = Object.values(devicetrust.controls)
         for (const ctrl of controls) {
-            if (errorsOnly && ctrl.passing) { continue }
-
             const next = ctrl.nextState
             let ctrlText = ctrl.definition?.text ?? {}
             ctrlText = ctrlText[I18n.getLanguage()] ?? ctrlText[I18n.defaultLanguage] ?? {}
@@ -55,7 +52,6 @@ function renderDeviceDashboard() {
 
 function renderAccountIssues() {
     chrome.runtime.sendMessage({type: "GetAccountIssues"}, function(accounttrust) {
-        console.log(accounttrust)
         const tb = document.getElementById("accounttrust-issues")
         tb.innerHTML = ""
 
