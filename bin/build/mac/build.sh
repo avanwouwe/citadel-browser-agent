@@ -32,10 +32,10 @@ build_for_arch() {
     # Ensure the latest version of Python is installed
     if [ ! -f "$BREW_CMD" ]; then
         echo "WARNING: installing Homebrew at $BREW_CMD"
-        $ARCH_CMD /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
-        $ARCH_CMD brew install python
+        $ARCH_CMD /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
-    $ARCH_CMD $BREW_CMD upgrade python
+
+    $ARCH_CMD brew install python
 
     # Create and activate virtual environment
     $ARCH_CMD $PYTHON_CMD -m venv citadel-venv
