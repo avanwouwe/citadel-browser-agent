@@ -137,7 +137,7 @@
       }
     },
     "AutoUpdates": {
-        "query": "SELECT 'AUOptions = ' || data AS error\nFROM (\n  SELECT\n    CASE\n      WHEN policies.name IS NOT NULL THEN policies.data\n      ELSE normal.data\n    END AS data\n  FROM\n    (\n      SELECT name,data FROM registry\n      WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions'\n    ) AS policies\n  FULL OUTER JOIN\n    (\n\t\t  SELECT name,data FROM registry\n\t\t  WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions'\n    ) AS normal\n  ON 1=1\n) AS update_policy\nWHERE CAST(data AS INTEGER) < 4\n\nUNION ALL \n\nSELECT 'NoAutoUpdate = ' || data AS error\nFROM registry\nWHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' AND data = '1'\n\nUNION ALL\n\nSELECT 'Windows Update service = ' || status AS error\nFROM services\nWHERE name = 'wuauserv' AND status != 'RUNNING';",
+      "query": "SELECT 'AUOptions = ' || data AS error\nFROM (\n  SELECT\n    CASE\n      WHEN policies.name IS NOT NULL THEN policies.data\n      ELSE normal.data\n    END AS data\n  FROM\n    (\n      SELECT name,data FROM registry\n      WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions'\n    ) AS policies\n  FULL OUTER JOIN\n    (\n\t\t  SELECT name,data FROM registry\n\t\t  WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions'\n    ) AS normal\n  ON 1=1\n) AS update_policy\nWHERE CAST(data AS INTEGER) < 4\n\nUNION ALL \n\nSELECT 'NoAutoUpdate = ' || data AS error\nFROM registry\nWHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' AND data = '1'\n\nUNION ALL\n\nSELECT 'Windows Update service = ' || status AS error\nFROM services\nWHERE name = 'wuauserv' AND status != 'RUNNING';",
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
@@ -211,6 +211,45 @@
         "fr": {
           "label": "Aucun périphérique de stockage USB",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
+        }
+      }
+    },
+    "SensitiveFiles": {
+      "query": "SELECT path AS error FROM file WHERE (path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%password%emergency%kit.pdf' OR path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%backup%code%' OR path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%recovery%code% OR path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%password%');",
+      "text": {
+        "en": {
+          "label": "Sensitive data is protected",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Données sensibles sont protégés",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        }
+      }
+    },
+    "ExportedFiles": {
+      "query": "SELECT path AS error FROM file WHERE (path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%export%.csv' OR path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%export%.json' OR path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%export%.txt') AND atime <= (strftime('%s','now') - (30 * 24 * 60 * 60));",
+      "text": {
+        "en": {
+          "label": "Exported files are purged",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Fichiers exportés sont supprimés",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        }
+      }
+    },
+    "UnusedFiles": {
+      "query": "SELECT path AS error FROM file WHERE path LIKE 'C:\\\\Users\\\\%\\\\Downloads\\\\%' AND atime <= (strftime('%s','now') - (90 * 24 * 60 * 60));",
+      "text": {
+        "en": {
+          "label": "Unused files are purged",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Fichiers inutilisés sont supprimés",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
         }
       }
     }

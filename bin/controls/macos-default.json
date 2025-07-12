@@ -202,7 +202,7 @@
       }
     },
     "BootOptions": {
-      "query": "SELECT name || ' is set to ' || value AS error FROM nvram WHERE name = 'csr-active-config' AND value != '0';",
+      "query": "SELECT name || ' is set to ' || value AS error\nFROM nvram \nWHERE (name = 'csr-active-config' AND value != '0') OR \n   (name = 'boot-args' AND (\n    value LIKE '%amfi=0x0%' OR \n    value LIKE '%amfi_get_out_of_my_way=1%' OR\n    value LIKE '%amfi_allow_any_signature=1%' OR\n    value LIKE '%amfi_allow_expired_certs=1%' OR\n    value LIKE '%amfi_allow_invalid_signature=1%' OR\n    value LIKE '%amfi_check_dyld=0%' OR\n    value LIKE '%amfi_unrestrict_task_for_pid=1%' OR\n    value LIKE '%amfi_verify_csignatures=0%'\n  ));;",
       "text": {
         "en": {
           "label": "Boot options are secure",
@@ -237,6 +237,45 @@
         "fr": {
           "label": "Aucun périphérique de stockage USB",
           "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
+        }
+      }
+    },
+    "SensitiveFiles": {
+      "query": "SELECT path AS error FROM file WHERE (path LIKE '/Users/%/Downloads/%password%emergency%kit.pdf' OR path LIKE '/Users/%/Downloads/%backup%code%' OR path LIKE '/Users/%/Downloads/%recovery%code%' OR path LIKE '/Users/%/Downloads/%password%');",
+      "text": {
+        "en": {
+          "label": "Sensitive data is protected",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Données sensibles sont protégés",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        }
+      }
+    },
+    "ExportedFiles": {
+      "query": "SELECT path AS error FROM file WHERE (path LIKE '/Users/%/Downloads/%export%.csv' OR path LIKE '/Users/%/Downloads/%export%.json' OR path LIKE '/Users/%/Downloads/%export%.txt') AND atime <= (strftime('%s','now') - (30 * 24 * 60 * 60));",
+      "text": {
+        "en": {
+          "label": "Exported files are purged",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Fichiers exportés sont supprimés",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        }
+      }
+    },
+    "UnusedFiles": {
+      "query": "SELECT path AS error FROM file WHERE path LIKE '/Users/%/Downloads/%' AND atime <= (strftime('%s','now') - (90 * 24 * 60 * 60));",
+      "text": {
+        "en": {
+          "label": "Unused files are purged",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Fichiers inutilisés sont supprimés",
+          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
         }
       }
     }
