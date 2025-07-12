@@ -1,5 +1,5 @@
 # Configuration
-Citadel comes with a [sensible default configuration](/config.js). You can override these configurations by creating a file `citadel-config.json` in the directory where the `citadel-browser-agent` file is placed. For example, you can specify the e-mail address of your own IT department so that warnings show your contact details. Or you can define what are your domains, which is used when determining if certain policies, such as password policy, should apply (external domains are excluded by default).
+Citadel comes with a [sensible default configuration](/config.js). You can override these configurations by creating a file `citadel-config.json` in the directory where the `citadel-browser-agent` file is placed. For example, you can specify the e-mail address of your own IT department so that warnings show your contact details. Or you can define what are your domains, and what are your applications, which is used when determining if certain policies, such as password policy, should apply (for privacy reasons external domains and non-applications are excluded by default).
 
 Example:
 
@@ -14,9 +14,19 @@ Example:
           "yourcompany.io",
           "yourcompany.net"
         ]
+        "applications": [
+            "www.your-crm.com",
+            "www.your-hris.com"
+        ]
     }
     ...
 ```
+
+When overriding default settings the following rules are used:
+* new attributes with values (number, string, boolean) : attribute is added
+* new attributes with values : value of attribute is replaced
+* existing attributes with objects or arrays : attributes are merged hierarchically, using the above rules
+
 
 ## exceptions
 You can override the global configuration for specific domains. This is possible for the following configuration elements:
@@ -31,19 +41,50 @@ For example, to ignore warnings about HTTP traffic over your VPN, you can overri
 
 ```
     ...
-    "exceptions": {
-        "VPN" : {
+    "exceptions": [
+        {
+          "description" : "unencrypted traffic is allowed over VPN",
           "domains": ["yourcompany.lan", "yourcompany.local"],
           "config": {
             "warningProtocols": ["ftp:", "ws:"]
           }
         }
-    }
+    ]
     ...
 ```
 
+Or you can enable password policy enforcement for any system on your domain, and irrespective of the username used:
+```
+    ...
+    "exceptions": [
+        {
+          "description" : "apply password policy for all company applications",
+          "domains": ["whoz.com", "whoz.io", "whoz.net", "whoz.team","whoz.lan","biznet.io"],
+          "config": {
+            "account": {
+              "checkOnlyInternal": false,
+              "checkOnlyApplications": false
+            }
+          }
+        }
+    ]
+    ...
+```
+
+Any exceptions you defined are applied "on top of" the default configuration, in the order that they are defined. 
+
+So if you define a `logging.logLevel` in two exceptions :
+* default : `logging.logLevel` = `DEBUG`
+* exception 1 :`["domain-a.com", "domain-b.com"]` = `WARN`
+* exception 2 : `["domain-a.com"]` = `ERROR`
+
+Then result will be:
+* www.randomdomain.com : `DEBUG` (default) 
+* www.domain-a.com : `ERROR` (exception 2)
+* www.domain-b.com : `WARN` (exception 1)
+
 ## blacklists
-The configuration you provide will be overridden with the attributes of the existing configuration. Since the blacklist configurations are arrays, you must re-state the blacklist configuration if you want to add your own blacklists to it.
+The configuration you provide will be overridden with the attributes of the existing configuration. Note that the blacklist configurations are not merged when they are overridden; you must re-state the blacklist configuration if you want to add your own blacklists to it.
 
 The URL blacklists are expected to contain one domain or URL per line. The blacklists configured by default are:
 * [URLhaus](https://urlhaus.abuse.ch/)
@@ -129,7 +170,7 @@ You have to enumerate the list of domains where you require MFA, and you can mak
             "yourcompany.com",
             "1password.com",
             "atlassian.com",
-            "business.apple.com",
+            "idmsa.apple.com",
             "notion.so",
             "openai.com",
             "gitlab.com",
@@ -170,18 +211,18 @@ Citadel can report on various aspects, such as application use and password poli
     ...
 ```
 
-The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "last two weeks" and you will have exactly one event for every endpoint. Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant.
+The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "last two weeks" and you will have exactly one event for every endpoint (actually, every browser / profile combination). Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant.
 
 ## errors
 Citadel reports when certain security-sensitive errors are raised by the browser (see [chrome://network-errors](chrome://network-errors) for a list of all browser errors). This can be for example a user ignoring a virus warning, or issues with certificates. You can override the default event level of each error type, should the default levels not work out for your specific environment.
 
-For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM. Or you can manually configure an extreme logging level for an error that is not detected by default, such as `ERR_ACCESS_DENIED`:
+For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM. Or you can manually configure an extreme logging level for an error that is not detected by default, such as `ERR_ACCESS_DENIED`. To disable logging completely use the `NEVER` level:
 
 ```
     ...
     "errors": {
         "exceptions": {
-            "net::ERR_CERT_AUTHORITY_INVALID"   : "DEBUG",
+            "net::ERR_CERT_AUTHORITY_INVALID"   : "NEVER",
             "net::ERR_CERT_COMMON_NAME_INVALID" : "DEBUG",
             "net::ERR_CERT_DATE_INVALID"        : "DEBUG",
             "net::ERR_ACCESS_DENIED"            : "ERROR"
