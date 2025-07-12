@@ -2,8 +2,8 @@ class Config {
     static config = {
         company: {
             name: 'Company',
-            contact: 'your IT support',         // replace with your support e-mail
-            logo: "",                           // replace with the URL of your logo
+            contact: 'your IT support',                                  // replace with your support e-mail
+            logo: chrome.runtime.getURL('/gui/images/icon128.png'),      // replace with the URL of your logo
             domains: [ ],
             applications: [ ]                   // put your applications
         },

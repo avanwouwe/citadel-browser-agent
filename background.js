@@ -13,6 +13,7 @@ let whitelistIP
 let whitelistURL
 let exceptionList
 let ignorelist
+let tabState
 let devicetrust
 let t
 
@@ -31,6 +32,7 @@ Port.onMessage("config",(newConfig) => {
 	exceptionList = new Exceptionlist()
 	ignorelist = new Ignorelist()
 
+	tabState = new TabState(true)
 	devicetrust = new DeviceTrust()
 
 	const version = chrome.runtime.getManifest().version
@@ -78,6 +80,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 				status.controls[control.name] = {
 					name: control.name,
 					definition: control.definition,
+					report: control.report,
 					passing: control.report.passed,
 					state: control.getState(),
 					nextState: control.getNextState(),
@@ -147,7 +150,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {
-		// do nothing for now
+		tabState?.clear()
 	}
 })
 

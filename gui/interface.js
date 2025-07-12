@@ -16,23 +16,18 @@ function showPopup(message, title = "Citadel browser agent"
 }
 
 function blockPage(tabId, reason, blockedPage) {
-    const url = chrome.runtime.getURL("gui/blocked.html")
-    const params = new URLSearchParams({
+    tabState?.setState(tabId, "BlockedPage", {
         reason,
-        value: blockedPage,
+        url: blockedPage,
         contact: config.company.contact,
+        logo: config.company.logo,
+        allowException: config.blacklist.exceptions.duration !== undefined
     })
 
-    if (config.blacklist.exceptions.duration) {
-        params.set('e', 12)     // security by obscurity, magic number, all true.. but it's better than nothing
-    }
-
-    chrome.tabs.update(tabId, { 'url' : `${url}?${params.toString()}` })
+    chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/blocked.html") })
 }
 
 function blockDomainModal(domain, message, exceptionMessage) {
-    const logo = config.company.logo || chrome.runtime.getURL('/gui/images/icon128.png')
-
     const text = {
         message: message,
         request_exception: t("block-modal.request-exception"),
@@ -200,7 +195,7 @@ function blockDomainModal(domain, message, exceptionMessage) {
         shadow.appendChild(style)
         shadow.appendChild(overlay)
         document.body.appendChild(host)
-    }, [text, logo, exceptionMessage])
+    }, [text, config.company.logo, exceptionMessage])
 }
 
 function unblockDomainModal(domain) {

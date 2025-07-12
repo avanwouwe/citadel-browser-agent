@@ -6,6 +6,30 @@
     <link rel="icon" type="image/png" sizes="16x16" href="/gui/images/icon16.png">
     <title data-i18n="dashboard.title">Dashboard</title>
     <style>
+        .has-errors {
+            cursor: pointer;
+            color: #ffffff;
+            margin-left: 5px;
+            font-size: 1.05em;
+            vertical-align: middle;
+        }
+        .click-tooltip {
+            position: absolute;
+            z-index: 1000;
+            background: #e3e3e3;
+            color: #000000;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-size: 92%;
+            min-width: 160px;
+            max-width: 600px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.22);
+            white-space: pre-line;
+            pointer-events: auto;
+            user-select: text;
+            opacity: 0.92;
+            transition: opacity 0.11s;
+        }
         .ellipsis {
             max-width: 150px;
             white-space: nowrap;
@@ -14,7 +38,7 @@
             display: block;       /* Important for <td> direct styling, or use <span> */
             cursor: pointer;
         }
-        body {font-family:sans-serif; margin:18px; min-width: 420px; max-width: 550px }
+        body {font-family:sans-serif; margin:6px; min-width: 420px; max-width: 550px }
         .state-dot { display:inline-block; width:13px; height:13px; border-radius:50%; margin-right:6px; }
         .passing  { background:#43d25e; }
         .warning  { background:#ffa800; }
@@ -24,6 +48,10 @@
         table { width:100%; border-collapse:collapse; font-size:95%; }
         th { background:#f5f5f5; }
         td, th { padding:4px 6px; }
+
+        td.label a, td.label a:link, td.label a:visited, td.label a:hover, td.label a:active, td.label a:focus { color: inherit; text-decoration: none; cursor: pointer; transition: color 0.2s; }
+        td.label a:hover, td.label a:focus { color: #0056b3; text-decoration: underline; }
+
         td.state, td.nextstate, td.days { text-align: center; font-weight:bold; }
         td.passing   { color:#43d25e; }
         td.warning   { background-color:#ffa800; }
@@ -101,6 +129,7 @@
         <thead>
         <tr>
             <th data-i18n="devicetrust.dashboard.control">Control</th>
+            <th></th>
             <th data-i18n="devicetrust.dashboard.state">State</th>
             <th data-i18n="devicetrust.dashboard.next-state">Next State</th>
             <th data-i18n="devicetrust.dashboard.in-days">In Days</th>
@@ -116,8 +145,8 @@
             <tr>
                 <th data-i18n="accounttrust.dashboard.username">Username</th>
                 <th data-i18n="accounttrust.dashboard.system">System</th>
+                <th></th>
                 <th data-i18n="accounttrust.dashboard.state">State</th>
-                <th data-i18n="accounttrust.dashboard.issue">Issue</th>
             </tr>
             </thead>
             <tbody id="accounttrust-issues"></tbody>

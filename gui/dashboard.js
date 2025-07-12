@@ -36,12 +36,27 @@ function renderDeviceDashboard() {
         const controls = Object.values(devicetrust.controls)
         for (const ctrl of controls) {
             const next = ctrl.nextState
-            let ctrlText = ctrl.definition?.text ?? {}
-            ctrlText = ctrlText[I18n.getLanguage()] ?? ctrlText[I18n.defaultLanguage] ?? {}
+            const ctrlText = I18n.fromObject(ctrl.definition?.text).getTranslator()
+
+            let label = ctrlText("label") ?? ctrl.name
+            const explainPage = ctrlText("explain")
+            if (explainPage) {
+                label = `<a href="${explainPage}">${label}</a>`
+            }
+
+            let errors = ''
+            if (!ctrl.passing && ctrl.report?.errors?.length) {
+                errors = ctrl.report.errors.slice(0, 30).join('\n')
+                if (ctrl.report.errors.length > 30) {
+                    errors += '\n...'
+                }
+                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlAttr()}">&#128269;</span>`
+            }
 
             const tr = document.createElement("tr")
             tr.innerHTML =
-                `<td>${ctrlText.label ?? ctrl.name}</td>` +
+                `<td ${explainPage ? "class='label'" : ''}>${label}</td>` +
+                `<td>${errors}</td>`+
                 `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
                 `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
                 `<td class="days">${next.days ?? ""}</td>`
@@ -56,15 +71,17 @@ function renderAccountIssues() {
         tb.innerHTML = ""
 
         for (const acct of accounttrust.accounts) {
-            const issue = acct.report.issues?.count > 0 ? `has ${acct.report.issues?.count} issues` : ""
-            const description = acct.report.issues?.description
+            let errors = acct.report.issues?.description
+            if (acct.report.issues?.count > 0) {
+                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlAttr()}">&#128269;</span>`
+            }
 
             const tr = document.createElement("tr")
             tr.innerHTML =
                 `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
                 `<td><span class="ellipsis" title="${acct.system}">${acct.system}</span></td>` +
-                `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
-                `<td${description ? ` title="${description.escapeHtmlAttr()}"` : ''}>${issue}</td>`
+                `<td>${errors}</td>` +
+                `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>`
             tb.appendChild(tr)
         }
     })
@@ -101,4 +118,48 @@ updateBtn.addEventListener('click', function () {
     updateBtn.classList.add('refreshing')
 
     refreshStatus()
-})
+});
+
+(function(){
+    let tooltip, hideHandler
+
+    document.body.addEventListener('click', function(ev) {
+        const el = ev.target.closest('.has-errors')
+
+        // Remove existing tooltip if any
+        if (tooltip) {
+            // If the click is inside the tooltip, do nothing
+            if (ev.target.closest('.click-tooltip')) {
+                return
+            }
+            // If clicking another info icon, remove current and continue
+            tooltip.remove()
+            tooltip = null
+            if (hideHandler) document.removeEventListener('click', hideHandler, true)
+        }
+
+        if (!el) return;
+
+        // Create tooltip
+        tooltip = document.createElement('div')
+        tooltip.className = "click-tooltip"
+        tooltip.innerText = el.dataset.tooltip || ''
+        document.body.appendChild(tooltip)
+
+        const rect = el.getBoundingClientRect()
+        tooltip.style.top = (window.scrollY + rect.bottom + 6) + 'px'
+        tooltip.style.left = (window.scrollX + rect.left) + 'px'
+
+        // Handler to hide tooltip only when clicking outside both .has-info and the tooltip
+        hideHandler = function(ev2) {
+            // If click is on the info icon or inside the tooltip, do nothing
+            if (ev2.target.closest('.has-info') || ev2.target.closest('.click-tooltip')) return
+            if (tooltip) {
+                tooltip.remove()
+                tooltip = null
+                document.removeEventListener('click', hideHandler, true)
+            }
+        }
+        document.addEventListener('click', hideHandler, true)
+    })
+})()

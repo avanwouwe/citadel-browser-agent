@@ -48,6 +48,7 @@
       "/utils/schedule.js",
       "/utils/persistence.js",
       "/utils/session-state.js",
+      "/utils/tab-state.js",
       "/utils/appstats.js",
       "/utils/messaging.js",
       "/utils/ratethrottle.js",

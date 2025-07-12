@@ -1,24 +1,21 @@
-I18n.loadPage('/utils/i18n', (i18n) => {
+I18n.loadPage('/utils/i18n', async (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
-    renderPage()
+    await renderPage()
 })()
 
-function renderPage() {
-    const urlParams = new URLSearchParams(window.location.search)
+async function renderPage() {
+    const blocked = await new TabState().getState("BlockedPage")
 
-    // Inject reason and contact into the page
-    const blacklistedUrl = urlParams.get('value')
-    const blacklistReason = urlParams.get('reason')
-    const allowException = urlParams.get('e')
-    document.getElementById('value').textContent = blacklistedUrl || t("block-page.not-specified")
-    document.getElementById('reason').textContent = blacklistReason || t("block-page.not-specified")
-    document.getElementById('contact').textContent = urlParams.get('contact')
+    document.getElementById("logo").src = blocked.logo
+    document.getElementById('url').textContent = blocked.url || t("block-page.not-specified")
+    document.getElementById('reason').textContent = blocked.reason || t("block-page.not-specified")
+    document.getElementById('contact').textContent = blocked.contact
 
     const exceptionSectionToggle = document.getElementById('exceptionSectionToggle')
     const exceptionSection = document.getElementById('exceptionSection')
 
-    if (allowException) {
+    if (blocked.allowException) {
         exceptionSectionToggle.style.display = 'block'
 
         exceptionSectionToggle.addEventListener('click', function() {
@@ -41,8 +38,8 @@ function renderPage() {
 
             chrome.runtime.sendMessage({
                 type: 'allow-blacklist',
-                url: blacklistedUrl,
-                description: blacklistReason,
+                url: blocked.url,
+                description: blocked.reason,
                 reason: exceptionReason
             })
 

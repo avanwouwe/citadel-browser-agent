@@ -8,6 +8,7 @@ importScripts('utils/alarm.js');
 importScripts('utils/schedule.js');
 importScripts('utils/persistence.js');
 importScripts('utils/session-state.js');
+importScripts('utils/tab-state.js');
 importScripts('utils/appstats.js');
 importScripts('utils/messaging.js');
 importScripts('utils/ratethrottle.js');
