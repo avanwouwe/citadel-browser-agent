@@ -27,175 +27,71 @@ function blockPage(tabId, reason, blockedPage) {
     chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/blocked.html") })
 }
 
-function blockDomainModal(domain, message, exceptionMessage) {
-    const text = {
+
+function blockDomainModal(domain, message, exceptionEvent) {
+    const options = {
+        logo: config.company.logo,
         message: message,
-        request_exception: t("block-modal.request-exception"),
-        request_exception_header: t("block-modal.request-exception-header"),
-        provide_reason: t("block-modal.provide-reason"),
-        submit_request: t("block-modal.submit-request"),
+        exception: {
+            request: t("block-modal.request-exception"),
+            requestHeader: t("block-modal.request-exception-header"),
+            provideReason: t("block-modal.provide-reason"),
+            submitRequest: t("block-modal.submit-request"),
+            exceptionEvent
+        }
     }
 
-    forAllTabs(domain, (text, logo, exceptionMessage) => {
+    forAllTabs(domain, async (options) => {
         if (document.getElementById('blockOverlayShadowRootHost')) return
+
+        const res = await fetch(chrome.runtime.getURL('/gui/modal.html'))
+        const html = await res.text()
 
         const host = document.createElement('div')
         host.id = 'blockOverlayShadowRootHost'
         const shadow = host.attachShadow({ mode: 'closed' })
-        const style = document.createElement('style')
-        style.textContent = `
-            #blockOverlay {
-                all: initial;
-                position:fixed;
-                z-index:2147483647;
-                left:0; top:0; width:100vw; height:100vh;
-                background:rgba(0,0,0,0.7);
-                display:flex; justify-content:center; align-items:center;
-            }
-            .modal {
-                all: unset;
-                background:white; padding:2em 3em; border-radius:10px; text-align:left;
-                box-shadow:0 5px 20px #0004; display:flex; align-items:center; gap:1em;
-                min-width:280px;
-                min-height:120px;
-                font-family: Arial, sans-serif;
-                font-size: 16px;
-                white-space: pre-wrap;
-            }
-            .icon {
-                width:100px;
-                margin-right:1em;
-            }
-            .column {
-                display: flex;
-                flex-direction: column;
-                align-items: stretch;
-                min-width:220px;
-                flex: 1 1 0%;
-            }
-            .message {
-                line-height:1.4;
-                margin-bottom: 1em;
-            }
-            .exception-toggle {
-                cursor: pointer;
-                margin-bottom: 0.3em;
-                user-select: none;
-            }
-            .clickable {
-                color: #007bff;
-                text-decoration: underline;
-                transition: color .18s;
-            }
-            .exception-toggle:hover .clickable, 
-            .exception-toggle:focus .clickable {
-                color: #0056b3;
-            }
-            .exception-section {
-                display: none;
-                flex-direction: column;
-                align-items: stretch;
-                width:100%;
-                margin-top:0.5em;
-            }
-            .exception-title { font-size: 1.1em; font-weight: bold; margin-bottom: 0.4em; }
-            .exception-reason {
-                width:100%; min-width:210px; min-height: 70px;
-                padding: 0.4em; margin-bottom: 0.3em; resize:vertical;
-            }
-            .exception-submit {
-                padding: 0.5em 1.5em; background-color: #007bff; color: white; border: none;
-                cursor: pointer; border-radius: 4px; transition: background .2s;
-            }
-            .exception-submit:hover:not(:disabled) { background-color: #0056b3; }
-            .exception-submit:disabled {
-                background-color: #d3d3d3; color: #808080;
-                cursor: not-allowed; opacity: 0.7;
-            }
-            .exception-success, .exception-error {
-                margin-top:0.5em; font-weight:bold; color: green; text-align: center;
-            }
-            .exception-error { color: #990000; }
-        `
+        shadow.innerHTML = html
+        document.body.appendChild(host)
 
-        // Main overlay elements
-        const overlay = document.createElement('div')
-        overlay.id = 'blockOverlay'
-        const modal = document.createElement('div')
-        modal.className = 'modal'
+        shadow.getElementById('blockModalLogo').src = options.logo || ''
+        shadow.getElementById('blockModalMessage').innerHTML = options.message || ''
+        shadow.getElementById('exceptionToggle').innerHTML = options.exception.request || ''
+        shadow.getElementById('exceptionLabel').innerText = options.exception.requestHeader || ''
+        shadow.getElementById('exceptionTextarea').placeholder = options.exception.provideReason || ''
+        shadow.getElementById('exceptionSubmit').innerText = options.exception.submitRequest || 'Submit'
 
-        // Left icon
-        const icon = document.createElement('img')
-        icon.className = 'icon'
-        icon.src = logo
-        icon.alt = ''
+        // Toggle logic (show/hide request exception section)
+        const toggle = shadow.getElementById('exceptionToggle')
+        const exceptionSection = shadow.getElementById('exceptionSection')
+        toggle.onclick = () => {
+            exceptionSection.style.display =
+                (exceptionSection.style.display === 'flex') ? 'none' : 'flex'
+            if (exceptionSection.style.display === 'flex') {
+                shadow.getElementById('exceptionTextarea').focus()
+            }
+        }
 
-        // Right column
-        const column = document.createElement('div')
-        column.className = 'column'
-
-        const messageDiv = document.createElement('div')
-        messageDiv.className = "message"
-        messageDiv.innerHTML = text.message
-
-        // --- Exception Request UI ---
-        const toggle = document.createElement('div')
-        toggle.className = 'exception-toggle'
-        toggle.innerHTML = text.request_exception
-
-        // Exception Section
-        const exceptionSection = document.createElement('div')
-        exceptionSection.className = 'exception-section'
-
-        const label = document.createElement('div')
-        label.className = 'exception-title'
-        label.textContent = text.request_exception_header
-
-        const textarea = document.createElement('textarea')
-        textarea.className = 'exception-reason'
-        textarea.placeholder = text.provide_reason
-
-        const submit = document.createElement('button')
-        submit.className = 'exception-submit'
-        submit.textContent = text.submit_request
-
-        submit.disabled = true
-        textarea.addEventListener('input', function() {
+        // Handle textarea input/enable submit button
+        const textarea = shadow.getElementById('exceptionTextarea')
+        const submit = shadow.getElementById('exceptionSubmit')
+        const resultDiv = shadow.getElementById('exceptionResult')
+        textarea.addEventListener('input', () => {
             submit.disabled = !textarea.value.trim()
         })
 
-        const resultDiv = document.createElement('div')
-        exceptionSection.appendChild(label)
-        exceptionSection.appendChild(textarea)
-        exceptionSection.appendChild(submit)
-        exceptionSection.appendChild(resultDiv)
-
-        column.appendChild(messageDiv)
-        column.appendChild(toggle)
-        column.appendChild(exceptionSection)
-
-        toggle.onclick = () => {
-            exceptionSection.style.display = (exceptionSection.style.display === 'flex') ? 'none' : 'flex'
-        }
-
         submit.addEventListener('click', function() {
-            const exceptionReason = textarea.value.trim()
+            const reason = textarea.value.trim()
             submit.disabled = true
             textarea.disabled = true
             resultDiv.textContent = ""
             resultDiv.className = ""
 
-            exceptionMessage.reason = exceptionReason
+            let exceptionMessage = Object.assign({}, options.exception.exceptionEvent || {})
+            exceptionMessage.reason = reason
+
             chrome.runtime.sendMessage(exceptionMessage)
         })
-
-        modal.appendChild(icon)
-        modal.appendChild(column)
-        overlay.appendChild(modal)
-        shadow.appendChild(style)
-        shadow.appendChild(overlay)
-        document.body.appendChild(host)
-    }, [text, config.company.logo, exceptionMessage])
+    }, [options])
 }
 
 function unblockDomainModal(domain) {
