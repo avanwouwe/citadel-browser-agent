@@ -226,7 +226,7 @@ function setWarning(warning) {
 function raiseAlert(id, title, message) {
     const notification = {
         type: "basic",
-        iconUrl: chrome.runtime.getURL('/gui/images/icon128.png'),
+        iconUrl: config.company.logo,
         title: title,
         message: message
     }

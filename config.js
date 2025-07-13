@@ -3,7 +3,7 @@ class Config {
         company: {
             name: 'Company',
             contact: 'your IT support',                                  // replace with your support e-mail
-            logo: chrome.runtime.getURL('/gui/images/icon128.png'),      // replace with the URL of your logo
+            logo: chrome.runtime.getURL('/gui/images/icon128.png'),      // replace with the URL of your (square, transparent) logo
             domains: [ ],
             applications: [ ]                   // put your applications
         },
