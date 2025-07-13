@@ -7,11 +7,11 @@ rm -rf $OUTPUT_PKG
 mkdir "$BUILD_ROOT"
 
 # Copy the files to the directory structure
-cd ../..
+cd ../../..
 cp ./*.js ./*.json "$BUILD_ROOT"
-cp -r utils gui blacklist "$BUILD_ROOT"
+cp -r utils gui "$BUILD_ROOT"
 
-cd ./bin/browser/ || exit
+cd ./bin/build/browser/ || exit
 mv "$BUILD_ROOT" $OUTPUT_PKG
 cd "$OUTPUT_PKG" || exit
 zip -r ../"$OUTPUT_PKG".zip .
