@@ -269,7 +269,6 @@ class Config {
                 "BLOCK": ["DriveEncryption", "RemovableStorage"]
             },
             controls: {
-                maxUptimeDays: 30,
                 applications: {
                     forbidden: [],
                     required: []

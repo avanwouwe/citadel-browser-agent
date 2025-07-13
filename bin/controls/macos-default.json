@@ -61,6 +61,7 @@
       }
     },
     "MaxUptime": {
+      "query": "SELECT '' AS error FROM uptime WHERE total_seconds / 60 / 60 / 24 > 30;",
       "text": {
         "en": {
           "label": "System was restarted recently",
