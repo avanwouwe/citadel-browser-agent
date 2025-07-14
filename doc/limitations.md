@@ -13,7 +13,5 @@ Citadel **does not**:
 * guarantee that reports are generated as planned (ex. if machines are turned off, they only report when turned on again)
 * generate one report per user (since users may have multiple machines, or even just multiple browsers or profiles within a browser)
 * manage the duration of "session" cookies (if Citadel would set their expiration date that would store them, which is also problematic)
-* detect what is going on in private sessions (users have to manually select "Allow Incognito" in the [extension management page](chrome://extensions/?id=anheildjmkfdkdpgbndmpjnmkfliefga))
-* automatically install in Opera
 
 Be aware that some browsers (Firefox) have a "safe mode" or "troubleshoot mode" that allows users to disable all extensions, even if they were "force installed".
