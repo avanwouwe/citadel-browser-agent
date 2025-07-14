@@ -73,6 +73,10 @@
     "request-exception": "En cas d’urgence ou de situation exceptionnelle, vous pouvez <span class=\"clickable\">demander une exception</span> si vous êtes bloqué.",
     "request-exception-header": "Demander une exception",
     "provide-reason": "Veuillez préciser la raison de votre demande d’exception",
-    "submit-request": "Envoyer la demande"
+    "submit-request": "Envoyer la demande",
+    "acknowledge": "OK"
+  },
+  "notify-modal": {
+    "acknowledge": "OK"
   }
 }

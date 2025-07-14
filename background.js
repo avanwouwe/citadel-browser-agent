@@ -798,8 +798,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		account.lastMFA = nowDatestamp()
 		AppStats.markDirty()
 
-		forAllTabs(request.domain, () => location.reload())
-
+		removeModal(request.domain)
 		logger.log(nowTimestamp(), "exception", "MFA exception granted", sender.url, Log.ERROR, request.reason, `user requested MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 

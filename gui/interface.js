@@ -28,7 +28,7 @@ function blockPage(tabId, reason, blockedPage) {
 }
 
 
-function blockDomainModal(domain, message, exceptionEvent) {
+async function blockDomainModal(domain, message, exceptionEvent) {
     const options = {
         logo: config.company.logo,
         message: message,
@@ -41,26 +41,16 @@ function blockDomainModal(domain, message, exceptionEvent) {
         }
     }
 
-    forAllTabs(domain, async (options) => {
-        if (document.getElementById('blockOverlayShadowRootHost')) return
-
-        const res = await fetch(chrome.runtime.getURL('/gui/modal.html'))
-        const html = await res.text()
-
-        const host = document.createElement('div')
-        host.id = 'blockOverlayShadowRootHost'
-        const shadow = host.attachShadow({ mode: 'closed' })
-        shadow.innerHTML = html
-        document.body.appendChild(host)
-
-        shadow.getElementById('blockModalLogo').src = options.logo || ''
-        shadow.getElementById('blockModalMessage').innerHTML = options.message || ''
+    await forAllTabs(domain, createModal,['/gui/modal-block.html', '/gui/modal.css'])
+    await forAllTabs(domain, async (options) => {
+        const shadow = document.getElementById("CitadelOverlayShadowRootHost").shadowRoot
+        shadow.getElementById('companyLogo').src = options.logo || ''
+        shadow.getElementById('modalMessage').innerHTML = options.message || ''
         shadow.getElementById('exceptionToggle').innerHTML = options.exception.request || ''
-        shadow.getElementById('exceptionLabel').innerText = options.exception.requestHeader || ''
+        shadow.getElementById('exceptionTitle').innerText = options.exception.requestHeader || ''
         shadow.getElementById('exceptionTextarea').placeholder = options.exception.provideReason || ''
         shadow.getElementById('exceptionSubmit').innerText = options.exception.submitRequest || 'Submit'
 
-        // Toggle logic (show/hide request exception section)
         const toggle = shadow.getElementById('exceptionToggle')
         const exceptionSection = shadow.getElementById('exceptionSection')
         toggle.onclick = () => {
@@ -71,7 +61,6 @@ function blockDomainModal(domain, message, exceptionEvent) {
             }
         }
 
-        // Handle textarea input/enable submit button
         const textarea = shadow.getElementById('exceptionTextarea')
         const submit = shadow.getElementById('exceptionSubmit')
         const resultDiv = shadow.getElementById('exceptionResult')
@@ -94,19 +83,29 @@ function blockDomainModal(domain, message, exceptionEvent) {
     }, [options])
 }
 
-function unblockDomainModal(domain) {
+function removeModal(domain) {
     forAllTabs(domain, () => {
-        const host = document.getElementById('blockOverlayShadowRootHost')
-        if (host) host.remove()
+        document.getElementById("CitadelOverlayShadowRootHost")?.remove()
     })
 }
 
-function forAllTabs(domain, func, args = []) {
-    chrome.tabs.query({url: [`*://*.${domain}/*`]}, (tabs) => {
-        tabs.forEach((tab) => {
-            chrome.scripting.executeScript( { target: { tabId: tab.id }, func, args } )
-        })
-    })
+async function createModal(page, css) {
+    if (document.getElementById("CitadelOverlayShadowRootHost")) return
+
+    page = await fetch(chrome.runtime.getURL(page))
+    css = await fetch(chrome.runtime.getURL(css))
+    const host = document.createElement('div')
+    host.id = "CitadelOverlayShadowRootHost"
+    document.body.appendChild(host)
+    const shadow = host.attachShadow({mode: 'open'})
+    shadow.innerHTML = `<style>${await css.text()}</style>${await page.text()}`
+}
+
+async function forAllTabs(domain, func, args = []) {
+    const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, `*://*.${domain}/*`] })
+    await Promise.all(
+        tabs.map(tab => chrome.scripting.executeScript({ target: { tabId: tab.id }, func, args }))
+    )
 }
 
 function setWarning(warning) {

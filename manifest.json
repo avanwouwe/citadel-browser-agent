@@ -28,7 +28,9 @@
       "resources": [
         "/gui/images/*",
         "/gui/utils.js",
-        "/gui/modal.html",
+        "/gui/modal.css",
+        "/gui/modal-block.html",
+        "/gui/modal-notify.html",
         "/utils/i18n/*.json",
         "/utils/passwords.js",
         "/utils/injected/citadel-page-script.js"

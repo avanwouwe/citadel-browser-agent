@@ -73,6 +73,10 @@
     "request-exceptions": "In urgent and exceptional cases you can <span class=\"clickable\">request an exception</span> if you are blocked.",
     "request-exception-header": "Request an Exception",
     "provide-reason": "Please provide your reason for requesting an exception",
-    "submit-request": "Submit Request"
+    "submit-request": "Submit Request",
+    "acknowledge": "OK"
+  },
+  "notify-modal": {
+    "acknowledge": "OK"
   }
 }
