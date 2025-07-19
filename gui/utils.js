@@ -25,3 +25,7 @@ const htmlAttributesRegex = new RegExp(`[${Object.keys(htmlAttributes).map(ch =>
 String.prototype.escapeHtmlAttr= function () {
     return this.replace(htmlAttributesRegex, ch => htmlAttributes[ch])
 }
+
+function openDashboard() {
+    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/dashboard.html") })
+}

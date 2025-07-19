@@ -17,23 +17,24 @@ function startTimerMFA(url, minutes, showModal) {
 
     console.log(`MFA session starting for ${domain}, timer started`)
 
-    const timerId = setTimeout(() => {
+    const timerId = setTimeout(async () => {
         console.log(`MFA timeout for ${domain}`)
 
         logger.log(nowTimestamp(), "block", "MFA blocked", url, Log.WARN, undefined, `blocked access to ${domain} due to missing MFA`)
 
-        logOffApplication(domain)
+        await logOffApplication(domain)
 
-        forAllTabs(domain, () => location.reload())
+        await injectFuncIntoDomain(domain, () => location.reload())
 
         if (showModal) {
-            setTimeout(() => {
-                const message = t("mfa.disconnected", { contact: config.company.contact })
+            const title = t("mfa.title")
+            const message = t("mfa.disconnected", { contact: config.company.contact })
 
-                const exceptionMessage = { type: 'allow-mfa', domain }
+            const onAcknowledge = { type: 'acknowledge-mfa', domain }
+            const onException = { type: 'allow-mfa', domain }
 
-                blockDomainModal(domain, message, exceptionMessage)
-            }, ONE_SECOND)
+            await sleep(ONE_SECOND)
+            await Modal.createForDomain(domain, title, message, onAcknowledge, onException)
         }
 
         delete mfaTimers[domain]
@@ -86,9 +87,9 @@ function requiresMFA(url, config) {
  * Helper function to log off a specific application by wiping cookies, local storage, etc.
  * @param {string} domain - The domain of application that should be logged off
  */
-function logOffApplication(domain) {
+async function logOffApplication(domain) {
     // Remove cookies
-    chrome.cookies.getAll({ domain }, (cookies) => {
+    await chrome.cookies.getAll({ domain }, (cookies) => {
         cookies.forEach((cookie) => {
             const cookieDetails = {
                 url: `http${cookie.secure ? 's' : ''}://${cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain}${cookie.path}`,
@@ -104,7 +105,7 @@ function logOffApplication(domain) {
     })
 
     // Clear storage, unregister service workers and clear cache
-    forAllTabs(domain, () => {
+    await injectFuncIntoDomain(domain, () => {
         try {
             localStorage.clear()
             sessionStorage.clear()

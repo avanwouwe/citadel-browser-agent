@@ -15,6 +15,8 @@ importScripts('utils/ratethrottle.js');
 importScripts('utils/logging.js');
 importScripts('utils/browser.js');
 importScripts('gui/interface.js');
+importScripts('gui/modal.js');
+importScripts('gui/notification.js');
 importScripts('gui/utils.js');
 importScripts('utils/i18n/i18n.js');
 importScripts('utils/trust/accounttrust.js');

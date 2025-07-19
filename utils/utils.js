@@ -346,3 +346,7 @@ function applyPath(obj, attributePaths, func) {
 function debug(...params) {
     console.log(...params)
 }
+
+async function sleep(time) {
+    await new Promise(r => setTimeout(r, time))
+}

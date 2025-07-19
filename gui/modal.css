@@ -27,6 +27,11 @@
     min-width:220px;
     flex: 1 1 0;
 }
+.title {
+    line-height:1.4;
+    margin-bottom: 1em;
+    font-weight: bold;
+}
 .message {
     line-height:1.4;
     margin-bottom: 1em;

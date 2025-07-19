@@ -1,5 +1,7 @@
 class DeviceTrust {
 
+    static #NOTIFICATION_TYPE = "devicetrust"
+
     static State = class {
         static PASSING = "PASSING"
         static FAILING = "FAILING"
@@ -22,7 +24,6 @@ class DeviceTrust {
 
     #controls = { }
     #deviceState
-    #lastNotification = 0
 
     addReport(report) {
         const browserUpdated = Browser.isUpdated(report.browsers)
@@ -90,29 +91,28 @@ class DeviceTrust {
     }
 
     #notify() {
-        setWarning(this.#deviceState === DeviceTrust.State.WARNING || this.#deviceState === DeviceTrust.State.BLOCKING)
-
-        const alertId = "devicetrust"
         const title = t("devicetrust.notification.title")
-        const timeSinceLastNotification = Date.now() - this.#lastNotification
 
         if (this.#deviceState === DeviceTrust.State.PASSING) {
-            cancelAlert(alertId)
-            this.#lastNotification = Date.now()
-            return
-        }
-
-        if (DeviceTrust.State.FAILING && timeSinceLastNotification >= ONE_DAY * 7) {
-            raiseAlert(alertId, title, t("devicetrust.notification.failing"))
-            this.#lastNotification = Date.now()
-        } else if (DeviceTrust.State.WARNING && timeSinceLastNotification >= ONE_DAY * 1) {
+            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState)
+        } else if (this.#deviceState === DeviceTrust.State.FAILING) {
+            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState, title, t("devicetrust.notification.failing"))
+        } else if (this.#deviceState === DeviceTrust.State.WARNING) {
             const days = this.getNextState().days ?? "a few"
-            raiseAlert(alertId, title, t("devicetrust.notification.failing", {days}))
-            this.#lastNotification = Date.now()
-        } else if (DeviceTrust.State.BLOCKING && timeSinceLastNotification >= ONE_DAY * 1) {
-            raiseAlert(alertId, title, t("devicetrust.notification.blocking"))
-            this.#lastNotification = Date.now()
+            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState, title, t("devicetrust.notification.failing", {days}))
+        } else if (this.#deviceState === DeviceTrust.State.BLOCKING) {
+            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState, title, t("devicetrust.notification.blocking"))
         }
     }
+
+    static {
+        chrome.notifications.onClicked.addListener(function(notificationId) {
+            if (notificationId === DeviceTrust.#NOTIFICATION_TYPE) {
+                openDashboard()
+                Notification.acknowledge(DeviceTrust.#NOTIFICATION_TYPE)
+            }
+        })
+    }
+
 }
 

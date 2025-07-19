@@ -22,7 +22,7 @@
     "notification": {
       "title": "Device security issues",
       "failing": "Your device has security issues. Click to fix them.",
-      "warning": "⚠\uFE0F Your device is not is securely configured. In {{days}} days your device will be blocked. Click to fix issues.",
+      "warning": "⚠\uFE0F Your device is not securely configured. In {{days}} days your device will be blocked. Click to fix issues.",
       "blocking": "⚠\uFE0F Your device is insecure and has been blocked. Click to fix issues."
     }
   },
@@ -44,6 +44,12 @@
         "number-symbols": "Must contain at least {{min}} symbol(s)",
         "entropy": "Does not have enough different characters",
         "sequence": "Is too repetitive"
+      },
+      "notification": {
+        "title": "Account security issues",
+        "failing": "One of your accounts has security issues. Click to fix them.",
+        "warning": "⚠\uFE0F One of your accounts is not securely configured. In {{days}} days your device will be blocked. Click to fix issues.",
+        "blocking": "⚠\uFE0F One of your accounts is insecure and has been blocked. Your device has been blocked. Click to fix issues."
       }
     }
   },
@@ -54,6 +60,7 @@
     }
   },
   "mfa": {
+    "title": "Missing MFA",
     "disconnected": "You have been disconnected because you authenticated using only a password. \n\nReconnect and configure your account to use Multi Factor Authentication (MFA) such as a Time-based One-Time Password (TOTP).\nContact {{contact}} if you need help."
   },
   "block-page": {
@@ -70,13 +77,10 @@
     "request-submitted-popup": "Your exception request has been submitted. You can retry the operation."
   },
   "block-modal": {
-    "request-exceptions": "In urgent and exceptional cases you can <span class=\"clickable\">request an exception</span> if you are blocked.",
+    "request-exception": "In urgent and exceptional cases you can <span class=\"clickable\">request an exception</span> if you are blocked.",
     "request-exception-header": "Request an Exception",
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
-    "acknowledge": "OK"
-  },
-  "notify-modal": {
     "acknowledge": "OK"
   }
 }

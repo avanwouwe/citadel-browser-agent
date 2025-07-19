@@ -708,6 +708,12 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 	registerInteraction(details.url, details)
 })
 
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+	if (changeInfo.status !== "complete") return
+
+	Notification.showIfRequired(tab.url, tabId)
+})
+
 chrome.cookies.onChanged.addListener((changeInfo) => {
 	if (changeInfo.removed || changeInfo.cause !== 'explicit' || config.session.maxSessionDays <= 0 || Object.keys(config.session.domains).length === 0)
 		return
@@ -791,6 +797,14 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		cancelTimerMFA(siteUrl, "public key auth")
 	}
 
+	if (request.type === "acknowledge-alert") {
+		openDashboard()
+		Notification.acknowledge(request.alertType)
+	}
+
+	if (request.type === "acknowledge-mfa") {
+		Modal.removeFromDomain(request.domain)
+	}
 
 	if (request.type === "allow-mfa") {
 		const app = AppStats.forURL(siteUrl)
@@ -798,7 +812,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 		account.lastMFA = nowDatestamp()
 		AppStats.markDirty()
 
-		removeModal(request.domain)
+		Modal.removeFromDomain(request.domain)
 		logger.log(nowTimestamp(), "exception", "MFA exception granted", sender.url, Log.ERROR, request.reason, `user requested MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 
@@ -811,5 +825,5 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 })
 
 chrome.action.onClicked.addListener(() => {
-	chrome.tabs.create({ url: chrome.runtime.getURL('/gui/dashboard.html') })
+	openDashboard()
 })
