@@ -15,8 +15,8 @@ I18n.loadPage('/utils/i18n', (i18n) => {
     renderAccountIssues()
 
     const params = new URLSearchParams(window.location.search)
-    const tabId = params.get('tabId') ?? 'devicetrust'
-    selectTab(tabId)
+    const tabName = params.get('tab') ?? 'devicetrust'
+    selectTab(tabName)
 })()
 
 function selectTab(tabId) {

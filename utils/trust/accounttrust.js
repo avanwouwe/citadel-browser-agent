@@ -1,5 +1,7 @@
 class AccountTrust {
 
+    static TYPE = "accounttrust"
+
     static checkFor(username, sitename) {
         const config = Config.forHostname(sitename)
 
@@ -18,6 +20,8 @@ class AccountTrust {
         const accounts = [ ]
         for (const [system, app] of AppStats.allApps()) {
             for (const [username, report] of AppStats.allAccounts(app)) {
+                if (!AccountTrust.checkFor(username, system)) continue
+
                 if (report.issues?.count > 0) {
                     report.state = DeviceTrust.State.FAILING
                     const description = {
@@ -41,4 +45,29 @@ class AccountTrust {
         }
         return accounts
     }
-}
+
+    static #notify() {
+        let state = DeviceTrust.State.PASSING
+        for (const acct of AccountTrust.failingAccounts()) {
+            if (DeviceTrust.State.indexOf(acct.report.state) > DeviceTrust.State.indexOf(state)) {
+                state = acct.report.state
+            }
+        }
+
+        const title = t("accounttrust.notification.title")
+
+        if (state === DeviceTrust.State.PASSING) {
+            Notification.setAlert(AccountTrust.TYPE, state)
+        } else if (state === DeviceTrust.State.FAILING) {
+            Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.failing"))
+        } else if (state === DeviceTrust.State.WARNING) {
+            Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.warning"))
+        } else if (state === DeviceTrust.State.BLOCKING) {
+            Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.blocking"))
+        }
+    }
+
+    static {
+        setTimeout(() => AccountTrust.#notify(), 1 * ONE_MINUTE)
+        setInterval(() => AccountTrust.#notify(), 7 * ONE_DAY)
+    }}

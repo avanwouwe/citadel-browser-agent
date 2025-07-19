@@ -1,6 +1,6 @@
 class DeviceTrust {
 
-    static #NOTIFICATION_TYPE = "devicetrust"
+    static TYPE = "devicetrust"
 
     static State = class {
         static PASSING = "PASSING"
@@ -94,25 +94,15 @@ class DeviceTrust {
         const title = t("devicetrust.notification.title")
 
         if (this.#deviceState === DeviceTrust.State.PASSING) {
-            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState)
+            Notification.setAlert(DeviceTrust.TYPE, this.#deviceState)
         } else if (this.#deviceState === DeviceTrust.State.FAILING) {
-            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState, title, t("devicetrust.notification.failing"))
+            Notification.setAlert(DeviceTrust.TYPE, this.#deviceState, title, t("devicetrust.notification.failing"))
         } else if (this.#deviceState === DeviceTrust.State.WARNING) {
             const days = this.getNextState().days ?? "a few"
-            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState, title, t("devicetrust.notification.failing", {days}))
+            Notification.setAlert(DeviceTrust.TYPE, this.#deviceState, title, t("devicetrust.notification.warning", {days}))
         } else if (this.#deviceState === DeviceTrust.State.BLOCKING) {
-            Notification.setAlert(DeviceTrust.#NOTIFICATION_TYPE, this.#deviceState, title, t("devicetrust.notification.blocking"))
+            Notification.setAlert(DeviceTrust.TYPE, this.#deviceState, title, t("devicetrust.notification.blocking"))
         }
     }
-
-    static {
-        chrome.notifications.onClicked.addListener(function(notificationId) {
-            if (notificationId === DeviceTrust.#NOTIFICATION_TYPE) {
-                openDashboard(DeviceTrust.#NOTIFICATION_TYPE)
-                Notification.acknowledge(DeviceTrust.#NOTIFICATION_TYPE)
-            }
-        })
-    }
-
 }
 

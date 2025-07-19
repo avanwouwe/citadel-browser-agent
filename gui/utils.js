@@ -26,6 +26,16 @@ String.prototype.escapeHtmlAttr= function () {
     return this.replace(htmlAttributesRegex, ch => htmlAttributes[ch])
 }
 
-function openDashboard(tabId) {
-    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/dashboard.html") + (tabId ? `?tabId=${tabId}` : '') })
+function openDashboard(tabName, foreground = true) {
+    const dashboardRoot = chrome.runtime.getURL("/gui/dashboard.html");
+    const dashboardUrl = dashboardRoot + (tabName ? `?tab=${tabName}` : '')
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        const currentTab = tabs[0]
+        if (currentTab && currentTab.url.startsWith(dashboardUrl)) {
+            chrome.tabs.update(currentTab.id, { url: dashboardUrl })
+        } else {
+            chrome.tabs.create({ url: dashboardUrl, active: foreground })
+        }
+    })
 }

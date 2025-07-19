@@ -350,3 +350,14 @@ function debug(...params) {
 async function sleep(time) {
     await new Promise(r => setTimeout(r, time))
 }
+
+const Tabs = {
+    get: (tabIds) => Promise.all(tabIds.map(tabId =>
+        new Promise((resolve, reject) => {
+            chrome.tabs.get(tabId, tab => {
+                if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
+                else resolve(tab)
+            })
+        })
+    ))
+}

@@ -798,7 +798,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 	if (request.type === "acknowledge-alert") {
-		openDashboard(request.alertType)
+		openDashboard(request.alertType, false)
 		Notification.acknowledge(request.alertType)
 	}
 
@@ -821,9 +821,15 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 		logger.log(nowTimestamp(), "exception", "blacklist exception granted", request.url, Log.ERROR, request.reason, "user requested exception: " + request.description)
 	}
-
 })
 
 chrome.action.onClicked.addListener(() => {
 	openDashboard()
+})
+
+chrome.notifications.onClicked.addListener(function(notificationId) {
+	if (notificationId === DeviceTrust.TYPE || notificationId === AccountTrust.TYPE) {
+		openDashboard(notificationId)
+		Notification.acknowledge(notificationId)
+	}
 })

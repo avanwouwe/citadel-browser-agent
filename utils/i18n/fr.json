@@ -60,7 +60,7 @@
     }
   },
   "mfa": {
-    "title": "Manquement de MFA",
+    "title": "Vous connectez pas avec MFA",
     "disconnected": "Vous avez été déconnecté car vous vous êtes authentifié uniquement avec un mot de passe.\n\nReconnectez-vous et configurez votre compte pour utiliser l’authentification multifacteur (MFA), comme un mot de passe à usage unique basé sur le temps (TOTP).\nContactez {{contact}} si vous avez besoin d’aide."
   },
   "block-page": {

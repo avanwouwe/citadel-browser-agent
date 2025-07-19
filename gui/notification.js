@@ -1,5 +1,6 @@
 class Notification {
     static #alerts = { }
+    static showing
 
     static setAlert(type, level, title, message) {
         if (level === DeviceTrust.State.PASSING) {
@@ -15,8 +16,6 @@ class Notification {
         }
         alert.level = level
 
-        Notification.#updateIcon()
-
         const sinceLastNotification = Notification.#sinceLastNotification(type)
         if (
             alert.level === DeviceTrust.State.FAILING && sinceLastNotification >= 7 * ONE_DAY||
@@ -25,6 +24,8 @@ class Notification {
         ) {
             Notification.#showNotification(type, title, message)
         }
+
+        Notification.#updateState()
     }
 
     static acknowledge(type) {
@@ -33,21 +34,25 @@ class Notification {
         if (alert) {
             alert.acknowledged = true
 
-            for (const tabId of alert.tabs) {
-                Modal.removeFromTab(tabId)
-            }
+            Tabs.get(Array.from(alert.tabs))
+                .then(tabs => tabs.forEach(tab => {
+                    Modal.removeFromTab(tab.id)
+                    Notification.showIfRequired(tab.url, tab.id)
+                }))
+
             alert.tabs = new Set()
 
             chrome.notifications.clear(type)
         }
+
+        Notification.#updateState()
     }
 
     static showIfRequired(url, tabId) {
         if (!url || ! tabId) return false
 
-        const alert = Notification.alert()
-
-        if (! alert || alert.level === DeviceTrust.State.PASSING || alert.acknowledged ) {
+        const alert = Notification.showing
+        if (! alert ) {
             return false
         }
 
@@ -63,18 +68,6 @@ class Notification {
 
             Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge)
         }
-    }
-
-    static alert() {
-        let worstAlert
-
-        for (const alert of Object.values(Notification.#alerts)) {
-            if (! worstAlert || DeviceTrust.State.indexOf(alert.level) > DeviceTrust.State.indexOf(worstAlert.level)) {
-                worstAlert = alert
-            }
-        }
-
-        return worstAlert
     }
 
     static #sinceLastNotification(type) {
@@ -99,10 +92,22 @@ class Notification {
         const alert = Notification.#getAlert(type)
         alert.notification = notification
         alert.lastNotification = Date.now()
+        alert.acknowledged = false
     }
 
-    static #updateIcon() {
-        const level = Notification.alert()?.level ?? DeviceTrust.State.PASSING
+    static #updateState() {
+        Notification.showing = undefined
+        let worstAlert = Notification.#getAlert()
+        for (const alert of Object.values(Notification.#alerts)) {
+            if (DeviceTrust.State.indexOf(alert.level) >= DeviceTrust.State.indexOf(worstAlert.level)) {
+                if (! alert.acknowledged) {
+                    Notification.showing = alert
+                }
+                worstAlert = alert
+            }
+        }
+
+        const level = worstAlert.level
         const warning = DeviceTrust.State.indexOf(DeviceTrust.State.WARNING)
 
         if (DeviceTrust.State.indexOf(level) >= warning) {
