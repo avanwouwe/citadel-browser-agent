@@ -798,7 +798,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 	if (request.type === "acknowledge-alert") {
-		openDashboard()
+		openDashboard(request.alertType)
 		Notification.acknowledge(request.alertType)
 	}
 

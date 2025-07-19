@@ -1,15 +1,10 @@
 window.addEventListener('DOMContentLoaded', function () {
     const tabButtons = document.querySelectorAll('.tab')
-    const tabContents = document.querySelectorAll('.tab-content')
-    tabButtons.forEach((btn, i) => {
+    tabButtons.forEach(btn => {
         btn.addEventListener('click', function () {
-            tabButtons.forEach((b, j) => {
-                b.classList.toggle('active', i === j)
-                tabContents[j].classList.toggle('active', i === j)
-            })
+            selectTab(btn.id)
         })
     })
-    // (Optional) Keyboard navigation for tabs ...
 })
 
 let t
@@ -18,7 +13,22 @@ I18n.loadPage('/utils/i18n', (i18n) => {
     i18n.translatePage()
     renderDeviceDashboard()
     renderAccountIssues()
+
+    const params = new URLSearchParams(window.location.search)
+    const tabId = params.get('tabId') ?? 'devicetrust'
+    selectTab(tabId)
 })()
+
+function selectTab(tabId) {
+    const tabButtons = document.querySelectorAll('.tab')
+    const tabContents = document.querySelectorAll('.tab-content')
+
+    for (let i = 0; i < tabButtons.length; i++) {
+        const isActive = tabButtons[i].id === tabId
+        tabButtons[i].classList.toggle('active', isActive)
+        tabContents[i].classList.toggle('active', isActive)
+    }
+}
 
 function renderDeviceDashboard() {
     chrome.runtime.sendMessage({type: "GetDeviceStatus"}, function(devicetrust) {

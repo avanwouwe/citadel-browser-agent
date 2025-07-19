@@ -102,10 +102,10 @@
 </head>
 <body>
 <div class="tabs">
-    <button class="tab active" id="tab1-btn" data-i18n="devicetrust.dashboard.title">Device Trust</button>
-    <button class="tab" id="tab2-btn" data-i18n="accounttrust.dashboard.title">Account Issues</button>
+    <button class="tab active" id="devicetrust" data-i18n="devicetrust.dashboard.title">Device Trust</button>
+    <button class="tab" id="accounttrust" data-i18n="accounttrust.dashboard.title">Account Issues</button>
 </div>
-<div id="tab1" class="tab-content active">
+<div id="devicetrust-tab" class="tab-content active">
     <div style="display: flex; align-items: center;">
         <span class="state-dot" id="dot"></span>
         <span id="status-label" style="margin-right: 8px;">-</span>
@@ -138,7 +138,7 @@
         <tbody id="devicetrust-issues"></tbody>
     </table>
 </div>
-<div id="tab2" class="tab-content">
+<div id="accounttrust-tab" class="tab-content">
     <div id="account-issues">
         <table>
             <thead>

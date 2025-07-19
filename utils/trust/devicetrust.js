@@ -108,7 +108,7 @@ class DeviceTrust {
     static {
         chrome.notifications.onClicked.addListener(function(notificationId) {
             if (notificationId === DeviceTrust.#NOTIFICATION_TYPE) {
-                openDashboard()
+                openDashboard(DeviceTrust.#NOTIFICATION_TYPE)
                 Notification.acknowledge(DeviceTrust.#NOTIFICATION_TYPE)
             }
         })

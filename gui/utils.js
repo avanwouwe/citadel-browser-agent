@@ -26,6 +26,6 @@ String.prototype.escapeHtmlAttr= function () {
     return this.replace(htmlAttributesRegex, ch => htmlAttributes[ch])
 }
 
-function openDashboard() {
-    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/dashboard.html") })
+function openDashboard(tabId) {
+    chrome.tabs.create({ url: chrome.runtime.getURL("/gui/dashboard.html") + (tabId ? `?tabId=${tabId}` : '') })
 }
