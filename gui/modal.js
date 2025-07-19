@@ -43,28 +43,26 @@ class Modal {
         const acknowledge = shadow.getElementById('acknowledgeButton')
         acknowledge.hidden = options.onAcknowledge === undefined
         acknowledge.textContent = options.text.acknowledge || ''
-        acknowledge.addEventListener('click', function() {
+        acknowledge.addEventListener('click', function () {
             chrome.runtime.sendMessage(options.onAcknowledge)
         })
 
-        if (! options.exception) {
+        if (!options.exception) {
             shadow.getElementById('exceptionDiv').hidden = true
             return
         }
 
-        shadow.getElementById('exceptionToggle').innerHTML = options.exception.text.request || ''
+        shadow.getElementById('exceptionEnabler').innerHTML = options.exception.text.request || ''
         shadow.getElementById('exceptionTitle').innerText = options.exception.text.requestHeader || ''
         shadow.getElementById('exceptionTextarea').placeholder = options.exception.text.provideReason || ''
         shadow.getElementById('exceptionSubmit').innerText = options.exception.text.submitRequest || 'Submit'
 
-        const toggle = shadow.getElementById('exceptionToggle')
+        const exceptionEnabler = shadow.getElementById('exceptionEnabler')
         const exceptionSection = shadow.getElementById('exceptionSection')
-        toggle.onclick = () => {
-            exceptionSection.style.display =
-                (exceptionSection.style.display === 'flex') ? 'none' : 'flex'
-            if (exceptionSection.style.display === 'flex') {
-                shadow.getElementById('exceptionTextarea').focus()
-            }
+        exceptionEnabler.onclick = () => {
+            acknowledge.hidden = true
+            exceptionSection.style.display = 'flex'
+            shadow.getElementById('exceptionTextarea').focus()
         }
 
         const textarea = shadow.getElementById('exceptionTextarea')

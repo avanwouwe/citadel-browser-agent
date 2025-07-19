@@ -31,6 +31,7 @@
     line-height:1.4;
     margin-bottom: 1em;
     font-weight: bold;
+    text-align: center;
 }
 .message {
     line-height:1.4;
@@ -38,7 +39,6 @@
 }
 .exception-toggle {
     cursor: pointer;
-    margin-bottom: 0.3em;
     user-select: none;
 }
 .clickable {
@@ -55,7 +55,6 @@
     flex-direction: column;
     align-items: stretch;
     width:100%;
-    margin-top:0.5em;
 }
 .exception-title { font-size: 1.1em; font-weight: bold; margin-bottom: 0.4em; }
 .exception-reason {
