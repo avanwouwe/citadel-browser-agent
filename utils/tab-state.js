@@ -5,9 +5,9 @@ class TabState {
     constructor(isForServiceworker = false) {
         if (isForServiceworker) {
             this.#handler = (message, sender, sendResponse) => {
-                if (message.type === "GetTabState") {
-                    if (sender.id !== chrome.runtime.id) { return console.error(`message received from unknown extension ${sender.id}`) }
+                if (sender.id !== chrome.runtime.id) return
 
+                if (message.type === "GetTabState") {
                     const state = this.#state[sender.tab.id]?.[message.key]
                     sendResponse({ type: "SendTabState", key: message.key, state })
                 }

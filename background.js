@@ -62,6 +62,8 @@ Port.onMessage("devicetrust",(report) => {
 })
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	if (sender.id !== chrome.runtime.id) return
+
 	switch(message.type) {
 		case 'GetAccountIssues':
 			const accounts = AccountTrust.failingAccounts()
@@ -747,6 +749,8 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 })
 
 chrome.runtime.onMessage.addListener(function(request, sender) {
+	if (sender.id !== chrome.runtime.id) return
+
 	const siteUrl =  sender.url.toURL()
 
 	if (request.type === "user-interaction") {
