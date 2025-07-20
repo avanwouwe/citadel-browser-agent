@@ -137,14 +137,24 @@ chrome.webRequest.onCompleted.addListener(
     function (details) {
         if (details.method !== "POST") return
 
-        setInitiator(details)
         const url = details.url?.toURL()
+        if (!url) return
 
-        if (
-            (isMFA(url?.pathname) && details.statusCode >= 200 && details.statusCode < 300) ||
-            (findAuthPattern(url?.pathname) && details.statusCode >= 400)
-        ) {
+        setInitiator(details)
+
+        if (isMFA(url.pathname) && details.statusCode >= 200 && details.statusCode < 300) {
             cancelTimerMFA(details.initiator, "POST to MFA-esque URL")
+        }
+
+        if (findAuthPattern(url.pathname) && details.statusCode >= 400) {
+            cancelTimerMFA(details.initiator, "failed login")
+
+            new SessionState(details.initiator.toURL().origin).load().then(sessionState =>  {
+                const app = AppStats.forURL(details.initiator)
+                if (app) {
+                    AppStats.deleteAccount(app, sessionState.auth.username)
+                }
+            })
         }
     }, { urls: ["<all_urls>"] }
 )
