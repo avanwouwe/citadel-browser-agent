@@ -1,6 +1,8 @@
 importScripts('config.js');
 importScripts('utils/definitions.js');
 importScripts('utils/utils.js');
+importScripts('utils/encryption/bcrypt.js');
+importScripts('utils/encryption/pbkdf2.js');
 importScripts('utils/passwords.js');
 importScripts('utils/mfa.js');
 importScripts('utils/eventaccumulator.js');

@@ -32,6 +32,7 @@
         "/gui/modal.css",
         "/gui/modal.html",
         "/utils/i18n/*.json",
+        "/utils/encryption/pbkdf2.js",
         "/utils/passwords.js",
         "/utils/injected/citadel-page-script.js"
       ],
@@ -44,6 +45,8 @@
       "/config.js",
       "/utils/definitions.js",
       "/utils/utils.js",
+      "/utils/encryption/bcrypt.js",
+      "/utils/encryption/pbkdf2.js",
       "/utils/passwords.js",
       "/utils/mfa.js",
       "/utils/eventaccumulator.js",
@@ -77,6 +80,7 @@
       "matches": ["<all_urls>"],
       "all_frames": true,
       "js": [
+        "/utils/hash.js",
         "/utils/passwords.js",
         "/utils/session-state.js",
         "/utils/injected/injected-utils.js",

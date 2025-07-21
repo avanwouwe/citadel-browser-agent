@@ -1,3 +1,4 @@
+injectPageScript('/utils/pbkdf2.js')
 injectPageScript('/utils/passwords.js')
 injectPageScript('/utils/injected/citadel-page-script.js')
 
