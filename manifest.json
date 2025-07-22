@@ -80,7 +80,7 @@
       "matches": ["<all_urls>"],
       "all_frames": true,
       "js": [
-        "/utils/hash.js",
+        "/utils/encryption/pbkdf2.js",
         "/utils/passwords.js",
         "/utils/session-state.js",
         "/utils/injected/injected-utils.js",
