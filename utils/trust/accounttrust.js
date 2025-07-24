@@ -22,8 +22,11 @@ class AccountTrust {
             for (const [username, report] of AppStats.allAccounts(app)) {
                 if (!AccountTrust.checkFor(username, system)) continue
 
-                if (report.issues?.count > 0) {
-                    report.state = DeviceTrust.State.FAILING
+                report.state = DeviceTrust.State.PASSING
+
+                const issueCount = report.issues?.count ?? 0
+                report.state = issueCount >= DeviceTrust.State.values.length ? DeviceTrust.State.BLOCKING : DeviceTrust.State.values[issueCount]
+                if (issueCount > 0) {
                     const description = {
                         numberOfDigits:   t("accounttrust.password.quality.number-digits",    { min: config.account.passwordPolicy.minNumberOfDigits }),
                         numberOfLetters:  t("accounttrust.password.quality.number-letters",   { min: config.account.passwordPolicy.minNumberOfLetters }),
