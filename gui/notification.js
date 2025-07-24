@@ -22,7 +22,7 @@ class Notification {
             alert.level === DeviceTrust.State.WARNING && sinceLastNotification >= 1 * ONE_DAY ||
             alert.level === DeviceTrust.State.BLOCKING && sinceLastNotification >= 1 * ONE_DAY
         ) {
-            Notification.#showNotification(type, title, message)
+            Notification.enable(type, title, message)
         }
 
         Notification.#updateState()
@@ -30,25 +30,22 @@ class Notification {
 
     static acknowledge(type) {
         const alert = Notification.#alerts[type]
+        if (!alert) return
 
-        if (alert) {
-            alert.acknowledged = true
-
-            Tabs.get(Array.from(alert.tabs))
-                .then(tabs => tabs.forEach(tab => {
-                    Modal.removeFromTab(tab.id)
-                    Notification.showIfRequired(tab.url, tab.id)
-                }))
-
-            alert.tabs = new Set()
-
-            chrome.notifications.clear(type)
-        }
-
+        alert.acknowledged = true
         Notification.#updateState()
+
+        Tabs.get(Array.from(alert.tabs))
+            .then(tabs => tabs.forEach(tab => {
+                Modal.removeFromTab(tab.id)
+                Notification.showIfRequired(tab.url, tab.id)
+            }))
+
+        chrome.notifications.clear(type)
+        alert.tabs = new Set()
     }
 
-    static showIfRequired(url, tabId) {
+    static async showIfRequired(url, tabId) {
         if (!url || ! tabId) return false
 
         const alert = Notification.showing
@@ -61,12 +58,15 @@ class Notification {
         if (isProtected) {
             alert.tabs.add(tabId)
 
-            const onAcknowledge = {
-                type: 'acknowledge-alert',
-                alertType: alert.type
+            const onAcknowledge = { type: 'acknowledge-alert', alert }
+            let onException
+            if (alert.level === DeviceTrust.State.BLOCKING &&
+                config.devicetrust.exceptions.duration > 0 && matchDomain(hostname, config.devicetrust.exceptions.domains)
+            ) {
+                onException = { type: 'allow-alert', alert }
             }
 
-            Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge)
+            await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
         }
     }
 
@@ -75,10 +75,10 @@ class Notification {
         return Date.now() - lastNotification
     }
 
-    static #showNotification(type, title, message) {
+    static enable(type, title, message) {
         const notification = {
             type: "basic",
-            iconUrl: config.company.logo,
+            iconUrl: Logo.getLogo(),
             title: title,
             message: message
         }

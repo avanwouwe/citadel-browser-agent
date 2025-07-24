@@ -802,8 +802,22 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 	if (request.type === "acknowledge-alert") {
-		openDashboard(request.alertType, false)
-		Notification.acknowledge(request.alertType)
+		openDashboard(request.alert.type, true)
+
+		if (request.alert.level !== DeviceTrust.State.BLOCKING) {
+			Notification.acknowledge(request.alert.type)
+		}
+	}
+
+	if (request.type === "allow-alert") {
+		openDashboard(request.alert.type, true)
+
+		Notification.acknowledge(request.alert.type)
+		setTimeout(alert => {
+			Notification.enable(alert.type, alert.title, alert.message)
+		}, config.devicetrust.exceptions * ONE_MINUTE)
+
+		logger.log(nowTimestamp(), "exception", `${alert.type} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alert.type} exception`)
 	}
 
 	if (request.type === "acknowledge-mfa") {
