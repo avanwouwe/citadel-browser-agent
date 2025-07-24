@@ -50,7 +50,7 @@
       "title": "Account security issues",
       "failing": "One of your accounts has security issues. Click to fix them.",
       "warning": "⚠\uFE0F One of your accounts is not securely configured. In {{days}} days your device will be blocked. Click to fix issues.",
-      "blocking": "⚠\uFE0F One of your accounts is insecure and has been blocked. Your device has been blocked. Click to fix issues."
+      "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your device has been blocked. Click to fix issues."
     }
   },
   "errors": {
