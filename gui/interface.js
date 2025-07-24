@@ -20,7 +20,7 @@ function blockPage(tabId, reason, blockedPage) {
         reason,
         url: blockedPage,
         contact: config.company.contact,
-        logo: config.company.logo,
+        logo: Logo.getLogo(),
         allowException: config.blacklist.exceptions.duration !== undefined
     })
 

@@ -1,11 +1,11 @@
 class Config {
     static config = {
         company: {
-            name: 'Company',
-            contact: 'your IT support',                                  // replace with your support e-mail
-            logo: chrome.runtime.getURL('/gui/images/icon128.png'),      // replace with the URL of your (square, transparent) logo
-            domains: [ ],
-            applications: [ ]                   // put your applications
+            name: 'Your Organisation',          // name of your organisation
+            contact: 'your IT support',         // replace with the email address of your support
+            logo: undefined,                    // replace with the URL of your logo (128 x 128 pixel, transparent)
+            domains: [ ],                       // replace with your domains, e.g. ["yourdomain.com","yourdomain.io"]
+            applications: [ ]                   // list your applications, e.g. ["your-crm.com", "your-mdm.com"]
         },
         logging: {
             reportFailure: true,

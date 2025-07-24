@@ -3,7 +3,6 @@ class Modal {
 
     static async createForDomain(domain, title, message, onAcknowledge, onException) {
         const options = Modal.#prepareOptions(title, message, onAcknowledge, onException)
-        options.onAcknowledge.domain = domain
 
         await injectFilesIntoDomain(domain, ['/gui/modal.js'])
         await injectFuncIntoDomain(domain, async options => await Modal.create(options), [options])
@@ -11,7 +10,6 @@ class Modal {
 
     static async createForTab(tabId, title, message, onAcknowledge, onException) {
         const options = Modal.#prepareOptions(title, message, onAcknowledge, onException)
-        options.onAcknowledge.tabId = tabId
 
         await injectFilesIntoTab(tabId, ['/gui/modal.js'])
         await injectFuncIntoTab(tabId, async options => await Modal.create(options), [options])
@@ -81,7 +79,7 @@ class Modal {
 
     static #prepareOptions(title, message, onAcknowledge, onException) {
         const options = {
-            logo: config.company.logo,
+            logo: Logo.getLogo(),
             text: {
                 title,
                 message,

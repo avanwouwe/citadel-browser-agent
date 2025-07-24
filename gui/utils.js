@@ -26,6 +26,18 @@ String.prototype.escapeHtmlAttr= function () {
     return this.replace(htmlAttributesRegex, ch => htmlAttributes[ch])
 }
 
+class Logo {
+    static DEFAULT = chrome.runtime.getURL('/gui/images/icon128.png')
+
+    static getLogo() {
+        if (config.company.logo.startsWith("data:")) {
+            return config.company.logo
+        }
+
+        return navigator.onLine ? config.company.logo ?? Logo.DEFAULT : Logo.DEFAULT
+    }
+}
+
 function openDashboard(tabName, foreground = true) {
     const dashboardRoot = chrome.runtime.getURL("/gui/dashboard.html");
     const dashboardUrl = dashboardRoot + (tabName ? `?tab=${tabName}` : '')
