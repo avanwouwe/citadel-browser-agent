@@ -24,6 +24,8 @@ class Modal {
     }
 
     static async create(options) {
+        await domReady()
+
         if (document.getElementById(Modal.#HOST_ELEMENT_ID)) return
 
         const page = await fetch(chrome.runtime.getURL("/gui/modal.html"))

@@ -79,21 +79,11 @@ class I18n {
     }
 
     static loadPage(path, callback) {
-        function domReady() {
-            return new Promise(resolve => {
-                if (document.readyState === "loading") {
-                    document.addEventListener("DOMContentLoaded", resolve)
-                } else {
-                    resolve()
-                }
-            })
-        }
-
         return async () => {
-            const domPromise = domReady()
-            const i18nPromise = I18n.fromFile(path)
-
-            const [_, i18n] = await Promise.all([domPromise, i18nPromise])
+            const [_, i18n] = await Promise.all([
+                domReady(),
+                I18n.fromFile(path)
+            ])
 
             callback(i18n)
         }
