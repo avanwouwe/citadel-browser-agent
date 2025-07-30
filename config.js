@@ -263,7 +263,7 @@ class Config {
                 'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'DEBUG',
             }
         },
-        devicetrust: {
+        device: {
             trigger: {
                 warn: 2,
                 block: 7

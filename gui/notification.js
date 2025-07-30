@@ -63,7 +63,7 @@ class Notification {
             const blockedOverPassword = AccountTrust.failingAccounts(hostname)?.some(a => a?.report?.state === DeviceTrust.State.BLOCKING)
             if (blockedOverPassword) return false
 
-            if (config.devicetrust.exceptions.duration > 0 && matchDomain(hostname, config.devicetrust.exceptions.domains)) {
+            if (config.device.exceptions.duration > 0 && matchDomain(hostname, config.device.exceptions.domains)) {
                 onException = { type: 'allow-alert', alert }
             }
         }

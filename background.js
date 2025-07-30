@@ -811,7 +811,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 	if (request.type === "allow-alert") {
 		const alertType = request.alert.type
-		const exceptionDuration = config[alertType === "devicetrust" ? "devicetrust" : "account" ].exceptions.duration * ONE_MINUTE
+		const exceptionDuration = config[alertType === "devicetrust" ? "device" : "account" ].exceptions.duration * ONE_MINUTE
 
 		Notification.acknowledge(alertType)
 

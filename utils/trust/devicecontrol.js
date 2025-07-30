@@ -8,18 +8,18 @@ class DeviceControl {
     #action
 
     constructor(controlName) {
-        const isSkipped = config.devicetrust.actions[DeviceTrust.Action.SKIP].includes(controlName)
+        const isSkipped = config.device.actions[DeviceTrust.Action.SKIP].includes(controlName)
         assert(!isSkipped, `tried to create skipped control ${controlName}`)
 
         this.name = controlName
         for (const action of DeviceTrust.Action.values) {
-            if (config.devicetrust.actions[action].includes(controlName)) {
+            if (config.device.actions[action].includes(controlName)) {
                 this.#action = action
             }
         }
 
         if (this.#action === undefined) {
-            this.#action = config.devicetrust.actions.default
+            this.#action = config.device.actions.default
         }
     }
 
@@ -48,9 +48,9 @@ class DeviceControl {
             return DeviceTrust.State.BLOCKING
         } else if (this.#action === DeviceTrust.Action.NOTHING || this.#action === DeviceTrust.Action.NOTIFY) {
             return DeviceTrust.State.FAILING
-        } else if (this.#failedDays >= config.devicetrust.trigger.block) {
+        } else if (this.#failedDays >= config.device.trigger.block) {
             return DeviceTrust.State.BLOCKING
-        } else if (this.#failedDays >= config.devicetrust.trigger.warn) {
+        } else if (this.#failedDays >= config.device.trigger.warn) {
             return DeviceTrust.State.WARNING
         } else {
             return DeviceTrust.State.FAILING
@@ -64,10 +64,10 @@ class DeviceControl {
             return { state: DeviceTrust.State.BLOCKING }
         } else if (this.#action === DeviceTrust.Action.NOTHING || this.#action === DeviceTrust.Action.NOTIFY) {
             return { state: DeviceTrust.State.FAILING }
-        } else if (this.#failedDays < config.devicetrust.trigger.warn) {
-            return { state: DeviceTrust.State.WARNING, days: config.devicetrust.trigger.warn - this.#failedDays }
-        } else if (this.#failedDays < config.devicetrust.trigger.block) {
-            return { state: DeviceTrust.State.BLOCKING, days: config.devicetrust.trigger.block - this.#failedDays }
+        } else if (this.#failedDays < config.device.trigger.warn) {
+            return { state: DeviceTrust.State.WARNING, days: config.device.trigger.warn - this.#failedDays }
+        } else if (this.#failedDays < config.device.trigger.block) {
+            return { state: DeviceTrust.State.BLOCKING, days: config.device.trigger.block - this.#failedDays }
         } else {
             return { state: DeviceTrust.State.BLOCKING }
         }

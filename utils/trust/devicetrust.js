@@ -33,7 +33,7 @@ class DeviceTrust {
         browserControl.definition = report.controls.definitions["BrowserUpdated"]
 
         for (const controlReport of Object.values(report.controls.results)) {
-            const isSkipped = config.devicetrust.actions[DeviceTrust.Action.SKIP].includes(controlReport.name)
+            const isSkipped = config.device.actions[DeviceTrust.Action.SKIP].includes(controlReport.name)
             if (!isSkipped) {
                 const control = this.getControl(controlReport.name)
                 control.addReport(controlReport)
