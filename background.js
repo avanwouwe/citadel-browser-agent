@@ -15,7 +15,7 @@ let exceptionList
 let ignorelist
 let tabState
 let devicetrust
-let t
+let t = new I18n({}).getTranslator()
 
 I18n.fromFile('/utils/i18n').then(i18n => t = i18n.getTranslator())
 
@@ -810,14 +810,16 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 	}
 
 	if (request.type === "allow-alert") {
-		openDashboard(request.alert.type, true)
+		const alertType = request.alert.type
+		const exceptionDuration = config[alertType === "devicetrust" ? "devicetrust" : "account" ].exceptions.duration * ONE_MINUTE
 
-		Notification.acknowledge(request.alert.type)
+		Notification.acknowledge(alertType)
+
 		setTimeout(alert => {
-			Notification.enable(alert.type, alert.title, alert.message)
-		}, config.devicetrust.exceptions * ONE_MINUTE)
+			Notification.enable(alert.type, alert.notification.title, alert.notification.message)
+		}, exceptionDuration, request.alert)
 
-		logger.log(nowTimestamp(), "exception", `${alert.type} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alert.type} exception`)
+		logger.log(nowTimestamp(), "exception", `${alert.type} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alertType} exception`)
 	}
 
 	if (request.type === "acknowledge-mfa") {

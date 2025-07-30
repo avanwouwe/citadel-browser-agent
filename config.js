@@ -160,6 +160,14 @@ class Config {
             exceptions: [],
         },
         account: {
+            trigger: {
+                warn: 2,
+                block: 7
+            },
+            exceptions: {
+                duration: 60,
+                domains: [ ]
+            },
             retentionDays: 90,
             checkOnlyInternal: true,
             checkOnlyApplications: true,
@@ -268,6 +276,10 @@ class Config {
                 "WARN": [],
                 "BLOCK": ["DriveEncryption", "RemovableStorage"]
             },
+            exceptions: {
+                duration: 60,
+                domains: [ ]
+            },
             controls: {
                 applications: {
                     forbidden: [],
@@ -286,7 +298,6 @@ class Config {
                 windows: undefined,
                 macos: undefined
             },
-
         }
     }
 
@@ -307,6 +318,8 @@ class Config {
         "session.exceptions",
         "domain.isApplication",
         "domain.isPublicMail",
+        "devicetrust.exceptions.domains",
+        "account.exceptions.domains",
         "account.mfa.required",
         "account.mfa.exceptions",
     ]
