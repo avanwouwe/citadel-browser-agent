@@ -5,20 +5,20 @@ class AccountTrust {
     static checkFor(username, sitename) {
         const config = Config.forHostname(sitename)
 
-        if (config.account.checkOnlyInternal && isExternalUser(username)) {
-            return false
-        }
-
-        if (config.account.checkOnlyApplications && ! isApplication(sitename)) {
-            return false
-        }
+        if (config.account.checkOnlyApplications && ! isApplication(sitename)) return false
+        if (config.account.checkOnlyInternal && isExternalUser(username)) return false
 
         return true
     }
 
-    static failingAccounts() {
+    static failingAccounts(appName = null) {
         const accounts = [ ]
-        for (const [system, app] of AppStats.allApps()) {
+
+        const app = appName ? AppStats.forAppName(appName) : null
+        if (appName && !app) return accounts
+
+        const apps = app ? [[appName, app]] : AppStats.allApps()
+        for (const [system, app] of apps) {
             for (const [username, report] of AppStats.allAccounts(app)) {
                 if (!AccountTrust.checkFor(username, system)) continue
 

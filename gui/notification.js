@@ -54,20 +54,23 @@ class Notification {
         }
 
         const hostname = url.toURL()?.hostname
-        const isProtected = matchDomain(hostname, config.company.applications)
-        if (isProtected) {
-            alert.tabs.add(tabId)
+        const isProtected = matchDomain(hostname, config.company.applications) || matchDomain(hostname, config.company.domains)
+        if (!isProtected) return false
 
-            const onAcknowledge = { type: 'acknowledge-alert', alert }
-            let onException
-            if (alert.level === DeviceTrust.State.BLOCKING &&
-                config.devicetrust.exceptions.duration > 0 && matchDomain(hostname, config.devicetrust.exceptions.domains)
-            ) {
+        const onAcknowledge = { type: 'acknowledge-alert', alert }
+        let onException
+        if (alert.level === DeviceTrust.State.BLOCKING) {
+            const blockedOverPassword = AccountTrust.failingAccounts(hostname)?.some(a => a?.report?.state === DeviceTrust.State.BLOCKING)
+            if (blockedOverPassword) return false
+
+            if (config.devicetrust.exceptions.duration > 0 && matchDomain(hostname, config.devicetrust.exceptions.domains)) {
                 onException = { type: 'allow-alert', alert }
             }
-
-            await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
         }
+
+        alert.tabs.add(tabId)
+        await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
+        return true
     }
 
     static #sinceLastNotification(type) {
@@ -93,11 +96,13 @@ class Notification {
         alert.notification = notification
         alert.lastNotification = Date.now()
         alert.acknowledged = false
+
+        Notification.#updateState()
     }
 
     static #updateState() {
         Notification.showing = undefined
-        let worstAlert = Notification.#getAlert()
+        let worstAlert = { level: DeviceTrust.State.PASSING }
         for (const alert of Object.values(Notification.#alerts)) {
             if (DeviceTrust.State.indexOf(alert.level) >= DeviceTrust.State.indexOf(worstAlert.level)) {
                 if (! alert.acknowledged) {
