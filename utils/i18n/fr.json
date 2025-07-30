@@ -37,6 +37,7 @@
     "password": {
       "quality": {
         "title": "Problème(s) avec le mot de passe",
+        "username-password": "Doit pas être basé sur le nom d'utilisateur",
         "number-digits": "Doit contenir au moins {{min}} chiffre(s)",
         "number-letters": "Doit contenir au moins {{min}} lettre(s)",
         "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",

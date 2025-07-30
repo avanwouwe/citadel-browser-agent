@@ -68,8 +68,8 @@ class SessionState {
         debug("session state setting username", username, this.auth)
     }
 
-    setPassword(password) {
-        this.auth.password = analyzePassword(password)
+    setPassword(username, password) {
+        this.auth.password = analyzePassword(username, password)
         this.auth.totp = false
 
         debug("session state setting password", password, this.auth)

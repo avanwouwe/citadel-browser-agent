@@ -152,7 +152,7 @@ function shannonEntropy(str) {
     return Math.round(entropy * 1000) / 1000
 }
 
-function analyzePassword(password) {
+function analyzePassword(username, password) {
     const passwordAnalysis = {
         length: password !== undefined ? password.length : 0,
         numberOfDigits: 0,
@@ -181,6 +181,11 @@ function analyzePassword(password) {
             passwordAnalysis.numberOfSymbols += 1
         }
     }
+
+    const nonLetterChar = /[^\p{L}]+/gu
+    const u = username.toLowerCase().replace(nonLetterChar, '')
+    const p = password.toLowerCase().replace(nonLetterChar, '')
+    passwordAnalysis.usernameInPassword = (u.includes(p) || p.includes(u)) ? 1 : 0
 
     return passwordAnalysis
 }

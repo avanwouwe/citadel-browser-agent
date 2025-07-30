@@ -22,7 +22,7 @@
                 if (credentials && credentials.type === "password" && credentials.id && credentials.password) {
                     const report = {
                         username: credentials.id,
-                        password: analyzePassword(credentials.password),
+                        password: analyzePassword(credentials.id, credentials.password),
                         mfa: false
                     }
 

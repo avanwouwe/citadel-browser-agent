@@ -119,7 +119,7 @@ function analyzeForm(formElements, eventElement) {
                 sessionState.init()
                 return
             } else {
-                sessionState.setPassword(formPassword)
+                sessionState.setPassword(formUsername, formPassword)
             }
         }
 
