@@ -89,7 +89,7 @@ function renderAccountIssues() {
             const tr = document.createElement("tr")
             tr.innerHTML =
                 `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
-                `<td><span class="ellipsis" title="${acct.system}">${acct.system}</span></td>` +
+                `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
                 `<td>${errors}</td>` +
                 `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>`
             tb.appendChild(tr)
