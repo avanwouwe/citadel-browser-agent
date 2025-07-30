@@ -1,6 +1,7 @@
 {
   "control": {
     "state": {
+      "UNKNOWN": "INCONNU",
       "PASSING": "VALIDÉ",
       "FAILING": "ÉCHEC",
       "WARNING": "ALERTE",

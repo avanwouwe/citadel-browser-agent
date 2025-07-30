@@ -1,6 +1,7 @@
 {
   "control": {
     "state": {
+      "UNKNOWN": "UNKNOWN",
       "PASSING": "PASSING",
       "FAILING": "FAILING",
       "WARNING": "WARNING",

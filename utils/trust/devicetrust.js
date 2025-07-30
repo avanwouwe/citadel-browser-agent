@@ -3,6 +3,7 @@ class DeviceTrust {
     static TYPE = "devicetrust"
 
     static State = class {
+        static UNKNOWN = "UNKNOWN"
         static PASSING = "PASSING"
         static FAILING = "FAILING"
         static WARNING = "WARNING"
@@ -54,9 +55,11 @@ class DeviceTrust {
 
     getControls() { return this.#controls }
 
-    getState() { return this.#deviceState }
+    getState() { return this.#deviceState ?? DeviceTrust.State.UNKNOWN }
 
     getNextState() {
+        if (this.getState() === DeviceTrust.State.UNKNOWN) return  { state: DeviceTrust.State.UNKNOWN }
+
         let worstState = { state: DeviceTrust.State.PASSING }
 
         Object.values(this.#controls).forEach(control => {
@@ -78,7 +81,7 @@ class DeviceTrust {
         let compliant = 0
 
         controls.forEach(control => { if (control.getState() === DeviceTrust.State.PASSING) compliant++ })
-        const rate = controls.length ? compliant / controls.length : 1
+        const rate = controls.length ? compliant / controls.length : 0
         return Math.round(rate * 100)
 
     }
