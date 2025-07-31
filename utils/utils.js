@@ -310,7 +310,7 @@ function matchDomain(hostname, domainPatterns) {
 }
 
 function isExternalUser(username) {
-    const domain = getDomainFromUsername(username)
+    const domain = PasswordCheck.getDomainFromUsername(username)
 
     if (! domain) return false
 

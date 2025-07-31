@@ -462,7 +462,7 @@ function detectApplication(hook, headers) {
 				const app = AppStats.getOrCreateApp(appName)
 				AppStats.markUsed(app)
 
-				const authPattern = findAuthPattern(details.url.toURL()?.pathname)
+				const authPattern = MFACheck.findAuthPattern(details.url.toURL()?.pathname)
 				if (authPattern) {
 					return markIsAuthenticated(appName, 'url:' + authPattern)
 				}
@@ -774,7 +774,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 
 		const config = Config.forURL(siteUrl)
 
-		if (requiresMFA(siteUrl, config)) {
+		if (MFACheck.isRequired(siteUrl, config)) {
 			if (config.account.checkOnlyInternal && isExternalUser(request.report.username)) {
 				return
 			}
@@ -782,7 +782,7 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 			debug(`MFA required for connection of '${request.report.username}' to ${siteUrl.hostname}`)
 
 			if (request.report.mfa) {
-				cancelTimerMFA(siteUrl, 'TOTP in form')
+				MFACheck.cancelTimer(siteUrl, 'TOTP in form')
 				return
 			}
 
@@ -792,13 +792,13 @@ chrome.runtime.onMessage.addListener(function(request, sender) {
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
 				const showModal = account.lastMFA === undefined
 				delete account.lastMFA
-				startTimerMFA(sender.url, config.account.mfa.waitMinutes, showModal)
+				MFACheck.startTimer(sender.url, config.account.mfa.waitMinutes, showModal)
 			}
 		}
 	}
 
 	if (request.type === "request-credential" && request.subtype === "public-key") {
-		cancelTimerMFA(siteUrl, "public key auth")
+		MFACheck.cancelTimer(siteUrl, "public key auth")
 	}
 
 	if (request.type === "acknowledge-alert") {

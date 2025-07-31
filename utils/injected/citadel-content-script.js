@@ -1,5 +1,6 @@
 injectPageScript('/utils/encryption/pbkdf2.js')
 injectPageScript('/utils/passwords.js')
+injectPageScript('/utils/mfa.js')
 injectPageScript('/utils/injected/citadel-page-script.js')
 
 function findFormElements(element) {
@@ -66,8 +67,8 @@ function analyzeForm(formElements, eventElement) {
 
             debug("found element", serializeElement(elem))
 
-            if (elem.type === 'password' || isMFA(elem.name) || isMFA(elem.id) || isMFA(window.location.pathname)) {
-                if (isTOTP(elem.value)) {
+            if (elem.type === 'password' || MFACheck.isMFA(elem.name) || MFACheck.isMFA(elem.id) || MFACheck.isMFA(window.location.pathname)) {
+                if (MFACheck.isTOTP(elem.value)) {
                     debug("found TOTP", elem.value)
 
                     formTOTP = elem.value
@@ -76,7 +77,7 @@ function analyzeForm(formElements, eventElement) {
             }
 
             if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
-                if (! isTOTP(elem.value)) {
+                if (! MFACheck.isTOTP(elem.value)) {
                     debug("found password", elem.value)
 
                     formPassword = elem.value
@@ -86,7 +87,7 @@ function analyzeForm(formElements, eventElement) {
 
             if ((elem.type === 'text' || elem.type === 'email') && (
                     formHasPassword && formUsername === undefined ||
-                    findAuthPattern(window.location.pathname) &&  (
+                    MFACheck.findAuthPattern(window.location.pathname) &&  (
                         isUsernameField(elem.name) ||
                         isUsernameField(elem.id) ||
                         findEmailPattern(elem.value)

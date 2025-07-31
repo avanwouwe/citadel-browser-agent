@@ -63,13 +63,13 @@ class SessionState {
     setUsername(username) {
         this.init()
         this.auth.username = username
-        this.auth.domain = getDomainFromUsername(username)
+        this.auth.domain = PasswordCheck.getDomainFromUsername(username)
 
         debug("session state setting username", username, this.auth)
     }
 
     setPassword(username, password) {
-        this.auth.password = analyzePassword(username, password)
+        this.auth.password = PasswordCheck.analyzePassword(username, password)
         this.auth.totp = false
 
         debug("session state setting password", password, this.auth)

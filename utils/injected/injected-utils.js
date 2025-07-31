@@ -54,4 +54,3 @@ function domReady() {
         }
     })
 }
-
