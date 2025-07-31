@@ -72,7 +72,7 @@ class SessionState {
         this.auth.password = PasswordCheck.analyzePassword(username, password)
         this.auth.totp = false
 
-        debug("session state setting password", password, this.auth)
+        debug("session state setting password", this.auth)
     }
 
     setTOTP(isTrue = true) {
