@@ -14,7 +14,7 @@ class PBKDF2 {
         return bytes
     }
 
-    static generateSalt() { return crypto.getRandomValues(new Uint8Array(16)) }
+    static genSalt() { return crypto.getRandomValues(new Uint8Array(16)) }
 
     static async generateHash(input, salt, iterations = 100000) {
         const encoder = new TextEncoder()
