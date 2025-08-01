@@ -673,11 +673,13 @@ function registerAccountUsage(url, report) {
 	}
 
 	const issues = {
+		length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
 		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
 		numberOfLetters: report.password.numberOfLetters < config.account.passwordPolicy.minNumberOfLetters ? 1 : null,
 		numberOfUpperCase: report.password.numberOfUpperCase < config.account.passwordPolicy.minNumberOfUpperCase ? 1 : null,
 		numberOfLowerCase: report.password.numberOfLowerCase < config.account.passwordPolicy.minNumberOfLowerCase ? 1 : null,
 		numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
+		usernameInPassword: report.password.usernameInPassword ? 1 : null,
 		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
 		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
 	}

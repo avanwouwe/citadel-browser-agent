@@ -36,17 +36,22 @@
       "issue": "Problème"
     },
     "password": {
-      "quality": {
-        "title": "Problème(s) avec le mot de passe",
-        "username-password": "Doit pas être basé sur le nom d'utilisateur",
-        "number-digits": "Doit contenir au moins {{min}} chiffre(s)",
-        "number-letters": "Doit contenir au moins {{min}} lettre(s)",
-        "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",
-        "number-lowercase": "Doit contenir au moins {{min}} lettre(s) minuscule(s)",
-        "number-symbols": "Doit contenir au moins {{min}} symbole(s)",
-        "entropy": "Ne contient pas assez de caractères différents",
-        "sequence": "Est trop répétitif"
-      }
+      "password": {
+        "reuse": {
+          "other-system": "un autre système"
+        },
+        "quality": {
+          "title": "Problème(s) avec le mot de passe",
+          "number-digits": "Doit contenir au moins {{min}} chiffre(s)",
+          "number-letters": "Doit contenir au moins {{min}} lettre(s)",
+          "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",
+          "number-lowercase": "Doit contenir au moins {{min}} lettre(s) minuscule(s)",
+          "number-symbols": "Doit contenir au moins {{min}} symbole(s)",
+          "length": "Doit contenir au moins {{min}} charactèrss",
+          "entropy": "Ne contient pas assez de caractères différents",
+          "sequence": "Est trop répétitif",
+          "username-password": "Doit pas être basé sur le nom d'utilisateur"
+        }
     },
     "notification": {
       "title": "Problèmes de sécurité",

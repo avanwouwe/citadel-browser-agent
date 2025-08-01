@@ -28,14 +28,15 @@ class AccountTrust {
                 report.state = issueCount >= DeviceTrust.State.values.length ? DeviceTrust.State.BLOCKING : DeviceTrust.State.values[issueCount]
                 if (issueCount > 0) {
                     const description = {
-                        usernameInPassword: t("accounttrust.password.quality.username-password", { min: config.account.passwordPolicy.usernameInPassword }),
                         numberOfDigits:     t("accounttrust.password.quality.number-digits",     { min: config.account.passwordPolicy.minNumberOfDigits }),
                         numberOfLetters:    t("accounttrust.password.quality.number-letters",    { min: config.account.passwordPolicy.minNumberOfLetters }),
                         numberOfUpperCase:  t("accounttrust.password.quality.number-uppercase",  { min: config.account.passwordPolicy.minNumberOfUpperCase }),
                         numberOfLowerCase:  t("accounttrust.password.quality.number-lowercase",  { min: config.account.passwordPolicy.minNumberOfLowerCase }),
                         numberOfSymbols:    t("accounttrust.password.quality.number-symbols",    { min: config.account.passwordPolicy.minNumberOfSymbols }),
+                        length:             t("accounttrust.password.quality.length",            { min: config.account.passwordPolicy.minLength }),
                         entropy:            t("accounttrust.password.quality.entropy"),
                         sequence:           t("accounttrust.password.quality.sequence"),
+                        usernameInPassword: t("accounttrust.password.quality.username-password"),
                     }
 
                     const lines = Object.keys(report.issues)
