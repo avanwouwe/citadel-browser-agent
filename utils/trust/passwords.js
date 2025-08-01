@@ -189,7 +189,6 @@ class PasswordCheck {
 
         return Math.round(entropy * 1000) / 1000
     }
-
 }
 
 if (typeof window !== "undefined") window.PasswordCheck = PasswordCheck

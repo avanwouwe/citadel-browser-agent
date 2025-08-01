@@ -1,6 +1,6 @@
 injectPageScript('/utils/encryption/pbkdf2.js')
-injectPageScript('/utils/passwords.js')
-injectPageScript('/utils/mfa.js')
+injectPageScript('/utils/trust/passwords.js')
+injectPageScript('/utils/trust/mfa.js')
 injectPageScript('/utils/injected/citadel-page-script.js')
 
 function findFormElements(element) {
@@ -106,7 +106,7 @@ function analyzeForm(formElements, eventElement) {
         }
 
         debug("formUsername is ", formUsername)
-        debug("formPassword is ", formPassword)
+        debug("formPassword is ", formPassword ? "<masked>" : undefined)
         debug("formTOTP is ", formTOTP)
 
         if (formUsername === undefined && formPassword === undefined && formTOTP === undefined) return
