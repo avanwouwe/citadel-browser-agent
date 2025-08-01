@@ -24,11 +24,16 @@ function debug(message, ...params) {
     console.log("CITADEL : " + message, ...params)
 }
 
-function injectPageScript(scriptPath) {
+function injectPageScripts(scriptPaths, index = 0) {
+    if (index >= scriptPaths.length) return
+
     const s = document.createElement('script')
-    s.src = chrome.runtime.getURL(scriptPath)
+    s.src = chrome.runtime.getURL(scriptPaths[index])
     s.type = 'module'
-    s.onload = () => s.remove();
+    s.onload = () => {
+        s.remove()
+        injectPageScripts(scriptPaths, index + 1)
+    };
     (document.head || document.documentElement).appendChild(s)
 }
 

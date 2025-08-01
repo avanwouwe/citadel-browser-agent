@@ -1,7 +1,10 @@
-injectPageScript('/utils/encryption/pbkdf2.js')
-injectPageScript('/utils/trust/passwords.js')
-injectPageScript('/utils/trust/mfa.js')
-injectPageScript('/utils/injected/citadel-page-script.js')
+injectPageScripts([
+    '/utils/context.js',
+    '/utils/encryption/pbkdf2.js',
+    '/utils/trust/passwords.js',
+    '/utils/trust/mfa.js',
+    '/utils/injected/citadel-page-script.js'
+])
 
 function findFormElements(element) {
     if (element.form) {
