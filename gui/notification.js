@@ -38,7 +38,8 @@ class Notification {
         Tabs.get(Array.from(alert.tabs))
             .then(tabs => tabs.forEach(tab => {
                 Modal.removeFromTab(tab.id)
-                Notification.showIfRequired(tab.url, tab.id)
+                    .then(() => Notification.showIfRequired(tab.url, tab.id))
+                    .catch(err => console.error(err))
             }))
 
         chrome.notifications.clear(type)

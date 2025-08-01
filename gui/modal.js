@@ -15,12 +15,12 @@ class Modal {
         await injectFuncIntoTab(tabId, async options => await Modal.create(options), [options])
     }
 
-    static removeFromDomain(domain) {
-        injectFuncIntoDomain(domain, (elemId) => document.getElementById(elemId)?.remove(), [Modal.#HOST_ELEMENT_ID])
+    static async removeFromDomain(domain) {
+        return injectFuncIntoDomain(domain, (elemId) => document.getElementById(elemId)?.remove(), [Modal.#HOST_ELEMENT_ID])
     }
 
-    static removeFromTab(tabId) {
-        injectFuncIntoTab(tabId, (elemId) => document.getElementById(elemId)?.remove(), [Modal.#HOST_ELEMENT_ID])
+    static async removeFromTab(tabId) {
+        return injectFuncIntoTab(tabId, (elemId) => document.getElementById(elemId)?.remove(), [Modal.#HOST_ELEMENT_ID])
     }
 
     static async create(options) {
