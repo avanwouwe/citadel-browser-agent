@@ -31,12 +31,13 @@
         "/gui/modal.js",
         "/gui/modal.css",
         "/gui/modal.html",
+        "/utils/context.js",
         "/utils/i18n/*.json",
         "/utils/encryption/pbkdf2.js",
         "/utils/trust/passwords.js",
         "/utils/trust/mfa.js",
         "/utils/trust/devicetrust.js",
-        "/utils/injected/injected-utils.js",
+        "/utils/injected/citadel-content-script-utils.js",
         "/utils/injected/citadel-page-script.js"
       ],
       "matches": ["*://*/*"]
@@ -47,6 +48,7 @@
     "scripts": [
       "/config.js",
       "/utils/definitions.js",
+      "/utils/context.js",
       "/utils/utils.js",
       "/utils/persistence.js",
       "/utils/encryption/bcrypt.js",
@@ -84,11 +86,12 @@
       "matches": ["<all_urls>"],
       "all_frames": true,
       "js": [
+        "/utils/context.js",
         "/utils/session-state.js",
         "/utils/encryption/pbkdf2.js",
         "/utils/trust/passwords.js",
         "/utils/trust/mfa.js",
-        "/utils/injected/injected-utils.js",
+        "/utils/injected/citadel-content-script-utils.js",
         "/utils/injected/citadel-content-script.js"
       ],
       "run_at": "document_start"

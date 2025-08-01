@@ -1,5 +1,6 @@
 importScripts('config.js');
 importScripts('utils/definitions.js');
+importScripts('utils/context.js');
 importScripts('utils/utils.js');
 importScripts('utils/persistence.js');
 importScripts('utils/encryption/bcrypt.js');
