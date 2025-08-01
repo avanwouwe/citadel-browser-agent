@@ -16,7 +16,7 @@ class PBKDF2 {
 
     static genSalt() { return crypto.getRandomValues(new Uint8Array(16)) }
 
-    static async generateHash(input, salt, iterations = 100000) {
+    static async hash(input, salt, iterations = 100000) {
         const encoder = new TextEncoder()
 
         const keyMaterial = await crypto.subtle.importKey(
@@ -39,6 +39,9 @@ class PBKDF2 {
 
         return { hash: PBKDF2.toBase64(hash), salt: PBKDF2.toBase64(salt) }
     }
+
+    static {
+        if (Context.isPageScript()) window.PBKDF2 = PBKDF2
+    }
 }
 
-if (typeof window !== 'undefined') window.Hash = PBKDF2
