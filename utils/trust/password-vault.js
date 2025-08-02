@@ -82,5 +82,16 @@ class PasswordVault {
 
             PasswordVault.prehashSalt = salts.pbkdf2
         })
+
+        const handler = (message, sender, sendResponse) => {
+            if (sender.id !== chrome.runtime.id) return
+
+            if (message.type === "CheckPasswordReuse") {
+                const passwordReuse = PasswordVault.detectReuse(message.report.username, message.report.password, sender.origin)
+                sendResponse(passwordReuse)
+            }
+        }
+
+        chrome.runtime.onMessage.addListener(handler)
     }
 }
