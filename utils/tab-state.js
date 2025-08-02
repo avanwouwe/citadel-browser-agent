@@ -9,14 +9,12 @@ class TabState {
 
                 if (message.type === "GetTabState") {
                     const state = this.#state[sender.tab.id]?.[message.key]
-                    sendResponse({ type: "SendTabState", key: message.key, state })
+                    sendResponse(state)
                 }
             }
 
             chrome.runtime.onMessage.addListener(this.#handler)
         }
-
-        return this
     }
 
     clear() {
@@ -41,16 +39,7 @@ class TabState {
             return Promise.resolve(this.#state[tabId]?.[key])
         }
 
-        return new Promise((resolve, reject) => {
-            chrome.runtime.sendMessage({ type: "GetTabState", key, tabId }, (response) => {
-                    if (chrome.runtime.lastError) {
-                        reject(chrome.runtime.lastError)
-                    } else {
-                        resolve(response?.state)
-                    }
-                }
-            )
-        })
+        return callServiceWorker({ type: "GetTabState", key, tabId })
     }
 }
 
