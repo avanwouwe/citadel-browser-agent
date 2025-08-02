@@ -27,18 +27,11 @@
     {
       "resources": [
         "/gui/images/*",
-        "/gui/utils.js",
         "/gui/modal.js",
         "/gui/modal.css",
         "/gui/modal.html",
-        "/utils/context.js",
         "/utils/i18n/*.json",
-        "/utils/encryption/pbkdf2.js",
-        "/utils/trust/passwords.js",
-        "/utils/trust/mfa.js",
-        "/utils/trust/devicetrust.js",
-        "/utils/injected/citadel-content-script-utils.js",
-        "/utils/injected/citadel-page-script.js"
+        "/utils/injected/bundle.js"
       ],
       "matches": ["*://*/*"]
     }

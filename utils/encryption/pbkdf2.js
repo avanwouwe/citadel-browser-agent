@@ -39,9 +39,5 @@ class PBKDF2 {
 
         return { hash: PBKDF2.toBase64(hash), salt: PBKDF2.toBase64(salt) }
     }
-
-    static {
-        if (Context.isPageScript()) window.PBKDF2 = PBKDF2
-    }
 }
 

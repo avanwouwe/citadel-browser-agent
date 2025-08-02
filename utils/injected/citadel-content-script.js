@@ -1,9 +1,4 @@
-injectPageScripts([
-    '/utils/context.js',
-    '/utils/encryption/pbkdf2.js',
-    '/utils/trust/mfa.js',
-    '/utils/injected/citadel-page-script.js'
-])
+injectPageScripts(['/utils/injected/bundle.js'])
 
 function findFormElements(element) {
     if (element.form) {
@@ -58,18 +53,12 @@ function serializeElement(elem) {
 }
 
 function analyzeForm(formElements, eventElement) {
-    const formHasPassword = formElements.some(elem => elem.type === 'password')
-
-    if (formHasPassword) {
-        injectPageScripts([
-            '/utils/trust/passwords.js',
-        ])
-    }
-
     new SessionState(window.location.origin).load().then(async sessionState =>  {
         debug("analyzing form")
 
         let formUsername, formPassword, formTOTP
+        const formHasPassword = formElements.some(elem => elem.type === 'password')
+
         for (let elem of formElements) {
             if (elem.value === "" || elem.value === undefined || elem.isHidden()) continue
 
@@ -128,7 +117,7 @@ function analyzeForm(formElements, eventElement) {
                 sessionState.init()
                 return
             } else {
-                sessionState.setPassword(formUsername, formPassword)
+                await sessionState.setPassword(formUsername, formPassword)
             }
         }
 
@@ -153,7 +142,7 @@ function analyzeForm(formElements, eventElement) {
             }
         }
 
-        sessionState.save()
+        await sessionState.save()
     })
 
 }
