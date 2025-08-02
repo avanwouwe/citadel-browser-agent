@@ -52,8 +52,10 @@ function serializeElement(elem) {
     return result
 }
 
-function analyzeForm(formElements, eventElement) {
-    new SessionState(window.location.origin).load().then(async sessionState =>  {
+async function analyzeForm(formElements, eventElement) {
+    const origin = window.location.origin
+
+    return new SessionState(origin).load().then(async sessionState =>  {
         debug("analyzing form")
 
         let formUsername, formPassword, formTOTP
@@ -129,22 +131,30 @@ function analyzeForm(formElements, eventElement) {
             }
         }
 
-        if (sessionState.auth.username !== undefined && sessionState.auth.password !== undefined) {
-            const report = {
-                username: sessionState.auth.username,
-                password: sessionState.auth.password,
-                mfa: sessionState.auth.totp
-            }
-            chrome.runtime.sendMessage({type: 'account-usage', report})
-
-            if (sessionState.auth.totp) {
-                sessionState.init()
-            }
+        if (sessionState.auth.password === undefined) {
+            await sessionState.save()
+            return
         }
 
-        await sessionState.save()
-    })
+        const report = {
+            username: sessionState.auth.username,
+            password: sessionState.auth.password,
+            mfa: sessionState.auth.totp
+        }
 
+        chrome.runtime.sendMessage({type: 'account-usage', report})
+
+        let passwordReuse
+        if (AccountTrust.checkFor(sessionState.auth.username, origin)) {
+            passwordReuse = await callServiceWorker({type: 'CheckPasswordReuse', report})
+        }
+
+        if (sessionState.auth.totp) {
+            sessionState.init()
+        }
+
+        return passwordReuse
+    })
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -209,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     })
 
-    function clickListener(event) {
+    async function clickListener(event) {
         chrome.runtime.sendMessage({type: "user-interaction"})
 
         const button = event.target.closest('button, input[type="button"], input[type="submit"]')
@@ -224,19 +234,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const fields = findFormElements(button)
         if (fields.length > 0) {
-            analyzeForm(fields, button)
+            const passwordReuse = await analyzeForm(fields, button)
         }
     }
 
     document.addEventListener("click", clickListener, true)
     document.shadowRoot?.addEventListener("click", clickListener, true)
 
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', async function(event) {
         if (event.key === 'Enter' &&
             (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'BUTTON')
         ) {
             const fields= findFormElements(event.target)
-            analyzeForm(fields, event.target)
+            const passwordReuse = await analyzeForm(fields, event.target)
         }
     })
 
