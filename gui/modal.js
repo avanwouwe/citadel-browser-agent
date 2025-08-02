@@ -11,7 +11,7 @@ class Modal {
     static async createForTab(tabId, title, message, onAcknowledge, onException) {
         const options = Modal.#prepareOptions(title, message, onAcknowledge, onException)
 
-        await injectFilesIntoTab(tabId, ['/gui/modal.js'])
+        await injectFilesIntoTab(tabId, ['/gui/modal.js']).catch(err => console.error(err))
         await injectFuncIntoTab(tabId, async options => await Modal.create(options), [options])
     }
 

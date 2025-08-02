@@ -28,23 +28,23 @@ function blockPage(tabId, reason, blockedPage) {
 }
 
 async function injectFilesIntoTab(tabId, files) {
-    await chrome.scripting.executeScript({ target: { tabId }, files })
+    return chrome.scripting.executeScript({ target: { tabId }, files })
 }
 
 async function injectFilesIntoDomain(domain, files) {
     const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, `*://*.${domain}/*`] })
-    await Promise.all(
+    return Promise.allSettled(
         tabs.map(tab => chrome.scripting.executeScript({ target: { tabId: tab.id }, files }))
     )
 }
 
 async function injectFuncIntoTab(tabId, func, args = []) {
-    await chrome.scripting.executeScript({ target: { tabId }, func, args })
+    return chrome.scripting.executeScript({ target: { tabId }, func, args })
 }
 
 async function injectFuncIntoDomain(domain, func, args = []) {
     const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, `*://*.${domain}/*`] })
-    await Promise.all(
+    return Promise.allSettled(
         tabs.map(tab => chrome.scripting.executeScript({ target: { tabId: tab.id }, func, args }))
     )
 }
