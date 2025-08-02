@@ -141,6 +141,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 		}
 
 		SessionState.purge()
+		PasswordVault.purge()
 
 		reportInteractions()
 
@@ -683,6 +684,9 @@ function registerAccountUsage(url, report) {
 		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
 		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
 	}
+
+	const passwordReuse = PasswordVault.detectReuse(report.username, report.password.hash.hash, appName)
+	issues.passwordReuse = passwordReuse.length > 0 ? passwordReuse.length : undefined
 
 	Object.entries(issues).forEach(([key, value]) => {
 		if (!value) {

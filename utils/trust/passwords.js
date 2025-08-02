@@ -1,5 +1,5 @@
 class PasswordCheck {
-    static analyzePassword(username, password) {
+    static async analyzePassword(username, password) {
         const passwordAnalysis = {
             length: password !== undefined ? password.length : 0,
             numberOfDigits: 0,
@@ -33,6 +33,11 @@ class PasswordCheck {
         const u = username.toLowerCase().replace(nonLetterChar, '')
         const p = password.toLowerCase().replace(nonLetterChar, '')
         passwordAnalysis.usernameInPassword = (u.includes(p) || p.includes(u)) ? 1 : 0
+
+        const salt = PasswordCheck.#getSalt()
+        if (salt) {
+            passwordAnalysis.hash = await PBKDF2.hash(password, salt)
+        }
 
         return passwordAnalysis
     }
@@ -189,6 +194,34 @@ class PasswordCheck {
 
         return Math.round(entropy * 1000) / 1000
     }
-}
 
-if (typeof window !== "undefined") window.PasswordCheck = PasswordCheck
+    static #salt
+    static #SALT_KEY_NAME = "citadel-password-salt"
+
+    static #getSalt() {
+        if (!PasswordCheck.#salt && Context.isPageScript()) {
+            const el = document.querySelector(`meta[name="${PasswordCheck.#SALT_KEY_NAME}"]`)
+            PasswordCheck.#salt = el?.content ? PBKDF2.fromBase64(el.content) : undefined
+        }
+
+        return PasswordCheck.#salt
+    }
+
+    static {
+        if (Context.isServiceWorker()) {
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.type === "GetPasswordSalt") sendResponse(PasswordVault.prehashSalt)
+            })
+        } else if (Context.isContentScript()) {
+            chrome.runtime.sendMessage({type: "GetPasswordSalt"}, (salt) => {
+                if (salt) {
+                    PasswordCheck.#salt = PBKDF2.fromBase64(salt)
+                    document.head.appendChild(Object.assign(document.createElement("meta"), {
+                        name: PasswordCheck.#SALT_KEY_NAME,
+                        content: salt
+                    }))
+                }
+            })
+        }
+    }
+}

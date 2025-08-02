@@ -68,8 +68,8 @@ class SessionState {
         debug("session state setting username", username, this.auth)
     }
 
-    setPassword(username, password) {
-        this.auth.password = PasswordCheck.analyzePassword(username, password)
+    async setPassword(username, password) {
+        this.auth.password = await PasswordCheck.analyzePassword(username, password)
         this.auth.totp = false
 
         debug("session state setting password", this.auth)
