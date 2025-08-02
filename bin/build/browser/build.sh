@@ -1,10 +1,14 @@
 #!/bin/bash
 
+set -e
+
 BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 OUTPUT_PKG="citadel-plugin"
 
 rm -rf $OUTPUT_PKG
 mkdir "$BUILD_ROOT"
+
+./pack.sh
 
 # Copy the files to the directory structure
 cd ../../..

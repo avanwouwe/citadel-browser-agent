@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 OUTPUT_BUNDLE="./utils/injected/bundle.js"
 
 rm -f "$OUTPUT_BUNDLE"
