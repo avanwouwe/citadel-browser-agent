@@ -1,7 +1,6 @@
 injectPageScripts([
     '/utils/context.js',
     '/utils/encryption/pbkdf2.js',
-    '/utils/trust/passwords.js',
     '/utils/trust/mfa.js',
     '/utils/injected/citadel-page-script.js'
 ])
@@ -59,12 +58,18 @@ function serializeElement(elem) {
 }
 
 function analyzeForm(formElements, eventElement) {
-    new SessionState(window.location.origin).load().then(sessionState =>  {
+    const formHasPassword = formElements.some(elem => elem.type === 'password')
+
+    if (formHasPassword) {
+        injectPageScripts([
+            '/utils/trust/passwords.js',
+        ])
+    }
+
+    new SessionState(window.location.origin).load().then(async sessionState =>  {
         debug("analyzing form")
 
         let formUsername, formPassword, formTOTP
-        const formHasPassword = formElements.some(elem => elem.type === 'password')
-
         for (let elem of formElements) {
             if (elem.value === "" || elem.value === undefined || elem.isHidden()) continue
 
@@ -81,7 +86,7 @@ function analyzeForm(formElements, eventElement) {
 
             if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
                 if (! MFACheck.isTOTP(elem.value)) {
-                    debug("found password", elem.value)
+                    debug("found password")
 
                     formPassword = elem.value
                     continue
