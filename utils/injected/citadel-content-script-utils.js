@@ -27,14 +27,18 @@ function debug(message, ...params) {
 function injectPageScripts(scriptPaths, index = 0) {
     if (index >= scriptPaths.length) return
 
-    const s = document.createElement('script')
-    s.src = chrome.runtime.getURL(scriptPaths[index])
-    s.type = 'module'
-    s.onload = () => {
-        s.remove()
-        injectPageScripts(scriptPaths, index + 1)
-    };
-    (document.head || document.documentElement).appendChild(s)
+    try {
+        const s = document.createElement('script')
+        s.src = chrome.runtime.getURL(scriptPaths[index])
+        s.type = 'module'
+        s.onload = () => {
+            s.remove()
+            injectPageScripts(scriptPaths, index + 1)
+        };
+        (document.head || document.documentElement).appendChild(s)
+    } catch (e) {
+        console.error(e)
+    }
 }
 
 function shallowClone(obj) {
