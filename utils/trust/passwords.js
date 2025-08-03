@@ -208,12 +208,8 @@ class PasswordCheck {
     }
 
     static {
-        if (Context.isServiceWorker()) {
-            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-                if (message.type === "GetPasswordSalt") sendResponse(PasswordVault.prehashSalt)
-            })
-        } else if (Context.isContentScript()) {
-            chrome.runtime.sendMessage({type: "GetPasswordSalt"}, (salt) => {
+        if (Context.isContentScript()) {
+            callServiceWorker("GetPasswordSalt").then(salt => {
                 if (salt) {
                     PasswordCheck.#salt = PBKDF2.fromBase64(salt)
                     document.head.appendChild(Object.assign(document.createElement("meta"), {
