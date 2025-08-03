@@ -1,4 +1,4 @@
-injectPageScripts(['/utils/injected/bundle.js'])
+injectPageScripts(['/utils/injected/bundle/citadel-bundle.js'])
 
 function findFormElements(element) {
     if (element.form) {

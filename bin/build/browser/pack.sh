@@ -2,7 +2,7 @@
 
 set -e
 
-OUTPUT_BUNDLE="./utils/injected/bundle.js"
+OUTPUT_BUNDLE="./utils/injected/bundle/citadel-bundle.js"
 
 rm -f "$OUTPUT_BUNDLE"
 
