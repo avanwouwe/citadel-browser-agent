@@ -24,7 +24,7 @@ class PersistentObject {
     async start() {
         if (!this.#timer) {
             this.#readFromStorage()
-            this.#timer = setInterval(() => this.#saveToStorage(), this.#interval)
+            this.#timer = setInterval(() => this.flush(), this.#interval)
         }
 
         return this.#readyPromise
@@ -45,23 +45,22 @@ class PersistentObject {
 
     markDirty(bool = true) { this.#persistentObject.isDirty = bool }
 
-    clear() {
-        this.#persistentObject.isDirty = false
-
-        chrome.storage.local.remove(this.#storageKey, () => {
+    async clear() {
+        await chrome.storage.local.remove(this.#storageKey, () => {
             if (chrome.runtime.lastError) {
                 console.error(chrome.runtime.lastError)
             }
+            this.#persistentObject.clear()
         })
     }
 
-    #saveToStorage() {
+    async flush() {
         if (this.#persistentObject.isDirty) {
             this.#persistentObject.isDirty = false
             const object = { ...this.#persistentObject }
             delete object.isDirty
 
-            chrome.storage.local.set({ [this.#storageKey]: object }, () => {
+            await chrome.storage.local.set({ [this.#storageKey]: object }, () => {
                 if (chrome.runtime.lastError) {
                     console.error('Error setting item:', chrome.runtime.lastError)
                 }
@@ -95,38 +94,44 @@ class PersistentObject {
 
 class ChangeTrackingObject {
 
-    constructor(initialValues = {}) {
-        const handler = {
-            set: (target, property, value) => {
-                if (property === 'isDirty') {
-                    target[property] = value
-                    return true
-                }
-
-                if (target[property] !== value) {
-                    target.isDirty = true
-                    target[property] = value
-                    return true;
-                }
-
-                return true;
-            },
-            get: (target, property) => {
-                return target[property]
-            },
-            deleteProperty: (target, property) => {
-                target.isDirty = true
-                return delete target[property]
+    static #handler = {
+        set: (target, property, value) => {
+            if (property === 'isDirty') {
+                target[property] = value
+                return true
             }
 
+            if (target[property] !== value) {
+                target.isDirty = true
+                target[property] = value
+                return true;
+            }
+
+            return true;
+        },
+        get: (target, property) => {
+            return target[property]
+        },
+        deleteProperty: (target, property) => {
+            target.isDirty = true
+            return delete target[property]
         }
+    }
+
+    constructor(initialValues = {}) {
 
         // Create the target object with initial values
         const target = { ...initialValues }
 
         // Create a proxy to intercept property changes
-        const proxy = new Proxy(target, handler)
+        const proxy = new Proxy(target, ChangeTrackingObject.#handler)
         proxy.isDirty = false
+        proxy.clear = function clear() {
+            Object.keys(this).forEach(key => {
+                delete this[key]
+            })
+            this.isDirty = true
+        }
         return proxy
     }
 
