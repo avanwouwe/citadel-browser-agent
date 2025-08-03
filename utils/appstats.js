@@ -83,11 +83,12 @@ class AppStats {
         this.#APPSTATS.isDirty = true
     }
 
-    static clear() {
-        // clear all storage except for application statistics
-        const appStats = new PersistentObject(this.#APPLICATION_STATISTICS_KEY)
+    static async clear() {
+        // clear all storage *except* for application statistics
+        const appStats = await new PersistentObject(this.#APPLICATION_STATISTICS_KEY).ready()
         chrome.storage.local.clear()
         appStats.markDirty()
+        appStats.flush()
 
         chrome.runtime.reload()
     }
