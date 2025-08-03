@@ -713,9 +713,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 	}
 })
 
-chrome.runtime.onMessage.addListener(function(request, sender) {
-	if (sender.id !== chrome.runtime.id) return
-
+onMessage((request, sender) => {
 	const siteUrl =  sender.url.toURL()
 
 	if (request.type === "user-interaction") {

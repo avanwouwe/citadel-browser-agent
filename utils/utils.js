@@ -1,7 +1,7 @@
 function assert(condition, message) {
   if (!condition) {
-      console.trace()
-      throw new Error(message || "Assertion failed");
+      console.trace(message)
+      throw new Error(message || "Assertion failed")
   }
 }
 
@@ -360,4 +360,24 @@ const Tabs = {
             })
         })
     ))
+}
+
+function onMessage(type, listener, once= false) {
+    if (typeof type !== 'string') {
+        once = listener
+        listener = type
+        type = undefined
+    }
+
+    function safeListener(message, sender, sendResponse) {
+        if (sender && sender.id !== chrome.runtime.id) return
+
+        if (type && message.type !== type) return
+
+        if (once) chrome.runtime.onMessage.removeListener(safeListener)
+
+        return listener(message, sender, sendResponse)
+    }
+
+    chrome.runtime.onMessage.addListener(safeListener)
 }

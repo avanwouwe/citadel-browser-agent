@@ -36,8 +36,7 @@ async function renderPage() {
         submitButton.addEventListener('click', function() {
             const exceptionReason = exceptionReasonInput.value.trim()
 
-            chrome.runtime.sendMessage({
-                type: 'allow-blacklist',
+            sendMessage('allow-blacklist', {
                 url: blocked.url,
                 description: blocked.reason,
                 reason: exceptionReason

@@ -20,6 +20,13 @@ Element.prototype.isHidden = function() {
     return false
 }
 
+function assert(condition, message) {
+    if (!condition) {
+        console.trace(message)
+        throw new Error(message || "Assertion failed")
+    }
+}
+
 function debug(message, ...params) {
     console.log("CITADEL : " + message, ...params)
 }
@@ -64,9 +71,29 @@ function domReady() {
     })
 }
 
-function callServiceWorker(message) {
+async function sendMessage(type, message, handler) {
+    if (type && typeof type !== 'string') {
+        handler = message
+        message = type
+        type = undefined
+    }
+
+    if (message && typeof message !== 'object') {
+        handler = message
+        message = undefined
+    }
+
+    message = message ?? { }
+    if (typeof message !== 'object') assert("message must be an object")
+    if (message?.type != null) type = message.type
+    if (type != null && message != null) message.type = type
+
+    return chrome.runtime.sendMessage(message, handler)
+}
+
+async function callServiceWorker(type, message) {
     return new Promise((resolve, reject) => {
-        chrome.runtime.sendMessage(message, (response) => {
+        sendMessage(type, message, (response) => {
             if (chrome.runtime.lastError) {
                 reject(chrome.runtime.lastError)
             } else {

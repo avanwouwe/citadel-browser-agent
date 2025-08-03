@@ -142,12 +142,13 @@ async function analyzeForm(formElements, eventElement) {
             mfa: sessionState.auth.totp
         }
 
-        chrome.runtime.sendMessage({type: 'account-usage', report})
+        sendMessage("account-usage", { report })
 
-        let passwordReuse
-        if (AccountTrust.checkFor(sessionState.auth.username, origin)) {
-            passwordReuse = await callServiceWorker({type: 'CheckPasswordReuse', report})
-        }
+        const passwordReuse = await callServiceWorker("CheckPasswordReuse", {
+            username: report.username,
+            password: report.password.hash,
+            system: origin
+        })
 
         if (sessionState.auth.totp) {
             sessionState.init()
@@ -173,18 +174,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
-            chrome.runtime.sendMessage({type: "user-interaction"})
+            sendMessage("user-interaction")
         }
     }, true)
 
     window.addEventListener('beforeprint', function() {
-        chrome.runtime.sendMessage({type: 'print-dialog'});
+        sendMessage("print-dialog")
     }, true)
 
     document.addEventListener('change', function(event) {
         if (event.target?.type === 'file') {
             for (const file of event.target.files) {
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'picked file', file: cloneFile(file)
+                sendMessage('file-select', { subtype : 'picked file', file: cloneFile(file)
              })
             }
         }
@@ -192,13 +193,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.addEventListener('drop', function(event) {
         Array.from(event.dataTransfer.files).forEach(file => {
-            chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: cloneFile(file) })
+            sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
         })
 
         Array.from(event.dataTransfer.items).forEach(item => {
             if (item.kind === 'file') {
                 const file = item.getAsFile();
-                chrome.runtime.sendMessage({ type: 'file-select', subtype : 'dropped file', file: cloneFile(file) })
+                sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
             }
         })
 
@@ -209,18 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (event.data.type === "request-credential" && event.data.subtype === "public-key") {
             debug("detected use of navigator.credentials API to get public key")
-            chrome.runtime.sendMessage({ type: event.data.type, subtype: event.data.subtype })
+            sendMessage(event.data.type, { subtype: event.data.subtype })
         }
 
         if (event.data.type === "request-credential" && event.data.subtype === "password") {
             debug("detected use of navigator.credentials API to get password")
-            chrome.runtime.sendMessage({ type: "account-usage", report: event.data.report })
+            sendMessage("account-usage", { report: event.data.report })
         }
 
     })
 
     async function clickListener(event) {
-        chrome.runtime.sendMessage({type: "user-interaction"})
+        sendMessage("user-interaction")
 
         const button = event.target.closest('button, input[type="button"], input[type="submit"]')
         if (

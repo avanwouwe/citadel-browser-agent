@@ -2,6 +2,7 @@ importScripts('config.js');
 importScripts('utils/definitions.js');
 importScripts('utils/context.js');
 importScripts('utils/utils.js');
+importScripts('utils/bridge.js');
 importScripts('utils/persistence.js');
 importScripts('utils/encryption/bcrypt.js');
 importScripts('utils/encryption/pbkdf2.js');

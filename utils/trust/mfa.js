@@ -24,10 +24,10 @@ class MFACheck {
             delete MFACheck.#mfaTimers[domain]
         }
 
-        console.log(`MFA session starting for ${domain}, timer started`)
+        debug(`MFA session starting for ${domain}, timer started`)
 
         const timerId = setTimeout(async () => {
-            console.log(`MFA timeout for ${domain}`)
+            debug(`MFA timeout for ${domain}`)
 
             logger.log(nowTimestamp(), "block", "MFA blocked", url, Log.WARN, undefined, `blocked access to ${domain} due to missing MFA`)
 

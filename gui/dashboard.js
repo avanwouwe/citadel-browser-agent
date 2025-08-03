@@ -31,7 +31,7 @@ function selectTab(tabId) {
 }
 
 function renderDeviceDashboard() {
-    chrome.runtime.sendMessage({type: "GetDeviceStatus"}, function(devicetrust) {
+    sendMessage("GetDeviceStatus", devicetrust => {
         const state = devicetrust.state
 
         document.getElementById("status-label").textContent = t("control.state." + state) || "-"
@@ -76,7 +76,7 @@ function renderDeviceDashboard() {
 }
 
 function renderAccountIssues() {
-    chrome.runtime.sendMessage({type: "GetAccountIssues"}, function(accounttrust) {
+    sendMessage("GetAccountIssues", accounttrust => {
         const tb = document.getElementById("accounttrust-issues")
         tb.innerHTML = ""
 
@@ -118,7 +118,7 @@ function reconnect() {
 connect()
 
 function refreshStatus() {
-    chrome.runtime.sendMessage({ type: "RefreshDeviceStatus" })
+    sendMessage("RefreshDeviceStatus")
 }
 
 const updateBtn = document.getElementById('update-button')

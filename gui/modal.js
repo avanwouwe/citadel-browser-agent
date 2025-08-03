@@ -44,7 +44,7 @@ class Modal {
         acknowledge.hidden = options.onAcknowledge === undefined
         acknowledge.textContent = options.text.acknowledge || ''
         acknowledge.addEventListener('click', function () {
-            chrome.runtime.sendMessage(options.onAcknowledge)
+            sendMessage(options.onAcknowledge)
         })
 
         if (!options.exception) {
@@ -75,7 +75,7 @@ class Modal {
             const onException = options.exception.onException ?? {}
             onException.reason = textarea.value.trim()
 
-            chrome.runtime.sendMessage(onException)
+            sendMessage(onException)
         })
     }
 
