@@ -83,7 +83,28 @@ class DeviceTrust {
         controls.forEach(control => { if (control.getState() === DeviceTrust.State.PASSING) compliant++ })
         const rate = controls.length ? compliant / controls.length : 0
         return Math.round(rate * 100)
+    }
 
+    getStatus() {
+        const status = {
+            controls: { },
+            state: devicetrust.getState(),
+            nextState: devicetrust.getNextState(),
+            compliance: devicetrust.getCompliance()
+        }
+
+        Object.values(devicetrust.getControls()).forEach((control) => {
+            status.controls[control.name] = {
+                name: control.name,
+                definition: control.definition,
+                report: control.report,
+                passing: control.report.passed,
+                state: control.getState(),
+                nextState: control.getNextState(),
+            }
+        })
+
+        return status
     }
 
     report() {

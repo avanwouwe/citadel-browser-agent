@@ -61,44 +61,6 @@ Port.onMessage("devicetrust",(report) => {
 	dashboard?.postMessage({type: "RefreshDeviceStatus"})
 })
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	if (sender.id !== chrome.runtime.id) return
-
-	switch(message.type) {
-		case 'GetAccountIssues':
-			const accounts = AccountTrust.failingAccounts()
-			sendResponse({ accounts })
-			break
-
-		case "GetDeviceStatus":
-			const status = {
-				controls: { },
-				state: devicetrust.getState(),
-				nextState: devicetrust.getNextState(),
-				compliance: devicetrust.getCompliance()
-			}
-
-			Object.values(devicetrust.getControls()).forEach((control) => {
-				status.controls[control.name] = {
-					name: control.name,
-					definition: control.definition,
-					report: control.report,
-					passing: control.report.passed,
-					state: control.getState(),
-					nextState: control.getNextState(),
-				}
-			})
-
-			sendResponse(status)
-			break
-
-		case "RefreshDeviceStatus":
-			debug("dashboard requested update")
-			Port.postMessage("devicetrust", { request: "update" } )
-	}
-})
-
-
 chrome.runtime.onUpdateAvailable.addListener(() => {
 	try {
 		reportInteractions()
@@ -684,9 +646,6 @@ function registerAccountUsage(url, report) {
 		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
 		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
 	}
-
-	const passwordReuse = PasswordVault.detectReuse(report.username, report.password.hash.hash, appName)
-	issues.passwordReuse = passwordReuse.length > 0 ? passwordReuse.length : undefined
 
 	Object.entries(issues).forEach(([key, value]) => {
 		if (!value) {
