@@ -3,6 +3,8 @@ class AccountTrust {
     static TYPE = "accounttrust"
 
     static checkFor(username, sitename) {
+        if (sitename.isURL()) sitename = getSitename(sitename)
+        
         const config = Config.forHostname(sitename)
 
         if (config.account.checkOnlyApplications && ! isApplication(sitename)) return false
