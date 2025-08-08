@@ -1,230 +1,8 @@
 injectPageScripts(['/utils/injected/bundle/citadel-bundle.js'])
 
 const system = window.location.origin
-let sessionState
-new SessionState(system).load().then(obj => sessionState = obj)
-
-function findFormElements(element) {
-    if (element.form) {
-        return Array.from(element.form.elements)
-    }
-
-    // Use the nearest ancestor that contains at least one relevant input field (password, e-mail, etc)
-    let fields = []
-    let container = element.parentElement ?? document.body
-    do {
-        fields = Array.from(container.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]'))
-        if (fields.length > 0 && !fields.includes(element)) break
-        container = container.parentElement
-    } while (container && container !== document.body)
-
-    return fields
-}
-
-function findUsernameInAncestors(startNode) {
-    let node = startNode?.parentElement
-
-    while (node && node !== document.body) {
-        const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null)
-        let el = walker.currentNode
-
-        while (el) {
-            if (el.offsetParent === null) { // skip hidden elements
-                el = walker.nextNode()
-                continue
-            }
-            if (el.children.length === 0) { // only leaf nodes
-                let text = el.textContent.trim()
-                if (text && text.length <= 100) {
-                    const email = findEmailPattern(text)
-                    if (email) return email
-                }
-            }
-            el = walker.nextNode()
-        }
-        node = node.parentElement
-    }
-
-    return null
-}
-
-function serializeElement(elem) {
-    const result = {}
-    for (const attr of elem.attributes) {
-        result[attr.name] = attr.value
-    }
-    return result
-}
-
-function repeatEvent(event, target) {
-    if (event.type === "keydown" || event.type === "keyup" || event.type === "keypress") {
-        const synthEvent = new KeyboardEvent(event.type, {
-            bubbles: true,
-            cancelable: true,
-            key: event.key,
-            code: event.code,
-            location: event.location,
-            ctrlKey: event.ctrlKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
-            metaKey: event.metaKey,
-            repeat: event.repeat,
-            isComposing: event.isComposing
-        })
-
-        Object.defineProperties(synthEvent, {
-            keyCode: { value: event.keyCode },
-            which: { value: event.which },
-            charCode: { value: event.charCode },
-        })
-
-        synthEvent.syntheticCitadelEvent = true;
-        target.dispatchEvent(synthEvent)
-    }
-
-    else if (event.type === "click") {
-        const synthEvent = new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            button: event.button,
-            buttons: event.buttons,
-            ctrlKey: event.ctrlKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
-            metaKey: event.metaKey,
-        })
-        synthEvent.syntheticCitadelEvent = true
-        target.dispatchEvent(synthEvent)
-    }
-}
-
-async function checkLogin(event, button) {
-    const fields = findFormElements(button)
-    const loginPromise = analyzeForm(fields, button)
-    if (! loginPromise || event.syntheticCitadelEvent) {
-        return
-    }
-
-    event.preventDefault()
-    event.stopImmediatePropagation()
-
-    const login = await loginPromise
-
-    if (PasswordCheck.isFirstConnection(login.username) && login.password.reuse) {
-        sendMessage("warn-reuse", { report: login })
-        callServiceWorker("DeletePassword", { username: login.username, system })
-        return
-    }
-
-    if (login.password) sendMessage("account-usage", { report: login })
-    if (login.totp) sendMessage("receive-totp")
-
-    repeatEvent(event, button)
-}
-
-function analyzeForm(formElements, eventElement) {
-    debug("analyzing form")
-
-    let username, password, TOTP
-    const formHasPassword = formElements.some(elem => elem.type === 'password')
-
-    for (let elem of formElements) {
-        if (elem.value === "" || elem.value === undefined || elem.isHidden()) continue
-
-        debug("found element", serializeElement(elem))
-
-        if (elem.type === 'password' || MFACheck.isMFA(elem.name) || MFACheck.isMFA(elem.id) || MFACheck.isMFA(window.location.pathname)) {
-            if (MFACheck.isTOTP(elem.value)) {
-                debug("found TOTP", elem.value)
-
-                TOTP = elem.value
-                continue
-            }
-        }
-
-        if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
-            if (! MFACheck.isTOTP(elem.value)) {
-                debug("found password")
-
-                password = elem.value
-                continue
-            }
-        }
-
-        if ((elem.type === 'text' || elem.type === 'email') && (
-            formHasPassword && username === undefined ||
-            MFACheck.findAuthPattern(window.location.pathname) &&  (
-                isUsernameField(elem.name) ||
-                isUsernameField(elem.id) ||
-                findEmailPattern(elem.value)
-            )
-        )
-        ) {
-            debug("found username (in form)", elem.value)
-            username = elem.value
-        }
-    }
-
-    if (username === undefined && formHasPassword) {
-        username = findUsernameInAncestors(eventElement)
-    }
-
-    debug("form username is ", username)
-    debug("form password is ", password)
-    debug("form TOTP is ", TOTP)
-
-    if (username !== undefined) sessionState.setUsername(username)
-    if (password !== undefined) sessionState.setPassword()
-    if (TOTP !== undefined) sessionState.setTOTP()
-
-    if (sessionState.auth.password === undefined) return
-    if (password === undefined && TOTP === undefined) return
-
-    return (async () => {
-        const login = {
-            username: sessionState.auth.username,
-            password: undefined,
-            totp: sessionState.auth.totp
-        }
-
-        if (password) {
-            login.password = PasswordCheck.analyzePassword(sessionState.auth.username, password)
-
-            const salt = PasswordCheck.getSalt()
-            if (salt) {
-                login.password.reuse = await callServiceWorker("CheckPasswordReuse", {
-                    username: login.username,
-                    password: await PBKDF2.hash(password, salt),
-                    system
-                })
-            }
-        }
-
-        if (sessionState.auth.totp) {
-            sessionState.init()
-        }
-        sessionState.save()
-
-        return login
-    })()
-}
 
 document.addEventListener('DOMContentLoaded', () => {
-    function cloneFile(file) {
-        const clone = shallowClone(file)
-        delete clone.lastModifiedDate
-
-        try {
-            clone.lastModified = new Date(clone.lastModified).toISOString()
-        } catch {
-            delete clone.lastModified
-        }
-
-        return clone
-    }
-
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Enter') {
             sendMessage("user-interaction")
@@ -294,3 +72,216 @@ document.addEventListener('DOMContentLoaded', () => {
     })
 
 }, true)
+
+let sessionState
+new SessionState(system).load().then(obj => sessionState = obj)
+
+function cloneFile(file) {
+    const clone = shallowClone(file)
+    delete clone.lastModifiedDate
+
+    try {
+        clone.lastModified = new Date(clone.lastModified).toISOString()
+    } catch {
+        delete clone.lastModified
+    }
+
+    return clone
+}
+
+function findFormElements(element) {
+    if (element.form) {
+        return Array.from(element.form.elements)
+    }
+
+    // Use the nearest ancestor that contains at least one relevant input field (password, e-mail, etc)
+    let fields = []
+    let container = element.parentElement ?? document.body
+    do {
+        fields = Array.from(container.querySelectorAll('input[type="text"], input[type="email"], input[type="password"]'))
+        if (fields.length > 0 && !fields.includes(element)) break
+        container = container.parentElement
+    } while (container && container !== document.body)
+
+    return fields
+}
+
+function findUsernameInAncestors(startNode) {
+    let node = startNode?.parentElement
+
+    while (node && node !== document.body) {
+        const walker = document.createTreeWalker(node, NodeFilter.SHOW_ELEMENT, null)
+        let el = walker.currentNode
+
+        while (el) {
+            if (el.offsetParent === null) { // skip hidden elements
+                el = walker.nextNode()
+                continue
+            }
+            if (el.children.length === 0) { // only leaf nodes
+                let text = el.textContent.trim()
+                if (text && text.length <= 100) {
+                    const email = findEmailPattern(text)
+                    if (email) return email
+                }
+            }
+            el = walker.nextNode()
+        }
+        node = node.parentElement
+    }
+
+    return null
+}
+
+function repeatEvent(event, target) {
+    if (event.type === "keydown" || event.type === "keyup" || event.type === "keypress") {
+        const synthEvent = new KeyboardEvent(event.type, {
+            bubbles: true,
+            cancelable: true,
+            key: event.key,
+            code: event.code,
+            location: event.location,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey,
+            metaKey: event.metaKey,
+            repeat: event.repeat,
+            isComposing: event.isComposing
+        })
+
+        Object.defineProperties(synthEvent, {
+            keyCode: { value: event.keyCode },
+            which: { value: event.which },
+            charCode: { value: event.charCode },
+        })
+
+        synthEvent.syntheticCitadelEvent = true;
+        target.dispatchEvent(synthEvent)
+    }
+
+    else if (event.type === "click") {
+        const synthEvent = new MouseEvent("click", {
+            bubbles: true,
+            cancelable: true,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            button: event.button,
+            buttons: event.buttons,
+            ctrlKey: event.ctrlKey,
+            shiftKey: event.shiftKey,
+            altKey: event.altKey,
+            metaKey: event.metaKey,
+        })
+        synthEvent.syntheticCitadelEvent = true
+        target.dispatchEvent(synthEvent)
+    }
+}
+
+async function checkLogin(event, button) {
+    const fields = findFormElements(button)
+    const loginPromise = analyzeForm(fields, button)
+    if (! loginPromise || event.syntheticCitadelEvent) {
+        return
+    }
+
+    event.preventDefault()
+    event.stopImmediatePropagation()
+
+    const login = await loginPromise
+
+console.log("checkLogin : ", PasswordCheck.isFirstConnection(login.username) , login.password.reuse)
+
+    if (PasswordCheck.isFirstConnection(login.username) && login.password.reuse) {
+        sendMessage("warn-reuse", { report: login })
+        callServiceWorker("DeletePassword", { username: login.username, system })
+        return
+    }
+
+    if (login.password) sendMessage("account-usage", { report: login })
+    if (login.totp) sendMessage("receive-totp")
+
+    repeatEvent(event, button)
+}
+
+function analyzeForm(formElements, eventElement) {
+    let username, password, TOTP
+    const formHasPassword = formElements.some(elem => elem.type === 'password')
+
+    for (let elem of formElements) {
+        if (elem.value === "" || elem.value === undefined || elem.isHidden()) continue
+
+        if (elem.type === 'password' || MFACheck.isMFA(elem.name) || MFACheck.isMFA(elem.id) || MFACheck.isMFA(window.location.pathname)) {
+            if (MFACheck.isTOTP(elem.value)) {
+                debug("found TOTP", elem.value)
+
+                TOTP = elem.value
+                continue
+            }
+        }
+
+        if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
+            if (! MFACheck.isTOTP(elem.value)) {
+                debug("found password")
+
+                password = elem.value
+                continue
+            }
+        }
+
+        if ((elem.type === 'text' || elem.type === 'email') && (
+            formHasPassword && username === undefined ||
+            MFACheck.findAuthPattern(window.location.pathname) &&  (
+                isUsernameField(elem.name) ||
+                isUsernameField(elem.id) ||
+                findEmailPattern(elem.value)
+            )
+        )
+        ) {
+            debug("found username (in form)", elem.value)
+            username = elem.value
+        }
+    }
+
+    if (username === undefined && formHasPassword) {
+        username = findUsernameInAncestors(eventElement)
+    }
+
+    debug("form username is ", username)
+    debug("form password is ", password ? "<masked>" : undefined)
+    debug("form TOTP is ", TOTP)
+
+    if (username !== undefined) sessionState.setUsername(username)
+    if (password !== undefined) sessionState.setPassword()
+    if (TOTP !== undefined) sessionState.setTOTP()
+
+    if (sessionState.auth.password === undefined) return
+    if (password === undefined && TOTP === undefined) return
+
+    return (async () => {
+        const login = {
+            username: sessionState.auth.username,
+            password: undefined,
+            totp: sessionState.auth.totp
+        }
+
+        if (password) {
+            login.password = PasswordCheck.analyzePassword(sessionState.auth.username, password)
+
+            const salt = PasswordCheck.getSalt()
+            if (salt) {
+                login.password.reuse = await callServiceWorker("CheckPasswordReuse", {
+                    username: login.username,
+                    password: await PBKDF2.hash(password, salt),
+                    system
+                })
+            }
+        }
+
+        if (sessionState.auth.totp) {
+            sessionState.init()
+        }
+        sessionState.save()
+
+        return login
+    })()
+}

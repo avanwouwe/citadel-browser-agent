@@ -41,7 +41,6 @@ class SessionState {
             console.error("cannot get session state", e)
         }
 
-        debug("session state loaded", this.auth)
         return this
     }
 
