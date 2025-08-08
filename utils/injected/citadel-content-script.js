@@ -1,80 +1,71 @@
 injectPageScripts(['/utils/injected/bundle/citadel-bundle.js'])
 
-const system = window.location.origin
+document.addEventListener("click", clickListener, true)
+document.shadowRoot?.addEventListener("click", clickListener, true)
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter') {
-            sendMessage("user-interaction")
-        }
-    }, true)
-
-    window.addEventListener('beforeprint', function() {
-        sendMessage("print-dialog")
-    }, true)
-
-    document.addEventListener('change', function(event) {
-        if (event.target?.type === 'file') {
-            for (const file of event.target.files) {
-                sendMessage('file-select', { subtype : 'picked file', file: cloneFile(file)
-             })
-            }
-        }
-    }, true)
-
-    document.addEventListener('drop', function(event) {
-        Array.from(event.dataTransfer.files).forEach(file => {
-            sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
-        })
-
-        Array.from(event.dataTransfer.items).forEach(item => {
-            if (item.kind === 'file') {
-                const file = item.getAsFile();
-                sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
-            }
-        })
-
-    }, true)
-
-    window.addEventListener("message", function(event) {
-        if (event.source !== window || event.origin !== window.location.origin) return
-
-        if (event.data.type === "request-credential" && event.data.subtype === "public-key") {
-            debug("detected use of navigator.credentials API to get public key")
-            sendMessage(event.data.type, { subtype: event.data.subtype })
-        }
-
-        if (event.data.type === "request-credential" && event.data.subtype === "password") {
-            debug("detected use of navigator.credentials API to get password")
-            sendMessage("account-usage", { report: event.data.report })
-        }
-
-    })
-
-    function clickListener(event) {
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Enter') {
         sendMessage("user-interaction")
 
-        const button = event.target.closest('button, input[type="button"], input[type="submit"]')
-        if (button && !button.disabled && button.offsetParent != null && ! button.isHidden()) {
-            checkLogin(event, button)
-        }
-    }
-
-    document.addEventListener("click", clickListener, true)
-    document.shadowRoot?.addEventListener("click", clickListener, true)
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Enter' &&
-            (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'BUTTON')
-        ) {
+        if  (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'BUTTON') {
             checkLogin(event, event.target)
         }
-    })
-
+    }
 }, true)
 
+window.addEventListener('beforeprint', function() {
+    sendMessage("print-dialog")
+}, true)
+
+document.addEventListener('change', function(event) {
+    if (event.target?.type === 'file') {
+        for (const file of event.target.files) {
+            sendMessage('file-select', { subtype : 'picked file', file: cloneFile(file)
+         })
+        }
+    }
+}, true)
+
+document.addEventListener('drop', function(event) {
+    Array.from(event.dataTransfer.files).forEach(file => {
+        sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
+    })
+
+    Array.from(event.dataTransfer.items).forEach(item => {
+        if (item.kind === 'file') {
+            const file = item.getAsFile();
+            sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
+        }
+    })
+}, true)
+
+window.addEventListener("message", function(event) {
+    if (event.source !== window || event.origin !== window.location.origin) return
+
+    if (event.data.type === "request-credential" && event.data.subtype === "public-key") {
+        debug("detected use of navigator.credentials API to get public key")
+        sendMessage(event.data.type, { subtype: event.data.subtype })
+    }
+
+    if (event.data.type === "request-credential" && event.data.subtype === "password") {
+        debug("detected use of navigator.credentials API to get password")
+        sendMessage("account-usage", { report: event.data.report })
+    }
+
+})
+
+const system = window.location.origin
 let sessionState
 new SessionState(system).load().then(obj => sessionState = obj)
+
+function clickListener(event) {
+    sendMessage("user-interaction")
+
+    const button = event.target.closest('button, input[type="button"], input[type="submit"]')
+    if (button && !button.disabled && button.offsetParent != null && ! button.isHidden()) {
+        checkLogin(event, button)
+    }
+}
 
 function cloneFile(file) {
     const clone = shallowClone(file)
@@ -189,8 +180,6 @@ async function checkLogin(event, button) {
 
     const login = await loginPromise
 
-console.log("checkLogin : ", PasswordCheck.isFirstConnection(login.username) , login.password.reuse)
-
     if (PasswordCheck.isFirstConnection(login.username) && login.password.reuse) {
         sendMessage("warn-reuse", { report: login })
         callServiceWorker("DeletePassword", { username: login.username, system })
@@ -221,7 +210,7 @@ function analyzeForm(formElements, eventElement) {
 
         if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
             if (! MFACheck.isTOTP(elem.value)) {
-                debug("found password")
+                    debug("found password")
 
                 password = elem.value
                 continue
