@@ -143,35 +143,4 @@ class MFACheck {
 
     static #AUTH_URL_REGEX = /(^|[/_.-])(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)|(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)([/_.-]|$)/i
     static findAuthPattern = (str) => str.match(MFACheck.#AUTH_URL_REGEX)?.[0]
-
-    static {
-        chrome.webRequest?.onCompleted.addListener(
-            function (details) {
-                if (details.method !== "POST") return
-
-                const url = details.url?.toURL()
-                if (!url) return
-
-                setInitiator(details)
-
-                if (MFACheck.isMFA(url.pathname) && details.statusCode >= 200 && details.statusCode < 300) {
-                    MFACheck.cancelTimer(details.initiator, "POST to MFA-esque URL")
-                }
-
-                if (MFACheck.findAuthPattern(url.pathname) && details.statusCode >= 400) {
-                    MFACheck.cancelTimer(details.initiator, "failed login")
-
-                    new SessionState(details.initiator.toURL().origin).load().then(sessionState =>  {
-                        if (!sessionState.auth?.username) return
-
-                        const app = AppStats.forURL(details.initiator)
-                        if (app) {
-                            AppStats.deleteAccount(app, sessionState.auth.username)
-                        }
-                    })
-                }
-            }, { urls: ["<all_urls>"] }
-        )
-    }
-
 }

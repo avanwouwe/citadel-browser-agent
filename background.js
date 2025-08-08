@@ -391,6 +391,34 @@ chrome.webRequest.onAuthRequired.addListener(
 	{ urls: ["<all_urls>"] }
 )
 
+chrome.webRequest.onCompleted.addListener(
+	function (details) {
+		if (details.method !== "POST") return
+
+		const url = details.url?.toURL()
+		if (!url) return
+
+		setInitiator(details)
+
+		if (MFACheck.isMFA(url.pathname) && details.statusCode >= 200 && details.statusCode < 300) {
+			MFACheck.cancelTimer(details.initiator, "POST to MFA-esque URL")
+		}
+
+		if (MFACheck.findAuthPattern(url.pathname) && details.statusCode >= 400) {
+			MFACheck.cancelTimer(details.initiator, "failed login")
+
+			new SessionState(details.initiator.toURL().origin).load().then(sessionState =>  {
+				if (!sessionState.auth?.username) return
+
+				const app = AppStats.forURL(details.initiator)
+				if (app) {
+					AppStats.deleteAccount(app, sessionState.auth.username)
+				}
+			})
+		}
+	}, { urls: ["<all_urls>"] }
+)
+
 async function getFrameUrl(tabId, frameId) {
 	return new Promise((resolve, reject) => {
 		chrome.webNavigation.getFrame({ tabId, frameId }, (frameInfo) => {
