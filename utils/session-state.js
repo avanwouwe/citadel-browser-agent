@@ -68,14 +68,18 @@ class SessionState {
         debug("session state setting username", username, this.auth)
     }
 
-    async setPassword(username, password) {
-        this.auth.password = await PasswordCheck.analyzePassword(username, password)
+    setPassword(isTrue = true) {
+        if (!this.auth.username) return this.init()
+
+        this.auth.password = isTrue
         this.auth.totp = false
 
         debug("session state setting password", this.auth)
     }
 
     setTOTP(isTrue = true) {
+        if (!this.auth.password) return this.init()
+
         this.auth.totp = isTrue
 
         debug("session state setting TOTP", isTrue, this.auth)

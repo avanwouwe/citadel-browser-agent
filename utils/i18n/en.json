@@ -37,6 +37,8 @@
     },
     "password": {
       "reuse": {
+        "title": "Possible Phishing Alert",
+        "message": "You are using the password of {{username}} for {{system}}, to connect to another site.\n\n⚠\uFE0F This may be a phishing attack. Is it really the site you think it is?",
         "other-system": "another system"
       },
       "quality": {
@@ -49,7 +51,8 @@
         "length": "Must contain at least {{min}} characters",
         "entropy": "Does not have enough different characters",
         "sequence": "Is too repetitive",
-        "username-password": "Must not be based on the username"
+        "username-password": "Must not be based on the username",
+        "reuse": "Must not be based on password of '{{account}}'"
       }
     },
     "notification": {

@@ -4,7 +4,7 @@ class AccountTrust {
 
     static checkFor(username, sitename) {
         if (sitename.isURL()) sitename = getSitename(sitename)
-        
+
         const config = Config.forHostname(sitename)
 
         if (config.account.checkOnlyApplications && ! isApplication(sitename)) return false
@@ -39,6 +39,7 @@ class AccountTrust {
                         entropy:            t("accounttrust.password.quality.entropy"),
                         sequence:           t("accounttrust.password.quality.sequence"),
                         usernameInPassword: t("accounttrust.password.quality.username-password"),
+                        reuse:              t("accounttrust.password.quality.reuse",            { account: report.issues.reuse }),
                     }
 
                     const lines = Object.keys(report.issues)

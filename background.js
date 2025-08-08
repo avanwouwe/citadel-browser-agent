@@ -645,6 +645,7 @@ function registerAccountUsage(url, report) {
 		usernameInPassword: report.password.usernameInPassword ? 1 : null,
 		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
 		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
+		reuse: report.password.reuse ? PasswordVault.getReusedAccount(report.password.reuse, report.username, appName)?.label : null,
 	}
 
 	Object.entries(issues).forEach(([key, value]) => {
@@ -732,7 +733,7 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
 	}
 
-	if (request.type === "account-usage") {
+	if (request.type === "account-usage" || request.type === "allow-reuse") {
 		registerAccountUsage(siteUrl, request.report)
 
 		const config = Config.forURL(siteUrl)
@@ -744,11 +745,6 @@ onMessage((request, sender) => {
 
 			debug(`MFA required for connection of '${request.report.username}' to ${siteUrl.hostname}`)
 
-			if (request.report.mfa) {
-				MFACheck.cancelTimer(siteUrl, 'TOTP in form')
-				return
-			}
-
 			const app = AppStats.forURL(siteUrl)
 			const account = AppStats.getAccount(app, request.report.username)
 
@@ -758,6 +754,10 @@ onMessage((request, sender) => {
 				MFACheck.startTimer(sender.url, config.account.mfa.waitMinutes, showModal)
 			}
 		}
+	}
+
+	if (request.type === "receive-totp") {
+		MFACheck.cancelTimer(siteUrl, 'TOTP in form')
 	}
 
 	if (request.type === "request-credential" && request.subtype === "public-key") {
@@ -785,8 +785,23 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "exception", `${alert.type} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alertType} exception`)
 	}
 
-	if (request.type === "acknowledge-mfa") {
-		Modal.removeFromDomain(request.domain)
+	if (request.type === "warn-reuse") {
+		const report = request.report
+		const account = PasswordVault.getReusedAccount(report.password.reuse, report.username, sender.origin)
+		const onAcknowledge = { type: 'acknowledge-reuse', username: report.username, system: sender.origin }
+		const onException =  { type: 'allow-reuse', report }
+		Modal.createForTab(sender.tab.id, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", account), onAcknowledge, onException)
+
+		logger.log(nowTimestamp(), "password reuse", "password reuse warning", request.url, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
+	}
+
+	if (request.type === "acknowledge-reuse") {
+		Modal.removeFromTab(sender.tab.id)
+	}
+
+	if (request.type === "allow-reuse") {
+		injectFuncIntoTab(sender.tab.id, () => location.reload())
+		logger.log(nowTimestamp(), "password reuse", "password reuse exception granted", request.url, Log.ERROR, undefined, `user requested exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "allow-mfa") {

@@ -162,6 +162,8 @@ class MFACheck {
                     MFACheck.cancelTimer(details.initiator, "failed login")
 
                     new SessionState(details.initiator.toURL().origin).load().then(sessionState =>  {
+                        if (!sessionState.auth?.username) return
+
                         const app = AppStats.forURL(details.initiator)
                         if (app) {
                             AppStats.deleteAccount(app, sessionState.auth.username)

@@ -1,7 +1,7 @@
 class AppStats {
 
     static #APPLICATION_STATISTICS_KEY = 'application-statistics'
-    static #APPSTATS = new PersistentObject(this.#APPLICATION_STATISTICS_KEY).value()
+    static #APPSTATS = new PersistentObject(AppStats.#APPLICATION_STATISTICS_KEY).value()
 
     static getOrCreateApp(appName) {
         const existingApp = this.#APPSTATS[appName]
@@ -64,6 +64,8 @@ class AppStats {
         const accounts = app.getOrSet("accounts", { })
         delete accounts[username]
 
+        PasswordVault.deleteAccount(username, app)
+
         AppStats.markDirty()
     }
 
@@ -85,7 +87,7 @@ class AppStats {
 
     static async clear() {
         // clear all storage *except* for application statistics
-        const appStats = await new PersistentObject(this.#APPLICATION_STATISTICS_KEY).ready()
+        const appStats = await new PersistentObject(AppStats.#APPLICATION_STATISTICS_KEY).ready()
         chrome.storage.local.clear()
         appStats.markDirty()
         appStats.flush()

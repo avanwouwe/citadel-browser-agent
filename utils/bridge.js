@@ -18,10 +18,21 @@ class Bridge {
             }
         })
 
+        Bridge.listenTo("InitPasswordCheck", (_, sender) => {
+            const msg = { salt: PasswordVault.prehashSalt }
+            const app = AppStats.forURL(sender.origin)
+            msg.accounts = app ? AppStats.allAccounts(app).map(([key]) => key) : undefined
+            return msg
+        })
+
         Bridge.listenTo("CheckPasswordReuse", ({username, password}, sender) => PasswordVault.detectReuse(username, password, sender.origin))
-        Bridge.listenTo("GetPasswordSalt", () => PasswordVault.prehashSalt)
+
+        Bridge.listenTo("DeletePassword", ({username, system}) => PasswordVault.deleteAccount(username, system))
+
         Bridge.listenTo("GetAccountIssues", () => ({ accounts: AccountTrust.failingAccounts() }))
+
         Bridge.listenTo("GetDeviceStatus", () => devicetrust.getStatus())
+
         Bridge.listenTo("RefreshDeviceStatus", () => {
             debug("dashboard requested update")
             Port.postMessage("devicetrust", { request: "update" })

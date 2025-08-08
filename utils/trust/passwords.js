@@ -1,5 +1,12 @@
 class PasswordCheck {
-    static async analyzePassword(username, password) {
+
+    static isFirstConnection(username) {
+        assert(Context.isContentScript(), "can only be called from content script")
+
+        return ! PasswordCheck.#knownAccounts.includes(username)
+    }
+
+    static analyzePassword(username, password) {
         const passwordAnalysis = {
             length: password !== undefined ? password.length : 0,
             numberOfDigits: 0,
@@ -33,11 +40,6 @@ class PasswordCheck {
         const u = username.toLowerCase().replace(nonLetterChar, '')
         const p = password.toLowerCase().replace(nonLetterChar, '')
         passwordAnalysis.usernameInPassword = (u.includes(p) || p.includes(u)) ? 1 : 0
-
-        const salt = PasswordCheck.#getSalt()
-        if (salt) {
-            passwordAnalysis.hash = await PBKDF2.hash(password, salt)
-        }
 
         return passwordAnalysis
     }
@@ -196,27 +198,31 @@ class PasswordCheck {
     }
 
     static #salt
-    static #SALT_KEY_NAME = "citadel-password-salt"
+    static #knownAccounts = []
+    static #ELEMENT_NAME = "citadel-password-check"
 
-    static #getSalt() {
-        if (!PasswordCheck.#salt && Context.isPageScript()) {
-            const el = document.querySelector(`meta[name="${PasswordCheck.#SALT_KEY_NAME}"]`)
-            PasswordCheck.#salt = el?.content ? PBKDF2.fromBase64(el.content) : undefined
-        }
+    static getSalt() {
+        if (!PasswordCheck.#salt)
+            if (Context.isPageScript()) {
+                const el = document.querySelector(`meta[name="${PasswordCheck.#ELEMENT_NAME}"]`)
+                PasswordCheck.#salt = el?.content ? PBKDF2.fromBase64(el.content) : undefined
+            } else if (Context.isServiceWorker()) {
+                PasswordCheck.#salt = PBKDF2.fromBase64(PasswordVault.prehashSalt)
+            }
 
         return PasswordCheck.#salt
     }
 
     static {
         if (Context.isContentScript()) {
-            callServiceWorker("GetPasswordSalt").then(salt => {
-                if (salt) {
-                    PasswordCheck.#salt = PBKDF2.fromBase64(salt)
-                    document.head.appendChild(Object.assign(document.createElement("meta"), {
-                        name: PasswordCheck.#SALT_KEY_NAME,
-                        content: salt
-                    }))
-                }
+            callServiceWorker("InitPasswordCheck").then(info => {
+                PasswordCheck.#knownAccounts = info.accounts
+                PasswordCheck.#salt = info.salt ? PBKDF2.fromBase64(info.salt) : undefined
+
+                document.head.appendChild(Object.assign(document.createElement("meta"), {
+                    name: PasswordCheck.#ELEMENT_NAME,
+                    content: info.salt
+                }))
             })
         }
     }

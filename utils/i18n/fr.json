@@ -36,22 +36,24 @@
       "issue": "Problème"
     },
     "password": {
-      "password": {
-        "reuse": {
-          "other-system": "un autre système"
-        },
-        "quality": {
-          "title": "Problème(s) avec le mot de passe",
-          "number-digits": "Doit contenir au moins {{min}} chiffre(s)",
-          "number-letters": "Doit contenir au moins {{min}} lettre(s)",
-          "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",
-          "number-lowercase": "Doit contenir au moins {{min}} lettre(s) minuscule(s)",
-          "number-symbols": "Doit contenir au moins {{min}} symbole(s)",
-          "length": "Doit contenir au moins {{min}} charactèrss",
-          "entropy": "Ne contient pas assez de caractères différents",
-          "sequence": "Est trop répétitif",
-          "username-password": "Doit pas être basé sur le nom d'utilisateur"
-        }
+      "reuse": {
+        "title": "Potentiel Alerte de Phishing",
+        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site. \n\n⚠\uFE0F Ceci peut être une attaque de phishing. Est-ce bien le site que vous pensez?",
+        "other-system": "un autre système"
+      },
+      "quality": {
+        "title": "Problème(s) avec le mot de passe",
+        "number-digits": "Doit contenir au moins {{min}} chiffre(s)",
+        "number-letters": "Doit contenir au moins {{min}} lettre(s)",
+        "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",
+        "number-lowercase": "Doit contenir au moins {{min}} lettre(s) minuscule(s)",
+        "number-symbols": "Doit contenir au moins {{min}} symbole(s)",
+        "length": "Doit contenir au moins {{min}} charactèrss",
+        "entropy": "Ne contient pas assez de caractères différents",
+        "sequence": "Est trop répétitif",
+        "username-password": "Doit pas être basé sur le nom d'utilisateur",
+        "reuse": "Doit pas être basé sur le mot de passe de {{account}}"
+      }
     },
     "notification": {
       "title": "Problèmes de sécurité",

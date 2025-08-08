@@ -164,9 +164,10 @@ class Config {
                 warn: 2,
                 block: 7
             },
-            exceptions: {
-                duration: 60,
-                domains: [ ]
+            passwordReuse: {
+                exceptions: {
+                    groups: [ ]
+                }
             },
             retentionDays: 90,
             checkOnlyInternal: true,
