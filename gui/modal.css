@@ -8,16 +8,17 @@
 }
 .modal {
     all: unset;
-    background:white; padding:2em 3em; border-radius:10px; text-align:left;
+    background:white; padding:2em 3em 2em 2em; border-radius:10px; text-align:left;
     box-shadow:0 5px 20px #0004; display:flex; align-items:center; gap:1em;
     min-width:280px;
     min-height:120px;
+    max-width: 480px;
     font-family: Arial, sans-serif;
     font-size: 16px;
     white-space: pre-wrap;
 }
 .icon {
-    width:100px;
+    width:80px;
     margin-right:1em;
 }
 .column {
@@ -36,6 +37,7 @@
 .message {
     line-height:1.4;
     margin-bottom: 1em;
+    text-align: justify;
 }
 .exception-toggle {
     cursor: pointer;
@@ -74,3 +76,10 @@
     margin-top:0.5em; font-weight:bold; color: green; text-align: center;
 }
 .exception-error { color: #990000; }
+.acknowledge-button,
+.exception-submit {
+    max-width: 200px;
+    width: 100%;
+    display: block;           /* Ensures margin auto works */
+    margin: 1em auto 0 auto;  /* Top margin is 1em, horizontal auto = centered, bottom 0 */
+}
