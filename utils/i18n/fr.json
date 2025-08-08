@@ -38,7 +38,7 @@
     "password": {
       "reuse": {
         "title": "Potentiel Alerte de Phishing",
-        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site. \n\n⚠\uFE0F Ceci peut être une attaque de phishing. Est-ce bien le site que vous pensez?",
+        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site. \n\n⚠\uFE0F Ceci peut être une attaque de phishing: vérifiez que c'est bien le site que vous pensez.",
         "other-system": "un autre système"
       },
       "quality": {

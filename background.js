@@ -814,10 +814,11 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "warn-reuse") {
+		const allowException = Config.forURL(siteUrl).account.passwordReuse.exceptions.allowed
 		const report = request.report
 		const account = PasswordVault.getReusedAccount(report.password.reuse, report.username, sender.origin)
 		const onAcknowledge = { type: 'acknowledge-reuse', username: report.username, system: sender.origin }
-		const onException =  { type: 'allow-reuse', report }
+		const onException = allowException ? { type: 'allow-reuse', report } : undefined
 		Modal.createForTab(sender.tab.id, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", account), onAcknowledge, onException)
 
 		logger.log(nowTimestamp(), "password reuse", "password reuse warning", request.url, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)

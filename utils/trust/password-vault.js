@@ -96,19 +96,18 @@ class PasswordVault {
     static #normalizeSystem(system) { return system.isURL() ? system.toURL().hostname : system }
 
     static #removeExceptions(system, passwordReuse) {
-        const systemExceptions = passwordReuse.filter(account => account.system === system)
-        const exceptionGroups = Config.forHostname(system).account.passwordReuse.exceptions.groups
+        const exceptions = Config.forHostname(system).account.passwordReuse.exceptions.groups
+            .map(exceptionGroup => Object.fromEntries(exceptionGroup.map(domain => [domain, true])))
+            .filter(exceptionGroup => matchDomain(system, exceptionGroup))
 
-        const allowedGroupSystems = new Set(
-            exceptionGroups
-                .filter(group => group.includes(system))
-                .flat()
-        )
+        const allowedSystems = passwordReuse.filter(reuse => exceptions.some(exception => matchDomain(reuse.system, exception)))
+            .map(reuse => reuse.system)
 
-        let filtered = passwordReuse.filter(pr => !allowedGroupSystems.has(pr.system))
+        let filtered = passwordReuse.filter(pr => !allowedSystems.includes(pr.system))
 
         if (filtered.length > 0) {
-            filtered = [...filtered, ...systemExceptions]
+            const reuseBySystem = passwordReuse.filter(account => account.system === system)
+            filtered = [...filtered, ...reuseBySystem]
         }
 
         return filtered

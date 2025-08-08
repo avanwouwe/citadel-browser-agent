@@ -166,6 +166,7 @@ class Config {
             },
             passwordReuse: {
                 exceptions: {
+                    allowed: false,
                     groups: [ ]
                 }
             },
@@ -319,7 +320,7 @@ class Config {
         "session.exceptions",
         "domain.isApplication",
         "domain.isPublicMail",
-        "devicetrust.exceptions.domains",
+        "device.exceptions.domains",
         "account.exceptions.domains",
         "account.mfa.required",
         "account.mfa.exceptions",
