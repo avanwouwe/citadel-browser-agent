@@ -229,7 +229,7 @@ class Config {
                 },
                 {
                     name: "Known Torrent Sites",
-                    url: "https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackres.txt",
+                    url: "https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackers.txt",
                     freq: 60 * 12
                 }
             ],

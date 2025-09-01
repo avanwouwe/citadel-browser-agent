@@ -12,17 +12,6 @@ function timestampToISO(timestamp) {
     return date.toISOString()
 }
 
-
-async function fetchTextStream(url) {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error('Network response was not OK, unable to retrieve ${url}');
-    }
-    
-    return response.body.pipeThrough(new TextDecoderStream())
-}
-
-
 const LINE_SPLIT_REGEX = /\r?\n/;
 
 async function processTextStream(stream, callback) {
@@ -55,29 +44,29 @@ async function processTextStream(stream, callback) {
 
 
 async function getCached(url, replace = true) {
-    const CACHE_NAME = 'http-cache';
-    const cache = await caches.open(CACHE_NAME);
+    const CACHE_NAME = 'http-cache'
+    const cache = await caches.open(CACHE_NAME)
 
-    const cachedResponse = await cache.match(url);
+    const cachedResponse = await cache.match(url)
     if (cachedResponse && ! replace) {
-        return cachedResponse;
+        return cachedResponse
     }
 
     // If not cached, fetch from network
     try {
-        const networkResponse = await fetch(url);
+        const networkResponse = await fetch(url)
 
         if (networkResponse.ok) {
-            const cachedResponse = networkResponse.clone();
-            cache.put(url, cachedResponse);
+            const cachedResponse = networkResponse.clone()
+            await cache.put(url, cachedResponse)
         } else {
-            console.error('Network response was not OK:', networkResponse.status);
+            console.error(`HTTP error ${networkResponse.status} when fetching ${url}`)
         }
 
-        return networkResponse;
+        return networkResponse
     } catch (error) {
-        console.error('Fetch failed:', error);
-        throw error;
+        console.error('Fetch failed:', error)
+        throw error
     }
 }
 
