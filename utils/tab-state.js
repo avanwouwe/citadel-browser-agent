@@ -35,7 +35,7 @@ class TabState {
             return Promise.resolve(this.#state[tabId]?.[key])
         }
 
-        return callServiceWorker("GetTabState", { key, tabId })
+        return callServiceWorker("GetTabState", { key })
     }
 }
 
