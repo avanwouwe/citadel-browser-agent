@@ -8,13 +8,20 @@ const EMAIL_ADDRESS_FORMAT_REGEX = /[^\s@]+@[^\s@]+\.[^\s@]+/u
 const findEmailPattern = (str) => str.match(EMAIL_ADDRESS_FORMAT_REGEX)?.[0]
 
 Element.prototype.isHidden = function() {
-    // Check if the element or any parent is hidden
+    // Check if the element is connected to the current document
+    if (!this.isConnected) return true
+
+    // Check if the element has a "hidden" type or attribute
     if (this.type === "hidden" || this.hasAttribute('hidden')) return true
 
-    const style = window.getComputedStyle(this)
+    const style = window.getComputedStyle(this);
     if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") return true
 
-    // Additionally, check if attached to DOM and offsetParent is available
+    // Check if the element has dimensions
+    const rect = this.getBoundingClientRect()
+    if (rect.width === 0 && rect.height === 0) return true
+
+    // Additionally, check offsetParent (except for position:fixed elements)
     if (!this.offsetParent && style.position !== "fixed") return true
 
     return false
