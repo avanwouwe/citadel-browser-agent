@@ -13,6 +13,8 @@ import os
 import time
 import subprocess
 import threading
+import urllib.request
+
 
 match platform.system().lower():
     case "windows":
@@ -27,6 +29,7 @@ CONFIG_PATH = "citadel-config.json"
 PERIODIC_CHECK_FREQUENCY = 60 * 60 # every hour
 DEFAULT_OSQUERY_PATH = "C:\\Program Files\\osquery\\osqueryi.exe" if SYSTEM_OS == "windows" else "/usr/local/bin/osqueryi"
 REPORT_TIMEOUT = 60   # seconds
+FETCH_TIMEOUT = 20    # seconds
 
 osqueryPath = DEFAULT_OSQUERY_PATH
 config = {}
@@ -435,6 +438,52 @@ def periodicChecksWorker():
 
         time.sleep(PERIODIC_CHECK_FREQUENCY)
 
+ALLOWED_FETCH_SITES = [
+    "https://chromewebstore.google.com/detail",
+    "https://addons.mozilla.org/",
+    "https://microsoftedge.microsoft.com/addons/detail/",
+    "https://addons.opera.com/",
+]
+
+def isFetchAllowed(url):
+    for prefix in ALLOWED_FETCH_SITES:
+        if url.startswith(prefix):
+            return True
+    return False
+
+def fetchError(url, message):
+    warning(message)
+    sendMessage("fetch", {
+        "ok": False,
+        "url": url,
+        "error": message
+})
+
+def fetch(url):
+    if not url:
+        return fetchError(url, f"agent fetch request without URL")
+
+    if not isFetchAllowed(url):
+        return fetchError(url, f"agent attempted fetch of non-whitelisted URL: {url}")
+
+    try:
+        with urllib.request.urlopen(url, timeout = FETCH_TIMEOUT) as r:
+            MAX_BYTES = 10 * 1024 * 1024
+            status = r.status
+            data = r.read(MAX_BYTES)
+
+            if len(data) == MAX_BYTES:
+                return fetchError(url, f"agent fetch of {url} exceeded maximum page size of {MAX_BYTES}")
+
+            sendMessage("fetch", {
+                "url": url,
+                "ok": 200 <= status < 300,
+                "status": status,
+                "content": data.decode('utf-8', errors = 'replace')
+            })
+    except Exception as e:
+        fetchError(url, f"agent fetch of {url} failed: {str(e)}")
+
 def main():
     loadConfig()
 
@@ -450,6 +499,9 @@ def main():
                     log(message.get('message'))
                 case 'devicetrust':
                     threading.Thread(target=generateAndSendReport, daemon=True).start()
+                case 'fetch':
+                    url = message.get('message', { }).get('url')
+                    threading.Thread(target=fetch, args=(url,), daemon=True).start()
                 case _:
                     warning(f"agent sent unexpected message type '{messageType}'")
 

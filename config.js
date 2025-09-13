@@ -300,6 +300,25 @@ class Config {
                 windows: undefined,
                 macos: undefined
             },
+        },
+        extensions: {
+            risk: {
+                maxLikelihood: 5.0,
+                maxImpact: 4.0,
+                maxRisk: 4.0,
+            },
+            exceptions: {
+                allowed: true,
+            },
+            id: {
+                allowed: ["*"],
+                forbidden: [],
+            },
+            category: {
+                allowed: ["*"],
+                forbidden: [],
+            }
+
         }
     }
 

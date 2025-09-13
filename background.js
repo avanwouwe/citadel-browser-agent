@@ -708,6 +708,10 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 	if (changeInfo.status !== "complete") return
 
 	Notification.showIfRequired(tab.url, tabId)
+
+	if (ExtensionStore.of(tab.url)) {
+		ExtensionAnalysis.start(tab.id, tab.url)
+	}
 })
 
 chrome.cookies.onChanged.addListener((changeInfo) => {

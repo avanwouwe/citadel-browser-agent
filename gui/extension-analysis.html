@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Page Blocked</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+
+        .content {
+            display: inline-block;
+            text-align: left;
+            max-width: 600px;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .risk-details-header {
+            display: block;
+            font-size: 1.15em;
+            font-weight: 600;
+            color: #26507a;
+            margin: 1.3em 0 0.4em 0;
+            border-left: 3px solid #cddff6;
+            padding-left: 10px;
+            letter-spacing: 0.2px;
+            background: #f2f6fa;
+        }
+
+        .risk-details-label {
+            display: inline-block;
+            min-width: 100px;
+            font-weight: 500;
+            color: #365675;
+            letter-spacing: 0.1px;
+            vertical-align: top;
+        }
+
+        .risk-details-value {
+            color: #295d4b;
+            font-weight: 400;
+            background: #e6f2ef;
+            padding: 2px 7px;
+            margin-left: 0.3em;
+            border-radius: 4px;
+            font-family: Consolas, monospace;
+        }
+
+        .content p {
+            margin: 0 0 0.5em 1.5em;
+            padding: 0;
+        }
+
+        .risk-indicator {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-right: 5px;
+            color: #8e2c5a;
+        }
+        #exceptionSection {
+            display: none; /* Start hidden */
+            margin-top: 20px;
+        }
+        #exceptionReason {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #d3d3d3;
+            color: #808080;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        #exceptionSectionToggle #clickable {
+            color: #007bff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div style="margin-top:32px;margin-bottom:24px;text-align:center;">
+    <img id="logo" src="" alt="Company Logo" style="max-height:72px; object-fit:contain; display:inline-block;">
+</div>
+
+<h1 data-i18n="extension-analysis.block-page.page-blocked-header">Analyzing Extension</h1>
+<p data-i18n="extension-analysis.block-page.page-blocked-text">The extension you are trying to install is being analyzed.</p>
+
+<div class="content">
+    <p><span class="risk-indicator" id="risk-likelihood"></span></p>
+    <p><span class="risk-indicator" id="risk-impact"></span></p>
+    <p><span class="risk-indicator" id="risk-global"></span></p>
+
+    <div>
+        <span class="risk-details-header" data-i18n="extension-analysis.block-page.details.header">Extension Details</span>
+
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.details.name">Name</span>:
+            <span class="risk-details-value" id="risk-value-name"></span>
+        </p>
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.details.id">Extension Id</span>:
+            <span class="risk-details-value" id="risk-value-id"></span>
+        </p>
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.details.category">Category</span>:
+            <span class="risk-details-value" id="risk-value-category"></span>
+        </p>
+    </div>
+
+    <div>
+        <span class="risk-details-header" data-i18n="extension-analysis.block-page.likelihood.header">Risk Likelihood</span>
+
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.likelihood.verified-extension">Verified Extension</span>:
+            <span class="risk-details-value" id="risk-value-verified-extension"></span>
+        </p>
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.likelihood.verified-publisher">Verified Publisher</span>:
+            <span class="risk-details-value" id="risk-value-verified-publisher"></span>
+        </p>
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.likelihood.downloads">Downloads</span>:
+            <span class="risk-details-value" id="risk-value-downloads"></span>
+        </p>
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.likelihood.rating">Rating</span>:
+            <span class="risk-details-value">
+            <span id="risk-value-rating"></span>
+            (<span id="risk-value-ratings"></span> <span data-i18n="extension-analysis.block-page.likelihood.ratings"></span>)
+        </span>
+        </p>
+        <p>
+            <span class="risk-details-label" data-i18n="extension-analysis.block-page.likelihood.manifest">Manifest</span>:
+            <span class="risk-details-value" id="risk-value-manifest"></span>
+        </p>
+    </div>
+
+    <div>
+        <span class="risk-details-header" data-i18n="extension-analysis.block-page.impact.header">Risk Impact</span>
+
+        <table>
+            <thead>
+            <tr>
+                <th data-i18n="extension-analysis.block-page.impact.perm-header-name">Permission Name</th>
+                <th data-i18n="extension-analysis.block-page.impact.perm-header-desc">Description</th>
+                <th data-i18n="extension-analysis.block-page.impact.perm-header-risk">Risk</th>
+            </tr>
+            </thead>
+            <tbody id="permissions"></tbody>
+        </table>
+
+    </div>
+
+    <p id="exceptionSectionToggle" data-i18n-html="extension-analysis.block-page.request-exception" style="display: none">If you are <b><u>sure</u></b> the extension does not represent a security risk you can <span id="clickable">request an exception</span></p>
+
+    <div id="exceptionSection" style="display: none">
+        <label for="exceptionReason" data-i18n="extension-analysis.block-page.request-exception-header" style="font-size: 1.25em; font-weight: bold;">Request an Exception</label>
+        <textarea id="exceptionReason" data-i18n="extension-analysis.block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
+        <button id="submitException" data-i18n="extension-analysis.block-page.submit-request">Submit Request</button>
+    </div>
+
+</div>
+
+<script src="/utils/definitions.js"></script>
+<script src="/utils/browser.js"></script>
+<script src="/utils/injected/citadel-content-script-utils.js"></script>
+<script src="/utils/tab-state.js"></script>
+<script src="/utils/i18n/i18n.js"></script>
+<script src="/utils/trust/extension.js"></script>
+<script src="/utils/trust/extension-store.js"></script>
+<script src="/utils/trust/extension-analysis.js"></script>
+<script src="/gui/utils.js"></script>
+<script src="/gui/extension-analysis.js"></script>
+</body>
+</html>

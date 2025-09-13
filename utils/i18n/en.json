@@ -91,5 +91,361 @@
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
     "acknowledge": "OK"
+  },
+  "extension-analysis": {
+    "block-page": {
+      "page-blocked-header": "Analyzing Extension",
+      "page-blocked-text": "The extension you are trying to install is being analyzed.",
+      "details": {
+        "header": "Extension Details",
+        "name": "Name",
+        "id": "Extension Id",
+        "category": "Category"
+      },
+      "likelihood": {
+        "header": "Risk Likelihood",
+        "verified-extension": "Extension Verified",
+        "verified-publisher": "Publisher Verified",
+        "downloads": "Downloads",
+        "rating": "Rating",
+        "ratings": "ratings",
+        "manifest": "Manifest"
+      },
+      "impact": {
+        "header": "Risk Impact",
+        "perm-header-name": "Permission Name",
+        "perm-header-desc": "Description",
+        "perm-header-risk": "Risk"
+      },
+      "request-exception": "If you are <b><u>sure</u></b> the extension does not represent a security risk you can <span id=\"clickable\">request a temporary exception</span>",
+      "request-exception-header": "Request an Exception",
+      "provide-reason": "Please provide your reason for requesting an exception",
+      "submit-request": "Submit Request",
+      "request-submitted-popup": "Your exception request has been submitted. You can install the extension."
+    },
+    "permissions": {
+      "webRequestBlocking": {
+        "description": "Allows the use of the chrome.webRequest API for blocking.",
+        "analysis": "Extensions with the webRequestBlocking permission, in conjunction with the webRequest, can block network requests (requires host permissions and only applicable to force-installed extensions)."
+      },
+      "accessibilityFeatures.modify": {
+        "description": "Lets extensions modify accessibility feature states when using the chrome.accessibilityFeatures API.",
+        "analysis": "No risk analysis available."
+      },
+      "accessibilityFeatures.read": {
+        "description": "Lets extensions read accessibility states when using the chrome.accessibilityFeatures API.",
+        "analysis": "No risk analysis available."
+      },
+      "activeTab": {
+        "description": "Gives temporary access to the active tab through a user gesture. For details, see activeTab.",
+        "analysis": "Extensions with the activeTab permission can temporarily access the active tab, including injecting scripts and modifying content, but only when explicitly invoked by a user gesture. Access is revoked when the user closes the tab or navigates away. Compared to <all_urls>, activeTab is safer as it does not grant persistent access."
+      },
+      "alarms": {
+        "description": "Gives access to the chrome.alarms API.",
+        "analysis": "Extensions with the alarms permission can schedule code to run periodically or at a specified time in the future."
+      },
+      "audio": {
+        "description": "Gives access to the chrome.audio API.",
+        "analysis": "No risk analysis available."
+      },
+      "background": {
+        "description": "Makes Chrome start up early (as soon as the user logs into their computer, before they launch Chrome), and shut down late (even after its last window is closed, until the user explicitly quits Chrome).",
+        "analysis": "Extensions with the background permission can force the browser run invisibly as soon as the user logs in to the computer, and keep the browser running after the last window is closed (until the user explicitly quits)."
+      },
+      "bookmarks": {
+        "description": "Gives access to the chrome.bookmarks API.",
+        "analysis": "Extensions with the bookmarks permission can create, organize, and otherwise manipulate bookmarks."
+      },
+      "browsingData": {
+        "description": "Gives access to the chrome.browsingData API.",
+        "analysis": "Extensions with the browsingData permission can remove browsing data from a user's local profile, which could result in forensics / logging issues."
+      },
+      "certificateProvider": {
+        "description": "Gives access to the chrome.certificateProvider API.",
+        "analysis": "No risk analysis available."
+      },
+      "clipboardRead": {
+        "description": "Lets the extension paste items from the clipboard using the web platform Clipboard API.",
+        "analysis": "Extensions with the clipboardRead permission can read the system's clipboard content."
+      },
+      "clipboardWrite": {
+        "description": "Lets the extension cut and copy items to the clipboard using the web platform Clipboard API.",
+        "analysis": "Extensions with the clipboardWrite permission can modify the system's clipboard content."
+      },
+      "contentSettings": {
+        "description": "Gives access to the chrome.contentSettings API.",
+        "analysis": "No risk analysis available."
+      },
+      "contextMenus": {
+        "description": "Gives access to the chrome.contextMenus API.",
+        "analysis": "Extensions with the contextMenus permission can add items to the browser's context menu (also known as the right-click menu)."
+      },
+      "cookies": {
+        "description": "Gives access to the chrome.cookies API.",
+        "analysis": "Extensions with the cookies permission can retrieve and modify cookies (requires host permissions)."
+      },
+      "debugger": {
+        "description": "Gives access to the chrome.debugger API.",
+        "analysis": "Extensions with the debugger permission have access to the browser's DevTools Protocol (CDP), enabling advanced debugging capabilities, including inspecting network interactions, debugging JavaScript, modifying the DOM and CSS, essentially providing super user access."
+      },
+      "declarativeContent": {
+        "description": "Gives access to the chrome.declarativeContent API.",
+        "analysis": "Extensions with the declarativeContent permission can take actions depending on the content of a page, without requiring permission to read the page's content."
+      },
+      "declarativeNetRequest": {
+        "description": "Gives access to the chrome.declarativeNetRequest API.",
+        "analysis": "Extensions with the declarativeNetRequest permission can block network requests without requiring host permissions, and redirect requests and modify headers if it has host permissions."
+      },
+      "declarativeNetRequestWithHostAccess": {
+        "description": "Gives access to the chrome.declarativeNetRequest API but requires host permissions for all actions.",
+        "analysis": "No risk analysis available."
+      },
+      "declarativeNetRequestFeedback": {
+        "description": "Gives permission to write errors and warnings to the DevTools console when using the chrome.declarativeNetRequest API. This permission is for use with unpacked extensions and is ignored for extensions installed from the Chrome Web Store.",
+        "analysis": "No risk analysis available."
+      },
+      "desktopCapture": {
+        "description": "Gives access to the chrome.desktopCapture API.",
+        "analysis": "Extensions with the desktopCapture permission can capture the content of your entire screen, individual window or individual tab. desktopCapture needs to be invoked by a user gesture, unless the extension is force-installed, in which case in can capture the screen without user interaction."
+      },
+      "dns": {
+        "description": "Gives access to the chrome.dns API.",
+        "analysis": "No risk analysis available."
+      },
+      "documentScan": {
+        "description": "Gives access to the chrome.documentScan API.",
+        "analysis": "No risk analysis available."
+      },
+      "downloads": {
+        "description": "Gives access to the chrome.downloads API.",
+        "analysis": "Extensions with the downloads permission can programmatically initiate, monitor, manipulate, and search for downloads. This can be used to download scripts."
+      },
+      "downloads.open": {
+        "description": "Allows the use of chrome.downloads.open().",
+        "analysis": "No risk analysis available."
+      },
+      "downloads.ui": {
+        "description": "Allows the use of chrome.downloads.setUiOptions().",
+        "analysis": "No risk analysis available."
+      },
+      "enterprise.deviceAttributes": {
+        "description": "Gives access to the chrome.enterprise.deviceAttributes API.",
+        "analysis": "No risk analysis available."
+      },
+      "enterprise.hardwarePlatform": {
+        "description": "Gives access to the chrome.enterprise.hardwarePlatform API.",
+        "analysis": "No risk analysis available."
+      },
+      "enterprise.networkingAttributes": {
+        "description": "Gives access to the chrome.enterprise.networkingAttributes API.",
+        "analysis": "No risk analysis available."
+      },
+      "enterprise.platformKeys": {
+        "description": "Gives access to the chrome.enterprise.platformKeys API.",
+        "analysis": "No risk analysis available."
+      },
+      "favicon": {
+        "description": "Grants access to the Favicon API.",
+        "analysis": "No risk analysis available."
+      },
+      "fileBrowserHandler": {
+        "description": "Gives access to the chrome.fileBrowserHandler API.",
+        "analysis": "No risk analysis available."
+      },
+      "fileSystemProvider": {
+        "description": "Gives access to the chrome.fileSystemProvider API.",
+        "analysis": "Extensions with the fileSystemProvider permission can create file systems that are accessible from the file manager (only applicable to ChromeOS)."
+      },
+      "fontSettings": {
+        "description": "Gives access to the chrome.fontSettings API.",
+        "analysis": "No risk analysis available."
+      },
+      "gcm": {
+        "description": "Gives access to the chrome.gcm and chrome.instanceID APIs.",
+        "analysis": "No risk analysis available."
+      },
+      "geolocation": {
+        "description": "Allows the extension to use the geolocation API without prompting the user for permission.",
+        "analysis": "No risk analysis available."
+      },
+      "history": {
+        "description": "Gives access to the chrome.history API.",
+        "analysis": "Extensions with the history permission can add, remove, and query for URLs in the browser's history."
+      },
+      "identity": {
+        "description": "Gives access to the chrome.identity API.",
+        "analysis": "Extensions with the identity permission can prompt users to authenticate with their Google accounts using OAuth 2.0, but the user must approve the request for the extension to obtain an access token."
+      },
+      "identity.email": {
+        "description": "Gives access to the user's email address through the chrome.identity API.",
+        "analysis": "No risk analysis available."
+      },
+      "idle": {
+        "description": "Gives access to the chrome.idle API.",
+        "analysis": "Extensions with the idle permission can detect whether the machine is idle, in use, or locked."
+      },
+      "loginState": {
+        "description": "Gives access to the chrome.loginState API.",
+        "analysis": "No risk analysis available."
+      },
+      "management": {
+        "description": "Gives access to the chrome.management API.",
+        "analysis": "Extensions with the management permission can manage your installed apps, extensions, and themes. If the extension is force-installed, it can disable other extensions."
+      },
+      "nativeMessaging": {
+        "description": "Gives access to the native messaging API.",
+        "analysis": "Extensions with the nativeMessaging permission can communicate with cooperating applications installed on the user's machine."
+      },
+      "notifications": {
+        "description": "Gives access to the chrome.notifications API.",
+        "analysis": "Extensions with the notifications permission can display notifications on the user's desktop."
+      },
+      "offscreen": {
+        "description": "Gives access to the chrome.offscreen API.",
+        "analysis": "Use the offscreen API to create and manage offscreen documents."
+      },
+      "pageCapture": {
+        "description": "Gives access to the chrome.pageCapture API.",
+        "analysis": "No risk analysis available."
+      },
+      "platformKeys": {
+        "description": "Gives access to the chrome.platformKeys API.",
+        "analysis": "No risk analysis available."
+      },
+      "power": {
+        "description": "Gives access to the chrome.power API.",
+        "analysis": "Extensions with the power permission can override the system's power management features like preventing the device from sleeping and allowing the extension to run while the screen is off."
+      },
+      "printerProvider": {
+        "description": "Gives access to the chrome.printerProvider API.",
+        "analysis": "No risk analysis available."
+      },
+      "printing": {
+        "description": "Gives access to the chrome.printing API.",
+        "analysis": "No risk analysis available."
+      },
+      "printingMetrics": {
+        "description": "Gives access to the chrome.printingMetrics API.",
+        "analysis": "No risk analysis available."
+      },
+      "privacy": {
+        "description": "Gives access to the chrome.privacy API.",
+        "analysis": "Extensions with the privacy permission can manage browser features that may affect user privacy and safety, for example turn off phishing protection (safeBrowsingEnabled)."
+      },
+      "processes": {
+        "description": "Gives access to the chrome.processes API.",
+        "analysis": "No risk analysis available."
+      },
+      "proxy": {
+        "description": "Gives access to the chrome.proxy API.",
+        "analysis": "Extensions with the proxy permission can configure how the user's internet traffic is routed, which can be exploited for data theft, man-in-the-middle (MITM) attacks, phishing, and bypassing network security measures."
+      },
+      "readingList": {
+        "description": "Gives access to the chrome.readingList API.",
+        "analysis": "No risk analysis available."
+      },
+      "runtime": {
+        "description": "Gives access to runtime.connectNative() and runtime.sendNativeMessage(). For all other features of the runtime namespace, no permission is required.",
+        "analysis": "No risk analysis available."
+      },
+      "scripting": {
+        "description": "Gives access to the chrome.scripting API.",
+        "analysis": "Extensions with the scripting permission can inject and execute code in web pages, which can potentially be used for data exfiltration or session hijacking (requires host permissions, available since Manifest V3)."
+      },
+      "search": {
+        "description": "Gives access to the chrome.search API.",
+        "analysis": "No risk analysis available."
+      },
+      "sessions": {
+        "description": "Gives access to the chrome.sessions API.",
+        "analysis": "No risk analysis available."
+      },
+      "sidePanel": {
+        "description": "Gives access to the chrome.sidePanel API.",
+        "analysis": "Extensions with the sidePanel permission can display content in the browser's side panel alongside the main content of a webpage, enabling a persistent interface that complement the user's browsing journey (available since Manifest V3)."
+      },
+      "storage": {
+        "description": "Gives access to the chrome.storage API.",
+        "analysis": "Extensions with the storage permission can store and retrieve user data, which can persist even after clearing the cache and browsing history."
+      },
+      "system.cpu": {
+        "description": "Gives access to the chrome.system.cpu API.",
+        "analysis": "No risk analysis available."
+      },
+      "system.display": {
+        "description": "Gives access to the chrome.system.display API.",
+        "analysis": "No risk analysis available."
+      },
+      "system.memory": {
+        "description": "Gives access to the chrome.system.memory API.",
+        "analysis": "No risk analysis available."
+      },
+      "system.storage": {
+        "description": "Gives access to the chrome.system.storage API.",
+        "analysis": "No risk analysis available."
+      },
+      "tabCapture": {
+        "description": "Gives access to the chrome.tabCapture API.",
+        "analysis": "Extensions with the tabCapture permission can capture the content of any tab. tabCapture needs to be invoked by a user gesture, unless the extension is force-installed, in which case in can capture the screen without user interaction."
+      },
+      "tabGroups": {
+        "description": "Gives access to the chrome.tabGroups API.",
+        "analysis": "No risk analysis available."
+      },
+      "tabs": {
+        "description": "Gives access to privileged fields of the Tab objects used by several APIs, including chrome.tabs and chrome.windows. You usually don't need to declare this permission to use those APIs.",
+        "analysis": "Extensions with the tabs permission can query the url, pendingUrl, title, and favIconUrl of any tab."
+      },
+      "topSites": {
+        "description": "Gives access to the chrome.topSites API.",
+        "analysis": "No risk analysis available."
+      },
+      "tts": {
+        "description": "Gives access to the chrome.tts API.",
+        "analysis": "No risk analysis available."
+      },
+      "ttsEngine": {
+        "description": "Gives access to the chrome.ttsEngine API.",
+        "analysis": "No risk analysis available."
+      },
+      "unlimitedStorage": {
+        "description": "Provides an unlimited quota for chrome.storage.local, IndexedDB, Cache Storage, and Origin Private File System. For more information, see Storage and cookies.",
+        "analysis": "Extensions with the unlimitedStorage permission have no storage quota restrictions for chrome.storage.local, IndexedDB, Cache Storage, and the Origin Private File System."
+      },
+      "userScripts": {
+        "description": "Gives access to the chrome.userScripts API. NOTE: the user must also explicitly enable the usage of user scripts.",
+        "analysis": "No risk analysis available."
+      },
+      "vpnProvider": {
+        "description": "Gives access to the chrome.vpnProvider API.",
+        "analysis": "No risk analysis available."
+      },
+      "wallpaper": {
+        "description": "Gives access to the chrome.wallpaper API.",
+        "analysis": "No risk analysis available."
+      },
+      "webAuthenticationProxy": {
+        "description": "Gives access to the chrome.webAuthenticationProxy API.",
+        "analysis": "No risk analysis available."
+      },
+      "webNavigation": {
+        "description": "Gives access to the chrome.webNavigation API.",
+        "analysis": "Extensions with the webNavigation permission can track websites the user visits by listening to navigation events."
+      },
+      "webRequest": {
+        "description": "Gives access to the chrome.webRequest API.",
+        "analysis": "Access to network traffic"
+      },
+      "<all_urls>": {
+        "description": "Grants the extension permission to operate on all http:// and https:// URLs in the browser.",
+        "analysis": "Extensions with the <all_urls> host permission can utilize their granted permissions on every website visited, greatly increasing the possibility for broad data collection or injection attacks."
+      }
+    },
+    "risk-level" : {
+      "1" : "Low",
+      "2" : "Medium",
+      "3" : "High",
+      "4" : "Critical"
+    }
   }
 }

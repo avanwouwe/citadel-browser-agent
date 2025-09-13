@@ -37,5 +37,8 @@ class Bridge {
             debug("dashboard requested update")
             Port.postMessage("devicetrust", { request: "update" })
         })
+
+        Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))
+        Bridge.listenTo("FetchExtensionManifest", async ({url}) => await ExtensionStore.fetchManifest(url))
     }
 }

@@ -15,7 +15,8 @@
     "cookies",
     "scripting",
     "tabs",
-    "notifications"
+    "notifications",
+    "management"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -52,11 +53,13 @@
       "/utils/trust/mfa.js",
       "/utils/eventaccumulator.js",
       "/utils/alarm.js",
+      "/utils/unzipit.js",
       "/utils/schedule.js",
       "/utils/session-state.js",
       "/utils/tab-state.js",
       "/utils/appstats.js",
       "/utils/messaging.js",
+      "/utils/fetch.js",
       "/utils/ratethrottle.js",
       "/utils/logging.js",
       "/utils/browser.js",
@@ -72,6 +75,9 @@
       "/utils/blacklist/ignorelist.js",
       "/utils/blacklist/exceptionlist.js",
       "/utils/blacklist/ipv4range.js",
+      "/utils/trust/extension.js",
+      "/utils/trust/extension-store.js",
+      "/utils/trust/extension-analysis.js",
       "/background.js"
     ]
   },

@@ -51,3 +51,14 @@ function openDashboard(tabName, foreground = true) {
         }
     })
 }
+
+function html2dom(html) {
+    const template = document.createElement('template')
+    template.innerHTML = html
+    return template.content.cloneNode(true)
+}
+
+function containsSvg(element, dStr) {
+    const paths = element.querySelectorAll('svg path')
+    return Array.from(paths).some(path => path.getAttribute('d') === dStr)
+}
