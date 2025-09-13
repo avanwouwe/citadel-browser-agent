@@ -32,7 +32,6 @@ When overriding default settings the following rules are used:
 You can override the global configuration for specific domains. This is possible for the following configuration elements:
 * `warningProtocols` : ex. allow HTTP for VPN traffic
 * `account` : ex. specific password policies for one application
-* `session` : ex. restrict session duration only for internal applications
 * `application` : ex. specific retention period
 * `logging` : ex. turn off logging for the development instances
 * `errors` : ex. do not log certificate issues for your development web servers
@@ -91,7 +90,7 @@ The URL blacklists are expected to contain one domain or URL per line. The black
 * [Romain Marcoux - malicious domains](https://github.com/romainmarcoux/malicious-domains)
 * [Pi-hole Torrent Blacklist](https://github.com/sakib-m/Pi-hole-Torrent-Blocklist)
 
-Blacklists containing domains block all URLs in that domain. Blacklists containing URLs block only that URL, whilst ignoring the query parameters and URI fragment (i.e. the "hash part"). In both cases the matching is done in a case insensitive manner.
+Blacklists containing domains block all URLs in that domain. Blacklists containing URLs block only that URL, whilst ignoring the query parameters and URI fragment (i.e. the "hash part"). In both cases the matching is done in a case-insensitive manner.
 
 The IP blacklist is expected to contain one IPv4 address or one CIDR formatted subnet per line. The blacklists configured by default are:
 * [FireHOL (level 1)](https://iplists.firehol.org/?ipset=firehol_level1)
@@ -157,7 +156,7 @@ Note that:
 * the `minEntropy` setting refers to the [Shannon Entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
 * the `minSequence` setting measures the number of consecutive characters or numbers in the password, relative to the password length
 
-## Multi Factor Authentication
+## Multi-Factor Authentication
 You can ensure that whenever users send a password, they *also* use another factor (e.g. TOTP, WebAuthn). If they do not provide one within `waitMinutes` they are logged off. Once connected their session will remain valid for `maxSessionDays`.
 
 You have to enumerate the list of domains where you require MFA, and you can make exceptions for specific sub-domains:
@@ -177,7 +176,7 @@ You have to enumerate the list of domains where you require MFA, and you can mak
             "github.com"
           ],
           "exceptions": [
-            "non-mfa.yourcompany.com"
+            "non-mfa-application.yourcompany.com"
           ]
         }
     }

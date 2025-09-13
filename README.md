@@ -7,11 +7,6 @@ Citadel is a browser agent that enforces IT policy and detects malware and shado
 
 Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
 
-# Citadel browser agent
-Citadel is a browser agent that enforces IT policy and detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)).
-
-Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
-
 <table>
   <tr>
     <td><img src="/doc/screenshot wazuh.png" alt="screenshot Wazuh"></td>
@@ -20,22 +15,26 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
 </table>
 
 ## Overview
-Citadel can perform web filtering, limit the maximum duration of authenticated sessions, enforce your MFA policy, and help you enforce your password policy.
+In today's cybersecurity landscape it is difficult to have good control over your endpoints and their use. You need a solution to ensure endpoint compliance, but most of those do not manage the browser. And it is difficult to get a full-blown MDM installed on endpoints that are not provided by your organisation, such as in the case of employee BYOD, or of external staff. Many applications do not allow you to configure a password policy, and if they do provide security controls such as "MFA must be enabled", it is only as part of an "Enterprise" licence. So you have to select, integrate and maintain several solutions, each one costing a couple of dollars per endpoint.
 
-Citadel detects the following events in the browser:
+Out of this dissatisfaction, and the realisation that for many organisations the browser constitutes today's operating system, Citadel was born.
+
+Citadel has a native component that ensures device compliance by monitoring the usual controls (patching, disk encryption, firewall, etc) and even a few more unusual ones (protection of SSH keys, requiring or prohibiting of installed or running software, storage of unnecessary sensitive data, etc). It also has a browser component that performs web filtering, enforces your password and MFA policies, and limits the maximum duration of authenticated sessions.
+
+In case of non-compliance users are notified and access to protected systems can be temporarily disabled until the controls are compliant. To prevent users being blocked at a critical moment it is possible to give the possibility to request exceptions. 
+
+On top of this, Citadel detects the following events in the browser:
 * IP, URL or domain is blacklisted (good default blacklists provided, can be made bypassable by users)
 * user is using unencrypted protocols for an application (e.g. FTP, HTTP or WS)
-* user is using URL with username or password in the URL
 * user has downloaded a file
-* user has selected a file on the local drive (N.B. it is unknown if the file was uploaded)
-* user has opened the print dialog for a page (N.B. it is unknown if the dialog was cancelled)
 * the user is warned that the downloaded file is dangerous
 * user has accepted downloading of a dangerous file
-* user has used a password that does not conform to the password policy
-* user connected using a password but without MFA, when policy requires it for this particular application 
+* user has selected a file on the local drive (N.B. it is unknown if the file was uploaded)
+* user has opened the print dialog for a page (N.B. it is unknown if the dialog was cancelled)
 * security-related browser errors (e.g. certificate issues, detection of phishing or virus, etc. See [list](chrome://network-errors))
+* user is using URL with username or password in the URL
 
-It also reports on usage statistics of applications, allowing for detection of shadow IT and unused licences.
+Citadel also reports on usage statistics of applications, allowing for detection of shadow IT and unused licences.
 
 Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
 
@@ -58,16 +57,21 @@ These usage reports can be aggregated in your SIEM / EDR and used to get an over
 ## Password policy enforcement
 Any time a password is sent to a web application via a form, Citadel checks whether the password conforms to the policy you have configured. 
 
+When users connect to systems that are part of the protected scope, Citadel hashes and stores the password. This list of hashes is used to detect re-use of passwords when connecting to any system, even non-protected ones.
+
 Once every two weeks a report is triggered that generates one event for every application, for every account that has a password that does not conform to the password policy.
 
 ## MFA policy enforcement
-Citadel can check if MFA is used after a password is sent to a web application via a form. The idea being that generally non-password based authentication such as delegated authentication (OIDC, SAML, etc) will require MFA. Detection of the MFA is based on various heuristics, such as the name of form fields, the structure of URLs and the content of the fields. Use of the navigator.credentials API to request for example use of WebAuthn or FIDO is detected.
+Citadel can check if MFA is used after a password is sent to a web application via a form. The idea being that generally non-password based authentication such as delegated authentication (OIDC, SAML, etc) will require MFA anyway, and does not need to be checked. Detection of the MFA is based on various heuristics, such as the name of form fields, the structure of URLs and the content of the fields. Use of the `navigator.credentials` API to request for example use of WebAuthn or FIDO is detected.
 
 If a password is observed, users are allowed a couple of minutes to use or configure MFA. Failing that they are disconnected from the application, and instructed to configure MFA. For urgent and exceptional cases they can request a temporary exception. Both events are logged.
 
 Sessions that are authenticated using MFA have a maximum duration. Once this duration is exceeded the user is disconnected and is this forced to re-authenticate.
 
 Since MFA is not available for all sites, the list of sites for which MFA is required must be explicitly configured.
+
+## Device Trust
+Citadel uses [osquery](https://osquery.io/) to check the state of various controls, regarding disk encryption, screen locking, etc. Controls are defined using osquery queries, and depending on the configured severity of the control, it is possible to notify the user or block use of protected sites until the control stops failing. It is also possible to warn users before blocking them, or even to allow them to ask for (temporary) exceptions.
 
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
@@ -90,8 +94,7 @@ There are a lot of moving parts. Citadel needs to be installed in the browser, o
 ## Frequently Asked Questions
 
 ### who is Citadel meant for?
-The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. Theoretically end-users can decide by themselves to install the extension to benefit from the blacklist functionality, but logging won't work unless Native Messaging components are also installed ([macOS](/doc/macos.md) / [Windows](/doc/windows.md)).
-
+The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. Citadel does check for injection vulnerabilities but competent adversarial users or sites may be able to render compliance verifications ineffective.
 
 ### what about the privacy of my staff?
 Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. By default:
@@ -102,7 +105,7 @@ Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) 
 
 See the [configuration](/config.js) to understand the default settings.
 
-If you do not reduce the default privacy-related measures, you restrict access to the log entries, and you have listed an entry for "logging and monitoring" in your Records of Processing Activities, you are in compliance with the GDPR.
+If you have informed your staff of the fact that you are monitoring their internet use, you do not reduce the default privacy-related measures, you restrict access to the log entries, and you have listed an entry for "logging and monitoring" in your Records of Processing Activities, you are likely in compliance with the GDPR.
 
 ### which browsers are supported?
 Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
@@ -121,4 +124,4 @@ Citadel is mainly intended for policy enforcement, licence management and DFIR. 
 For more detail see the complete [list of limitations](/doc/limitations.md).
 
 ### does Citadel help me with my ISO 27001 certification?
-Citadel, when integrated with your SIEM (like Wazuh), providers many features that cover a wide range of ISO 27001 controls. For more information, see the [overview of controls](/doc/ISO27001.md).
+Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of ISO 27001 controls. For more information, see the [overview of controls](/doc/ISO27001.md).
