@@ -15,24 +15,25 @@
 <p data-i18n="extension-analysis.block-page.page-blocked-text">The extension you are trying to install is being analyzed.</p>
 
 <div class="content">
-    <p><span class="risk-indicator" id="risk-likelihood"></span></p>
-    <p><span class="risk-indicator" id="risk-impact"></span></p>
-    <p><span class="risk-indicator" id="risk-global"></span></p>
+    <img id="extension-logo" src="" hidden width="64" height="64">
+    <span class="extension-name" id="extension-name"></span>
+
+    <p>
+        <span class="risk-indicator" id="risk-likelihood"></span>
+        <span class="risk-indicator" id="risk-impact"></span>
+        <span class="risk-indicator" id="risk-global"></span>
+    </p>
 
     <div>
         <span class="risk-details-header" data-i18n="extension-analysis.block-page.details.header">Extension Details</span>
 
         <p>
-            <span class="risk-details-label" data-i18n="extension-analysis.block-page.details.name">Name</span>:
-            <span class="risk-details-value" id="risk-value-name"></span>
-        </p>
-        <p>
             <span class="risk-details-label" data-i18n="extension-analysis.block-page.details.id">Extension Id</span>:
-            <span class="risk-details-value" id="risk-value-id"></span>
+            <span class="risk-details-value" id="extension-id"></span>
         </p>
         <p>
             <span class="risk-details-label" data-i18n="extension-analysis.block-page.details.category">Category</span>:
-            <span class="risk-details-value" id="risk-value-category"></span>
+            <span class="risk-details-value" id="extension-category"></span>
         </p>
     </div>
 

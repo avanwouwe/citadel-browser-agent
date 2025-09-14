@@ -1,4 +1,8 @@
 {
+  "global": {
+    "yes": "Yes",
+    "no": "No"
+  },
   "control": {
     "state": {
       "UNKNOWN": "UNKNOWN",
