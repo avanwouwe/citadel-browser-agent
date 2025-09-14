@@ -79,12 +79,12 @@ class ExtensionStore {
     }
 
     static Chrome = class {
-        static pattern = new RegExp('^https://chromewebstore.google.com/detail/[^/]+/([^/]+)')
+        static pattern = new RegExp('^https://chromewebstore.google.com/detail/[^/]+/([^/?#]+)')
 
-        static parsePage(dom = document) {
+        static parsePage(dom) {
             function parseRatingsNumber(str) {
-                str = str.trim()
-                const match = str.match(/^(\d+(?:[.,]\d+)?)/)
+                str = str?.trim()
+                const match = str?.match(/^(\d+(?:[.,]\d+)?)/)
                 if (!match) {
                     return null
                 }
@@ -100,8 +100,8 @@ class ExtensionStore {
             }
 
             function parseInstalledNumber(str) {
-                str = str.trim()
-                let match = str.match(/^([\d\s,.']+)/)
+                str = str?.trim()
+                let match = str?.match(/^([\d\s,.']+)/)
                 if (!match) return null
 
                 let numberStr = match[1].replace(/[\s,.']/g, '')
@@ -115,18 +115,21 @@ class ExtensionStore {
             // extensionName
             const extensionName = dom.querySelector('h1')
 
-            const descriptionLine1 = extensionName.parentNode.parentNode
-            const descriptionLine2 = descriptionLine1.nextElementSibling
-            const descriptionLine3 = descriptionLine2.nextElementSibling
+            const descriptionLine1 = extensionName?.parentNode?.parentNode
+            const descriptionLine2 = descriptionLine1?.nextElementSibling
+            const descriptionLine3 = descriptionLine2?.nextElementSibling
+
+            // extensionLogo
+            const extensionLogo = dom.querySelector('meta[property="og:image"]')?.getAttribute('content')
 
             // rating
             const ratingNode = Array.from(dom.querySelectorAll('[style]'))
                 .find(el => el.style.getPropertyValue('--star-icon-size') !== '')
-            const rating = parseRatingsNumber(ratingNode.childNodes[0].childNodes[0].textContent) / 1000
+            const rating = parseRatingsNumber(ratingNode?.childNodes[0]?.childNodes[0]?.textContent) / 1000
 
             // numInstalls
             const numInstalls = descriptionLine3 ?
-                Array.from(descriptionLine3.childNodes)
+                Array.from(descriptionLine3?.childNodes)
                     .filter(node => node.nodeType === Node.TEXT_NODE)
                     .map(textNode => parseInstalledNumber(textNode.textContent))
                     .find(count => count !== null) || null
@@ -140,7 +143,7 @@ class ExtensionStore {
 
             // numRatings
             const anchor = dom.querySelector('a[href*="/' + extensionId + '/reviews"]')
-            const numRatings = parseRatingsNumber(anchor.textContent)
+            const numRatings = parseRatingsNumber(anchor?.textContent)
 
             // categories
             const categories = descriptionLine3 ?
@@ -161,6 +164,7 @@ class ExtensionStore {
                 browser: Browser.Chrome,
                 id: extensionId,
                 name: extensionName.textContent,
+                extensionLogo,
                 categories,
                 rating,
                 numRatings,
@@ -174,7 +178,7 @@ class ExtensionStore {
 
     static Firefox = class {
 
-        static pattern = new RegExp('^https://addons.mozilla.org/[^/]+/firefox/addon/([^/?]+)')
+        static pattern = new RegExp('^https://addons.mozilla.org/[^/]+/firefox/addon/([^/?#]+)')
 
         static categories = {
             'tabs': { primary: 'make_chrome_yours', secondary: 'functionality' },
@@ -204,6 +208,9 @@ class ExtensionStore {
             const extensionName = titleElement ?
                 titleElement.textContent.replace(titleElement.querySelector('.AddonTitle-author')?.textContent || '', '').trim() :
                 null
+
+            // extensionLogo
+            const extensionLogo = dom.querySelector('img.Addon-icon-image')?.getAttribute('src')
 
             // isVerifiedExtension
             const isVerifiedExtension = !!header.querySelector('div.Badge[data-testid="badge-recommended"]')
@@ -252,6 +259,7 @@ class ExtensionStore {
                 browser: Browser.Firefox,
                 id: extensionId,
                 name: extensionName,
+                extensionLogo,
                 rating,
                 numRatings,
                 numInstalls,
@@ -294,6 +302,7 @@ class ExtensionStore {
             if (!extensionId) return null
 
             const extensionName = dom.querySelector('title')?.textContent?.replace(' - Microsoft Edge Addons', '')
+            const extensionLogo = dom.querySelector('img[src^="https://store-images.s-microsoft.com"]')?.getAttribute('src')
 
             // rating & numRatings, numInstalls
             const ratingMeta = dom.querySelector('meta[itemprop="ratingValue"]')
@@ -324,6 +333,7 @@ class ExtensionStore {
                 browser: Browser.Edge,
                 id: extensionId,
                 name: extensionName,
+                extensionLogo,
                 numInstalls,
                 rating,
                 numRatings,
@@ -335,9 +345,10 @@ class ExtensionStore {
     }
 
     static Opera = class {
-        static pattern = new RegExp('^https://addons.opera.com/[^/]+/extensions/details/([^/]+)')
+        static pattern = new RegExp('^https://addons.opera.com/[^/]+/extensions/details/([^/#?]+)')
 
         static categories = {
+            'privacy-security': { primary: 'make_chrome_yours', secondary: 'privacy' },
             'accessibility': { primary: 'make_chrome_yours', secondary: 'accessibility' },
             'appearance': { primary: 'make_chrome_yours', secondary: 'appearance' },
             'blockchain-cryptocurrency': { primary: 'productivity', secondary: 'crypto' },
@@ -364,7 +375,8 @@ class ExtensionStore {
             const extensionId = ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
-            const extensionName = dom.querySelector('h1[itemprop="name"]')?.textContent.trim() || null
+            const extensionName = dom.querySelector('h1[itemprop="name"]')?.textContent.trim()
+            const extensionLogo = dom.querySelector('img.icon-pkg')?.getAttribute('src')
             const rating = parseFloat(dom.querySelector('span.rating#rating-value')?.textContent)
             const numRatings = parseInt(dom.querySelector('span#rating-count')?.textContent)
 
@@ -384,15 +396,19 @@ class ExtensionStore {
                 }
             }
 
+            const downloadUrl = `https://addons.opera.com/extensions/download/${extensionId}/`
+
             return {
                 browser: Browser.Opera,
                 id: extensionId,
                 name: extensionName,
+                extensionLogo,
                 numInstalls,
                 rating,
                 numRatings,
                 categories,
                 isVerifiedPublisher,
+                downloadUrl
             }
         }
     }
