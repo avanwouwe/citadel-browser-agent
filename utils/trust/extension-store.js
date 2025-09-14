@@ -109,7 +109,7 @@ class ExtensionStore {
                 return parseInt(numberStr)
             }
 
-            const extensionId = ExtensionStore.extensionIdOf(dom.location.href)
+            const extensionId = ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return
 
             // extensionName
@@ -194,8 +194,8 @@ class ExtensionStore {
             'other': null,
         }
 
-        static parsePage(dom = document) {
-            const extensionId = ExtensionStore.extensionIdOf(dom.location.href)
+        static parsePage(dom) {
+            const extensionId = ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
             // extensionName
@@ -281,7 +281,7 @@ class ExtensionStore {
             'sports': { primary: 'lifestyle', secondary: 'entertainment' }
         }
 
-        static parsePage(dom = document) {
+        static parsePage(dom) {
             function parseInstalledNumber(str) {
                 const match = str.match(/([0-9.,'\s]+)/)
                 if (!match) return null
@@ -290,7 +290,7 @@ class ExtensionStore {
                 return Number(numeric).valueOf()
             }
 
-            const extensionId = ExtensionStore.extensionIdOf(dom.location.href)
+            const extensionId = ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
             const extensionName = dom.querySelector('title')?.textContent?.replace(' - Microsoft Edge Addons', '')
@@ -353,7 +353,7 @@ class ExtensionStore {
             'translation': { primary: 'productivity', secondary: 'translation' },
         }
 
-        static parsePage(dom = document) {
+        static parsePage(dom) {
             function parseInteger(str) {
                 if(!str) return null
                 str = str.replace(/[\s,.']/g, '')
@@ -361,7 +361,7 @@ class ExtensionStore {
                 return isNaN(num) ? null : num
             }
 
-            const extensionId = ExtensionStore.extensionIdOf(dom.location.href)
+            const extensionId = ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
             const extensionName = dom.querySelector('h1[itemprop="name"]')?.textContent.trim() || null

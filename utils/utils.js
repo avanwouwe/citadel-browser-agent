@@ -198,9 +198,9 @@ function truncateString(str, maxLength) { return isString(str) ? str.truncate(ma
 
 String.prototype.emptyToUndefined = function() { return this.isEmpty() ? undefined : this }
 
-String.prototype.htmlNowrap = function () { return `<span style="white-space: nowrap;">${this}</span>`; };
+String.prototype.htmlNowrap = function () { return `<span style="white-space: nowrap;">${this}</span>` }
 
-String.prototype.htmlMonospace = function () { return `<span style="font-family: 'Courier New', Courier, monospace;">${this}</span>`; };
+String.prototype.htmlMonospace = function () { return `<span style="font-family: 'Courier New', Courier, monospace;">${this}</span>` }
 
 Object.prototype.getOrSet = function (attr, defaultValue) {
     if (this.hasOwnProperty(attr)) {

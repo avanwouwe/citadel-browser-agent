@@ -3,61 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <title>Page Blocked</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-        }
-        .content {
-            display: inline-block;
-            text-align: left;
-            max-width: 600px;
-            margin: 20px;
-            padding: 20px;
-            background-color: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .title {
-            font-weight: bold;
-        }
-        #exceptionSection {
-            display: none; /* Start hidden */
-            margin-top: 20px;
-        }
-        #exceptionReason {
-            width: 100%;
-            height: 100px;
-            margin-top: 10px;
-        }
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        button:disabled {
-            background-color: #d3d3d3;
-            color: #808080;
-            cursor: not-allowed;
-            opacity: 0.6;
-        }
-        #exceptionSectionToggle #clickable {
-            color: #007bff;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="/gui/blocked.css">
 </head>
 <body>
 
-<div style="margin-top:32px;margin-bottom:24px;text-align:center;">
-    <img id="logo" src="" alt="Company Logo" style="max-height:72px; object-fit:contain; display:inline-block;">
+<div class="logo-container">
+    <img id="logo" src="" alt="Company Logo">
 </div>
 
 <h1 data-i18n="block-page.page-blocked-header">This page has been blocked</h1>
@@ -68,10 +19,10 @@
     <p><span class="title" data-i18n="block-page.target-label">Target:</span> <span id="url"></span></p>
     <p><span class="title" data-i18n="block-page.contact-label">Contact:</span> <span id="contact"></span></p>
 
-    <p id="exceptionSectionToggle" data-i18n-html="block-page.request-exception" style="display: none">If you are <b><u>sure</u></b> there is no security issue you can <span id="clickable">request a temporary exception</span></p>
+    <p id="exceptionSectionToggle" data-i18n-html="block-page.request-exception">If you are <b><u>sure</u></b> there is no security issue you can <span id="clickable">request a temporary exception</span></p>
 
-    <div id="exceptionSection" style="display: none">
-        <label for="exceptionReason" data-i18n="block-page.request-exception-header" style="font-size: 1.25em; font-weight: bold;">Request an Exception</label>
+    <div id="exceptionSection">
+        <label for="exceptionReason" data-i18n="block-page.request-exception-header" class="exception-request-header">Request an Exception</label>
         <textarea id="exceptionReason" data-i18n="block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
         <button id="submitException" data-i18n="block-page.submit-request">Submit Request</button>
     </div>

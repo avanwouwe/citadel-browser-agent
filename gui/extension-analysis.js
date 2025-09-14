@@ -56,7 +56,7 @@ async function renderPage() {
 async function fetchStoreInfo(storeUrl) {
     const html = await sendMessagePromise('FetchExtensionPage', { url: storeUrl })
     const dom = html2dom(html.content)
-    dom.location = { href: storeUrl }
+    dom.url = storeUrl
 
     const store = ExtensionStore.of(storeUrl)
     const extensionInfo = store.parsePage(dom)

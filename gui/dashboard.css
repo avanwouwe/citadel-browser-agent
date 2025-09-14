@@ -1,0 +1,113 @@
+.has-errors {
+    cursor: pointer;
+    color: #ffffff;
+    margin-left: 5px;
+    font-size: 1.05em;
+    vertical-align: middle;
+}
+.click-tooltip {
+    position: absolute;
+    z-index: 1000;
+    background: #e3e3e3;
+    color: #000000;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 92%;
+    min-width: 160px;
+    max-width: 600px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.22);
+    white-space: pre-line;
+    pointer-events: auto;
+    user-select: text;
+    opacity: 0.92;
+    transition: opacity 0.11s;
+}
+.ellipsis {
+    max-width: 150px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;       /* Important for <td> direct styling, or use <span> */
+    cursor: pointer;
+}
+body {font-family:sans-serif; margin:6px; min-width: 420px; max-width: 550px }
+.state-dot { display:inline-block; width:13px; height:13px; border-radius:50%; margin-right:6px; }
+.passing  { background:#43d25e; }
+.warning  { background:#ffa800; }
+.blocking { background:#e23a3a; }
+.failing  { background:#999; }
+.unknown  { background:#999; }
+.compliance { font-weight:bold; margin-bottom:11px; }
+table { width:100%; border-collapse:collapse; font-size:95%; }
+th { background:#f5f5f5; }
+td, th { padding:4px 6px; }
+
+td.label a, td.label a:link, td.label a:visited, td.label a:hover, td.label a:active, td.label a:focus { color: inherit; text-decoration: none; cursor: pointer; transition: color 0.2s; }
+td.label a:hover, td.label a:focus { color: #0056b3; text-decoration: underline; }
+
+td.state, td.nextstate, td.days { text-align: center; font-weight:bold; }
+td.passing   { color:#43d25e; }
+td.warning   { background-color:#ffa800; }
+td.blocking  { background-color:#e23a3a; }
+td.failing   { background-color:#999; }
+
+#update-button:hover { background-color: rgba(0, 0, 0, 0.05); }
+#update-button.refreshing .refresh-icon { display: none !important; }
+#update-button.refreshing .spinner-icon { display: block !important;}
+
+/* TABS */
+.tabs {
+    display: flex;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+.tab {
+    background: #f5f5f5;
+    border: 1px solid #ccc;
+    border-bottom: none;
+    padding: 9px 18px;
+    cursor: pointer;
+    margin-right: 1px;
+    border-radius: 7px 7px 0 0;
+    font-weight: 600;
+    color: #444;
+    transition: background 0.14s;
+}
+.tab.active, .tab:focus {
+    background: #fff;
+    color: #222;
+    border-bottom: 1px solid #fff;
+}
+.tab-content {
+    display: none;
+    padding: 12px 4px 12px 4px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 0 0 7px 7px;
+    min-height: 40px;
+    margin-bottom: 16px;
+}
+.tab-content.active {
+    display: block;
+}
+.device-status-container {
+    display: flex;
+    align-items: center;
+}
+#status-label {
+    margin-right: 8px;
+}
+#update-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+}
+.refresh-icon {
+    display: block;
+}
+.spinner-icon {
+    display: none;
+}

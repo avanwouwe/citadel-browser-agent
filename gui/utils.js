@@ -53,9 +53,7 @@ function openDashboard(tabName, foreground = true) {
 }
 
 function html2dom(html) {
-    const template = document.createElement('template')
-    template.innerHTML = html
-    return template.content.cloneNode(true)
+    return new DOMParser().parseFromString(html, 'text/html')
 }
 
 function containsSvg(element, dStr) {

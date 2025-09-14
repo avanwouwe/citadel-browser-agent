@@ -22,7 +22,7 @@
     "<all_urls>"
   ],
   "content_security_policy": {
-    "extension_pages": "script-src 'self'; object-src 'self'"
+    "extension_pages": "default-src 'self'; connect-src * data:; style-src 'self'; img-src 'self' data: https://*.googleusercontent.com https://addons.mozilla.org https://store-images.s-microsoft.com https://*.operacdn.com"
   },
   "web_accessible_resources": [
     {

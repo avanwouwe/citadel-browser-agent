@@ -2,7 +2,7 @@ function showPopup(message, title = "Citadel browser agent"
                    , width = 350, height = 200
                    , left = 200, top = 200)
 {
-    const url = chrome.runtime.getURL("gui/popup.html")
+    const url = chrome.runtime.getURL("/gui/popup.html")
     const params = new URLSearchParams({ message: message, title: title })
 
     chrome.windows.create({
@@ -24,7 +24,7 @@ function blockPage(tabId, reason, blockedPage) {
         allowException: config.blacklist.exceptions.duration !== undefined
     })
 
-    chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/blocked.html") })
+    chrome.tabs.update(tabId, { url: chrome.runtime.getURL("/gui/blocked.html") })
 }
 
 async function injectFilesIntoTab(tabId, files) {

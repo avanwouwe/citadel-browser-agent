@@ -1,0 +1,122 @@
+/* Logo container styles */
+.logo-container {
+    margin-top: 32px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+/* Company logo styles */
+#logo {
+    max-height: 72px;
+    object-fit: contain;
+    display: inline-block;
+}
+
+/* Exception section toggle - initially hidden */
+#exceptionSectionToggle {
+    display: none;
+}
+
+/* Exception request header */
+.exception-request-header {
+    font-size: 1.25em;
+    font-weight: bold;
+}
+
+/* Existing styles from the head section */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.content {
+    display: inline-block;
+    text-align: left;
+    max-width: 600px;
+    margin: 20px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.risk-details-header {
+    display: block;
+    font-size: 1.15em;
+    font-weight: 600;
+    color: #26507a;
+    margin: 1.3em 0 0.4em 0;
+    border-left: 3px solid #cddff6;
+    padding-left: 10px;
+    letter-spacing: 0.2px;
+    background: #f2f6fa;
+}
+
+.risk-details-label {
+    display: inline-block;
+    min-width: 100px;
+    font-weight: 500;
+    color: #365675;
+    letter-spacing: 0.1px;
+    vertical-align: top;
+}
+
+.risk-details-value {
+    color: #295d4b;
+    font-weight: 400;
+    background: #e6f2ef;
+    padding: 2px 7px;
+    margin-left: 0.3em;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+}
+
+.content p {
+    margin: 0 0 0.5em 1.5em;
+    padding: 0;
+}
+#extension-logo,
+.extension-name {
+    vertical-align: middle;
+}
+.risk-low    { color: #218838; font-weight: bold; }
+.risk-medium { color: #e67e22; font-weight: bold; }
+.risk-high   { color: #e74c3c; font-weight: bold; }
+.risk-critical { color: #c0392b; font-weight: bold; }
+.risk-indicator {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-right: 5px;
+    color: #8e2c5a;
+}
+#exceptionSection {
+    display: none; /* Start hidden */
+    margin-top: 20px;
+}
+#exceptionReason {
+    width: 100%;
+    height: 100px;
+    margin-top: 10px;
+}
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+}
+button:hover {
+    background-color: #0056b3;
+}
+button:disabled {
+    background-color: #d3d3d3;
+    color: #808080;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+#exceptionSectionToggle #clickable {
+    color: #007bff;
+    cursor: pointer;
+}
