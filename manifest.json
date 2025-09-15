@@ -75,9 +75,11 @@
       "/utils/blacklist/ignorelist.js",
       "/utils/blacklist/exceptionlist.js",
       "/utils/blacklist/ipv4range.js",
-      "/utils/trust/extension.js",
-      "/utils/trust/extension-store.js",
-      "/utils/trust/extension-analysis.js",
+      "/utils/trust/extension/acorn-walk.js",
+      "/utils/trust/extension/acorn.js",
+      "/utils/trust/extension/extension.js",
+      "/utils/trust/extension/extension-store.js",
+      "/utils/trust/extension/extension-analysis.js",
       "/background.js"
     ]
   },
