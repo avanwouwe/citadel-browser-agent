@@ -29,24 +29,263 @@ class ExtensionStore {
     }
 
     /**
-     * Fetches Chrome extension CRX3, extracts and returns the manifest.json as JSON object.
-     * @param {string} url - The URL of the file containing the extension.
-     * @returns {Promise<Object>} Resolves to manifest.json object.
+     * Fetches and extracts an extension package
+     * @param {string} url - URL to download the extension from
+     * @returns {Promise<Object>} - Object containing unzipped entries
      */
-    static async fetchManifest(url) {
+    static async fetchPackage(url) {
         const response = await fetch(url)
-        if (!response.ok) throw new Error("Failed to download crx: " + response.status)
+        if (!response.ok) throw new Error("Failed to download extension: " + response.status)
 
         const buffer = await response.arrayBuffer()
-
         const zipBuffer = ExtensionStore.#stripCrxHeader(buffer)
-
         const { entries } = await unzipit.unzip(zipBuffer)
+        return entries
+    }
 
+    /**
+     * Fetches Chrome extension CRX3, extracts and returns the manifest.json as JSON object.
+     * @param {Object} entries - An Object containing the package.
+     * @returns {Promise<Object>} Resolves to manifest.json object.
+     */
+    static async getManifest(entries) {
         const manifestEntry = entries["manifest.json"] || Object.values(entries).find(e => e.name.endsWith("/manifest.json"))
         if (!manifestEntry) throw new Error("manifest.json not found")
 
         return await manifestEntry.json()
+    }
+
+    /**
+     * Extracts JavaScript files from extension entries
+     * @param {Object} entries - Unzipped extension entries
+     * @returns {Object} - Object mapping file paths to their content
+     */
+    static extractJavascript(entries) {
+        const manifest = ExtensionStore.getManifest(entries)
+        const scripts = {}
+        const jsFilePaths = new Set()
+
+        if (manifest.background) {
+            if (manifest.background.service_worker) {
+                jsFilePaths.add(manifest.background.service_worker)
+            } else if (manifest.background.scripts) {
+                manifest.background.scripts.forEach(script => jsFilePaths.add(script))
+            } else if (manifest.background.page) {
+                jsFilePaths.add(manifest.background.page)
+            }
+        }
+
+        if (manifest.content_scripts) {
+            manifest.content_scripts.forEach(cs => {
+                if (cs.js) cs.js.forEach(script => jsFilePaths.add(script))
+            })
+        }
+
+        const popupPage = manifest.action?.default_popup || manifest.browser_action?.default_popup
+        if (popupPage) jsFilePaths.add(popupPage)
+
+        // Extract all JS files
+        for (const [path, entry] of Object.entries(entries)) {
+            if (path.endsWith('.js')) {
+                try {
+                    // We need to await here but can't use await in a forEach
+                    scripts[path] = entry.text()
+                } catch (error) {
+                    scripts[path] = Promise.resolve(`// Error extracting file: ${error.message}`)
+                }
+            }
+        }
+
+        // Extract scripts from HTML files that are referenced in the manifest
+        for (const filePath of jsFilePaths) {
+            if ((filePath.endsWith('.html') || filePath.endsWith('.htm')) && !scripts[filePath]) {
+                try {
+                    const htmlEntry = entries[filePath] ||
+                        Object.values(entries).find(e => e.name.endsWith('/' + filePath))
+
+                    if (htmlEntry) {
+                        scripts[filePath] = htmlEntry.text().then(content => {
+                            // Extract inline scripts
+                            const scriptMatches = content.match(/<script\b[^>]*>([\s\S]*?)<\/script>/gm) || []
+                            return scriptMatches.join('\n')
+                        })
+                    }
+                } catch (error) {
+                    scripts[filePath] = Promise.resolve(`// Error extracting HTML: ${error.message}`)
+                }
+            }
+        }
+
+        // Resolve all promises to get the actual content
+        return Promise.all(
+            Object.entries(scripts).map(async ([path, contentPromise]) => {
+                return [path, await contentPromise]
+            })
+        ).then(entries => Object.fromEntries(entries))
+    }
+
+    /**
+     * Analyzes JavaScript code using acorn
+     * @param {Object} scripts - Object mapping file paths to their content
+     * @returns {Object} - Analysis results
+     */
+    static analyseJavascript(scripts) {
+        const analysis = {}
+
+        for (const [path, content] of Object.entries(scripts)) {
+            if (!content || typeof content !== 'string') {
+                analysis[path] = { error: "Invalid content" }
+                continue
+            }
+
+            try {
+                const ast = acorn.parse(content, {
+                    ecmaVersion: 2022,
+                    sourceType: 'module',
+                    locations: true
+                })
+
+                const fileAnalysis = {
+                    functions: [],
+                    chrome_api_calls: [],
+                    network_requests: [],
+                    event_listeners: [],
+                    permissions_used: new Set(),
+                    storage_access: [],
+                    message_passing: []
+                }
+
+                // Walk the AST to analyze patterns
+                acorn.walk.recursive(ast, {}, {
+                    FunctionDeclaration(node, state, c) {
+                        fileAnalysis.functions.push({
+                            type: 'function',
+                            name: node.id?.name || 'anonymous',
+                            params: node.params.length,
+                            loc: node.loc
+                        })
+                        node.body && c(node.body, state)
+                    },
+
+                    ArrowFunctionExpression(node, state, c) {
+                        fileAnalysis.functions.push({
+                            type: 'arrow',
+                            params: node.params.length,
+                            loc: node.loc
+                        });
+                        node.body && c(node.body, state)
+                    },
+
+                    CallExpression(node, state, c) {
+                        // Chrome API calls
+                        if (node.callee.type === 'MemberExpression') {
+                            let obj = node.callee.object
+
+                            // Check for chrome.* API
+                            if (obj.type === 'MemberExpression' &&
+                                obj.object.type === 'Identifier' &&
+                                obj.object.name === 'chrome') {
+
+                                const api = `chrome.${obj.property.name}.${node.callee.property.name}`;
+                                fileAnalysis.chrome_api_calls.push({
+                                    api,
+                                    loc: node.loc
+                                })
+
+                                // Infer permissions from API usage
+                                if (obj.property.name === 'tabs') {
+                                    fileAnalysis.permissions_used.add('tabs');
+                                } else if (obj.property.name === 'storage') {
+                                    fileAnalysis.permissions_used.add('storage');
+                                    fileAnalysis.storage_access.push({
+                                        operation: node.callee.property.name,
+                                        loc: node.loc
+                                    })
+                                } else if (obj.property.name === 'runtime' &&
+                                    ['sendMessage', 'onMessage'].includes(node.callee.property.name)) {
+                                    fileAnalysis.message_passing.push({
+                                        type: node.callee.property.name,
+                                        loc: node.loc
+                                    })
+                                }
+                            }
+
+                            // Network requests
+                            if ((obj.type === 'Identifier' && obj.name === 'fetch') ||
+                                (node.callee.property.name === 'open' &&
+                                    obj.type === 'Identifier' &&
+                                    obj.name === 'XMLHttpRequest')) {
+
+                                let url = null
+                                if (node.arguments.length > 0 &&
+                                    node.arguments[0].type === 'Literal') {
+                                    url = node.arguments[0].value
+                                }
+
+                                fileAnalysis.network_requests.push({
+                                    type: obj.name === 'XMLHttpRequest' ? 'xhr' : 'fetch',
+                                    url,
+                                    loc: node.loc
+                                })
+
+                                fileAnalysis.permissions_used.add('*://*/*')
+                            }
+                        }
+
+                        // Process all nested elements
+                        node.arguments.forEach(arg => c(arg, state))
+                        c(node.callee, state)
+                    },
+
+                    MemberExpression(node, state, c) {
+                        // Event listeners
+                        if (node.property.type === 'Identifier' &&
+                            ['addEventListener', 'removeEventListener'].includes(node.property.name)) {
+                            fileAnalysis.event_listeners.push({
+                                type: node.property.name,
+                                loc: node.loc
+                            })
+                        }
+
+                        c(node.object, state);
+                        if (node.computed) c(node.property, state)
+                    }
+                })
+
+                // Convert Set to Array for serialization
+                fileAnalysis.permissions_used = [...fileAnalysis.permissions_used]
+
+                analysis[path] = fileAnalysis;
+            } catch (error) {
+                analysis[path] = {
+                    error: error.message,
+                    partial_content: content.substring(0, 100) + '...'
+                }
+            }
+        }
+
+        return analysis
+    }
+
+    /**
+     * Parses and analyzes the JavaScript files of an extension
+     * @param {string} entries - The contents of te package to analyze
+     * @returns {Promise<Object>} - Analysis results of the extension code
+     */
+    static async analyseStatically(entries) {
+        const manifest = ExtensionStore.getManifest(entries)
+        const scripts = await this.extractJavascript(entries)
+        const analysis = this.analyseJavascript(scripts)
+        return {
+            name: manifest.name,
+            manifest_version: manifest.manifest_version,
+            permissions: manifest.permissions || [],
+            host_permissions: manifest.host_permissions || [],
+            content_scripts: manifest.content_scripts?.length || 0,
+            background: !!manifest.background,
+            files_analyzed: Object.keys(analysis).length,
+            analysis
+        }
     }
 
     static #stripCrxHeader(buffer) {

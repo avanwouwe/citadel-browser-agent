@@ -47,9 +47,12 @@ async function renderPage() {
         const storeInfo = await fetchStoreInfo(extensionPage)
         renderStoreInfo(storeInfo)
 
-        const manifestInfo = await fetchManifestInfo(storeInfo.downloadUrl)
-        renderManifestInfo(manifestInfo)
-        console.log(storeInfo, manifestInfo)
+        const entries = await ExtensionStore.fetchPackage(storeInfo.downloadUrl)
+        const manifest = await ExtensionStore.getManifest(entries)
+        renderManifestInfo(manifest)
+
+        const staticAnalysis = ExtensionStore.analyseStatically(entries)
+        console.log(staticAnalysis)
     }
 }
 
@@ -64,10 +67,6 @@ async function fetchStoreInfo(storeUrl) {
     extensionInfo.extensionId = ExtensionStore.extensionIdOf(storeUrl)
 
     return extensionInfo
-}
-
-async function fetchManifestInfo(downloadUrl) {
-    return await sendMessagePromise('FetchExtensionManifest', { url: downloadUrl })
 }
 
 function renderStoreInfo(extensionInfo) {
