@@ -363,7 +363,7 @@ class ExtensionStore {
 
             // rating
             const ratingNode = Array.from(dom.querySelectorAll('[style]'))
-                .find(el => el.style.getPropertyValue('--star-icon-size') !== '')
+                .find(el => el.getAttribute('style')?.includes('--star-icon-size'))
             const rating = parseRatingsNumber(ratingNode?.childNodes[0]?.childNodes[0]?.textContent) / 1000
 
             // numInstalls
