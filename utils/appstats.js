@@ -58,13 +58,15 @@ class AppStats {
         AppStats.markDirty()
     }
 
-    static deleteAccount(app, username) {
-        assert(app && username, "must specify app and username")
+    static deleteAccount(appName, username) {
+        assert(appName && username, "must specify app and username")
+        const app = AppStats.forAppName(appName)
+        if (!app) return
 
         const accounts = app.getOrSet("accounts", { })
         delete accounts[username]
 
-        PasswordVault.deleteAccount(username, app)
+        PasswordVault.deleteAccount(username, appName)
 
         AppStats.markDirty()
     }

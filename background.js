@@ -97,7 +97,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			// purge accounts if they haven't been used for a while
 			for (const [username, details] of AppStats.allAccounts(app)) {
 				if (isDate(details.lastConnected) && daysSince(details.lastConnected) > config.account.retentionDays) {
-					AppStats.deleteAccount(app, username)
+					AppStats.deleteAccount(appName, username)
 				}
 			}
 		}
@@ -409,11 +409,8 @@ chrome.webRequest.onCompleted.addListener(
 
 			new SessionState(details.initiator.toURL().origin).load().then(sessionState =>  {
 				if (!sessionState.auth?.username) return
-
-				const app = AppStats.forURL(details.initiator)
-				if (app) {
-					AppStats.deleteAccount(app, sessionState.auth.username)
-				}
+				const appName = getSitename(details.initiator)
+				AppStats.deleteAccount(appName, sessionState.auth.username)
 			})
 		}
 	}, { urls: ["<all_urls>"] }
