@@ -37,7 +37,7 @@ class PasswordVault {
         }
 
         let passwordReuse = Object.values(matchingPasswords)
-            .filter(account => account.system !== system)
+            .filter(account => ! inSameDomain(account.system, system))
             .map(account => ({ username: account.username, system: account.system }))
 
         if (passwordReuse.length > 0 && !isProtectedSystem) {

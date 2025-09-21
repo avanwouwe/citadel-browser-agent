@@ -89,6 +89,15 @@ const SLD_DOMAINS = [
     "gob.mx"
 ];
 
+function stripSubdomain(host) {
+    const parts = host.split('.')
+    if (parts.length <= 1) return host
+    return parts.slice(1).join('.')
+}
+
+function inSameDomain(hostA, hostB) {
+    return stripSubdomain(hostA) === stripSubdomain(hostB);
+}
 
 function getDomain(hostname) {
     if (!hostname) return
