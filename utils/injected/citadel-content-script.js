@@ -178,18 +178,24 @@ async function checkLogin(event, button) {
     event.preventDefault()
     event.stopImmediatePropagation()
 
-    const login = await loginPromise
+    try {
+        const login = await loginPromise
 
-    if (PasswordCheck.isFirstConnection(login.username) && login.password.reuse) {
-        sendMessage("warn-reuse", { report: login })
-        callServiceWorker("DeletePassword", { username: login.username, system })
-        return
+        if (PasswordCheck.isFirstConnection(login.username) && login.password.reuse) {
+            sendMessage("warn-reuse", { report: login })
+            callServiceWorker("DeletePassword", { username: login.username, system })
+            return
+        }
+
+        if (login.password) sendMessage("account-usage", { report: login })
+        if (login.totp) sendMessage("receive-totp")
+
+        repeatEvent(event, button)
+    } catch (error) {
+        console.error('exception when analyzing login', error.stack)
+        repeatEvent(event, button)
     }
 
-    if (login.password) sendMessage("account-usage", { report: login })
-    if (login.totp) sendMessage("receive-totp")
-
-    repeatEvent(event, button)
 }
 
 function analyzeForm(formElements, eventElement) {
