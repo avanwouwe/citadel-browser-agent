@@ -6,7 +6,7 @@ async function readJsonFile(path) {
     return await response.json()
 }
 
-const htmlAttributes = {
+const htmlEscapeChars = {
     '&': '&amp;',
     '"': '&quot;',
     "'": '&#39;',
@@ -20,10 +20,10 @@ const htmlAttributes = {
     '}': '&#125;',
     '%': '&#37;'
 }
-const htmlAttributesRegex = new RegExp(`[${Object.keys(htmlAttributes).map(ch => '\\' + ch).join('')}]`, 'g')
+const htmlEscapeRegex = new RegExp(`[${Object.keys(htmlEscapeChars).map(ch => '\\' + ch).join('')}]`, 'g')
 
-String.prototype.escapeHtmlAttr= function () {
-    return this.replace(htmlAttributesRegex, ch => htmlAttributes[ch])
+String.prototype.escapeHtmlEntities= function () {
+    return this.replace(htmlEscapeRegex, ch => htmlEscapeChars[ch])
 }
 
 class Logo {
