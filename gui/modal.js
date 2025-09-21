@@ -43,8 +43,17 @@ class Modal {
         const acknowledge = shadow.getElementById('acknowledgeButton')
         acknowledge.hidden = options.onAcknowledge === undefined
         acknowledge.textContent = options.text.acknowledge || ''
+
+        function closeModal() {
+            host.remove()
+            window.removeEventListener('keydown', onEsc)
+        }
+        const onEsc = function(e) { if (e.key === 'Escape') closeModal() }
+        window.addEventListener('keydown', onEsc)
+
         acknowledge.addEventListener('click', function () {
             sendMessage(options.onAcknowledge)
+            closeModal()
         })
 
         if (!options.exception) {
