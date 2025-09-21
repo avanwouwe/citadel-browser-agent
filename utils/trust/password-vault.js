@@ -17,6 +17,11 @@ class PasswordVault {
 
         const matchingPasswords = PasswordVault.#passwords[passwordHash] ?? {}
 
+        // only take check against accounts that are *currently* protected
+        Object.entries(matchingPasswords)
+            .filter(([_, account]) => !AccountTrust.checkFor(account.username, account.system))
+            .forEach(([accountKey]) => delete matchingPasswords[accountKey])
+
         if (isProtectedSystem) {
             PasswordVault.#passwords[passwordHash] = matchingPasswords
 

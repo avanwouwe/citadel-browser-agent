@@ -54,6 +54,15 @@ class AccountTrust {
         return accounts
     }
 
+    static async deleteAccount(username, system) {
+        assert(username && system, "missing either username or system")
+
+        AppStats.deleteAccount(system, username)
+        await logOffDomain(system)
+        await injectFuncIntoDomain(system, () => location.reload())
+        logger.log(nowTimestamp(), "account management", "account deleted", `https://${system}`, Log.WARN, undefined, `user deleted account of '${username}' for ${system}`)
+    }
+
     static #notify() {
         let state = DeviceTrust.State.PASSING
         for (const acct of AccountTrust.failingAccounts()) {

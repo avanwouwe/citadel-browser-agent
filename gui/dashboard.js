@@ -60,7 +60,7 @@ function renderDeviceDashboard() {
                 if (ctrl.report.errors.length > 30) {
                     errors += '\n...'
                 }
-                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlAttr()}">&#128269;</span>`
+                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
             }
 
             const tr = document.createElement("tr")
@@ -80,10 +80,13 @@ function renderAccountIssues() {
         const tb = document.getElementById("accounttrust-issues")
         tb.innerHTML = ""
 
+        tb.removeEventListener('click', handleDeleteClick)
+        tb.addEventListener('click', handleDeleteClick)
+
         for (const acct of accounttrust.accounts) {
             let errors = acct.report.issues?.description
             if (acct.report.issues?.count > 0) {
-                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlAttr()}">&#128269;</span>`
+                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
             }
 
             const tr = document.createElement("tr")
@@ -91,10 +94,21 @@ function renderAccountIssues() {
                 `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
                 `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
                 `<td>${errors}</td>` +
-                `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>`
+                `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
+                `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
+
             tb.appendChild(tr)
         }
     })
+}
+
+async function handleDeleteClick(event) {
+    if (event.target.classList.contains('delete-btn')) {
+        const username = event.target.dataset.username
+        const system = event.target.dataset.system
+        await callServiceWorker("DeleteAccount", { username, system })
+        renderAccountIssues()
+    }
 }
 
 let port

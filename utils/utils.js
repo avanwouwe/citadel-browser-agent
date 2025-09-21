@@ -370,3 +370,55 @@ function onMessage(type, listener, once= false) {
 
     chrome.runtime.onMessage.addListener(safeListener)
 }
+
+
+/**
+ * Helper function to log off a specific application by wiping cookies, local storage, etc.
+ * @param {string} domain - The domain of application that should be logged off
+ */
+
+async function logOffDomain(domain) {
+    // Remove cookies
+    await chrome.cookies.getAll({ domain }, (cookies) => {
+        cookies.forEach((cookie) => {
+            const cookieDetails = {
+                url: `http${cookie.secure ? 's' : ''}://${cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain}${cookie.path}`,
+                name: cookie.name
+            }
+
+            chrome.cookies.remove(cookieDetails, () => {
+                if (chrome.runtime.lastError) {
+                    console.error(`Error removing cookie ${cookie.name}:`, chrome.runtime.lastError)
+                }
+            })
+        })
+    })
+
+    // Clear storage, unregister service workers and clear cache
+    await injectFuncIntoDomain(domain, () => {
+        try {
+            localStorage.clear()
+            sessionStorage.clear()
+            indexedDB?.databases()?.then(dbs => {
+                dbs.forEach(db => {
+                    indexedDB.deleteDatabase(db.name)
+                })
+            })
+        } catch (e) {
+            console.error('Error clearing storage:', e)
+        }
+
+        navigator?.serviceWorker.getRegistrations()
+            .then(registrations => {
+                for (let registration of registrations) {
+                    registration.unregister()
+                }
+            })
+
+        caches?.keys().then(names => {
+            for (let name of names) {
+                caches.delete(name)
+            }
+        })
+    })
+}

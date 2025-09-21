@@ -195,7 +195,6 @@ async function checkLogin(event, button) {
         console.error('exception when analyzing login', error.stack)
         repeatEvent(event, button)
     }
-
 }
 
 function analyzeForm(formElements, eventElement) {
