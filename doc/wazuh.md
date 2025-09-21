@@ -75,7 +75,7 @@ PUT _template/wazuh-browseragent
 ```
 
 > [!NOTE]  
-> This template will only be applied when the **next** index is created, which is generally the next day. If events are injected in the current index, the fields will not be the correct type, and the same field will have different types in different indexes. This may cause strange behaviour elsewhere. You may want to wait until the next index is created, or delete the current index (if it does not contain important information)
+> This template will only be applied when the **next** index is created, which is generally the next day. If events are injected in the current index, the fields will not be the correct type, and the same field will have different types in different indexes. This may cause strange behaviour elsewhere. You may want to wait with injecting new events until the next index is created, or delete the current index (though this means losing that day's worth of security events
 
 # add decoder
 In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` > `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [/doc/0590-browser-agent_decoder.xml](/doc/0590-browser-agent_decoder.xml).
