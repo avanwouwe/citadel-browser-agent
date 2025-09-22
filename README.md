@@ -80,7 +80,6 @@ The shadow IT detection only reports on interaction with (authenticated) applica
 
 The data is logged on the local machine and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 
-
 ## Installation
 There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM.
 
@@ -103,9 +102,7 @@ Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) 
 * events lower than `INFO` log level are masked or hashed (meaning only sensitive events such as downloads and alerts are logged with details)
 * log levels allow you to log events locally but not send them to your EDR, thus allowing post-incident analysis without having everything centrally logged
 
-See the [configuration](/config.js) to understand the default settings.
-
-If you have informed your staff of the fact that you are monitoring their internet use, you do not reduce the default privacy-related measures, you restrict access to the log entries, and you have listed an entry for "logging and monitoring" in your Records of Processing Activities, you are likely in compliance with the GDPR.
+A [Data Protection Transparency statement](/doc/transparency.md) is available that can be used to perform Data Privacy Impact Analysis (DPIA)
 
 ### which browsers are supported?
 Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
