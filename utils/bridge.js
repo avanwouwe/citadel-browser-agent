@@ -31,7 +31,7 @@ class Bridge {
 
         Bridge.listenTo("GetAccountIssues", () => ({ accounts: AccountTrust.failingAccounts() }))
 
-        Bridge.listenTo("DeleteAccount", ({username, system}) => AccountTrust.deleteAccount(system, username))
+        Bridge.listenTo("DeleteAccount", ({username, system}) => AccountTrust.deleteAccount(username, system))
 
         Bridge.listenTo("GetDeviceStatus", () => devicetrust.getStatus())
 
