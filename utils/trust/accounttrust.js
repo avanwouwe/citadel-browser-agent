@@ -54,13 +54,16 @@ class AccountTrust {
         return accounts
     }
 
-    static async deleteAccount(username, system) {
-        assert(username && system, "missing either username or system")
+    static async deleteAccount(username, appName) {
+        assert(username && appName, "missing either username or system")
 
-        AppStats.deleteAccount(system, username)
-        await logOffDomain(system)
-        await injectFuncIntoDomain(system, () => location.reload())
-        logger.log(nowTimestamp(), "account management", "account deleted", `https://${system}`, Log.WARN, undefined, `user deleted account of '${username}' for ${system}`)
+        AppStats.deleteAccount(appName, username)
+        await logOffDomain(appName)
+        await injectFuncIntoDomain(appName, () => location.reload())
+
+        AccountTrust.#notify()
+
+        logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, undefined, `user deleted account of '${username}' for ${appName}`)
     }
 
     static #notify() {
@@ -69,6 +72,11 @@ class AccountTrust {
             if (DeviceTrust.State.indexOf(acct.report.state) > DeviceTrust.State.indexOf(state)) {
                 state = acct.report.state
             }
+        }
+
+        const currNotif = Notification.showing
+        if (currNotif && currNotif.type === AccountTrust.TYPE && currNotif.level !== state) {
+            Notification.acknowledge(AccountTrust.TYPE)
         }
 
         const title = t("accounttrust.notification.title")
