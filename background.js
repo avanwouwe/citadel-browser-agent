@@ -834,6 +834,10 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "password reuse", "password reuse exception granted", request.url, Log.ERROR, undefined, `user requested exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 
+	if (request.type === "acknowledge-mfa") {
+		Modal.removeFromDomain(request.domain)
+	}
+
 	if (request.type === "allow-mfa") {
 		const app = AppStats.forURL(siteUrl)
 		const account = AppStats.getAccount(app, app.lastAccount)
