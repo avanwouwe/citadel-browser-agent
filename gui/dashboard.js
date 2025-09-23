@@ -128,6 +128,8 @@ function connect() {
         if (msg.type === 'RefreshDeviceStatus') {
             updateBtn.classList.remove('refreshing')
             renderDeviceDashboard()
+        } else if (msg.type === 'RefreshAccountStatus') {
+            renderAccountDashboard()
         }
     })
 }
