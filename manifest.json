@@ -45,6 +45,7 @@
       "/utils/context.js",
       "/utils/utils.js",
       "/utils/bridge.js",
+      "/utils/dashboard.js",
       "/utils/persistence.js",
       "/utils/encryption/bcrypt.js",
       "/utils/encryption/pbkdf2.js",

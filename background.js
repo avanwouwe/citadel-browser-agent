@@ -45,20 +45,10 @@ Port.onMessage("restart",() => {
 	chrome.runtime.reload()
 })
 
-let dashboard
-chrome.runtime.onConnect.addListener((port) => {
-	port.onDisconnect.addListener(() => {
-		dashboard = null
-		console.debug("Dashboard port disconnected")
-	})
-
-	dashboard = port
-})
-
 Port.onMessage("devicetrust",(report) => {
 	debug("received device trust report", report)
 	devicetrust.addReport(report)
-	dashboard?.postMessage({type: "RefreshDeviceStatus"})
+	Dashboard.sendMessage({type: "RefreshDeviceStatus"})
 })
 
 chrome.runtime.onUpdateAvailable.addListener(() => {
