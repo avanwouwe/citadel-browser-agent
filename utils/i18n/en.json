@@ -42,7 +42,7 @@
     "password": {
       "reuse": {
         "title": "Possible Phishing Alert",
-        "message": "You are using the password of {{username}} for {{system}}, to connect to another site.\n\n⚠\uFE0F This may be a phishing attack: verify that this is the site you think it is.",
+        "message": "You are using the password of {{username}} for {{system}}, to connect to another site.\n\n⚠\uFE0F This may be a phishing attack: verify that this is the site you think it is.\n\nIf it is; re-use of passwords is dangerous, and not allowed.",
         "other-system": "another system"
       },
       "quality": {
@@ -74,7 +74,7 @@
   },
   "mfa": {
     "title": "You are not connecting with MFA",
-    "disconnected": "You have been disconnected because you authenticated using only a password. \n\nReconnect and configure your account to use Multi Factor Authentication (MFA) such as a Time-based One-Time Password (TOTP).\nContact {{contact}} if you need help."
+    "disconnected": "You have been disconnected because you authenticated using only a password. \n\nReconnect and configure your account to use Multi Factor Authentication (MFA) such as a Time-based One-Time Password (TOTP).\n\nContact {{contact}} if you need help."
   },
   "block-page": {
     "not-specified": "Not specified",

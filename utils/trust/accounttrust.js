@@ -82,6 +82,8 @@ class AccountTrust {
         } else if (state === DeviceTrust.State.BLOCKING) {
             Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.blocking"))
         }
+
+        Dashboard.sendMessage({type: "RefreshAccountStatus"})
     }
 
     static {

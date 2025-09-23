@@ -11,8 +11,9 @@ let t
 I18n.loadPage('/utils/i18n', (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
+
     renderDeviceDashboard()
-    renderAccountIssues()
+    renderAccountDashboard()
 
     const params = new URLSearchParams(window.location.search)
     const tabName = params.get('tab') ?? 'devicetrust'
@@ -28,6 +29,13 @@ function selectTab(tabId) {
         tabButtons[i].classList.toggle('active', isActive)
         tabContents[i].classList.toggle('active', isActive)
     }
+
+    const params = new URLSearchParams(window.location.search)
+    params.set('tab', tabId)
+    window.history.replaceState({}, '', `${window.location.pathname}?${params}`)
+
+    renderDeviceDashboard()
+    renderAccountDashboard()
 }
 
 function renderDeviceDashboard() {
@@ -75,7 +83,7 @@ function renderDeviceDashboard() {
     })
 }
 
-function renderAccountIssues() {
+function renderAccountDashboard() {
     sendMessage("GetAccountIssues", accounttrust => {
         const tb = document.getElementById("accounttrust-issues")
         tb.innerHTML = ""
@@ -107,7 +115,7 @@ async function handleDeleteClick(event) {
         const username = event.target.dataset.username
         const system = event.target.dataset.system
         await callServiceWorker("DeleteAccount", { username, system })
-        renderAccountIssues()
+        renderAccountDashboard()
     }
 }
 
@@ -131,7 +139,7 @@ function reconnect() {
 
 connect()
 
-function refreshStatus() {
+function refreshDeviceStatus() {
     sendMessage("RefreshDeviceStatus")
 }
 
@@ -141,7 +149,7 @@ updateBtn.addEventListener('click', function () {
 
     updateBtn.classList.add('refreshing')
 
-    refreshStatus()
+    refreshDeviceStatus()
 });
 
 (function(){
