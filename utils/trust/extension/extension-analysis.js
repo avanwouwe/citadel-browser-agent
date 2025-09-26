@@ -16,7 +16,7 @@ class ExtensionAnalysis {
     }
 
     static #blockPage(tabId, url) {
-        tabState?.setState(tabId, "ExtensionAnalysis", {
+        tabState?.setState("ExtensionAnalysis", tabId, {
             url,
             logo: Logo.getLogo(),
             allowException: config.extensions.exceptions.allowed,

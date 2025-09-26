@@ -16,7 +16,7 @@ function showPopup(message, title = "Citadel browser agent"
 }
 
 function blockPage(tabId, reason, blockedPage) {
-    tabState?.setState(tabId, "BlockedPage", {
+    tabState?.setState("BlockedPage", tabId, {
         reason,
         url: blockedPage,
         contact: config.company.contact,

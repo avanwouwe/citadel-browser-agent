@@ -19,7 +19,7 @@ class TabState {
         this.#state = { }
     }
 
-    setState(tabId, key, value) {
+    setState(key, tabId, value) {
         assert ( this.#handler, "only service worker can set state")
 
         if (tabId === undefined) { return console.error("tabId parameter is required") }
@@ -36,6 +36,12 @@ class TabState {
         }
 
         return callServiceWorker("GetTabState", { key })
+    }
+
+    static {
+        chrome.tabs.onRemoved.addListener(tabId => {
+            delete this.#state[tabId]
+        })
     }
 }
 
