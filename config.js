@@ -164,6 +164,10 @@ class Config {
                 warn: 2,
                 block: 7
             },
+            exceptions: {
+                duration: 60,
+                domains: [ ]
+            },
             passwordReuse: {
                 exceptions: {
                     allowed: false,
@@ -311,7 +315,7 @@ class Config {
                 allowed: true,
             },
             id: {
-                allowed: ["*"],
+                allowed: [""],
                 forbidden: [],
             },
             category: {
