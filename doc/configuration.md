@@ -52,7 +52,7 @@ For example, to ignore warnings about HTTP traffic over your VPN, you can overri
     ...
 ```
 
-Or you can enable password policy enforcement for any system on your domain, and irrespective of the username used:
+Or you can enable password policy enforcement for any system, and irrespective of the username used:
 ```
     ...
     "exceptions": [
@@ -62,7 +62,7 @@ Or you can enable password policy enforcement for any system on your domain, and
           "config": {
             "account": {
               "checkOnlyInternal": false,
-              "checkOnlyApplications": false
+              "checkOnlyProtected": false
             }
           }
         }
@@ -137,7 +137,7 @@ You can configure your own password policy:
     ...
     "account": {
         "checkOnlyInternal": true,
-        "checkOnlyApplications": true,
+        "checkOnlyProtected": true,
         "passwordPolicy": {
             "minLength": 15,
             "minNumberOfDigits": 1,

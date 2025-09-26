@@ -172,7 +172,7 @@ class Config {
             },
             retentionDays: 90,
             checkOnlyInternal: true,
-            checkOnlyApplications: true,
+            checkOnlyProtected: true,
             passwordPolicy: {
                 minLength: 15,
                 minNumberOfDigits: 1,

@@ -151,7 +151,7 @@ function getSitename(url) {
     return url?.toURL()?.hostname
 }
 
-function isApplication(sitename) {
+function isProtected(sitename) {
     return matchDomain(sitename, config.domain.isApplication)  === true ||
         matchDomain(sitename, config.company.applications) === true ||
         matchDomain(sitename, config.company.domains) === true
