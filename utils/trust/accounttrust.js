@@ -1,6 +1,6 @@
 class AccountTrust {
 
-    static TYPE = "accounttrust"
+    static TYPE = "account"
 
     static checkFor(username, sitename) {
         if (sitename.isURL()) sitename = getSitename(sitename)

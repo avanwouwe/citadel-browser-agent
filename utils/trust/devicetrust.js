@@ -1,6 +1,6 @@
 class DeviceTrust {
 
-    static TYPE = "devicetrust"
+    static TYPE = "device"
 
     static State = class {
         static UNKNOWN = "UNKNOWN"

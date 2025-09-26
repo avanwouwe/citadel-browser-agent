@@ -242,7 +242,7 @@ def loadConfig():
 
         last_config_change = mtime
 
-        oqsueryPath = config.get("devicetrust", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
+        oqsueryPath = config.get("device", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
 
 
 
@@ -255,7 +255,7 @@ def osquery(query):
     return json.loads(proc.stdout)
 
 def loadControlPacks():
-    controlsSpec = config.get("devicetrust", {}).get("controls", {}).get("packs", [])
+    controlsSpec = config.get("device", {}).get("controls", {}).get("packs", [])
     controlsSpec.insert(0, {"type": "windows", "path": "controls/windows-default.json"})
     controlsSpec.insert(0, {"type": "macos",  "path": "controls/macos-default.json"})
 
@@ -333,7 +333,7 @@ def checkBlacklist(type, forbiddenLabel, requiredLabel, query):
     report = { }
 
     try:
-        blacklistConfig = config.get("devicetrust", {}).get(type, {})
+        blacklistConfig = config.get("device", {}).get(type, {})
         required = set(blacklistConfig.get("required", []))
         forbidden = set(blacklistConfig.get("forbidden", []))
 

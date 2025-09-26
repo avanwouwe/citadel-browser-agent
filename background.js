@@ -793,7 +793,7 @@ onMessage((request, sender) => {
 
 	if (request.type === "allow-alert") {
 		const alertType = request.alert.type
-		const exceptionDuration = config[alertType === "devicetrust" ? "device" : "account" ].exceptions.duration * ONE_MINUTE
+		const exceptionDuration = config[alertType].exceptions.duration * ONE_MINUTE
 
 		Notification.acknowledge(alertType)
 
@@ -805,7 +805,7 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "warn-reuse") {
-		const allowException = Config.forURL(siteUrl).account.passwordReuse.exceptions.allowed
+		const allowException = config.account.passwordReuse.exceptions.allowed
 		const report = request.report
 		const account = PasswordVault.getReusedAccount(report.password.reuse, report.username, sender.origin)
 		const onAcknowledge = { type: 'acknowledge-reuse', username: report.username, system: sender.origin }

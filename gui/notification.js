@@ -61,10 +61,12 @@ class Notification {
         const onAcknowledge = { type: 'acknowledge-alert', alert }
         let onException
         if (alert.level === DeviceTrust.State.BLOCKING) {
+            // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
             const blockedOverPassword = AccountTrust.failingAccounts(hostname)?.some(a => a?.report?.state === DeviceTrust.State.BLOCKING)
             if (blockedOverPassword) return false
 
-            if (config.device.exceptions.duration > 0 && matchDomain(hostname, config.device.exceptions.domains)) {
+            const exceptions = config[alert.type].exceptions
+            if (exceptions.duration > 0 && matchDomain(hostname, exceptions.domains)) {
                 onException = { type: 'allow-alert', alert }
             }
         }
