@@ -10,6 +10,10 @@ class TabState {
             }
 
             onMessage("GetTabState", this.#handler)
+
+            chrome.tabs.onRemoved.addListener(tabId => {
+                delete this.#state[tabId]
+            })
         }
     }
 
@@ -36,12 +40,6 @@ class TabState {
         }
 
         return callServiceWorker("GetTabState", { key })
-    }
-
-    static {
-        chrome.tabs.onRemoved.addListener(tabId => {
-            delete this.#state[tabId]
-        })
     }
 }
 
