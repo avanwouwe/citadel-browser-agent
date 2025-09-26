@@ -296,39 +296,6 @@ def checkSystemUpdated():
 
     return report
 
-def reportBrowsers():
-    try:
-        if SYSTEM_OS == "macos":
-            browser_ids = [
-                'com.google.Chrome',
-                'org.mozilla.firefox',
-                'com.brave.Browser',
-                'com.microsoft.edgemac',
-                'com.operasoftware.Opera'
-            ]
-            in_clause = ', '.join(f"'{bid}'" for bid in browser_ids)
-            query = (f"SELECT bundle_identifier AS brand, path, bundle_short_version AS version FROM apps WHERE bundle_identifier IN ({in_clause}) AND last_opened_time > 0;")
-            return list(osquery(query))
-
-        elif SYSTEM_OS == "windows":
-            browser_ids = [
-                'Google Chrome',
-                'Mozilla Firefox',
-                'Brave',
-                'Microsoft Edge',
-                'Opera'
-            ]
-            in_clause = ', '.join(f"'{bid}'" for bid in browser_ids)
-            query = (f"SELECT name AS brand, install_location AS path, version FROM programs WHERE name IN ({in_clause});")
-            return list(osquery(query))
-
-        else:
-            return []
-
-    except Exception as e:
-        exception("Failed to perform browser check", e)
-
-
 def checkBlacklist(type, forbiddenLabel, requiredLabel, query):
     report = { }
 
@@ -426,7 +393,7 @@ def generateReport():
     results.update(checkProcesses())
     results.update(checkSystemUpdated())
 
-    return { "controls": { "definitions":  definitions, "results": results }, "browsers": reportBrowsers() }
+    return { "controls": { "definitions":  definitions, "results": results } }
 
 def periodicChecksWorker():
     while True:

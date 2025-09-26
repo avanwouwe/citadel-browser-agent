@@ -63,17 +63,6 @@ class Browser {
         }
     })()
 
-    static isUpdated(installedBrowsers) {
-        for (let browser of installedBrowsers) {
-            browser = this.#normalizeVersion(browser)
-            if (browser.brand === Browser.version.brand && this.compareVersions(browser.version, Browser.version.version) > 0) {
-                return false
-            }
-        }
-
-        return true
-    }
-
     static compareVersions(a, b) {
         const pa = a.split('.').map(Number)
         const pb = b.split('.').map(Number)
