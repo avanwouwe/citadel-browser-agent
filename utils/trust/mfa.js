@@ -92,5 +92,5 @@ class MFACheck {
     static isMFA = (str) => MFACheck.#MFA_NAME_REGEX.test(str)
 
     static #AUTH_URL_REGEX = /(^|[/_.-])(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)|(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)([/_.-]|$)/i
-    static findAuthPattern = (str) => str.match(MFACheck.#AUTH_URL_REGEX)?.[0]
+    static findAuthPattern = (str) => str?.match(MFACheck.#AUTH_URL_REGEX)?.[0]
 }
