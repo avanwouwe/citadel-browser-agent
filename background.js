@@ -691,6 +691,26 @@ chrome.webNavigation.onCommitted.addListener((details) => {
 	registerInteraction(details.url, details)
 })
 
+chrome.webNavigation.onCompleted.addListener(async details => {
+	const { tabId, url } = details
+
+	if (url) {
+		const currUrl = url.toURL()
+		const prevUrl = await tabState?.getState("LastUrl", tabId)?.then(url => url?.toURL())
+
+		if (MFACheck.findAuthPattern(prevUrl?.href) && prevUrl.origin + prevUrl.pathname === currUrl.origin + currUrl.pathname) {
+			new SessionState(details.url.toURL().origin).load().then(sessionState =>  {
+				if (! sessionState.auth?.username) return
+				const appName = getSitename(details.url)
+				AppStats.deleteAccount(appName, sessionState.auth.username)
+				debug("detected failed login, not storing account")
+			})
+		}
+	}
+
+	tabState?.setState("LastUrl", tabId, url)
+})
+
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 	if (changeInfo.status !== "complete") return
 
@@ -752,7 +772,7 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
 	}
 
-	if (request.type === "account-usage" || request.type === "allow-reuse") {
+	if (request.type === "account-usage") {
 		registerAccountUsage(siteUrl, request.report)
 
 		const config = Config.forURL(siteUrl)
@@ -795,13 +815,9 @@ onMessage((request, sender) => {
 		const alertType = request.alert.type
 		const exceptionDuration = config[alertType].exceptions.duration * ONE_MINUTE
 
-		Notification.acknowledge(alertType)
+		Notification.acknowledge(alertType, exceptionDuration)
 
-		setTimeout(alert => {
-			Notification.enable(alert.type, alert.notification.title, alert.notification.message)
-		}, exceptionDuration, request.alert)
-
-		logger.log(nowTimestamp(), "exception", `${alert.type} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alertType} exception`)
+		logger.log(nowTimestamp(), "exception", `${alertType} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alertType} exception`)
 	}
 
 	if (request.type === "warn-reuse") {
@@ -820,6 +836,9 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "allow-reuse") {
+		// register the account so that at the next click it will not be seen as the first time that it was used
+		registerAccountUsage(siteUrl, request.report)
+
 		injectFuncIntoTab(sender.tab.id, () => location.reload())
 		logger.log(nowTimestamp(), "password reuse", "password reuse exception granted", request.url, Log.ERROR, undefined, `user requested exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
