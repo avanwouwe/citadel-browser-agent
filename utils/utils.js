@@ -354,13 +354,13 @@ async function sleep(time) {
 
 const Tabs = {
     get: (tabIds) => Promise.all(tabIds.map(tabId =>
-        new Promise((resolve, reject) => {
+        new Promise((resolve) => {
             chrome.tabs.get(tabId, tab => {
-                if (chrome.runtime.lastError) reject(chrome.runtime.lastError)
+                if (chrome.runtime.lastError) resolve(undefined)
                 else resolve(tab)
             })
         })
-    ))
+    )).then(tabs => tabs.filter(Boolean))
 }
 
 function onMessage(type, listener, once= false) {
