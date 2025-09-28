@@ -315,7 +315,7 @@ class Config {
                 allowed: true,
             },
             id: {
-                allowed: [""],
+                allowed: ["*"],
                 forbidden: [],
             },
             category: {
