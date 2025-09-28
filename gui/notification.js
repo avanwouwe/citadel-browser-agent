@@ -10,6 +10,7 @@ class Notification {
 
         if (level === DeviceTrust.State.PASSING) {
             delete Notification.#alerts[type]
+            Notification.#updateState()
             return
         }
 
@@ -71,8 +72,8 @@ class Notification {
             }
         }
 
-        alert.tabs.add(tabId)
         await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
+        alert.tabs.add(tabId)
         return true
     }
 
@@ -98,7 +99,6 @@ class Notification {
     static #updateState() {
         let worstAlert = { level: DeviceTrust.State.PASSING }
         const currAlert = Notification.showing
-        console.log("updatestate", currAlert)
         const currAlertLevel = DeviceTrust.State.indexOf(currAlert?.level)
 
         Notification.showing = undefined
