@@ -74,11 +74,6 @@ class AccountTrust {
             }
         }
 
-        const currNotif = Notification.showing
-        if (currNotif && currNotif.type === AccountTrust.TYPE && currNotif.level !== state) {
-            Notification.acknowledge(AccountTrust.TYPE)
-        }
-
         const title = t("accounttrust.notification.title")
 
         if (state === DeviceTrust.State.PASSING) {
