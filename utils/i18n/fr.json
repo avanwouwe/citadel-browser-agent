@@ -27,8 +27,9 @@
     "notification": {
       "title": "Problèmes de sécurité",
       "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger.",
-      "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée. Dans {{days}} jours, votre appareil sera bloqué. Cliquez pour corriger les problèmes.",
-      "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et a été bloqué. Cliquez pour corriger les problèmes."
+      "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée. Dans {{days}} jours, votre accès sera bloqué. Cliquez pour corriger les problèmes.",
+      "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et votre accès a été bloqué. Cliquez pour corriger les problèmes.",
+      "a-few": "quelques"
     }
   },
   "accounttrust": {
@@ -63,7 +64,7 @@
       "title": "Problèmes de sécurité",
       "failing": "Un de vos comptes présente des problèmes de sécurité. Cliquez pour les corriger.",
       "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Dans {{days}} jours, votre appareil sera bloqué. Cliquez pour corriger le compte..",
-      "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre appareil a été bloqué. Cliquez pour corriger le compte."
+      "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre accès a été bloqué. Cliquez pour corriger le compte."
     }
   },
   "errors": {

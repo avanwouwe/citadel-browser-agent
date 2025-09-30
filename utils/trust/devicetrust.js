@@ -117,7 +117,7 @@ class DeviceTrust {
         } else if (this.#deviceState === DeviceTrust.State.FAILING) {
             Notification.setAlert(DeviceTrust.TYPE, this.#deviceState, title, t("devicetrust.notification.failing"))
         } else if (this.#deviceState === DeviceTrust.State.WARNING) {
-            const days = this.getNextState().days ?? "a few"
+            const days = this.getNextState().days ?? t("devicetrust.notification.a-few")
             Notification.setAlert(DeviceTrust.TYPE, this.#deviceState, title, t("devicetrust.notification.warning", {days}))
         } else if (this.#deviceState === DeviceTrust.State.BLOCKING) {
             Notification.setAlert(DeviceTrust.TYPE, this.#deviceState, title, t("devicetrust.notification.blocking"))
