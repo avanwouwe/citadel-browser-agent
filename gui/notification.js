@@ -1,26 +1,27 @@
 class Notification {
     static #alerts = { }
+    static #tabs = new Set()
     static showing
 
     static setAlert(type, level, title, message) {
-        const currNotif = Notification.showing
-        if (currNotif && currNotif.type === type && currNotif.level !== level) {
-            Notification.acknowledge(type)
-        }
-
         if (level === DeviceTrust.State.PASSING) {
             delete Notification.#alerts[type]
             Notification.#updateState()
             return
         }
 
-        const alert = Notification.#getAlert(type)
+        // if the alert escalated, raise it to the attention of the user even if it was acknowledged before
+        // and if the alert was showing and it de-escalated, it likely was because the user did something, so acknowledge
+        const alert = Notification.#getOrCreateAlert(type)
+        const currLevel = DeviceTrust.State.indexOf(alert.level)
+        const newLevel = DeviceTrust.State.indexOf(level)
+        if (newLevel > currLevel) {
+            Notification.#setAcknowledge(alert, false)
+        } else if (newLevel < currLevel && Notification.showing?.type === type) {
+            Notification.#setAcknowledge(alert, true)
+        }
         alert.level = level
         alert.notification = { title, message }
-
-        if (DeviceTrust.State.indexOf(level) > DeviceTrust.State.indexOf(alert.level)) {
-            Notification.#enable(type)
-        }
 
         Notification.#updateState()
     }
@@ -30,100 +31,73 @@ class Notification {
         if (!alert) return
 
         alert.acknowledged = true
+
+        const now = Date.now()
         if (forMinutes) {
-            alert.lastNotification = Date.now() + forMinutes * ONE_MINUTE
+            alert.acknowledgeExpiry = now + forMinutes * ONE_MINUTE
+        } else {
+            if (alert.level === DeviceTrust.State.FAILING) alert.acknowledgeExpiry = now + 7 * ONE_DAY
+            else if (alert.level === DeviceTrust.State.WARNING) alert.acknowledgeExpiry = now + 1 * ONE_DAY
+            else if (alert.level === DeviceTrust.State.BLOCKING) alert.acknowledgeExpiry = now + 1 * ONE_MINUTE
+            else alert.acknowledgeExpiry = Infinity
         }
 
         Notification.#updateState()
-
-        chrome.notifications.clear(type)
-        Tabs.get(Array.from(alert.tabs))
-            .then(tabs => tabs.forEach(tab => {
-                Modal.removeFromTab(tab.id)
-                    .then(() => Notification.showIfRequired(tab.url, tab.id))
-                    .catch(err => console.trace(err))
-            }))
-
-        alert.tabs.clear()
     }
 
     static async showIfRequired(url, tabId) {
         if (!url || ! tabId) return false
 
-        const alert = Notification.showing
-        if (! alert ) {
-            return false
+        // check if any of the acknowledgements of the alerts has expired, and de-acknowledge them if needed
+        let acknowledgeExpired = false
+        for (const alert of Object.values(Notification.#alerts)) {
+            if (alert.acknowledgeExpiry < Date.now()) {
+                Notification.#setAcknowledge(alert, false)
+                acknowledgeExpired = true
+            }
         }
+        if (acknowledgeExpired) Notification.#updateState()
+
+        const alert = Notification.#alerts[Notification.showing?.type]
+        if (! alert ) return false
 
         const hostname = url.toURL()?.hostname
         const isProtected = matchDomain(hostname, config.company.applications) || matchDomain(hostname, config.company.domains)
         if (!isProtected) return false
 
-        const onAcknowledge = { type: 'acknowledge-alert', alert }
-        let onException
+        // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
         if (alert.type === AccountTrust.TYPE && alert.level === DeviceTrust.State.BLOCKING) {
-            // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
             const blockedOverPassword = AccountTrust.failingAccounts(hostname)?.some(a => a?.report?.state === DeviceTrust.State.BLOCKING)
             if (blockedOverPassword) return false
-
-            const exceptions = config[alert.type].exceptions
-            if (exceptions.duration > 0 && matchDomain(hostname, exceptions.domains)) {
-                onException = { type: 'allow-alert', alert }
-            }
         }
 
+        const exceptions = config[alert.type].exceptions
+        const onAcknowledge = { type: 'acknowledge-alert', alert }
+        const onException = (exceptions.duration > 0 && matchDomain(hostname, exceptions.domains)) ? { type: 'allow-alert', alert } : undefined
+
         await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
-        alert.tabs.add(tabId)
+        Notification.#tabs.add(tabId)
         return true
     }
 
-    static #enable(type) {
-        const alert = Notification.#getAlert(type)
-        alert.lastNotification = Date.now()
-        alert.acknowledged = false
-
-        const notification = {
-            type: "basic",
-            iconUrl: Logo.getLogo(),
-            title: alert.notification.title,
-            message: alert.notification.message
-        }
-
-        if (Browser.version.brand !== Browser.Firefox) {
-            notification.requireInteraction = true
-        }
-
-        chrome.notifications.create(type, notification)
-    }
-
     static #updateState() {
-        let worstAlert = { level: DeviceTrust.State.PASSING }
-        const currAlert = Notification.showing
-        const currAlertLevel = DeviceTrust.State.indexOf(currAlert?.level)
-
+        const prevAlert = Notification.showing
         Notification.showing = undefined
 
+        // find both the worst alert, and the worst alert that is not acknowledged (i.e. 'showing')
+        let worstAlert = { level: DeviceTrust.State.PASSING }
         for (const alert of Object.values(Notification.#alerts)) {
-            const sinceLastNotification = Date.now() - alert.lastNotification
-            if (
-                alert.level === DeviceTrust.State.FAILING && sinceLastNotification >= 7 * ONE_DAY||
-                alert.level === DeviceTrust.State.WARNING && sinceLastNotification >= 1 * ONE_DAY ||
-                alert.level === DeviceTrust.State.BLOCKING && sinceLastNotification >= 1 * ONE_MINUTE
-            ) {
-                Notification.#enable(alert.type)
-            }
-
             const alertLevel = DeviceTrust.State.indexOf(alert.level)
-            if (alertLevel >= DeviceTrust.State.indexOf(worstAlert.level) && (alert === currAlert || alertLevel > currAlertLevel)) {
-                if (! alert.acknowledged) {
-                    Notification.showing = alert
-                }
-                worstAlert = alert
+            const worstAlertLevel = DeviceTrust.State.indexOf(worstAlert.level)
+
+            if (alertLevel < worstAlertLevel) continue
+            worstAlert = alert
+            if (! alert.acknowledged && (! prevAlert || alert.type === prevAlert.type || alertLevel > worstAlertLevel)) {
+                Notification.showing = { type: alert.type, level: alert.level }
             }
         }
 
         const warning = DeviceTrust.State.indexOf(DeviceTrust.State.WARNING)
-
         if (DeviceTrust.State.indexOf(worstAlert.level) >= warning) {
             chrome.action.setBadgeText({ text: "⚠️" })
             chrome.action.setBadgeBackgroundColor({ color: "#FF0000" })
@@ -131,15 +105,62 @@ class Notification {
             chrome.action.setBadgeText({ text: "" })
             chrome.action.setBadgeBackgroundColor({ color: "#808080" })
         }
+
+        if (prevAlert?.type === Notification.showing?.type && prevAlert?.level === Notification.showing?.level) return
+
+        const clearModals = ! Notification.showing || prevAlert?.type !== Notification.showing.type
+        Notification.#updateInterface(clearModals)
     }
 
-    static #getAlert(type) {
-        return Notification.#alerts.getOrSet(type, {
+    static #updateInterface(clearModals = false) {
+        chrome.notifications.getAll()
+            .then(notifications => Object.keys(notifications)
+                .forEach(notification => chrome.notifications.clear(notification)))
+
+        const alert = Notification.#alerts[Notification.showing?.type]
+
+        if (alert) {
+            const notification = {
+                type: "basic",
+                iconUrl: Logo.getLogo(),
+                title: alert.notification.title,
+                message: alert.notification.message
+            }
+
+            if (Browser.version.brand !== Browser.Firefox) {
+                notification.requireInteraction = true
+            }
+
+            chrome.notifications.create(alert.type, notification)
+        }
+
+        Tabs.get(Array.from(Notification.#tabs))
+            .then(tabs => tabs.forEach(tab => {
+                Modal.removeFromTab(tab.id)
+                    .then(() => {
+                        if (!alert || clearModals) Notification.#tabs.clear()
+                        Notification.showIfRequired(tab.url, tab.id)
+                    })
+                    .catch(err => console.trace(err))
+            }))
+    }
+
+    static #setAcknowledge(alert, isAcknowledged) {
+        if (isAcknowledged) {
+            alert.acknowledged = true
+            alert.acknowledgeExpiry = Infinity
+        } else {
+            alert.acknowledged = false
+            alert.acknowledgeExpiry = Date.now()
+        }
+    }
+
+    static #getOrCreateAlert(type) {
+        return type ? Notification.#alerts.getOrSet(type, {
             type,
-            lastNotification: 0,
             level: DeviceTrust.State.PASSING,
             acknowledged: false,
-            tabs: new Set()
-        })
+            acknowledgeExpiry: Infinity,
+        }) : undefined
     }
 }
