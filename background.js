@@ -675,23 +675,16 @@ function registerAccountUsage(url, report) {
 	AppStats.markDirty()
 }
 
-chrome.webNavigation.onCommitted.addListener((details) => {
-	if (details?.transitionType === 'auto_subframe' ||
-		details?.transitionType === 'generated' ||
-		details?.transitionType === 'reload' ||
-		details?.transitionQualifiers?.includes('server_redirect') ||
-		details?.transitionQualifiers?.includes('client_redirect') ||
-		details.tabId < 0
-	) {
+chrome.webNavigation.onCompleted.addListener(async details => {
+	if (details.parentFrameId >= 0 || details.tabId < 0) {
 		return
 	}
 
 	setInitiator(details)
 
 	registerInteraction(details.url, details)
-})
 
-chrome.webNavigation.onCompleted.addListener(async details => {
+	// detect failed logins to prevent storing wrong passwords (i.e. URL looks like a login URL, and it did not change between navigations)
 	const { tabId, url } = details
 
 	if (url) {
