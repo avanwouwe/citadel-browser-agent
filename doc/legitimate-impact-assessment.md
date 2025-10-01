@@ -151,10 +151,6 @@ Yes, via configuration or organisational process in special situations.
 | Balancing outcome | Acceptable | Minimisation, hashing, transparency, and "need to know" controls address risks. |
 | Lawful basis | Art. 6(1)(f) GDPR – Legitimate Interest | Users are informed; DPIA / LIA documented and actively maintained. |
 
-| LIA completed by | \[Name/Title\] |
-| :---- | :---- |
-| Date | \[YYYY-MM-DD\] |
-
 ---
 
 ## 5\. Next Steps
