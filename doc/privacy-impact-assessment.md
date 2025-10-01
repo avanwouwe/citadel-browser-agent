@@ -17,14 +17,15 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 
 ### Inventory of Applicable Frameworks for the Processing
 
-| Applicable Frameworks for the processing | Consideration |
-| :---- | :---- |
-| GDPR | Fully considered. Legitimate interest is the legal basis. |
-| Local data protection law(s) | Considered; adoption depends on jurisdiction. |
+| Applicable Frameworks for the processing                                                                                                                                                                  | Consideration |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :---- |
+| GDPR                                                                                                                                                                                                      | Fully considered. Legitimate interest is the legal basis. |
+| Local data protection law(s)                                                                                                                                                                              | Considered; adoption depends on jurisdiction. |
 | [Délibération n° 2021-122 du 14 octobre 2021 portant adoption d'une recommandation relative à la journalisation](https://www.cnil.fr/sites/default/files/atoms/files/recommandation_-_journalisation.pdf) | Considered; justifies legitimate interest finding. |
-| Case study : [Time Doctor legal judgement](https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000051120331) | Considered; objections and infractions raised in application with similar scope are addressed. |
-| [French privacy watchdog “web filtering recommendations”](https://www.cnil.fr/sites/default/files/2025-07/projet_reco_deploiement_solution_filtrage_web.pdf) (draft) | Recommendations considered and integrated. |
-| SIEM/XDR policies | Citadel events included in existing SIEM/XDR authorization, security, and retention policies. |
+| Case study : [Time Doctor legal judgement](https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000051120331)                                                                                                   | Considered; objections and infractions raised in application with similar scope are addressed. |
+| [French privacy watchdog “web filtering recommendations”](https://www.cnil.fr/sites/default/files/2025-07/projet_reco_deploiement_solution_filtrage_web.pdf) (draft)                                      | Recommendations considered and integrated. |
+| French privacy watchdog : [logging recommendations](https://www.cnil.fr/fr/la-cnil-publie-une-recommandation-relative-aux-mesures-de-journalisation)                                                      | Recommendations considered and integrated. |
+| SIEM/XDR policies                                                                                                                                                                                         | Citadel events included in existing SIEM/XDR authorization, security, and retention policies. |
 
 ## **1.2 Data, Processes, and Media**
 
