@@ -253,7 +253,14 @@ class Extension {
             Object.entries(this.#catalog).forEach(([key, value]) => value.name = key)
         }
 
-        static of (permission) { return Extension.Risk.#catalog[permission]}
+        static ofScore(score) {
+            if (score < 4.0) return Extension.Risk.LOW
+            if (score < 7.0) return Extension.Risk.MEDIUM
+            if (score < 8.5) return Extension.Risk.HIGH
+            return Extension.Risk.CRITICAL
+        }
+
+        static ofPermission (permission) { return Extension.Risk.#catalog[permission]}
     }
 
     static async isInstalled(extensionId) {

@@ -53,6 +53,11 @@ async function renderPage() {
 
         const staticAnalysis = ExtensionStore.analyseStatically(entries)
         console.log(staticAnalysis)
+
+        const risk = ExtensionAnalysis.calculateRisk(storeInfo, manifest, staticAnalysis)
+        renderRisk("risk-global", "Global", risk.global, "provides an overall risk estimation, based on the likelihood and the impact")
+        renderRisk("risk-likelihood", "Likelihood", risk.likelihood, "provides an estimation of the likelihood that the extension is malware or has vulnerabilities, based on store information such as rating, reviews, number of installations, and extension / publisher verification")
+        renderRisk("risk-impact", "Impact", risk.impact, "provides an estimation of the capacity of the extension to obtain and exfiltrate data, based on extension permissions and analysis of the extension code")
     }
 }
 
@@ -93,7 +98,7 @@ const riskClassMap = {
 function renderManifestInfo(manifestInfo) {
     renderManifestVersion('risk-value-manifest', manifestInfo.manifest_version)
 
-    const risks = manifestInfo.permissions.map(permission => Extension.Risk.of(permission))
+    const risks = manifestInfo.permissions.map(permission => Extension.Risk.ofPermission(permission))
         .filter(Boolean)
         .sort((a, b) => b.risk - a.risk)
 
@@ -160,9 +165,41 @@ function renderManifestVersion(id, version) {
     return element
 
 }
+
 function renderVerified(id, isVerified) {
     const element = document.getElementById(id)
     element.textContent = isVerified ? t("global.yes") : t("global.no")
     if (isVerified) element.classList.add('risk-low')
     return element
+}
+
+function renderRisk(id, type, value, description) {
+    const score = Number(value).toFixed(1)
+    const risk = Extension.Risk.ofScore(score)
+
+    const riskClass = `risk-${risk.toLowerCase()}`
+    const riskLabel = `${risk.capitalize()} Risk`
+
+    const html = `
+        <div class="risk-score ${riskClass}">
+            <small>Risk Score</small>
+            <p>${score} / 10</p>
+            <strong>
+                ${riskLabel}
+                <span class="help">
+                    <svg width="14" height="15" viewBox="0 0 14 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0.5625" y="0.583008" width="12.875" height="12.875" rx="6.4375" stroke="white" stroke-width="1.125"></rect>
+                        <path d="M6.875 3.52051V8.02051" stroke="white" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M6.875 9.89551H6.88272" stroke="white" stroke-width="1.125" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span class="tooltip">
+                        <span>This <strong>Extension Risk ${type} Score</strong> ${description}.</span>
+                    </span>
+                </span>
+            </strong>
+        </div>
+    `
+
+    const element = document.getElementById(id)
+    element.innerHTML = html
 }
