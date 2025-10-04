@@ -98,6 +98,26 @@
     "acknowledge": "OK"
   },
   "extension-analysis": {
+    "scores": {
+      "global": {
+        "label": "Global Risk Score",
+        "description": "provides an overall risk estimation, based on the likelihood and the impact"
+      },
+      "likelihood": {
+        "label": "Likelihood Score",
+        "description": "provides an estimation of the likelihood that the extension is malware or has vulnerabilities, based on store information such as rating, reviews, number of installations, and extension / publisher verification"
+      },
+      "impact": {
+        "label": "Impact Score",
+        "description": "provides an estimation of the capacity of the extension to obtain and exfiltrate data, based on the permissions and the code of the extension"
+      }
+    },
+    "levels": {
+      "low": "Low Risk",
+      "medium": "Medium Risk",
+      "high": "High Risk",
+      "critical": "Critical Risk"
+    },
     "block-page": {
       "page-blocked-header": "Analyzing Extension",
       "page-blocked-text": "The extension you are trying to install is being analyzed.",

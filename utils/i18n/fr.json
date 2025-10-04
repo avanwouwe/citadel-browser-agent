@@ -98,6 +98,26 @@
     "acknowledge": "OK"
   },
   "extension-analysis": {
+    "scores": {
+      "global": {
+        "label": "Score de Risque Global",
+        "description": "fournit une estimation globale du risque, basée sur la probabilité et l'impact"
+      },
+      "likelihood": {
+        "label": "Score de Probabilité",
+        "description": "fournit une estimation de la probabilité que l’extension soit un logiciel malveillant ou présente des vulnérabilités, basée sur les informations du store telles que la note, les avis, le nombre d’installations, ainsi que la vérification de l’extension / de l’éditeur"
+      },
+      "impact": {
+        "label": "Score d’Impact",
+        "description": "fournit une estimation de la capacité de l’extension à obtenir et exfiltrer des données, basée sur les permissions et le code de l’extension"
+      }
+    },
+    "levels": {
+      "low": "Risque Faible",
+      "medium": "Risque Moyen",
+      "high": "Risque Élevé",
+      "critical": "Risque Critique"
+    },
     "block-page": {
       "page-blocked-header": "Analyse de l’extension",
       "page-blocked-text": "L’extension que vous essayez d’installer est en cours d’analyse.",
