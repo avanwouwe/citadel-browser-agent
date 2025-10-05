@@ -121,6 +121,13 @@
     "block-page": {
       "page-blocked-header": "Analyzing Extension",
       "page-blocked-text": "The extension you are trying to install is being analyzed.",
+      "install-blocked":  {
+        "install": "Install",
+        "blocked": "The extension you are trying to install has been blocked because",
+        "risk-global": "the overall risk level is too high",
+        "risk-impact": "it has a has too much access to sensitive data",
+        "risk-likelihood": "the probability that it is malware or can be hacked is too high"
+      },
       "details": {
         "header": "Extension Details",
         "name": "Name",

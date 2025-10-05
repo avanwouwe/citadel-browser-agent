@@ -16,14 +16,14 @@ class ExtensionAnalysis {
     }
 
     static calculateRisk(storeInfo, manifest, staticAnalysis) {
-        return { likelihood: 2.0, impact: 6.0 , global: 8.0 }
+        return { likelihood: 10.0, impact: 2.0 , global: 2.0 }
     }
 
     static #blockPage(tabId, url) {
         tabState?.setState("ExtensionAnalysis", tabId, {
             url,
             logo: Logo.getLogo(),
-            allowException: config.extensions.exceptions.allowed,
+            config: config.extensions,
         })
 
         chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/extension-analysis.html") })

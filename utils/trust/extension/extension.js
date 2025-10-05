@@ -278,4 +278,56 @@ class Extension {
         })
     }
 
+    static async flush() {
+        Extension.#exceptionsStorage.markDirty()
+        await Extension.#exceptionsStorage.flush()
+    }
+
+    static #SIDELOAD_TYPES = ["development", "sideload"]
+
+    static async #scanInstalledExtensions() {
+        const config = await Config.waitIsLoaded()
+
+        for (const ext of await chrome.management.getAll()) {
+            if (
+                ext.id === chrome.runtime.id ||
+                ! ext.enabled && config.extensions.onlyDisable ||
+                ! ext.mayDisable ||
+                config.extensions.id.allowed.includes(ext.id) ||
+                Extension.exceptions[ext.id] ||
+                ext.installType === "admin" ||
+                ! Extension.#SIDELOAD_TYPES.includes(ext.installType) && config.extensions.id.allowed.includes("*") ||
+                config.extensions.allowSideloading && config.extensions.id.allowed.includes("*")
+            ) continue
+
+            if (config.extensions.allowExisting) {
+                logger.log(Date.now(), "extension", `extension kept`, ext.homepageUrl, Log.WARN, ext.id, `forbidden pre-existing extension '${ext.shortName}' (${ext.id}) was kept`)
+                return
+            }
+
+            const action = config.extensions.onlyDisable ? "disabled" : "removed"
+
+            try {
+                if (config.extensions.onlyDisable) {
+                    await chrome.management.setEnabled(ext.id, false)
+                } else {
+                    await chrome.management.uninstall(ext.id, { showConfirmDialog: false })
+                }
+                logger.log(Date.now(), "extension", `extension ${action}`, ext.homepageUrl, Log.WARN, ext.id, `extension '${ext.shortName}' (${ext.id}) was ${action}`)
+            } catch (err) {
+                logger.log(Date.now(), "extension", `extension not ${action}`, ext.homepageUrl, Log.WARN, ext.id, `extension '${ext.shortName}' (${ext.id}) was unable to be ${action}`)
+            }
+        }
+    }
+
+    static {
+        Extension.#exceptionsStorage.ready().then(exceptions => {
+            Extension.exceptions = exceptions
+
+            chrome.runtime.onStartup.addListener(Extension.#scanInstalledExtensions)
+            chrome.runtime.onInstalled.addListener(Extension.#scanInstalledExtensions)
+            chrome.management.onInstalled.addListener(Extension.#scanInstalledExtensions)
+        })
+    }
+
 }

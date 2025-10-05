@@ -309,7 +309,7 @@ class Config {
             risk: {
                 maxLikelihood: 5.0,
                 maxImpact: 4.0,
-                maxRisk: 4.0,
+                maxGlobal: 4.0,
             },
             exceptions: {
                 allowed: true,
@@ -321,8 +321,10 @@ class Config {
             category: {
                 allowed: ["*"],
                 forbidden: [],
-            }
-
+            },
+            allowSideloading: false,
+            allowExisting: true,
+            onlyDisable: true,
         }
     }
 
@@ -388,14 +390,28 @@ class Config {
 
         }
 
-        Log.start()
         Config.#isLoaded = true
+        Config.#loadResolve?.(Config.config)
+        Log.start()
     }
 
     static assertIsLoaded() {
         if (! Config.#isLoaded) {
             throw new Error('the configuration has not yet been received from the native messaging port')
         }
+    }
+
+    static #loadPromise = null
+    static #loadResolve = null
+
+    static waitIsLoaded() {
+        if (Config.#isLoaded) return Promise.resolve(Config.config)
+
+        if (!Config.#loadPromise) {
+            Config.#loadPromise = new Promise((resolve) => Config.#loadResolve = resolve)
+        }
+
+        return Config.#loadPromise
     }
 
     static forHostname(hostname) {

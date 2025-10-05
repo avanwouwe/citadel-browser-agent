@@ -813,6 +813,12 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "exception", `${alertType} exception used`, sender.url, Log.ERROR, request.reason, `user used ${alertType} exception`)
 	}
 
+	if (request.type === "allow-extension") {
+		const ext = request.extension
+		Extension.exceptions[ext.id] = true
+		logger.log(nowTimestamp(), "exception", `extension exception used`, ext.url, Log.ERROR, request.reason, `user used exception to install extension '${ext.name}' (${ext.id}) with risk score ${ext.score}`)
+	}
+
 	if (request.type === "warn-reuse") {
 		const allowException = config.account.passwordReuse.exceptions.allowed
 		const report = request.report

@@ -121,6 +121,13 @@
     "block-page": {
       "page-blocked-header": "Analyse de l’extension",
       "page-blocked-text": "L’extension que vous essayez d’installer est en cours d’analyse.",
+      "install-blocked": {
+        "install": "Installer",
+        "blocked": "L’extension que vous essayez d’installer a été bloquée car",
+        "risk-global": "le niveau de risque global est trop élevé",
+        "risk-impact": "elle a un accès trop étendu aux données sensibles",
+        "risk-likelihood": "le probabilité qu’il s’agisse d’un logiciel malveillant ou qu’elle puisse être piratée est trop élevé"
+      },
       "details": {
         "header": "Détails de l’extension",
         "name": "Nom",

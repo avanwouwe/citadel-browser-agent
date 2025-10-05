@@ -15,14 +15,14 @@
 <p data-i18n="extension-analysis.block-page.page-blocked-text">The extension you are trying to install is being analyzed.</p>
 
 <div class="content">
-    <img id="extension-logo" src="" hidden width="64" height="64">
+    <img alt="extension logo" id="extension-logo" src="" hidden width="64" height="64">
     <span class="extension-name" id="extension-name"></span>
 
-    <p>
-        <span class="risk-indicator" id="risk-global"></span>
-        <span class="risk-indicator" id="risk-likelihood"></span>
-        <span class="risk-indicator" id="risk-impact"></span>
-    </p>
+    <div class="risk-indicator-row">
+        <div class="risk-indicator" id="risk-global"></div>
+        <div class="risk-indicator" id="risk-impact"></div>
+        <div class="risk-indicator" id="risk-likelihood"></div>
+    </div>
 
     <div>
         <span class="risk-details-header" data-i18n="extension-analysis.block-page.details.header">Extension Details</span>
@@ -81,9 +81,16 @@
 
     </div>
 
+    <div id="installSection">
+        <button data-i18n="extension-analysis.block-page.install-blocked.install" class="button" id="installButton" disabled>Install</button>
+        <p>
+        <div id="blockedSection"></div>
+    </div>
+
+    <p>
     <p id="exceptionSectionToggle" data-i18n-html="extension-analysis.block-page.request-exception">If you are <b><u>sure</u></b> the extension does not represent a security risk you can <span id="clickable">request an exception</span></p>
 
-    <div id="exceptionSection">
+    <div class="centered" id="exceptionSection">
         <label for="exceptionReason" data-i18n="extension-analysis.block-page.request-exception-header" class="exception-request-header">Request an Exception</label>
         <textarea id="exceptionReason" data-i18n="extension-analysis.block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
         <button id="submitException" data-i18n="extension-analysis.block-page.submit-request">Submit Request</button>
@@ -96,6 +103,7 @@
 <script src="/utils/browser.js"></script>
 <script src="/utils/unzipit.js"></script>
 <script src="/utils/injected/citadel-content-script-utils.js"></script>
+<script src="/utils/persistence.js"></script>
 <script src="/utils/tab-state.js"></script>
 <script src="/utils/i18n/i18n.js"></script>
 <script src="/utils/trust/extension/acorn.js"></script>
