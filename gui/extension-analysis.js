@@ -39,9 +39,7 @@ async function renderPage() {
     }
     const allowed = !reason
 
-    const installButton = document.getElementById("installButton")
-    const forbiddenSection = document.getElementById("blockedSection")
-    installButton.disabled = !allowed
+    document.getElementById("installButton").disabled = !allowed
 
     if (allowed) return
 
