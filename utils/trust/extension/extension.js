@@ -305,6 +305,8 @@ class Extension {
                 return
             }
 
+// TODO: SHOW NOTIFICATION OF REMOVAL
+
             const action = config.extensions.onlyDisable ? "disabled" : "removed"
 
             try {
