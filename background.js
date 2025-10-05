@@ -810,7 +810,7 @@ onMessage((request, sender) => {
 
 		Notification.acknowledge(alertType, exceptionDuration)
 
-		logger.log(nowTimestamp(), "exception", `${alertType} exception granted`, sender.url, Log.ERROR, request.reason, `user requested ${alertType} exception`)
+		logger.log(nowTimestamp(), "exception", `${alertType} exception used`, sender.url, Log.ERROR, request.reason, `user used ${alertType} exception`)
 	}
 
 	if (request.type === "warn-reuse") {
@@ -833,7 +833,7 @@ onMessage((request, sender) => {
 		registerAccountUsage(siteUrl, request.report)
 
 		injectFuncIntoTab(sender.tab.id, () => location.reload())
-		logger.log(nowTimestamp(), "password reuse", "password reuse exception granted", request.url, Log.ERROR, undefined, `user requested exception for password reuse for '${request.report.username}' on ${sender.origin}`)
+		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, undefined, `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "acknowledge-mfa") {
@@ -847,13 +847,13 @@ onMessage((request, sender) => {
 		AppStats.markDirty()
 
 		Modal.removeFromDomain(request.domain)
-		logger.log(nowTimestamp(), "exception", "MFA exception granted", sender.url, Log.ERROR, request.reason, `user requested MFA exception for account ${app.lastAccount} for ${request.domain}`)
+		logger.log(nowTimestamp(), "exception", "MFA exception used", sender.url, Log.ERROR, request.reason, `user used MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 
 	if (request.type === "allow-blacklist") {
 		exceptionList.add(request.url.toURL()?.hostname)
 
-		logger.log(nowTimestamp(), "exception", "blacklist exception granted", request.url, Log.ERROR, request.reason, "user requested exception: " + request.description)
+		logger.log(nowTimestamp(), "exception", "blacklist exception used", request.url, Log.ERROR, request.reason, "user used exception: " + request.description)
 	}
 })
 
