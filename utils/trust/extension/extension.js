@@ -1,5 +1,8 @@
 class Extension {
 
+    static #exceptionsStorage = new PersistentObject("extension-exceptions")
+    static exceptions
+
     static Risk = class {
         static LOW = "LOW"
         static MEDIUM = "MEDIUM"

@@ -434,3 +434,14 @@ async function logOffDomain(domain) {
         })
     })
 }
+
+
+// clear all storage *except* for application statistics and extensions exceptions
+async function clearStorage() {
+    chrome.storage.local.clear()
+
+    await AppStats.flush()
+    await Extension.flush()
+
+    chrome.runtime.reload()
+}

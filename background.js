@@ -60,7 +60,7 @@ chrome.runtime.onUpdateAvailable.addListener(() => {
 		debug("error while preparing update of extension", error)
 	}
 
-	AppStats.clear()
+	clearStorage()
 })
 
 chrome.runtime.onInstalled.addListener((details) => {

@@ -1,7 +1,9 @@
 class AppStats {
 
     static #APPLICATION_STATISTICS_KEY = 'application-statistics'
-    static #APPSTATS = new PersistentObject(AppStats.#APPLICATION_STATISTICS_KEY).value()
+    static #APPSTATS_STORAGE = new PersistentObject(AppStats.#APPLICATION_STATISTICS_KEY)
+    static #APPSTATS = AppStats.#APPSTATS_STORAGE.value()
+
 
     static getOrCreateApp(appName) {
         const existingApp = this.#APPSTATS[appName]
@@ -87,14 +89,9 @@ class AppStats {
         this.#APPSTATS.isDirty = true
     }
 
-    static async clear() {
-        // clear all storage *except* for application statistics
-        const appStats = await new PersistentObject(AppStats.#APPLICATION_STATISTICS_KEY).ready()
-        chrome.storage.local.clear()
-        appStats.markDirty()
-        appStats.flush()
-
-        chrome.runtime.reload()
+    static async flush() {
+        AppStats.markDirty()
+        await this.#APPSTATS_STORAGE.flush()
     }
 
     static incrementInteraction(url) {
