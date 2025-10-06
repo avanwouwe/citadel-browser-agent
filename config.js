@@ -242,6 +242,7 @@ class Config {
             ip: [
                 "10.0.0.0/8",
                 "127.0.0.0/8",
+                "0.0.0.0/32",
                 "169.254.0.0/16",
                 "172.16.0.0/12",
                 "192.168.0.0/16"
@@ -307,7 +308,7 @@ class Config {
         },
         extensions: {
             risk: {
-                maxLikelihood: 5.0,
+                maxLikelihood: 8.0,
                 maxImpact: 4.0,
                 maxGlobal: 4.0,
             },
@@ -315,7 +316,7 @@ class Config {
                 allowed: true,
             },
             id: {
-                allowed: ["*"],
+                allowed: [""],
                 forbidden: [],
             },
             category: {
