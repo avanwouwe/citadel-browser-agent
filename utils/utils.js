@@ -435,7 +435,6 @@ async function logOffDomain(domain) {
     })
 }
 
-
 // clear all storage *except* for application statistics and extensions exceptions
 async function clearStorage() {
     chrome.storage.local.clear()
@@ -444,4 +443,8 @@ async function clearStorage() {
     await Extension.flush()
 
     chrome.runtime.reload()
+}
+
+function navigateTo(tabId, url) {
+    chrome.tabs.update(tabId, { url })
 }

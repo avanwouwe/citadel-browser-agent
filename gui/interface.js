@@ -24,7 +24,7 @@ function blockPage(tabId, reason, blockedPage) {
         allowException: config.blacklist.exceptions.duration !== undefined
     })
 
-    chrome.tabs.update(tabId, { url: chrome.runtime.getURL("/gui/blocked.html") })
+    navigateTo(tabId, chrome.runtime.getURL("/gui/blocked.html"))
 }
 
 async function injectFilesIntoTab(tabId, files) {

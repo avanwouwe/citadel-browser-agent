@@ -814,9 +814,11 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "allow-extension") {
+		const storePage = request.url
 		const ext = request.extension
 		Extension.exceptions[ext.id] = true
-		logger.log(nowTimestamp(), "exception", `extension exception used`, ext.url, Log.ERROR, request.reason, `user used exception to install extension '${ext.name}' (${ext.id}) with risk score ${ext.score}`)
+		ExtensionAnalysis.approve(sender.tab.id, storePage)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, storePage, Log.ERROR, request.reason, `user used exception to install extension '${ext.name}' (${ext.id}) with risk score ${ext.score}`)
 	}
 
 	if (request.type === "warn-reuse") {

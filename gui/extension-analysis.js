@@ -6,14 +6,14 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
 
 async function renderPage() {
     const tabState = await new TabState().getState("ExtensionAnalysis")
-    const extensionPage = tabState.url
+    const storePage = tabState.url
 
     document.getElementById("logo").src = tabState.logo
 
     const exceptionSectionToggle = document.getElementById('exceptionSectionToggle')
     const exceptionSection = document.getElementById('exceptionSection')
 
-    const storeInfo = await fetchStoreInfo(extensionPage)
+    const storeInfo = await fetchStoreInfo(storePage)
     renderStoreInfo(storeInfo)
 
     const entries = await ExtensionStore.fetchPackage(storeInfo.downloadUrl)
@@ -39,8 +39,9 @@ async function renderPage() {
     }
     const allowed = !reason
 
-    document.getElementById("installButton").disabled = !allowed
-
+    const installButton = document.getElementById("installButton")
+    installButton.onclick = () => { sendMessagePromise('ApproveExtension', { tabId: tabState.tabId, storePage }) }
+    installButton.disabled = !allowed
     if (allowed) return
 
     document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.risk-' + reason)}.`
@@ -67,19 +68,14 @@ async function renderPage() {
             const exceptionReason = exceptionReasonInput.value.trim()
 
             sendMessage('allow-extension', {
-                url: extensionPage,
+                url: storePage,
                 reason: exceptionReason,
                 extension: {
-                    url: extensionPage,
                     name: storeInfo.name,
                     id: storeInfo.id,
                     score: formatScore(scores.global)
                 }
             })
-
-            alert(t("extension-analysis.block-page.request-submitted-popup"))
-
-            history.go(-2)
         })
     }
 }

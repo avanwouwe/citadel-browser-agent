@@ -152,8 +152,7 @@
       "request-exception": "Si vous êtes <b><u>certain</u></b> que l’extension ne représente pas un risque de sécurité, vous pouvez <span id=\"clickable\">demander une exception temporaire</span>",
       "request-exception-header": "Demander une exception",
       "provide-reason": "Veuillez indiquer la raison de votre demande d’exception",
-      "submit-request": "Envoyer la demande",
-      "request-submitted-popup": "Votre demande d’exception a été soumise. Vous pouvez installer l’extension."
+      "submit-request": "Envoyer la demande"
     },
     "permissions": {
       "webRequestBlocking": {

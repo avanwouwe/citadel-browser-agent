@@ -5,7 +5,9 @@ class TabState {
     constructor(isForServiceworker = false) {
         if (isForServiceworker) {
             this.#handler = (message, sender, sendResponse) => {
-                const state = this.#state[sender.tab.id]?.[message.key]
+                const tabId = sender.tab.id
+                const state = this.#state[tabId]?.[message.key]
+                state.tabId = tabId
                 sendResponse(state)
             }
 
