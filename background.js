@@ -799,7 +799,7 @@ onMessage((request, sender) => {
 	if (request.type === "acknowledge-alert") {
 		openDashboard(request.alert.type, true)
 
-		if (request.alert.level !== DeviceTrust.State.BLOCKING) {
+		if (request.alert.level !== State.BLOCKING) {
 			Notification.acknowledge(request.alert.type)
 		}
 	}

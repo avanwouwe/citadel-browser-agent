@@ -27,6 +27,7 @@ importScripts('gui/modal.js');
 importScripts('gui/notification.js');
 importScripts('gui/utils.js');
 importScripts('utils/i18n/i18n.js');
+importScripts('utils/trust/trust.js');
 importScripts('utils/trust/accounttrust.js');
 importScripts('utils/trust/devicetrust.js');
 importScripts('utils/trust/devicecontrol.js');

@@ -24,10 +24,10 @@ class AccountTrust {
             for (const [username, report] of AppStats.allAccounts(app)) {
                 if (!AccountTrust.checkFor(username, system)) continue
 
-                report.state = DeviceTrust.State.PASSING
+                report.state = State.PASSING
 
                 const issueCount = report.issues?.count ?? 0
-                report.state = issueCount >= DeviceTrust.State.values.length ? DeviceTrust.State.BLOCKING : DeviceTrust.State.values[issueCount]
+                report.state = issueCount >= State.values.length ? State.BLOCKING : State.values[issueCount]
                 if (issueCount > 0) {
                     const description = {
                         numberOfDigits:     t("accounttrust.password.quality.number-digits",     { min: config.account.passwordPolicy.minNumberOfDigits }),
@@ -67,22 +67,22 @@ class AccountTrust {
     }
 
     static #notify() {
-        let state = DeviceTrust.State.PASSING
+        let state = State.PASSING
         for (const acct of AccountTrust.failingAccounts()) {
-            if (DeviceTrust.State.indexOf(acct.report.state) > DeviceTrust.State.indexOf(state)) {
+            if (State.indexOf(acct.report.state) > State.indexOf(state)) {
                 state = acct.report.state
             }
         }
 
         const title = t("accounttrust.notification.title")
 
-        if (state === DeviceTrust.State.PASSING) {
+        if (state === State.PASSING) {
             Notification.setAlert(AccountTrust.TYPE, state)
-        } else if (state === DeviceTrust.State.FAILING) {
+        } else if (state === State.FAILING) {
             Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.failing"))
-        } else if (state === DeviceTrust.State.WARNING) {
+        } else if (state === State.WARNING) {
             Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.warning"))
-        } else if (state === DeviceTrust.State.BLOCKING) {
+        } else if (state === State.BLOCKING) {
             Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.blocking"))
         }
 

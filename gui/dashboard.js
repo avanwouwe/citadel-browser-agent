@@ -47,7 +47,7 @@ function renderDeviceDashboard() {
 
         document.getElementById("compliance").textContent = devicetrust.compliance
 
-        if (state === DeviceTrust.State.UNKNOWN) return
+        if (state === State.UNKNOWN) return
 
         const tb = document.getElementById("devicetrust-issues")
         tb.innerHTML = ""

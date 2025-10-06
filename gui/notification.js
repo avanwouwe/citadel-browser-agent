@@ -4,7 +4,7 @@ class Notification {
     static showing
 
     static setAlert(type, level, title, message) {
-        if (level === DeviceTrust.State.PASSING) {
+        if (level === State.PASSING) {
             delete Notification.#alerts[type]
             Notification.#updateState()
             return
@@ -13,8 +13,8 @@ class Notification {
         // if the alert escalated, raise it to the attention of the user even if it was acknowledged before
         // and if the alert was showing and it de-escalated, it likely was because the user did something, so acknowledge
         const alert = Notification.#getOrCreateAlert(type)
-        const currLevel = DeviceTrust.State.indexOf(alert.level)
-        const newLevel = DeviceTrust.State.indexOf(level)
+        const currLevel = State.indexOf(alert.level)
+        const newLevel = State.indexOf(level)
         if (newLevel > currLevel) {
             Notification.#setAcknowledge(alert, false)
         } else if (newLevel < currLevel && Notification.showing?.type === type) {
@@ -36,9 +36,9 @@ class Notification {
         if (forMinutes) {
             alert.acknowledgeExpiry = now + forMinutes * ONE_MINUTE
         } else {
-            if (alert.level === DeviceTrust.State.FAILING) alert.acknowledgeExpiry = now + 7 * ONE_DAY
-            else if (alert.level === DeviceTrust.State.WARNING) alert.acknowledgeExpiry = now + 1 * ONE_DAY
-            else if (alert.level === DeviceTrust.State.BLOCKING) alert.acknowledgeExpiry = now + 1 * ONE_MINUTE
+            if (alert.level === State.FAILING) alert.acknowledgeExpiry = now + 7 * ONE_DAY
+            else if (alert.level === State.WARNING) alert.acknowledgeExpiry = now + 1 * ONE_DAY
+            else if (alert.level === State.BLOCKING) alert.acknowledgeExpiry = now + 1 * ONE_MINUTE
             else alert.acknowledgeExpiry = Infinity
         }
 
@@ -66,14 +66,14 @@ class Notification {
         if (!isProtected) return false
 
         // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
-        if (alert.type === AccountTrust.TYPE && alert.level === DeviceTrust.State.BLOCKING) {
-            const blockedOverPassword = AccountTrust.failingAccounts(hostname)?.some(a => a?.report?.state === DeviceTrust.State.BLOCKING)
+        if (alert.type === AccountTrust.TYPE && alert.level === State.BLOCKING) {
+            const blockedOverPassword = AccountTrust.failingAccounts(hostname)?.some(a => a?.report?.state === State.BLOCKING)
             if (blockedOverPassword) return false
         }
 
         const exceptions = config[alert.type].exceptions
         const onAcknowledge = { type: 'acknowledge-alert', alert }
-        const onException = (alert.level === DeviceTrust.State.BLOCKING && exceptions.duration > 0 && matchDomain(hostname, exceptions.domains)) ? { type: 'allow-alert', alert } : undefined
+        const onException = (alert.level === State.BLOCKING && exceptions.duration > 0 && matchDomain(hostname, exceptions.domains)) ? { type: 'allow-alert', alert } : undefined
 
         await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
         Notification.#tabs.add(tabId)
@@ -85,10 +85,10 @@ class Notification {
         Notification.showing = undefined
 
         // find both the worst alert, and the worst alert that is not acknowledged (i.e. 'showing')
-        let worstAlert = { level: DeviceTrust.State.PASSING }
+        let worstAlert = { level: State.PASSING }
         for (const alert of Object.values(Notification.#alerts)) {
-            const alertLevel = DeviceTrust.State.indexOf(alert.level)
-            const worstAlertLevel = DeviceTrust.State.indexOf(worstAlert.level)
+            const alertLevel = State.indexOf(alert.level)
+            const worstAlertLevel = State.indexOf(worstAlert.level)
 
             if (alertLevel < worstAlertLevel) continue
             worstAlert = alert
@@ -97,8 +97,8 @@ class Notification {
             }
         }
 
-        const warning = DeviceTrust.State.indexOf(DeviceTrust.State.WARNING)
-        if (DeviceTrust.State.indexOf(worstAlert.level) >= warning) {
+        const warning = State.indexOf(State.WARNING)
+        if (State.indexOf(worstAlert.level) >= warning) {
             chrome.action.setBadgeText({ text: "⚠️" })
             chrome.action.setBadgeBackgroundColor({ color: "#FF0000" })
         } else {
@@ -158,7 +158,7 @@ class Notification {
     static #getOrCreateAlert(type) {
         return type ? Notification.#alerts.getOrSet(type, {
             type,
-            level: DeviceTrust.State.PASSING,
+            level: State.PASSING,
             acknowledged: false,
             acknowledgeExpiry: Infinity,
         }) : undefined

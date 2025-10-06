@@ -69,6 +69,7 @@
       "/gui/notification.js",
       "/gui/utils.js",
       "/utils/i18n/i18n.js",
+      "/utils/trust/trust.js",
       "/utils/trust/accounttrust.js",
       "/utils/trust/devicetrust.js",
       "/utils/trust/devicecontrol.js",
