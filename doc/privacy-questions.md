@@ -19,10 +19,10 @@ Citadel is designed with privacy in mind. Here’s what it **does** and **does n
 ### What’s Accessed or Logged
 
 - **Web application usage:**  
-  Tracks how often web applications (e.g., Teams, Salesforce) are used, and with which account.
+  Tracks how often you uses web applications (e.g., Teams, Salesforce), and with which account.
 
     - *Does NOT track usage on non-work, unauthenticated websites (e.g. blogs or Google search).*
-    - *Does NOT track the amount of time you spend on each application..*
+    - *Does NOT track the amount of time you spend on each application.*
 
 
 - **Security events:**  
@@ -60,7 +60,7 @@ Citadel is designed with privacy in mind. Here’s what it **does** and **does n
 - **Messages or web content:**  
   Does not read the contents of your emails, messages or web pages.
 - **Personal browsing:**  
-  Does **not** track your private browsing.
+  Does **not** track you when you use the internet for personal business.
 - **No central Citadel database:**  
   Citadel does **not** send your data to a special Citadel company or server. Security logs stay on your device or are sent only to your company’s (protected) security system.
 
