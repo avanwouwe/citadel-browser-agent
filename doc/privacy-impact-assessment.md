@@ -1,6 +1,7 @@
 # **Data Privacy Impact Assessment : Citadel**
 
-This Data Privacy Impact Assessment is intended as a **template** to be used by CISO / CIO during the Citadel deployment. The template should be carefully analysed, verified for compliance, and adapted to the specifics of the organisation, for example with respect to data retention, or use of external SIEM / SOAR solutions.
+> [!NOTE]
+> This is the Data Privacy Impact Assessment performed by the developer of Citadel, as part of the development of Citadel. It can be used as a **template** to be used by a CISO / CIO during the Citadel deployment. The template should however be carefully analysed, verified for compliance, and adapted to the specifics of the organisation, for example with respect to data retention, local laws or use of external SIEM / SOAR solutions.
 
 ## **1.1 Overview**
 
@@ -13,19 +14,17 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 | Data controller | Deployed organization (implementing Citadel within its IT estate); typically the IT or cybersecurity department. |
 | Processor(s) | None by default (Citadel backendless by design). SIEM/XDR may act as a data processor for security events. |
 
-### 
-
 ### Inventory of Applicable Frameworks for the Processing
 
-| Applicable Frameworks for the processing                                                                                                                                                                  | Consideration |
-|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------| :---- |
-| GDPR                                                                                                                                                                                                      | Fully considered. Legitimate interest is the legal basis. |
-| Local data protection law(s)                                                                                                                                                                              | Considered; adoption depends on jurisdiction. |
+| Applicable Frameworks for the processing | Consideration |
+| :---- | :---- |
+| GDPR | Fully considered. Legitimate interest is the legal basis. |
+| Local data protection law(s) | Considered; adoption depends on jurisdiction. |
 | [Délibération n° 2021-122 du 14 octobre 2021 portant adoption d'une recommandation relative à la journalisation](https://www.cnil.fr/sites/default/files/atoms/files/recommandation_-_journalisation.pdf) | Considered; justifies legitimate interest finding. |
-| Case study : [Time Doctor legal judgement](https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000051120331)                                                                                                   | Considered; objections and infractions raised in application with similar scope are addressed. |
-| [French privacy watchdog “web filtering recommendations”](https://www.cnil.fr/sites/default/files/2025-07/projet_reco_deploiement_solution_filtrage_web.pdf) (draft)                                      | Recommendations considered and integrated. |
-| French privacy watchdog : [logging recommendations](https://www.cnil.fr/fr/la-cnil-publie-une-recommandation-relative-aux-mesures-de-journalisation)                                                      | Recommendations considered and integrated. |
-| SIEM/XDR policies                                                                                                                                                                                         | Citadel events included in existing SIEM/XDR authorization, security, and retention policies. |
+| Case study : [Time Doctor legal judgement](https://www.legifrance.gouv.fr/cnil/id/CNILTEXT000051120331) | Considered; objections and infractions raised in application with similar scope are addressed. |
+| [French privacy watchdog “web filtering recommendations”](https://www.cnil.fr/sites/default/files/2025-07/projet_reco_deploiement_solution_filtrage_web.pdf) (draft) | Recommendations considered and integrated. |
+| French privacy watchdog : [logging recommendations](https://www.cnil.fr/fr/la-cnil-publie-une-recommandation-relative-aux-mesures-de-journalisation) | Recommendations considered and integrated. |
+| SIEM/XDR policies | Citadel events included in existing SIEM/XDR authorization, security, and retention policies. |
 
 ## **1.2 Data, Processes, and Media**
 
@@ -33,16 +32,16 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 
 | Data | Recipients | Retention Periods |
 | :---- | :---- | :---- |
-| Endpoint username, browser profile username | Local storage, security team via SIEM/XDR events | Local: as long as agent installed; SIEM/XDR: as per policy |
-| Web application usage statistics, application usernames | Local, security team via SIEM/XDR | Local: as long as agent installed; SIEM/XDR: as per policy |
-| Download/upload/print metadata | Local, security team via SIEM/XDR | Local: as long as agent installed; SIEM/XDR: as per policy |
-| Security events  | Local, security team via SIEM/XDR | Local: as long as agent installed; SIEM/XDR: as per policy |
-| Web navigations | Local only | As long as agent installed |
-| Web requests | Local only | N/A |
-| Passwords (hashes only) | Local only | As long as agent installed |
-| Endpoint compliance status | Local, security team via SIEM/XDR | Local: as long as agent installed; SIEM/XDR: as per policy |
-| Security configuration, installed/running apps, stored documents | Local, security team via SIEM/XDR | Aggregated status / state only, as long as agent installed |
-| Camera, microphone | Not processed | N/A |
+| Endpoint username, browser profile username | security team via SIEM / XDR events | As long as the agent is installed and as per SIEM / XDR retention policy. |
+| Web application usage statistics, application usernames | security team via SIEM / XDR | As long as the agent is installed and as per SIEM / XDR retention policy. |
+| Download/upload/print metadata | security team via SIEM / XDR | As long as the agent is installed and as per SIEM / XDR retention policy. |
+| Security events | security team via SIEM / XDR | As long as the agent is installed and as per SIEM / XDR retention policy. |
+| Web navigations (hashed) | security team, via local logfiles on endpoint (like [regular browser forensics](https://www.foxtonforensics.com/browser-history-examiner/chrome-history-location), but in a more privacy-respecting way) | As long as the agent is installed and as per local log retention policy. |
+| Web requests | local processing only | N/A |
+| Passwords (hashed) | strictly local processing and storage within browser storage | As long as the agent is installed |
+| Endpoint compliance status | security team via SIEM / XDR | As long as the agent is installed and as per SIEM / XDR retention policy. |
+| Security configuration, installed / running apps, stored documents | security team via SIEM / XDR | Aggregated status / state only, as long as agent installed |
+| Camera, microphone | no processing | N/A |
 
 ### 
 
@@ -57,8 +56,6 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 | Data minimization | Storage of only summary / status or non-identifiable data where possible (e.g. hashes, aggregate use) | Local storage, SIEM / XDR |
 | Endpoint control/status checks | Checks for forbidden apps, extensions, security compliance | Only summary control status stored |
 
-# 
-
 # **2 Fundamental Principles**
 
 ## **2.1 Assessment of Measures Ensuring the Proportionality and Necessity of Processing**
@@ -67,9 +64,9 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 
 | Purposes | Legitimacy |
 | :---- | :---- |
-| Security event detection, monitoring, prevention | Legitimate interest (GDPR Art. 6(1)(f)): protection of assets and compliance obligations |
-| Incident response, forensics (DFIR) | Legitimate interest and legal obligations for post-incident investigation and prevention |
-| Assurance of control efficacy and compliance | Legitimate interest; necessary to ensure security standards and policies are followed |
+| Security event detection, monitoring, prevention | Legitimate interest (GDPR Art. 6(1)(f)): protection of assets and compliance with normative, lawful and contractual frameworks, such as [ISO 27001](https://en.wikipedia.org/wiki/ISO/IEC_27001), [SOC 2](https://en.wikipedia.org/wiki/System_and_Organization_Controls), [NIS2 and DORA](https://en.wikipedia.org/wiki/Cyber-security_regulation) |
+| Incident response, forensics (DFIR) | Legitimate interest and legal obligations for post-incident investigation and prevention, as per normative, lawful and contractual frameworks, such as [ISO 27001](https://en.wikipedia.org/wiki/ISO/IEC_27001), [SOC 2](https://en.wikipedia.org/wiki/System_and_Organization_Controls), [NIS2 and DORA](https://en.wikipedia.org/wiki/Cyber-security_regulation) |
+| Assurance of control efficacy and compliance | Legitimate interest; necessary to ensure security standards and policies are operating and reducing risk as designed, as per normative, lawful and contractual frameworks, such as [ISO 27001](https://en.wikipedia.org/wiki/ISO/IEC_27001), [SOC 2](https://en.wikipedia.org/wiki/System_and_Organization_Controls), [NIS2 and DORA](https://en.wikipedia.org/wiki/Cyber-security_regulation) |
 
 ### Explanation and Justification of the Legal Basis
 
@@ -78,9 +75,9 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 | The data subject has given consent to the processing of their personal data for one or more specific purposes | No | Not required—processing relies on legitimate interest for cybersecurity. |
 | Processing is necessary for the performance of a contract | No | Not applicable. |
 | Processing is necessary for compliance with a legal obligation to which the controller is subject | Partial | Security incident reporting may be required by law in some sectors. |
-| Processing is necessary in order to protect the vital interests of the data subject or another natural person | No | Not the main basis. |
+| Processing is necessary in order to protect the vital interests of the data subject or another natural person | No | Not applicable.. |
 | Processing is necessary for the performance of a task carried out in the public interest or in the exercise of official authority | No | Not applicable. |
-| Processing is necessary for the purposes of the legitimate interests pursued by the controller or by a third party | Yes | Citadel's objectives are necessary for IT security, legal and contractual obligations. |
+| Processing is necessary for the purposes of the legitimate interests pursued by the controller or by a third party | Yes | Citadel's objectives are necessary to protect the organisation’s interests in terms of IT security, legal and contractual obligations. |
 
 ### Explanation and Justification of Data Minimization
 
@@ -119,8 +116,6 @@ This Data Privacy Impact Assessment is intended as a **template** to be used by 
 | Data quality: accurate and kept up to date | Acceptable |  |
 | Retention periods: limited | Acceptable | Alignment with SIEM / XDR data retention policy |
 
-## 
-
 ## **2.2 Assessment of Measures Protecting Data Subjects' Rights**
 
 ### Determination and Description of Measures for Informing Data Subjects
@@ -139,8 +134,6 @@ If third-party data recipients (e.g., SIEM/XDR or incident responders):
 | Detailed presentation of the purposes of transmission to third parties | Description in this DPIA & user notices | Complies with transparency requirement |
 | Detailed presentation of personal data transmitted | Described for each use case/data type | See Data Processing table above |
 | Identification of third party companies | SIEM / XDR vendor identified in policy | Provided in organization’s privacy documentation |
-
-### 
 
 ### Determination and Description of Measures for Obtaining Consent
 
@@ -200,8 +193,6 @@ If third-party data recipients (e.g., SIEM/XDR or incident responders):
 | Subcontracting: identified and contractualized | Acceptable | SIEM/XDR agreements periodically reviewed |
 | Transfers outside EU: obligations complied with | Acceptable (if SIEM / XDR contract aligns) | Ensure SCCs or equivalent are used when required |
 
-# 
-
 # **3 Data Security Risks**
 
 ## **3.1 Assessment of Measures**
@@ -240,8 +231,6 @@ If third-party data recipients (e.g., SIEM/XDR or incident responders):
 | Risk from location | Handled by org policy | Acceptable |  |
 | Protection from non-human risks | Handled by org policy | Acceptable | Periodic check of DR / BCP, environmental risk mitigation plans |
 
-### 
-
 ### Description & Assessment of Organizational Measures (Governance)
 
 | Organizational Measures (Governance) | Implementation Methods or Justification Otherwise | Acceptable / Needs Improvement? | Corrective Measures |
@@ -266,13 +255,11 @@ If third-party data recipients (e.g., SIEM/XDR or incident responders):
 | Unintended modification of data | SIEM/XDR config error, agent failure | False alerts, loss of data integrity | Misleading response or investigation | Audit logs, input validation, limited retention | Low | Low |
 | Data loss | Device loss, SIEM/XDR failure | Loss of evidence / traces, incident under-reporting | Reduced security, possibly missed incidents | Data backup & retention, centralization via SIEM/XDR | Moderate | Low |
 
-### 
-
 ### Risk Assessment
 
 | Risks | Acceptable / Needs Improvement? | Corrective Measures | Residual Severity | Residual Likelihood |
 | :---- | :---- | :---- | :---- | :---- |
-| Unauthorized access to data | Acceptable (with proper access controls) | Covered by SIEM / XDR controls. Access to be logged and audited where possible.  | Moderate | Low |
+| Unauthorized access to data | Acceptable (with proper access controls) | Covered by SIEM / XDR controls. Access to be logged and audited where possible. | Moderate | Low |
 | Purpose deviation | Acceptable | Training, access restriction | Low | Low |
 | Unintended modification of data | Acceptable | Covered by SIEM / XDR controls | Low | Low |
-| Data loss | Acceptable | Covered by SIEM / XDR controls  | Low | Low |
+| Data loss | Acceptable | Covered by SIEM / XDR controls | Low | Low |

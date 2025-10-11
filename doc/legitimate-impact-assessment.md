@@ -1,7 +1,6 @@
 # Legitimate Interests Assessment (LIA)
 
-> [!NOTE]  
-> This LIA is a template/example. Adapt to each deployment’s data flows, policies, and local law with legal / DP expertise as required.
+> [!NOTE] This is the Legitimate Impact Assessment performed by the developer of Citadel, as part of the development of Citadel. It can be used as a **template** to be used by a CISO / CIO during the Citadel deployment. The template should however be carefully analysed, verified for compliance, and adapted to the specifics of the organisation, for example with respect to data retention, local laws or use of external SIEM / SOAR solutions.
 
 *Citadel Browser Agent*
 
@@ -26,13 +25,15 @@ Citadel processes personal and technical data in order to:
 
 | Benefit | Description |
 | :---- | :---- |
-| Security improvement | Real-time detection and prevention of policy breaches and malware |
-| Compliance enhancement | Supports compliance with normative, lawful and contractual frameworks |
+| Security improvement and Risk Reduction | Real-time detection and prevention of policy breaches and malware |
+| Compliance enhancement | Enables compliance with cyber security requirements, such as IT policy enforcement, incident prevention, detection, analysis and resolution, in normative, lawful and contractual frameworks, such as [ISO 27001](https://en.wikipedia.org/wiki/ISO/IEC_27001), [SOC 2](https://en.wikipedia.org/wiki/System_and_Organization_Controls), [NIS2 and DORA](https://en.wikipedia.org/wiki/Cyber-security_regulation) |
 | DFIR readiness | Maintains evidence needed for incident response and forensic analysis |
 | Cost reduction | Identifies unused SaaS licences, reducing wasted spend |
 | User safety | Detects and prevents risky user behaviour or inadvertent data leakage |
 
 ### 1.3 Third-party and Public Benefits
+
+The expected benefits for third parties and the wider public:
 
 - Organisation users / clients benefit from increased security.
 - Organisation and its shareholders or stakeholders benefit from decreased risk.
@@ -48,23 +49,72 @@ Protecting enterprise and employee data is critical to business continuity, norm
 | Area | Potential Impact |
 | :---- | :---- |
 | Cybersecurity | Increased threat exposure, higher risk of undetected incidents |
-| Compliance | Inability to meet regulatory or contractual obligations |
+| Compliance | Inability to meet contractual or [regulatory obligations](https://en.wikipedia.org/wiki/Cyber-security_regulation), regarding IT policy enforcement, incident prevention, detection, analysis and resolution. |
 | Operations | Greater severity / cost of incidents, more complex forensics |
-| User Trust | Erosion of employee / evidence trust, post-incident damage |
+| User Trust | Erosion of user / evidence trust, post-incident damage |
+
+### 
 
 ### 1.6 Legal Framework Compliance
 
-Citadel:
+To the best of our knowledge, Citadel complies (or facilitates the compliance of organisations) with the following relevant legal and normative rules.
 
-- Aligns with GDPR (Art. 6(1)(f)), with “legitimate interest” as basis
-- Supports local data protection and logging requirements (e.g., CNIL guidelines)
-- Integrates with SIEM / XDR adhering to international and local standards
+#### 1\. GDPR (General Data Protection Regulation)
+
+- **Article 6(1)(f)** — Legitimate interest as lawful basis for processing
+- **Article 25** — Data protection by design and by default
+- **Article 32** — Security of processing
+- **Articles 33 & 34** — Notification of personal data breaches
+- **Article 5(1)(c)** — Data minimization
+- **Article 5(1)(f)** — Integrity and confidentiality
+
+#### 2\. ISO/IEC 27001:2022 (Information Security Management Systems)
+
+- **A.5.10** — Acceptable use of information and assets
+- **A.5.20** — Management of technical vulnerabilities
+- **A.5.23** — Information security for use of cloud services (logging, monitoring)
+- **A.5.32** — Information security event logging
+- **A.8.3.1 / A.8.3.2** — Management and improvement of information security events
+- **A.8.7** — Monitoring activities (user activities, security exceptions, events)
+
+#### 3\. DORA (Digital Operational Resilience Act — Regulation (EU) 2022/2554)
+
+- **Article 9** — ICT risk management measures (monitoring & logging)
+- **Article 13** — ICT-related incident detection, handling, reporting
+- **Article 15** — Classification and documentation of ICT-related incidents
+- **Article 21** — Information sharing (incident evidence, logs) between entities and authorities
+
+#### 4\. NIS2 Directive (EU Directive 2022/2555)
+
+- **Article 18** — Handling of security incidents
+- **Article 21** — Cybersecurity risk management measures, controls
+- **Article 23** — Incident notification to competent authorities
+- **Article 24** — Notification content/timelines, evidence preservation
+- **Annex I-II** — Security requirements for essential/important entities
+
+#### 5\. French CNIL Recommendations
+
+- **Délibération n° 2021-122 du 14 octobre 2021**  
+  *Logging of security events (journalisation) — data minimization, proportionality*
+
+- **Draft “Web Filtering” Recommendations (July 2025\)**  
+  *Web filtering transparency, proportionality, and privacy controls*
+
+#### 6\. NIST SP 800-53 Rev. 5 (for US-based or multinational organizations)
+
+- **AU-2** — Event Logging
+- **IR-4** — Incident Handling
+- **SI-4** — Information System Monitoring
 
 ### 1.7 Codes of Practice and Ethics
 
-- Privacy by design: data minimisation and privacy-preserving defaults
+We consider thatCitadel implements (or facilitates the implementation by organisations) of the following relevant industry guidelines and codes of practise.
+
+- **Privacy by design**: data minimisation and privacy-preserving defaults
+- **Transparency with users**; monitoring is justified, documented, and proportionate
 - No behavioural profiling or marketing data use
-- Transparency with users; monitoring is justified, documented, and proportionate
+
+Like all monitoring technology, Citadel poses an ethical dilemma: how to combine the need for information security with the right to privacy of the individual. At every step our design choices have been informed at every step by the GDPR key principles of purpose limitation, storage limitation, confidentiality, and transparency.
 
 ---
 
@@ -72,26 +122,34 @@ Citadel:
 
 ### 2.1 Link Between Processing and Purpose
 
+The data processed by Citadel helps to achieve the following purposes.
+
 | Purpose | Processing Activity | Necessary? |
 | :---- | :---- | :---- |
-| Security event detection | Log events (downloads, compliance, suspicious activity) | Yes |
-| Incident response / forensics | Store endpoint/application events | Yes |
-| Policy/contract enforcement | Monitor password/MFA use, block listed sites/apps | Yes |
+| Security event prevention | Raise policy infractions to IT staff | Yes, experience has shown that training alone is not enough. |
+| Security event detection | Log events (downloads, compliance, suspicious activity) | Yes, the absence of early detection means increased dwell time for attackers and increased risks. |
+| Incident response / forensics | Store endpoint / application events | Yes, logs are required to understand and resolve incidents. |
 
 ### 2.2 Proportionality and Alternatives
 
-| Purpose | Proportionate? | Less Intrusive Alternatives (if any) | Outcome |
+The following alternatives have been evaluated, to establish their impact on the efficacy and a proportionality has been established.
+
+
+| Purpose | Less Intrusive Alternatives (if any) | Outcome | Proportionate? |
 | :---- | :---- | :---- | :---- |
-| Security / DFIR | Yes | Omit local navigation logs | Heavily reduced usefulness for DFIR |
-| Security / DFIR | Yes | Omit URL / filename in download / upload metadata | Heavily reduced usefulness for DFIR |
-| Security / DFIR | Yes | Log security incidents only for protected perimeter | Heavily reduced usefulness for DFIR |
+| Security / DFIR | Omit (hashed) local navigation logs | Inability to verify incident timelines and events. | Yes |
+| Security / DFIR | Omit URL / filename in download / upload metadata | Significantly reduced usefulness for DFIR | Yes |
+| Security / DFIR | Log security incidents only for protected perimeter | Significantly reduced usefulness for DFIR | Yes |
 
-Privacy-preserving technical controls:
+As a result the following privacy-preserving technical controls have been implemented:
 
+- Analyse only applications in the protected scope
 - Hashing URLs for non-critical / forensic events
 - Local-only storage for most non-incident data
 
 ### 2.3 Data Minimisation
+
+Additionally, the following minimisations have been identified and implemented, so as to achieve the same goal with a minimum of data that is retained.
 
 | Data Type | Retained? | Minimisation Steps |
 | :---- | :---- | :---- |
@@ -107,6 +165,8 @@ Privacy-preserving technical controls:
 
 ### 3.1 Nature of Personal Data Processed
 
+An evaluation was performed of the type of data that is processed.
+
 | Data Category | Description / Sensitivity | Special Category? |
 | :---- | :---- | :---- |
 | Identifiers | Username, application accounts | No, unless used for special (e.g. union) accounts |
@@ -116,24 +176,28 @@ Privacy-preserving technical controls:
 | Browser navigation | High sensitivity, but stored locally and hashed | No |
 | Endpoint compliance | Pass / fail state, app/extension status | No |
 
-**Special Category:** Never processed intentionally. Possible risk of accidental capture if the user visits sensitive (e.g. health, religious) sites.
+**The main remaining issue is the “Special Category”.** This data is never processed intentionally, and extensive efforts have been made to exclude this data where possible. There remains however a risk of accidental capture if the user visits sensitive (e.g. health, religious) sites.
+
+Further analysis and measures are required if Citadel is deployed in contexts where it will process on a regular basis the personal data of children or other vulnerable people.
 
 ### 3.2 Reasonable Expectations
 
+The expectations of data subjects have been evaluated as follows.
+
 | Factor | Comment |
 | :---- | :---- |
-| Relationship | Users are employees/agents. Monitoring is disclosed and expected in enterprise. |
+| Relationship | Users are employees / agents of the organisation that is deploying Citadel. Security-related monitoring is disclosed and expected in a professional environment. |
 | Transparency | End-users notified (“transparency statement”, deployment briefings) |
-| Usage context | Security/IT monitoring is standard in managed environments |
+| Usage context | Security / IT monitoring is standard in managed environments |
 | Collection | Data generated by device-user activity only; direct collection only |
-| Innovation/novelty | Aligned with best practice, SIEM / XDR standards, and privacy by design |
+| Innovation / novelty | Aligned with best practice, SIEM / XDR standards, and privacy by design |
 
 ### 3.3 Likely Impact on Individuals
 
 | Impact Area | Assessment | Safeguards |
 | :---- | :---- | :---- |
 | Privacy | Limited; only for security/forensic uses | Data minimisation, local hashing, SIEM access controls |
-| Objection / Control | Employee discomfort possible | Opt-out / configuration options, internal helpdesk process.  |
+| Objection / Control | Employee discomfort possible | Opt-out / configuration options, internal helpdesk process. |
 | Intrusiveness | Low: only application/security, not full browsing tracked | No content; usage only for authenticated apps |
 | Misuse | Strict RBAC for SIEM / forensic data | Role-based access, limited audit trail |
 
@@ -156,6 +220,6 @@ Yes, via configuration or organisational process in special situations.
 ## 5\. Next Steps
 
 - **Filing:** Store this LIA and review annually, or on major technical or legal change.
-- **Transparency:** Summarise processing and legal basis in user privacy notices (see [statement](/doc/transparency.md)).
-- **DPIA:** Complete full DPIA where required by law, risk, or scale. (see [template](/doc/privacy-impact-assessment.md))
+- **Transparency:** Summarise processing and legal basis in user privacy notices (see [statement](http:///doc/transparency.md)).
+- **DPIA:** Complete full DPIA where required by law, risk, or scale. (see [template](http:///doc/privacy-impact-assessment.md))
 - **Review:** Monitor for regulatory/technical updates; revise document as needed.
