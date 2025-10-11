@@ -1,26 +1,21 @@
 class DeviceControl {
 
     name
+    action
     definition
     report
+    #warnTrigger
+    #blockTrigger
     #lastDayStart
     #failedDays = 0
-    #action
 
-    constructor(controlName) {
-        const isSkipped = config.device.actions[Action.SKIP].includes(controlName)
-        assert(!isSkipped, `tried to create skipped control ${controlName}`)
+    constructor(controlName, action, warnTrigger, blockTrigger) {
+        assert(action !== Action.SKIP, `tried to create skipped control ${controlName}`)
 
         this.name = controlName
-        for (const action of Action.values) {
-            if (config.device.actions[action].includes(controlName)) {
-                this.#action = action
-            }
-        }
-
-        if (this.#action === undefined) {
-            this.#action = config.device.actions.default
-        }
+        this.action = action
+        this.#warnTrigger = warnTrigger
+        this.#blockTrigger = blockTrigger
     }
 
     addReport(report) {
@@ -44,9 +39,9 @@ class DeviceControl {
     getState() {
         if (this.report.passed) {
             return State.PASSING
-        } else if (this.#action === Action.BLOCK) {
+        } else if (this.action === Action.BLOCK) {
             return State.BLOCKING
-        } else if (this.#action === Action.NOTHING || this.#action === Action.NOTIFY) {
+        } else if (this.action === Action.NOTHING || this.action === Action.NOTIFY) {
             return State.FAILING
         } else if (this.#failedDays >= config.device.trigger.block) {
             return State.BLOCKING
@@ -60,9 +55,9 @@ class DeviceControl {
     getNextState() {
         if (this.report.passed) {
             return {state: State.PASSING}
-        } else if (this.#action === Action.BLOCK) {
+        } else if (this.action === Action.BLOCK) {
             return { state: State.BLOCKING }
-        } else if (this.#action === Action.NOTHING || this.#action === Action.NOTIFY) {
+        } else if (this.action === Action.NOTHING || this.action === Action.NOTIFY) {
             return { state: State.FAILING }
         } else if (this.#failedDays < config.device.trigger.warn) {
             return { state: State.WARNING, days: config.device.trigger.warn - this.#failedDays }
