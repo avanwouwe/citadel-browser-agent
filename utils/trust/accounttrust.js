@@ -13,6 +13,8 @@ class AccountTrust {
         return true
     }
 
+    static accountKey(username, system) { return JSON.stringify({ u: username, s: system }) }
+
     static failingAccounts(appName = null) {
         const accounts = [ ]
 

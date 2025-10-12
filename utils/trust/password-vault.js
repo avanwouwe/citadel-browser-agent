@@ -13,7 +13,7 @@ class PasswordVault {
 
         const isProtectedSystem = AccountTrust.checkFor(username, system)
         const passwordHash = await Bcrypt.hash(password.hash, PasswordVault.salt)
-        const accountKey = PasswordVault.#accountKey(username, system)
+        const accountKey = AccountTrust.accountKey(username, system)
 
         const matchingPasswords = PasswordVault.#passwords[passwordHash] ?? {}
 
@@ -52,7 +52,7 @@ class PasswordVault {
     static deleteAccount(username, system) {
         system = PasswordVault.#normalizeSystem(system)
 
-        const accountKey = PasswordVault.#accountKey(username, system)
+        const accountKey = AccountTrust.accountKey(username, system)
         Object.values(PasswordVault.#passwords).forEach(password => delete password[accountKey])
         PasswordVault.#passwords.isDirty = true
     }
@@ -95,8 +95,6 @@ class PasswordVault {
             }
         }
     }
-
-    static #accountKey(username, system) { return JSON.stringify({ u: username, s: system }) }
 
     static #normalizeSystem(system) { return system.isURL() ? system.toURL().hostname : system }
 
