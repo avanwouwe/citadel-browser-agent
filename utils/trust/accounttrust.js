@@ -2,6 +2,8 @@ class AccountTrust {
 
     static TYPE = "account"
 
+    static #audit = new Audit()
+
     static checkFor(username, sitename) {
         if (sitename.isURL()) sitename = getSitename(sitename)
 
@@ -15,7 +17,63 @@ class AccountTrust {
 
     static accountKey(username, system) { return JSON.stringify({ u: username, s: system }) }
 
-    static failingAccounts(appName = null) {
+    static getStatus(appName = null) {
+        const failingAccounts = AccountTrust.#failingAccounts(appName)
+
+        for (const acct of failingAccounts) {
+            const accountKey = AccountTrust.accountKey(acct.username, acct.system)
+            const finding = this.#audit.getFinding(accountKey)
+            acct.report.state = finding?.getState() ?? State.FAILING
+            acct.report.nextState = finding?.getNextState() ?? { state : State.FAILING }
+        }
+
+        return failingAccounts
+    }
+
+    static async deleteAccount(username, appName) {
+        assert(username && appName, "missing either username or system")
+
+        AppStats.deleteAccount(appName, username)
+        await logOffDomain(appName)
+        await injectFuncIntoDomain(appName, () => location.reload())
+
+        AccountTrust.#refresh()
+
+        logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, undefined, `user deleted account of '${username}' for ${appName}`)
+    }
+
+    static #refresh() {
+        const prevAudit = this.#audit
+        this.#audit = new Audit()
+
+        for (const acct of AccountTrust.#failingAccounts()) {
+            const accountKey = AccountTrust.accountKey(acct.username, acct.system)
+            const warnTrigger = config.account.trigger.warn
+            const blockTrigger = config.account.trigger.block
+
+            let action = Action.NOTHING
+            for (const i of Action.values) {
+                if (acct.report.issues.count >= config.account.actions[i]) {
+                    action = i
+                }
+            }
+
+            const control = new Control(accountKey, action, warnTrigger, blockTrigger)
+            const report = {
+                name: accountKey,
+                passed: action === Action.NOTHING || action === Action.SKIP,
+                timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? nowTimestamp()
+            }
+            control.addReport(report)
+            this.#audit.setFinding(control)
+        }
+
+        this.#audit.notify(AccountTrust.TYPE)
+
+        Dashboard.sendMessage({type: "RefreshAccountStatus"})
+    }
+
+    static #failingAccounts(appName = null) {
         const accounts = [ ]
 
         const app = appName ? AppStats.forAppName(appName) : null
@@ -26,11 +84,8 @@ class AccountTrust {
             for (const [username, report] of AppStats.allAccounts(app)) {
                 if (!AccountTrust.checkFor(username, system)) continue
 
-                report.state = State.PASSING
-
                 const issueCount = report.issues?.count ?? 0
-                report.state = issueCount >= State.values.length ? State.BLOCKING : State.values[issueCount]
-                if (issueCount > 0) {
+                if (issueCount >= config.account.actions.NOTIFY) {
                     const description = {
                         numberOfDigits:     t("accounttrust.password.quality.number-digits",     { min: config.account.passwordPolicy.minNumberOfDigits }),
                         numberOfLetters:    t("accounttrust.password.quality.number-letters",    { min: config.account.passwordPolicy.minNumberOfLetters }),
@@ -53,45 +108,12 @@ class AccountTrust {
                 }
             }
         }
+
         return accounts
     }
 
-    static async deleteAccount(username, appName) {
-        assert(username && appName, "missing either username or system")
-
-        AppStats.deleteAccount(appName, username)
-        await logOffDomain(appName)
-        await injectFuncIntoDomain(appName, () => location.reload())
-
-        AccountTrust.#notify()
-
-        logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, undefined, `user deleted account of '${username}' for ${appName}`)
-    }
-
-    static #notify() {
-        let state = State.PASSING
-        for (const acct of AccountTrust.failingAccounts()) {
-            if (State.indexOf(acct.report.state) > State.indexOf(state)) {
-                state = acct.report.state
-            }
-        }
-
-        const title = t("accounttrust.notification.title")
-
-        if (state === State.PASSING) {
-            Notification.setAlert(AccountTrust.TYPE, state)
-        } else if (state === State.FAILING) {
-            Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.failing"))
-        } else if (state === State.WARNING) {
-            Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.warning"))
-        } else if (state === State.BLOCKING) {
-            Notification.setAlert(AccountTrust.TYPE, state, title, t("accounttrust.notification.blocking"))
-        }
-
-        Dashboard.sendMessage({type: "RefreshAccountStatus"})
-    }
-
     static {
-        setTimeout(() => AccountTrust.#notify(), 1 * ONE_MINUTE)
-        setInterval(() => AccountTrust.#notify(), 7 * ONE_DAY)
-    }}
+        setTimeout(() => AccountTrust.#refresh(), 1 * ONE_MINUTE)
+        setInterval(() => AccountTrust.#refresh(), 7 * ONE_DAY)
+    }
+}

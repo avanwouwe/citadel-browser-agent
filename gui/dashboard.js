@@ -84,7 +84,7 @@ function renderDeviceDashboard() {
 }
 
 function renderAccountDashboard() {
-    sendMessage("GetAccountIssues", accounttrust => {
+    sendMessage("GetAccountStatus", accounttrust => {
         const tb = document.getElementById("accounttrust-issues")
         tb.innerHTML = ""
 
@@ -92,6 +92,7 @@ function renderAccountDashboard() {
         tb.addEventListener('click', handleDeleteClick)
 
         for (const acct of accounttrust.accounts) {
+            const next = acct.report.nextState
             let errors = acct.report.issues?.description
             if (acct.report.issues?.count > 0) {
                 errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
@@ -103,6 +104,8 @@ function renderAccountDashboard() {
                 `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
                 `<td>${errors}</td>` +
                 `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
+                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
+                `<td class="days">${next.days ?? ""}</td>` +
                 `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
 
             tb.appendChild(tr)

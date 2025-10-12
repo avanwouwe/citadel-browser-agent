@@ -38,6 +38,8 @@
       "username": "Username",
       "system": "System",
       "state": "State",
+      "next-state": "Next",
+      "in-days": "In Days",
       "issue": "Issue"
     },
     "password": {

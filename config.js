@@ -164,6 +164,11 @@ class Config {
                 warn: 2,
                 block: 7
             },
+            actions: {
+                NOTIFY: 2,
+                WARN: 4,
+                BLOCK: 6
+            },
             exceptions: {
                 duration: 60,
                 domains: [ ]
