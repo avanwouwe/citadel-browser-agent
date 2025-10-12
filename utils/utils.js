@@ -448,3 +448,16 @@ async function clearStorage() {
 function navigateTo(tabId, url) {
     chrome.tabs.update(tabId, { url })
 }
+
+function evaluateBlacklist(entry, whitelist, blacklist, defaultValue) {
+    if (Array.isArray(entry)) return entry.every(item => evaluateBlacklist(item, whitelist, blacklist, defaultValue))
+
+    assert(isString(entry), "entry must be a string")
+    assert(Array.isArray(whitelist), "whitelist must be an array")
+    assert(Array.isArray(blacklist), "blacklist must be an array")
+
+    if (blacklist.includes(entry)) return false
+    if (whitelist.includes(entry) || whitelist.includes("*")) return true
+    if (blacklist.includes("*")) return false
+    return defaultValue
+}

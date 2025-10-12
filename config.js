@@ -321,11 +321,11 @@ class Config {
                 allowed: true,
             },
             id: {
-                allowed: [""],
+                allowed: [],
                 forbidden: [],
             },
             category: {
-                allowed: ["*"],
+                allowed: [],
                 forbidden: [],
             },
             allowSideloading: false,

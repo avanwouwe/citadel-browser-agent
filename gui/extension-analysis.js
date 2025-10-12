@@ -29,14 +29,23 @@ async function renderPage() {
     renderScore("impact", scores)
 
     const config = tabState.config
+
     let reason
-    if (scores.global > config.risk.maxGlobal) {
-        reason = 'global'
+    const allowId = evaluateBlacklist(storeInfo.id, config.id.allowed, config.id.forbidden, true)
+    const allowCategory = evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), config.category.allowed, config.category.forbidden, true)
+
+    if (!allowId) {
+        reason = 'blacklist-extension'
+    } else if (!allowCategory) {
+        reason = 'blacklist-category'
+    } else if (scores.global > config.risk.maxGlobal) {
+        reason = 'risk-global'
     } else if (scores.impact > config.risk.maxImpact) {
-        reason = 'impact'
+        reason = 'risk-impact'
     } else if (scores.likelihood > config.risk.maxLikelihood) {
-        reason = 'likelihood'
+        reason = 'risk-likelihood'
     }
+
     const allowed = !reason
 
     const installButton = document.getElementById("installButton")
@@ -44,7 +53,7 @@ async function renderPage() {
     installButton.disabled = !allowed
     if (allowed) return
 
-    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.risk-' + reason)}.`
+    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + reason)}.`
 
     if (config.exceptions.allowed) {
         exceptionSectionToggle.style.display = 'block'

@@ -82,7 +82,6 @@
   "block-page": {
     "not-specified": "Non spécifié",
     "page-blocked-header": "Cette page a été bloquée",
-    "page-blocked-text": "Le site Web que vous essayez de visiter est bloqué pour des raisons de sécurité.",
     "reason-label": "Raison:",
     "target-label": "Cible:",
     "contact-label": "Contact:",
@@ -126,6 +125,8 @@
       "install-blocked": {
         "install": "Installer",
         "blocked": "L’extension que vous essayez d’installer a été bloquée car",
+        "blacklist-extension": "elle a été interdite",
+        "blacklist-category": "la catégorie à laquelle elle appartient a été interdite",
         "risk-global": "le niveau de risque global est trop élevé",
         "risk-impact": "elle a un accès trop étendu aux données sensibles",
         "risk-likelihood": "le probabilité qu’il s’agisse d’un logiciel malveillant ou qu’elle puisse être piratée est trop élevé"

@@ -9,8 +9,7 @@ class ExtensionAnalysis {
 
         if (
             !extensionId ||
-            config.extensions.id.allowed.includes("*") ||
-            config.extensions.id.allowed.includes(extensionId) ||
+            evaluateBlacklist(extensionId, config.extensions.id.allowed, config.extensions.id.forbidden, false) ||
             Extension.exceptions[extensionId] ||
             ExtensionAnalysis.approved.includes(extensionId) ||
             await Extension.isInstalled(extensionId)
