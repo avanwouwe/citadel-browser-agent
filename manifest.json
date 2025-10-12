@@ -72,7 +72,6 @@
       "/utils/trust/trust.js",
       "/utils/trust/accounttrust.js",
       "/utils/trust/devicetrust.js",
-      "/utils/trust/devicecontrol.js",
       "/utils/blacklist/blacklist.js",
       "/utils/blacklist/ignorelist.js",
       "/utils/blacklist/exceptionlist.js",

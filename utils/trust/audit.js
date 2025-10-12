@@ -24,15 +24,14 @@ class Audit {
     #findings = { }
     #conclusion
 
-    addReport(report) {
-        for (const controlReport of Object.values(report.controls.results)) {
-            const control = this.getFinding(controlReport.name)
+    getFindings() { return this.#findings }
 
-            if (!control || control.action === Action.SKIP) continue
+    getFinding(name) {
+        return this.#findings[name]
+    }
 
-            control.addReport(controlReport)
-            control.definition = report.controls.definitions[controlReport.name]
-        }
+    setFinding(control) {
+        this.#findings[control.name] = control
 
         let worstState = State.indexOf(State.PASSING)
         Object.values(this.#findings).forEach(finding => {
@@ -41,24 +40,6 @@ class Audit {
         })
         this.#conclusion = State.values[worstState]
     }
-
-    getFindings() { return this.#findings }
-
-    getFinding(name) {
-        const warnTrigger = config.device.trigger.warn
-        const blockTrigger = config.device.trigger.block
-
-        let action = config.device.actions.default
-        for (const i of Action.values) {
-            if (config.device.actions[i].includes(name)) {
-                action = i
-            }
-        }
-
-        return this.#findings.getOrSet(name, new DeviceControl(name, action, warnTrigger, blockTrigger))
-    }
-
-    getControls() { return this.#findings }
 
     getState() { return this.#conclusion ?? State.UNKNOWN }
 
@@ -98,7 +79,7 @@ class Audit {
             compliance: this.getCompliance()
         }
 
-        Object.values(this.getControls()).forEach((control) => {
+        Object.values(this.getFindings()).forEach((control) => {
             status.controls[control.name] = {
                 name: control.name,
                 definition: control.definition,
@@ -113,17 +94,18 @@ class Audit {
     }
 
     notify(type) {
-        const title = t(`${type}.notification.title`)
+        const labeltype = `${type}trust`
+        const title = t(`${labeltype}.notification.title`)
 
         if (this.#conclusion === State.PASSING) {
-            Notification.setAlert(DeviceTrust.TYPE, this.#conclusion)
+            Notification.setAlert(type, this.#conclusion)
         } else if (this.#conclusion === State.FAILING) {
-            Notification.setAlert(DeviceTrust.TYPE, this.#conclusion, title, t(`${type}.notification.failing`))
+            Notification.setAlert(type, this.#conclusion, title, t(`${labeltype}.notification.failing`))
         } else if (this.#conclusion === State.WARNING) {
-            const days = this.getNextState().days ?? t(`${type}.notification.a-few`)
-            Notification.setAlert(DeviceTrust.TYPE, this.#conclusion, title, t(`${type}.notification.warning`, {days}))
+            const days = this.getNextState().days ?? t(`${labeltype}.notification.a-few`)
+            Notification.setAlert(type, this.#conclusion, title, t(`${labeltype}.notification.warning`, {days}))
         } else if (this.#conclusion === State.BLOCKING) {
-            Notification.setAlert(DeviceTrust.TYPE, this.#conclusion, title, t(`${type}.notification.blocking`))
+            Notification.setAlert(type, this.#conclusion, title, t(`${labeltype}.notification.blocking`))
         }
     }
 }

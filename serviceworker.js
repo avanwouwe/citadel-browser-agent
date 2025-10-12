@@ -30,7 +30,6 @@ importScripts('utils/i18n/i18n.js');
 importScripts('utils/trust/audit.js');
 importScripts('utils/trust/accounttrust.js');
 importScripts('utils/trust/devicetrust.js');
-importScripts('utils/trust/devicecontrol.js');
 importScripts('utils/blacklist/blacklist.js');
 importScripts('utils/blacklist/ignorelist.js');
 importScripts('utils/blacklist/exceptionlist.js');

@@ -5,8 +5,30 @@ class DeviceTrust {
     #audit = new Audit()
 
     addReport(report) {
-        this.#audit.addReport(report)
-        this.#audit.notify("devicetrust")
+        for (const controlReport of Object.values(report.controls.results)) {
+            const control = this.#audit.getFinding(controlReport.name) ?? this.#createControl(controlReport.name)
+            if (!control || control.action === Action.SKIP) continue
+
+            control.addReport(controlReport)
+            this.#audit.setFinding(control)
+
+            control.definition = report.controls.definitions[controlReport.name]
+        }
+
+        this.#audit.notify(DeviceTrust.TYPE)
+    }
+
+    #createControl(name) {
+        const warnTrigger = config.device.trigger.warn
+        const blockTrigger = config.device.trigger.block
+
+        let action = config.device.actions.default
+        for (const i of Action.values) {
+            if (config.device.actions[i].includes(name)) {
+                action = i
+            }
+        }
+        return new Control(name, action, warnTrigger, blockTrigger)
     }
 
     getStatus() {
