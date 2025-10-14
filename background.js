@@ -313,7 +313,7 @@ function handleError(hook, eventType, filter) {
 				if (details.url.startsWith('chrome://network-error/')) level = Log.INFO
 				else if (exception) level = exception
 				else if (details.error.match(BROWSER_ERROR_ERROR)) level = Log.ERROR
-				else if (details.error.match(BROWSER_ERROR_WARNING)) level = Log.WARN
+				else if (details.error.match(BROWSER_ERROR_WARNING) && isProtected(getSitename(details.url))) level = Log.WARN
 				else level = undefined
 
 				if (level) {
