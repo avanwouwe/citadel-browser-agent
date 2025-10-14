@@ -120,6 +120,10 @@
       "high": "High Risk",
       "critical": "Critical Risk"
     },
+    "remove-modal": {
+      "title": "Non-compliant Extension",
+      "message": "An extension that does not comply with the IT policy was found and has been deactivated."
+    },
     "block-page": {
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {

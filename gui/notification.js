@@ -71,9 +71,9 @@ class Notification {
             if (blockedOverPassword) return false
         }
 
-        const exceptions = config[alert.type].exceptions
+        const exceptions = config[alert.type]?.exceptions
         const onAcknowledge = { type: 'acknowledge-alert', alert }
-        const onException = (alert.level === State.BLOCKING && exceptions.duration > 0 && matchDomain(hostname, exceptions.domains)) ? { type: 'allow-alert', alert } : undefined
+        const onException = (alert.level === State.BLOCKING && exceptions?.duration > 0 && matchDomain(hostname, exceptions?.domains)) ? { type: 'allow-alert', alert } : undefined
 
         await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
         Notification.#tabs.add(tabId)

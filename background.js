@@ -797,6 +797,11 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "acknowledge-alert") {
+		if (request.alert.type === Extension.TYPE) {
+			Notification.setAlert(Extension.TYPE, State.PASSING)
+			return
+		}
+
 		openDashboard(request.alert.type, true)
 
 		if (request.alert.level !== State.BLOCKING) {

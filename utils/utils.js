@@ -352,15 +352,13 @@ async function sleep(time) {
     await new Promise(r => setTimeout(r, time))
 }
 
-const Tabs = {
-    get: (tabIds) => Promise.all(tabIds.map(tabId =>
-        new Promise((resolve) => {
-            chrome.tabs.get(tabId, tab => {
-                if (chrome.runtime.lastError) resolve(undefined)
-                else resolve(tab)
-            })
-        })
-    )).then(tabs => tabs.filter(Boolean))
+class Tabs {
+    static async get(tabIds) {
+        const tabs = await Promise.all(
+            tabIds.map(tabId => chrome.tabs.get(tabId).catch(() => undefined))
+        )
+        return tabs.filter(Boolean)
+    }
 }
 
 function onMessage(type, listener, once= false) {

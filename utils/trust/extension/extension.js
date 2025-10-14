@@ -1,5 +1,7 @@
 class Extension {
 
+    static TYPE = "extension"
+
     static #exceptionsStorage = new PersistentObject("extension-exceptions")
     static exceptions
 
@@ -305,7 +307,7 @@ class Extension {
                 return
             }
 
-// TODO: SHOW NOTIFICATION OF REMOVAL
+            Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.remove-modal.title'), t('extension-analysis.remove-modal.message'))
 
             const action = config.extensions.onlyDisable ? "disabled" : "removed"
 

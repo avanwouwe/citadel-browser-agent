@@ -119,6 +119,10 @@
       "high": "Risque Élevé",
       "critical": "Risque Critique"
     },
+    "remove-modal": {
+      "title": "Extension non conforme",
+      "message": "Une extension non conforme à la politique informatique a été détectée et désactivée."
+    },
     "block-page": {
       "page-blocked-header": "Analyse de l’extension",
       "page-blocked-text": "L’extension que vous essayez d’installer est en cours d’analyse.",
