@@ -349,7 +349,7 @@ class ExtensionStore {
             }
 
             const extensionId = ExtensionStore.extensionIdOf(dom.url)
-            if (!extensionId) return
+            if (!extensionId || dom?.url?.toURL()?.pathname?.endsWith("/error")) return
 
             // extensionName
             const extensionName = dom.querySelector('h1')
@@ -402,7 +402,7 @@ class ExtensionStore {
             return {
                 browser: Browser.Chrome,
                 id: extensionId,
-                name: extensionName.textContent,
+                name: extensionName?.textContent,
                 extensionLogo,
                 categories,
                 rating,

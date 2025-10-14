@@ -14,6 +14,7 @@ async function renderPage() {
     const exceptionSection = document.getElementById('exceptionSection')
 
     const storeInfo = await fetchStoreInfo(storePage)
+    if (!storeInfo) return
     renderStoreInfo(storeInfo)
 
     const entries = await ExtensionStore.fetchPackage(storeInfo.downloadUrl)
@@ -94,12 +95,7 @@ async function fetchStoreInfo(storeUrl) {
     const dom = html2dom(html.content)
     dom.url = storeUrl
 
-    const store = ExtensionStore.of(storeUrl)
-    const extensionInfo = store.parsePage(dom)
-    if (!extensionInfo) return null
-    extensionInfo.extensionId = ExtensionStore.extensionIdOf(storeUrl)
-
-    return extensionInfo
+    return ExtensionStore.of(storeUrl).parsePage(dom)
 }
 
 function renderStoreInfo(extensionInfo) {

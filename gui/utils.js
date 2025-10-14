@@ -57,6 +57,6 @@ function html2dom(html) {
 }
 
 function containsSvg(element, dStr) {
-    const paths = element.querySelectorAll('svg path')
+    const paths = element?.querySelectorAll('svg path') ?? []
     return Array.from(paths).some(path => path.getAttribute('d') === dStr)
 }
