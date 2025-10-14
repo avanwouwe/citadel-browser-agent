@@ -11,7 +11,7 @@ class Config {
             reportFailure: true,
             logLevel: 'DEBUG',
             consoleLevel: 'WARN',
-            maskUrlLevel: 'INFO',
+            maskUrlLevel: 'WARN',
             maxUrlLength: 500,
             throttle: {
                 windowDuration: 10,
