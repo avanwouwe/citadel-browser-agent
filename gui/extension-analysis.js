@@ -50,7 +50,7 @@ async function renderPage() {
     const allowed = !reason
 
     const installButton = document.getElementById("installButton")
-    installButton.onclick = () => { sendMessagePromise('ApproveExtension', { tabId: tabState.tabId, storePage }) }
+    installButton.onclick = () => { sendMessage('ApproveExtension', { tabId: tabState.tabId, storePage }) }
     installButton.disabled = !allowed
     if (allowed) return
 

@@ -15,6 +15,7 @@ let exceptionList
 let ignorelist
 let tabState
 let devicetrust
+let events = new RingBuffer(200)
 let t = new I18n({}).getTranslator()
 
 I18n.fromFile('/utils/i18n').then(i18n => t = i18n.getTranslator())

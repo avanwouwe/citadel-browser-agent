@@ -69,6 +69,16 @@
       "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre accès a été bloqué. Cliquez pour corriger le compte."
     }
   },
+  "events": {
+    "dashboard": {
+      "title": "Evénements",
+      "time": "Heure",
+      "level": "Niveau",
+      "event": "Evénement",
+      "url": "URL",
+      "description": "Description"
+    }
+  },
   "errors": {
     "messaging": {
       "please-contact": "Impossible de se connecter à l’application native. Veuillez contacter {{contact}}",

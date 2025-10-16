@@ -36,6 +36,7 @@ function selectTab(tabId) {
 
     renderDeviceDashboard()
     renderAccountDashboard()
+    if (tabId === "events") startEventRefreshing(); else stopEventRefreshing()
 }
 
 function renderDeviceDashboard() {
@@ -111,6 +112,29 @@ function renderAccountDashboard() {
             tb.appendChild(tr)
         }
     })
+}
+
+async function renderEventsDashboard() {
+    const log = await sendMessage('GetEvents')
+    const logTable = document.getElementById("event-log-entries")
+    logTable.innerHTML = ""
+    for (let i = log.length - 1; i >= 0; i--) {
+        const entry = log[i]
+        const tr = document.createElement('tr')
+        entry.timestamp = new Date(entry.timestamp)
+        const hours = String(entry.timestamp.getHours()).padStart(2, '0')
+        const minutes = String(entry.timestamp.getMinutes()).padStart(2, '0')
+        const seconds = String(entry.timestamp.getSeconds()).padStart(2, '0')
+        const shortTime = `${hours}:${minutes}:${seconds}`
+
+        tr.innerHTML =
+            `<td title="${entry.timestamp.toISOString()}">${shortTime}</td>
+             <td>${entry.browseragent.level}</td>
+             <td>${entry.browseragent.result}</td>
+             <td><span class="ellipsis" title="${entry.url}">${entry.url || '-'}</span></td>
+             <td><span class="ellipsis" title="${entry.browseragent.description}">${entry.browseragent.description || '-'}</span></td>`
+        logTable.appendChild(tr)
+    }
 }
 
 async function handleDeleteClick(event) {
@@ -200,3 +224,30 @@ updateBtn.addEventListener('click', function () {
         document.addEventListener('click', hideHandler, true)
     })
 })()
+
+document.addEventListener('visibilitychange', handleVisibilityChange);
+let refreshInterval = null
+
+function handleVisibilityChange() {
+    if (!document.hidden) {
+        startEventRefreshing()
+    } else {
+        stopEventRefreshing()
+    }
+}
+
+function startEventRefreshing() {
+    if (refreshInterval) return
+    renderEventsDashboard()
+    refreshInterval = setInterval(() => {
+        renderEventsDashboard()
+    }, 5 * ONE_SECOND)
+}
+
+function stopEventRefreshing() {
+    if (refreshInterval) {
+        clearInterval(refreshInterval)
+        refreshInterval = null
+    }
+}
+

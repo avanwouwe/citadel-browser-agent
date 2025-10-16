@@ -459,3 +459,27 @@ function evaluateBlacklist(entry, whitelist, blacklist, defaultValue) {
     if (blacklist.includes("*")) return false
     return defaultValue
 }
+
+class RingBuffer {
+    constructor(size) {
+        this.size = size
+        this.buffer = new Array(size)
+        this.pointer = 0
+        this.isFull = false
+    }
+
+    push(item) {
+        this.buffer[this.pointer] = item
+        this.pointer = (this.pointer + 1) % this.size
+        if (this.pointer === 0) this.isFull = true
+    }
+
+    get() {
+        if (!this.isFull) {
+            return this.buffer.slice(0, this.pointer)
+        } else {
+            return this.buffer.slice(this.pointer)
+                .concat(this.buffer.slice(0, this.pointer))
+        }
+    }
+}

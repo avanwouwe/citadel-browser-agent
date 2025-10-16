@@ -11,6 +11,7 @@
 <div class="tabs">
     <button class="tab active" id="device" data-i18n="devicetrust.dashboard.title">Device Trust</button>
     <button class="tab" id="account" data-i18n="accounttrust.dashboard.title">Account Issues</button>
+    <button class="tab" id="events" data-i18n="events.dashboard.title">Security Events</button>
 </div>
 <div id="devicetrust-tab" class="tab-content active">
     <div class="device-status-container">
@@ -62,6 +63,23 @@
         </table>
     </div>
 </div>
+<div id="events-tab" class="tab-content">
+    <div id="eventlog">
+        <table>
+            <thead>
+            <tr>
+                <th data-i18n="events.dashboard.time">Time</th>
+                <th data-i18n="events.dashboard.level">Level</th>
+                <th data-i18n="events.dashboard.event">Event</th>
+                <th data-i18n="events.dashboard.url">URL</th>
+                <th data-i18n="events.dashboard.description">Description</th>
+            </tr>
+            </thead>
+            <tbody id="event-log-entries"></tbody>
+        </table>
+    </div>
+</div>
+<script src="/utils/definitions.js"></script>
 <script src="/gui/utils.js"></script>
 <script src="/utils/injected/citadel-content-script-utils.js"></script>
 <script src="/utils/i18n/i18n.js"></script>

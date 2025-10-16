@@ -81,6 +81,10 @@ class Log {
 
         if (config.logging.logLevel > 0 && levelValue >= config.logging.logLevel) {
             Port.postMessage("event", logEntry)
+
+            if (levelValue >= config.logging.shipLevel) {
+                events.push(logEntry)
+            }
         }
 
         if (config.logging.consoleLevel > 0 && levelValue >= config.logging.consoleLevel) {
@@ -128,6 +132,7 @@ class Log {
         const logging = config.logging
 
         if (logging?.logLevel) logging.logLevel = Log.#levelValue[logging.logLevel]
+        if (logging?.shipLevel) logging.shipLevel = Log.#levelValue[logging.shipLevel]
         if (logging?.consoleLevel) logging.consoleLevel = Log.#levelValue[logging.consoleLevel]
         if (logging?.maskUrlLevel) logging.maskUrlLevel = Log.#levelValue[logging.maskUrlLevel]
     }

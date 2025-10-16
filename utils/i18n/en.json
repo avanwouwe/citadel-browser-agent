@@ -69,6 +69,16 @@
       "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your access has been blocked. Click to fix issues."
     }
   },
+  "events": {
+    "dashboard": {
+      "title": "Events",
+      "time": "Time",
+      "level": "Level",
+      "event": "Event",
+      "url": "URL",
+      "description": "Description"
+    }
+  },
   "errors": {
     "messaging": {
       "please-contact": "Unable to connect to native application. Please contact {{contact}}",

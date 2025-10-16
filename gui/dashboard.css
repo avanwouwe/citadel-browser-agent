@@ -30,7 +30,7 @@
     display: block;       /* Important for <td> direct styling, or use <span> */
     cursor: pointer;
 }
-body {font-family:sans-serif; margin:6px; min-width: 420px; max-width: 550px }
+body {font-family:sans-serif; margin:6px; min-width: 420px; max-width: 800px }
 .state-dot { display:inline-block; width:13px; height:13px; border-radius:50%; margin-right:6px; }
 .passing  { background:#43d25e; }
 .warning  { background:#ffa800; }
@@ -137,3 +137,5 @@ td:has(.delete-btn) {
     text-align: center;
     vertical-align: middle;
 }
+#eventlog th:nth-child(5) { min-width: 220px; max-width: 400px; }
+#eventlog td:nth-child(5) .ellipsis { max-width: 370px; }

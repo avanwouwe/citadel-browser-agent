@@ -100,13 +100,9 @@ async function sendMessage(type, message, handler) {
 
 function sendMessagePromise(type, message) {
     return new Promise((resolve, reject) => {
-        sendMessage(type, message, (result) => {
-            if (result && result.error) {
-                reject(result.error)
-            } else {
-                resolve(result)
-            }
-        })
+        sendMessage(type, message, result =>
+            result && result.error ? reject(result.error) : resolve(result)
+        )
     })
 }
 

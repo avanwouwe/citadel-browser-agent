@@ -10,6 +10,7 @@ class Config {
         logging: {
             reportFailure: true,
             logLevel: 'DEBUG',
+            shipLevel: 'INFO',
             consoleLevel: 'WARN',
             maskUrlLevel: 'WARN',
             maxUrlLength: 500,
