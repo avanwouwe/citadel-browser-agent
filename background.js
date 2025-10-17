@@ -676,7 +676,7 @@ function registerAccountUsage(url, report) {
 	AppStats.markDirty()
 }
 
-chrome.webNavigation.onCompleted.addListener(async details => {
+chrome.webNavigation.onCommitted.addListener(async details => {
 	if (details.parentFrameId >= 0 || details.tabId < 0) {
 		return
 	}
