@@ -15,7 +15,6 @@
     max-width: 480px;
     font-family: Arial, sans-serif;
     font-size: 16px;
-    white-space: pre-wrap;
 }
 .icon {
     width:80px;
@@ -28,15 +27,18 @@
     min-width:220px;
     flex: 1 1 0;
 }
+.column , .exceptionSection, #exceptionDiv {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
 .title {
     line-height:1.4;
-    margin-bottom: 1em;
     font-weight: bold;
     text-align: center;
 }
 .message {
     line-height:1.4;
-    margin-bottom: 1em;
     text-align: justify;
 }
 .exception-toggle {
@@ -58,14 +60,15 @@
     align-items: stretch;
     width:100%;
 }
-.exception-title { font-size: 1.1em; font-weight: bold; margin-bottom: 0.4em; }
+.exception-title { font-size: 1.1em; font-weight: bold; margin-bottom: 1em}
 .exception-reason {
     width:100%; min-width:210px; min-height: 70px;
-    padding: 0.4em; margin-bottom: 0.3em; resize:vertical;
+    padding: 0.4em; resize:vertical;
 }
 .exception-submit {
     padding: 0.5em 1.5em; background-color: #007bff; color: white; border: none;
     cursor: pointer; border-radius: 4px; transition: background .2s;
+    margin-top: 1em
 }
 .exception-submit:hover:not(:disabled) { background-color: #0056b3; }
 .exception-submit:disabled {
@@ -76,10 +79,12 @@
     margin-top:0.5em; font-weight:bold; color: green; text-align: center;
 }
 .exception-error { color: #990000; }
+.exception-title,
 .acknowledge-button,
 .exception-submit {
     max-width: 200px;
     width: 100%;
     display: block;           /* Ensures margin auto works */
-    margin: 1em auto 0 auto;  /* Top margin is 1em, horizontal auto = centered, bottom 0 */
+    margin-left: auto;
+    margin-right: auto;
 }
