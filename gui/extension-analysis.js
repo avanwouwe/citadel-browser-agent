@@ -1,36 +1,46 @@
+let config, tabState, storePage, storeInfo, scores
+
 I18n.loadPage('/utils/i18n', async (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
-    await renderPage()
+
+    tabState = await new TabState().getState("ExtensionAnalysis")
+    storePage = tabState.url
+    config = tabState.config
+
+    try {
+        await renderPage()
+    } catch (error) {
+        showError(t('extension-analysis.block-page.status.error') + ' : ' + (error?.message || String(error)))
+        if (config.exceptions.allowed) proposeException()
+    }
 })()
 
 async function renderPage() {
-    const tabState = await new TabState().getState("ExtensionAnalysis")
-    const storePage = tabState.url
+    setStatus(t('extension-analysis.block-page.status.analyze-store'), true)
 
     document.getElementById("logo").src = tabState.logo
 
-    const exceptionSectionToggle = document.getElementById('exceptionSectionToggle')
-    const exceptionSection = document.getElementById('exceptionSection')
-
-    const storeInfo = await fetchStoreInfo(storePage)
-    if (!storeInfo) return
+    storeInfo = await fetchStoreInfo(storePage)
+    if (!storeInfo) {
+        showError(t('extension-analysis.block-page.status.error-store'))
+        return
+    }
     renderStoreInfo(storeInfo)
 
+    setStatus(t('extension-analysis.block-page.status.analyze-manifest'), true)
     const entries = await ExtensionStore.fetchPackage(storeInfo.downloadUrl)
     const manifest = await ExtensionStore.getManifest(entries)
     renderManifestInfo(manifest)
 
+    setStatus(t('extension-analysis.block-page.status.analyze-code'), true)
     const staticAnalysis = ExtensionStore.analyseStatically(entries)
-    console.log(staticAnalysis)
 
-    const scores = ExtensionAnalysis.calculateRisk(storeInfo, manifest, staticAnalysis)
+    scores = ExtensionAnalysis.calculateRisk(storeInfo, manifest, staticAnalysis)
     renderScore("global", scores)
     renderScore("likelihood", scores)
     renderScore("impact", scores)
-
-    const config = tabState.config
-
+throw new Error("taupe")
     let reason
     const allowId = evaluateBlacklist(storeInfo.id, config.id.allowed, config.id.forbidden, true)
     const allowCategory = evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), config.category.allowed, config.category.forbidden, true)
@@ -52,42 +62,9 @@ async function renderPage() {
     const installButton = document.getElementById("installButton")
     installButton.onclick = () => { sendMessage('ApproveExtension', { tabId: tabState.tabId, storePage }) }
     installButton.disabled = !allowed
-    if (allowed) return
+    showAnalysis()
 
-    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + reason)}.`
-
-    if (config.exceptions.allowed) {
-        exceptionSectionToggle.style.display = 'block'
-
-        exceptionSectionToggle.addEventListener('click', function() {
-            exceptionSection.style.display = 'block'
-            exceptionSectionToggle.style.display = 'none'
-        })
-
-        const exceptionReasonInput = document.getElementById('exceptionReason')
-        const exceptionButton = document.getElementById('submitException')
-
-        // Enable submit button only when text field is filled
-        exceptionButton.disabled = true
-        exceptionReasonInput.addEventListener('input', function() {
-            exceptionButton.disabled = !exceptionReasonInput.value.trim()
-        })
-
-        // Handle exception request submission
-        exceptionButton.addEventListener('click', function() {
-            const exceptionReason = exceptionReasonInput.value.trim()
-
-            sendMessage('allow-extension', {
-                url: storePage,
-                reason: exceptionReason,
-                extension: {
-                    name: storeInfo.name,
-                    id: storeInfo.id,
-                    score: formatScore(scores.global)
-                }
-            })
-        })
-    }
+    if (!allowed) blockInstall()
 }
 
 async function fetchStoreInfo(storeUrl) {
@@ -177,9 +154,11 @@ function renderNumber(value, shorten) {
 }
 
 function renderLogo(url) {
+    if (!url) return
+
     const img = document.getElementById('extension-logo')
     img.src = url
-    img.removeAttribute('hidden')
+    img.hidden = false
 }
 
 function renderManifestVersion(id, version) {
@@ -231,3 +210,59 @@ function renderScore(type, scores) {
 }
 
 function formatScore(score) { return score ? Number(score).toFixed(1) : "??" }
+
+function showAnalysis() {
+    document.getElementById("status").hidden = true
+    document.getElementById("content").hidden = false
+}
+
+function setStatus(text, showSpinner = true) {
+    document.getElementById('status-text').textContent = text + (showSpinner ? '...' : '')
+    document.getElementById('status-spinner').hidden = !showSpinner
+}
+
+function showError(error) {
+    setStatus(error, false)
+    const backButton = document.getElementById("backButton")
+    backButton.onclick = () => { window.history.go(-2) }
+    backButton.hidden = false
+}
+
+function blockInstall() {
+    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + reason)}.`
+    if (config.exceptions.allowed) proposeException()
+}
+
+function proposeException() {
+    const exceptionSectionToggle = document.getElementById('exceptionSectionToggle')
+    exceptionSectionToggle.hidden = false
+    exceptionSectionToggle.addEventListener('click', function() {
+        exceptionSectionToggle.hidden = true
+        document.getElementById('exceptionSection').hidden = false
+        document.getElementById("backButton").hidden = true
+    })
+
+    const exceptionReasonInput = document.getElementById('exceptionReason')
+    const exceptionButton = document.getElementById('submitException')
+
+    // Enable submit button only when text field is filled
+    exceptionButton.disabled = true
+    exceptionReasonInput.addEventListener('input', function() {
+        exceptionButton.disabled = !exceptionReasonInput.value.trim()
+    })
+
+    // Handle exception request submission
+    exceptionButton.addEventListener('click', function() {
+        const exceptionReason = exceptionReasonInput.value.trim()
+
+        sendMessage('allow-extension', {
+            url: storePage,
+            reason: exceptionReason,
+            extension: {
+                name: storeInfo.name,
+                id: storeInfo.id,
+                score: formatScore(scores.global)
+            }
+        })
+    })
+}

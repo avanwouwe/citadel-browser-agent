@@ -13,7 +13,14 @@
 
 <h1 data-i18n="extension-analysis.block-page.page-blocked-header">Analyzing Extension</h1>
 
-<div class="content">
+<div id="status">
+    <span id="status-spinner" class="spinner"></span>
+    <span id="status-text"></span>
+    <br>
+    <button data-i18n="extension-analysis.block-page.back" class="button" id="backButton" hidden>Back</button>
+</div>
+
+<div id="content" hidden>
     <img alt="extension logo" id="extension-logo" src="" hidden width="64" height="64">
     <span class="extension-name" id="extension-name"></span>
 
@@ -21,6 +28,12 @@
         <div class="risk-indicator" id="risk-global"></div>
         <div class="risk-indicator" id="risk-impact"></div>
         <div class="risk-indicator" id="risk-likelihood"></div>
+    </div>
+
+    <div id="installSection">
+        <button data-i18n="extension-analysis.block-page.install" class="button" id="installButton" disabled>Install</button>
+        <p>
+        <div id="blockedSection"></div>
     </div>
 
     <div>
@@ -77,25 +90,17 @@
             </thead>
             <tbody id="permissions"></tbody>
         </table>
-
     </div>
-
-    <div id="installSection">
-        <button data-i18n="extension-analysis.block-page.install-blocked.install" class="button" id="installButton" disabled>Install</button>
-        <p>
-        <div id="blockedSection"></div>
-    </div>
-
-    <p>
-    <p id="exceptionSectionToggle" data-i18n-html="extension-analysis.block-page.request-exception">If you are <b><u>sure</u></b> the extension does not represent a security risk you can <span id="clickable">request an exception</span></p>
-
-    <div class="centered" id="exceptionSection">
-        <label for="exceptionReason" data-i18n="extension-analysis.block-page.request-exception-header" class="exception-request-header">Request an Exception</label>
-        <textarea id="exceptionReason" data-i18n="extension-analysis.block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
-        <button id="submitException" data-i18n="extension-analysis.block-page.submit-request">Submit Request</button>
-    </div>
-
 </div>
+
+<p id="exceptionSectionToggle" data-i18n-html="extension-analysis.block-page.request-exception" hidden>If you are <b><u>sure</u></b> the extension does not represent a security risk you can <span id="clickable">request an exception</span></p>
+
+<div class="centered" id="exceptionSection" hidden>
+    <label for="exceptionReason" data-i18n="extension-analysis.block-page.request-exception-header" class="exception-request-header">Request an Exception</label>
+    <textarea id="exceptionReason" data-i18n="extension-analysis.block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
+    <button id="submitException" data-i18n="extension-analysis.block-page.submit-request">Submit Request</button>
+</div>
+
 
 <script src="/utils/utils.js"></script>
 <script src="/utils/definitions.js"></script>

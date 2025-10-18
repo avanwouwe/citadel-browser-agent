@@ -135,9 +135,17 @@
       "message": "An extension that does not comply with the IT policy was found and has been deactivated."
     },
     "block-page": {
+      "install": "Install",
+      "back": "Back",
+      "status": {
+        "analyze-store": "Analyzing store page",
+        "analyze-manifest": "Analyzing manifest",
+        "analyze-code": "Analyzing code",
+        "error-store": "Unable to analyze the store page",
+        "error": "An error occurred"
+      },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {
-        "install": "Install",
         "blocked": "The extension you are trying to install has been blocked because",
         "blacklist-extension": "it has been blacklisted",
         "blacklist-category": "the category it belongs to has been blacklisted",

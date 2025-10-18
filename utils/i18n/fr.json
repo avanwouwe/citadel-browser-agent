@@ -134,10 +134,17 @@
       "message": "Une extension non conforme à la politique informatique a été détectée et désactivée."
     },
     "block-page": {
+      "install": "Installer",
+      "back": "Retour",
+      "status": {
+        "analyze-store": "Analyse de la page d'extension",
+        "analyze-manifest": "Analyse du manifeste",
+        "analyze-code": "Analyse du code",
+        "error-store": "La page de l'extension ne pouvait pas être analysé",
+        "error": "Une erreur est survenue"
+      },
       "page-blocked-header": "Analyse de l’extension",
-      "page-blocked-text": "L’extension que vous essayez d’installer est en cours d’analyse.",
       "install-blocked": {
-        "install": "Installer",
         "blocked": "L’extension que vous essayez d’installer a été bloquée car",
         "blacklist-extension": "elle a été interdite",
         "blacklist-category": "la catégorie à laquelle elle appartient a été interdite",
