@@ -130,7 +130,7 @@ async function renderEventsDashboard() {
         tr.innerHTML =
             `<td title="${entry.timestamp.toISOString()}">${shortTime}</td>
              <td>${entry.browseragent.level}</td>
-             <td>${entry.browseragent.result}</td>
+             <td>${entry.browseragent.result ?? entry.browseragent.event}</td>
              <td><span class="ellipsis" title="${entry.url}">${entry.url || '-'}</span></td>
              <td><span class="ellipsis" title="${entry.browseragent.description}">${entry.browseragent.description || '-'}</span></td>`
         logTable.appendChild(tr)
