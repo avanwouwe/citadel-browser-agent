@@ -146,23 +146,59 @@ function repeatEvent(event, target) {
             charCode: { value: event.charCode },
         })
 
-        synthEvent.syntheticCitadelEvent = true;
+        synthEvent.syntheticCitadelEvent = true
         target.dispatchEvent(synthEvent)
+        return
     }
 
-    else if (event.type === "click") {
-        const synthEvent = new MouseEvent("click", {
-            bubbles: true,
-            cancelable: true,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            button: event.button,
-            buttons: event.buttons,
-            ctrlKey: event.ctrlKey,
-            shiftKey: event.shiftKey,
-            altKey: event.altKey,
-            metaKey: event.metaKey,
-        })
+    if (event.type === "click") {
+        let synthEvent
+
+        if (window.PointerEvent && event instanceof PointerEvent) {
+            synthEvent = new PointerEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                composed: true,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                screenX: event.screenX,
+                screenY: event.screenY,
+                pageX: event.pageX,
+                pageY: event.pageY,
+                button: event.button,
+                buttons: event.buttons,
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+                altKey: event.altKey,
+                metaKey: event.metaKey,
+                pointerId: event.pointerId,
+                width: event.width,
+                height: event.height,
+                pressure: event.pressure,
+                tiltX: event.tiltX,
+                tiltY: event.tiltY,
+                pointerType: event.pointerType,
+                isPrimary: event.isPrimary,
+            })
+        } else {
+            synthEvent = new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+                clientX: event.clientX,
+                clientY: event.clientY,
+                screenX: event.screenX,
+                screenY: event.screenY,
+                pageX: event.pageX,
+                pageY: event.pageY,
+                button: event.button,
+                buttons: event.buttons,
+                ctrlKey: event.ctrlKey,
+                shiftKey: event.shiftKey,
+                altKey: event.altKey,
+                metaKey: event.metaKey,
+            })
+        }
+
         synthEvent.syntheticCitadelEvent = true
         target.dispatchEvent(synthEvent)
     }
