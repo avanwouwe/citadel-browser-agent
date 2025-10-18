@@ -206,31 +206,31 @@ function repeatEvent(event, target) {
 
 async function checkLogin(event, button) {
     const fields = findFormElements(button)
-    const loginPromise = analyzeForm(fields, button)
-    if (! loginPromise || event.syntheticCitadelEvent) {
+    const loginForm = analyzeForm(fields, button)
+    if (loginForm?.password == null || event.syntheticCitadelEvent) {
         return
     }
 
-    event.preventDefault()
-    event.stopImmediatePropagation()
+    if (PasswordCheck.isFirstConnection(loginForm.username)) {
+        try {
+            event.preventDefault()
+            event.stopImmediatePropagation()
 
-    try {
-        const login = await loginPromise
-
-        if (PasswordCheck.isFirstConnection(login.username) && login.password.reuse) {
-            sendMessage("warn-reuse", { report: login })
-            callServiceWorker("DeletePassword", { username: login.username, system })
-            return
+            loginForm.password.reuse = await loginForm.password.reuse
+            if (loginForm.password.reuse) {
+                sendMessage("warn-reuse", { report: loginForm })
+                callServiceWorker("DeletePassword", { username: loginForm.username, system })
+            }
+        } catch (error) {
+            console.error('exception when analyzing login', error.stack)
+            repeatEvent(event, button)
         }
-
-        if (login.password) sendMessage("account-usage", { report: login })
-        if (login.totp) sendMessage("receive-totp")
-
-        repeatEvent(event, button)
-    } catch (error) {
-        console.error('exception when analyzing login', error.stack)
-        repeatEvent(event, button)
+        return
     }
+
+    loginForm.password.reuse = await loginForm.password.reuse
+    sendMessage("account-usage", { report: loginForm })
+    if (loginForm.totp) sendMessage("receive-totp")
 }
 
 function analyzeForm(formElements, eventElement) {
@@ -287,31 +287,32 @@ function analyzeForm(formElements, eventElement) {
     if (sessionState.auth.password === undefined) return
     if (password === undefined && TOTP === undefined) return
 
-    return (async () => {
-        const login = {
-            username: sessionState.auth.username,
-            password: undefined,
-            totp: sessionState.auth.totp
-        }
+    const login = {
+        username: sessionState.auth.username,
+        password: undefined,
+        totp: sessionState.auth.totp
+    }
 
-        if (password) {
-            login.password = PasswordCheck.analyzePassword(sessionState.auth.username, password)
+    if (password) {
+        login.password = PasswordCheck.analyzePassword(sessionState.auth.username, password)
 
-            const salt = PasswordCheck.getSalt()
-            if (salt) {
-                login.password.reuse = await callServiceWorker("CheckPasswordReuse", {
+        const salt = PasswordCheck.getSalt()
+        if (salt) {
+            login.password.reuse = PBKDF2.hash(password, salt).then(hashed => {
+                return callServiceWorker("CheckPasswordReuse", {
                     username: login.username,
-                    password: await PBKDF2.hash(password, salt),
+                    password: hashed,
                     system
                 })
-            }
+            })
         }
+    }
 
-        if (sessionState.auth.totp) {
-            sessionState.init()
-        }
-        sessionState.save()
+    if (sessionState.auth.totp) {
+        sessionState.init()
+    }
 
-        return login
-    })()
+    sessionState.save()
+
+    return login
 }
