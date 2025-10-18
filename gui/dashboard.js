@@ -77,8 +77,8 @@ function renderDeviceDashboard() {
                 `<td ${explainPage ? "class='label'" : ''}>${label}</td>` +
                 `<td>${errors}</td>`+
                 `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
-                `<td class="days">${next.days ?? ""}</td>`
+                `<td class="days">${next.days ?? ""}</td>` +
+                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>`
             tb.appendChild(tr)
         }
     })
@@ -105,8 +105,8 @@ function renderAccountDashboard() {
                 `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
                 `<td>${errors}</td>` +
                 `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
                 `<td class="days">${next.days ?? ""}</td>` +
+                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
                 `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
 
             tb.appendChild(tr)
