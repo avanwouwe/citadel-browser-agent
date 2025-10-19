@@ -52,7 +52,11 @@ class ExtensionStore {
         const manifestEntry = entries["manifest.json"] || Object.values(entries).find(e => e.name.endsWith("/manifest.json"))
         if (!manifestEntry) throw new Error("manifest.json not found")
 
-        return await manifestEntry.json()
+        const manifest = await manifestEntry.json()
+        manifest.permissions = manifest.permissions ?? []
+        manifest.host_permissions = manifest.host_permissions ?? []
+        manifest.content_scripts = manifest.content_scripts ?? []
+        return manifest
     }
 
     /**
@@ -273,15 +277,15 @@ class ExtensionStore {
      * @returns {Promise<Object>} - Analysis results of the extension code
      */
     static async analyseStatically(entries) {
-        const manifest = ExtensionStore.getManifest(entries)
+        const manifest = await ExtensionStore.getManifest(entries)
         const scripts = await this.extractJavascript(entries)
         const analysis = this.analyseJavascript(scripts)
         return {
             name: manifest.name,
             manifest_version: manifest.manifest_version,
-            permissions: manifest.permissions || [],
-            host_permissions: manifest.host_permissions || [],
-            content_scripts: manifest.content_scripts?.length || 0,
+            permissions: manifest.permissions,
+            host_permissions: manifest.host_permissions,
+            content_scripts: manifest.content_scripts.length,
             background: !!manifest.background,
             files_analyzed: Object.keys(analysis).length,
             analysis
@@ -396,6 +400,11 @@ class ExtensionStore {
                     })
                     .filter(category => !!category)
                 : []
+
+            const emailNode = [...dom.querySelectorAll('details')]
+                ?.find(details => [...details.children].some(child => child.tagName === 'SUMMARY'))
+            const email = emailNode?.querySelector(':scope > div')?.textContent
+            const website = emailNode?.parentNode?.querySelector('a')?.href
 
             const downloadUrl = `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=${Browser.version.version}&x=id%3D${extensionId}%26uc`
 
