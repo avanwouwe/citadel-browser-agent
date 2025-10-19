@@ -94,6 +94,8 @@ class PersistentObject {
 
 class ChangeTrackingObject {
 
+    #proxy
+
     static #handler = {
         set: (target, property, value) => {
             if (property === 'isDirty') {
@@ -119,20 +121,20 @@ class ChangeTrackingObject {
     }
 
     constructor(initialValues = {}) {
-
         // Create the target object with initial values
         const target = { ...initialValues }
 
         // Create a proxy to intercept property changes
-        const proxy = new Proxy(target, ChangeTrackingObject.#handler)
-        proxy.isDirty = false
-        proxy.clear = function clear() {
-            Object.keys(this).forEach(key => {
-                delete this[key]
-            })
-            this.isDirty = true
-        }
-        return proxy
+        this.#proxy = new Proxy(target, ChangeTrackingObject.#handler)
+        this.#proxy.isDirty = false
+        return this.#proxy
+    }
+
+    clear(){
+        Object.keys(this.#proxy).forEach(key => {
+            delete this[key]
+        })
+        this.#proxy.isDirty = true
     }
 
 }
