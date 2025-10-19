@@ -203,12 +203,12 @@ String.prototype.truncate = function(maxLength) {
     if (this.length > maxLength) {
         return this.substring(0, maxLength) + "[truncated]";
     }
-    return this;
+    return this.toString()
 }
 
 function truncateString(str, maxLength) { return isString(str) ? str.truncate(maxLength) : str; }
 
-String.prototype.emptyToUndefined = function() { return this.isEmpty() ? undefined : this }
+String.prototype.emptyToUndefined = function() { return this.isEmpty() ? undefined : this.toString() }
 
 String.prototype.htmlNowrap = function () { return `<span style="white-space: nowrap;">${this}</span>` }
 
