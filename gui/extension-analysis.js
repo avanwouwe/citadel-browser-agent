@@ -11,6 +11,7 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
     try {
         await renderPage()
     } catch (error) {
+        console.error(error)
         showError(t('extension-analysis.block-page.status.error') + ' : ' + (error?.message || String(error)))
         if (config.exceptions.allowed) proposeException()
     }
@@ -40,7 +41,7 @@ async function renderPage() {
     renderScore("global", scores)
     renderScore("likelihood", scores)
     renderScore("impact", scores)
-throw new Error("taupe")
+
     let reason
     const allowId = evaluateBlacklist(storeInfo.id, config.id.allowed, config.id.forbidden, true)
     const allowCategory = evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), config.category.allowed, config.category.forbidden, true)
@@ -64,7 +65,7 @@ throw new Error("taupe")
     installButton.disabled = !allowed
     showAnalysis()
 
-    if (!allowed) blockInstall()
+    if (!allowed) blockInstall(reason)
 }
 
 async function fetchStoreInfo(storeUrl) {
@@ -117,12 +118,13 @@ function renderManifestInfo(manifestInfo) {
         descTd.textContent =  t(`extension-analysis.permissions.${permission.name}.analysis`)
         tr.appendChild(descTd)
 
-        const riskTd = document.createElement('td')
-        riskTd.textContent = t(`extension-analysis.risk-level.${permission.risk}`)
-        const riskClass = riskClassMap[permission.risk]
-        if (riskClass) riskTd.classList.add(riskClass)
-
-        tr.appendChild(riskTd)
+        if (permission.risk) {
+            const riskTd = document.createElement('td')
+            riskTd.textContent = t(`extension-analysis.risk-level.${permission.risk}`)
+            const riskClass = riskClassMap[permission.risk]
+            if (riskClass) riskTd.classList.add(riskClass)
+            tr.appendChild(riskTd)
+        }
 
         tbody.appendChild(tr)
     })
@@ -228,7 +230,7 @@ function showError(error) {
     backButton.hidden = false
 }
 
-function blockInstall() {
+function blockInstall(reason) {
     document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + reason)}.`
     if (config.exceptions.allowed) proposeException()
 }
