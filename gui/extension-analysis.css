@@ -83,7 +83,10 @@ body {
 }
 #extension-logo,
 .extension-name {
+    margin: 0.5em;
     vertical-align: middle;
+    font-weight: bold;
+    font-size: 1.5em;
 }
 .risk-low    { color: var(--color-risk-low); font-weight: bold;}
 .risk-medium { color: var(--color-risk-medium); font-weight: bold;}
