@@ -220,17 +220,18 @@ async function checkLogin(event, button) {
             if (loginForm.password.reuse) {
                 sendMessage("warn-reuse", { report: loginForm })
                 callServiceWorker("DeletePassword", { username: loginForm.username, system })
+                return
             }
         } catch (error) {
             console.error('exception when analyzing login', error.stack)
-            repeatEvent(event, button)
         }
-        return
-    }
 
-    loginForm.password.reuse = await loginForm.password.reuse
-    sendMessage("account-usage", { report: loginForm })
-    if (loginForm.totp) sendMessage("receive-totp")
+        repeatEvent(event, button)
+    } else {
+        loginForm.password.reuse = await loginForm.password.reuse
+        sendMessage("account-usage", { report: loginForm })
+        if (loginForm.totp) sendMessage("receive-totp")
+    }
 }
 
 function analyzeForm(formElements, eventElement) {
