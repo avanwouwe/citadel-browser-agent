@@ -214,6 +214,11 @@ class Config {
                     name: "https://github.com/romainmarcoux/malicious-outgoing-ip-domains",
                     url: "https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt",
                     freq: 60
+                },
+                {
+                    name: "IPsum (level 2+)",
+                    url: "https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt",
+                    freq: 60 * 12
                 }
             ],
             url: [
