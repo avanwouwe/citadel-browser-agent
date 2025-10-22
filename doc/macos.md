@@ -2,16 +2,20 @@
 
 Browser extensions are sandboxed and cannot access the local operating system. To allow Citadel to write to syslog it is necessary to set up Native Messaging. This involves placing a JSON manifest file in a specific place that gives the path to the program that will be started by Chrome, and then receive the events and log them to syslog.
 
-You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest), which will take care of everything.
+You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest), which will take care of all of that.
 
-Alternatively, place the [JSON manifest](/bin/macos/citadel.browser.agent.json) in:
+On top of the Citadel installer, you need to [install osquery](https://osquery.io/downloads) on the endpoint, so that the agent can query the device state.
+
+Alternatively, should you need for some reason to install Citadel manually, place the [JSON manifest](/bin/build/mac/citadel.browser.agent.json) in:
 * `/Library/Google/Chrome/NativeMessagingHosts/citadel.browser.agent.json`
-* `/Library/Mozilla/NativeMessagingHosts/citadel.browser.agent.json` (use the [Firefox specific manifest](/bin/macos/citadel.browser.agent-firefox.json))
+* `/Library/Mozilla/NativeMessagingHosts/citadel.browser.agent.json` (use the [Firefox specific manifest](/bin/build/mac/citadel.browser.agent-firefox.json))
 * `/Library/Opera/NativeMessagingHosts/citadel.browser.agent.json`
 * `/Library/Microsoft\ Edge/NativeMessagingHosts/citadel.browser.agent.json`
 * `/Library/BraveSoftware/Brave-Browser/citadel.browser.agent.json`
 
-Then ensure that [the messaging script](/bin/citadel-browser-agent) is deployed in `/Library/Scripts/Citadel/citadel-browser-agent` and marked executable.
+Copy the contents of [/bin/controls](/bin/controls) to `C:\Program Files\Citadel\controls`. Make sure that they are owned by root and not world writable.
+
+Then download [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) or build it using the [build script](/bin/build/mac/build.sh) and ensure that it is deployed in `/Library/Scripts/Citadel/citadel-browser-agent` and marked executable.
 
 You can verify that events are being created by running the following command:
 ```
