@@ -10,11 +10,11 @@ class Bridge {
             const handler = Bridge.#handlers[message.type]
             if (!handler) return
             const result = handler(args, sender)
-            if (result && typeof result.then === "function") {
-                result.then(sendResponse)
+            if (typeof result?.then === "function") {
+                result.then(data => sendResponse({data})).catch(error => sendResponse({error: serializeError(error)}))
                 return true
             } else {
-                sendResponse(result)
+                sendResponse({data: result})
             }
         })
 

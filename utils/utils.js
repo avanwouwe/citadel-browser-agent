@@ -483,3 +483,27 @@ class RingBuffer {
         }
     }
 }
+
+function serializeError(error) {
+    if (error instanceof Error) {
+        return {
+            message: error.message,
+            name: error.name,
+            stack: error.stack,
+        }
+    }
+
+    if (typeof error === "object" && error !== null) {
+        return {
+            message: error.message || JSON.stringify(error),
+            name: error.name || "NonErrorObject",
+            info: error, // optional, if it’s small and structured-cloneable
+        }
+    }
+
+    if (typeof error === "string") {
+        return { message: error, name: "StringError" }
+    }
+
+    return { message: String(error), name: typeof error }
+}
