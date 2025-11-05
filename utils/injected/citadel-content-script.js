@@ -218,12 +218,12 @@ async function checkLogin(event, button) {
 
                 loginForm.password.reuse = await loginForm.password.reuse
                 if (loginForm.password.reuse) {
-                    sendMessage("warn-reuse", { report: loginForm })
-                    callServiceWorker("DeletePassword", { username: loginForm.username, system })
+                    await sendMessage("warn-reuse", { report: loginForm })
+                    await callServiceWorker("DeletePassword", { username: loginForm.username, system })
                     return
                 }
             } catch (error) {
-                console.error('exception when analyzing login', error.stack)
+                console.error('exception when analyzing login', error)
             }
 
             repeatEvent(event, button)
