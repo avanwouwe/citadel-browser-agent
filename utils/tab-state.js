@@ -4,14 +4,14 @@ class TabState {
 
     constructor(isForServiceworker = false) {
         if (isForServiceworker) {
-            this.#handler = (message, sender, sendResponse) => {
+            this.#handler = (message, sender) => {
                 const tabId = sender.tab.id
                 const state = this.#state[tabId]?.[message.key]
                 state.tabId = tabId
-                sendResponse(state)
+                return state
             }
 
-            onMessage("GetTabState", this.#handler)
+            Bridge.listenTo("GetTabState", this.#handler)
 
             chrome.tabs.onRemoved.addListener(tabId => {
                 delete this.#state[tabId]

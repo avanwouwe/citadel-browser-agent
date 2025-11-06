@@ -39,83 +39,81 @@ function selectTab(tabId) {
     if (tabId === "events") startEventRefreshing(); else stopEventRefreshing()
 }
 
-function renderDeviceDashboard() {
-    sendMessage("GetDeviceStatus", devicetrust => {
-        const state = devicetrust.state
+async function renderDeviceDashboard() {
+    const devicetrust = await callServiceWorker("GetDeviceStatus")
+    const state = devicetrust.state
 
-        document.getElementById("status-label").textContent = t("control.state." + state) || "-"
-        document.getElementById("dot").className = "state-dot " + state.toLowerCase()
+    document.getElementById("status-label").textContent = t("control.state." + state) || "-"
+    document.getElementById("dot").className = "state-dot " + state.toLowerCase()
 
-        document.getElementById("compliance").textContent = devicetrust.compliance
+    document.getElementById("compliance").textContent = devicetrust.compliance
 
-        if (state === State.UNKNOWN) return
+    if (state === State.UNKNOWN) return
 
-        const tb = document.getElementById("devicetrust-issues")
-        tb.innerHTML = ""
-        const controls = Object.values(devicetrust.controls)
-        for (const ctrl of controls) {
-            const next = ctrl.nextState
-            const ctrlText = I18n.fromObject(ctrl.definition?.text).getTranslator()
+    const tb = document.getElementById("devicetrust-issues")
+    tb.innerHTML = ""
+    const controls = Object.values(devicetrust.controls)
+    for (const ctrl of controls) {
+        const next = ctrl.nextState
+        const ctrlText = I18n.fromObject(ctrl.definition?.text).getTranslator()
 
-            let label = ctrlText("label") ?? ctrl.name
-            const explainPage = ctrlText("explain")
-            if (explainPage) {
-                label = `<a href="${explainPage}">${label}</a>`
-            }
-
-            let errors = ''
-            if (!ctrl.passing && ctrl.report?.errors?.length) {
-                errors = ctrl.report.errors.slice(0, 30).join('\n')
-                if (ctrl.report.errors.length > 30) {
-                    errors += '\n...'
-                }
-                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
-            }
-
-            const tr = document.createElement("tr")
-            tr.innerHTML =
-                `<td ${explainPage ? "class='label'" : ''}>${label}</td>` +
-                `<td>${errors}</td>`+
-                `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
-                `<td class="days">${next.days ?? ""}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>`
-            tb.appendChild(tr)
+        let label = ctrlText("label") ?? ctrl.name
+        const explainPage = ctrlText("explain")
+        if (explainPage) {
+            label = `<a href="${explainPage}">${label}</a>`
         }
-    })
+
+        let errors = ''
+        if (!ctrl.passing && ctrl.report?.errors?.length) {
+            errors = ctrl.report.errors.slice(0, 30).join('\n')
+            if (ctrl.report.errors.length > 30) {
+                errors += '\n...'
+            }
+            errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
+        }
+
+        const tr = document.createElement("tr")
+        tr.innerHTML =
+            `<td ${explainPage ? "class='label'" : ''}>${label}</td>` +
+            `<td>${errors}</td>`+
+            `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
+            `<td class="days">${next.days ?? ""}</td>` +
+            `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>`
+        tb.appendChild(tr)
+    }
 }
 
-function renderAccountDashboard() {
-    sendMessage("GetAccountStatus", accounttrust => {
-        const tb = document.getElementById("accounttrust-issues")
-        tb.innerHTML = ""
+async function renderAccountDashboard() {
+    const accounttrust = await callServiceWorker("GetAccountStatus")
+    const tb = document.getElementById("accounttrust-issues")
+    tb.innerHTML = ""
 
-        tb.removeEventListener('click', handleDeleteClick)
-        tb.addEventListener('click', handleDeleteClick)
+    tb.removeEventListener('click', handleDeleteClick)
+    tb.addEventListener('click', handleDeleteClick)
 
-        for (const acct of accounttrust.accounts) {
-            const next = acct.report.nextState
-            let errors = acct.report.issues?.description
-            if (acct.report.issues?.count > 0) {
-                errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
-            }
-
-            const tr = document.createElement("tr")
-            tr.innerHTML =
-                `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
-                `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
-                `<td>${errors}</td>` +
-                `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
-                `<td class="days">${next.days ?? ""}</td>` +
-                `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
-                `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
-
-            tb.appendChild(tr)
+    for (const acct of accounttrust.accounts) {
+        const next = acct.report.nextState
+        let errors = acct.report.issues?.description
+        if (acct.report.issues?.count > 0) {
+            errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
         }
-    })
+
+        const tr = document.createElement("tr")
+        tr.innerHTML =
+            `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
+            `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
+            `<td>${errors}</td>` +
+            `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
+            `<td class="days">${next.days ?? ""}</td>` +
+            `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
+            `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
+
+        tb.appendChild(tr)
+    }
 }
 
 async function renderEventsDashboard() {
-    const log = await sendMessage('GetEvents')
+    const log = await callServiceWorker('GetEvents')
     const logTable = document.getElementById("event-log-entries")
     logTable.innerHTML = ""
     for (let i = log.length - 1; i >= 0; i--) {
@@ -168,8 +166,8 @@ function reconnect() {
 
 connect()
 
-function refreshDeviceStatus() {
-    sendMessage("RefreshDeviceStatus")
+async function refreshDeviceStatus() {
+    await callServiceWorker("RefreshDeviceStatus")
 }
 
 const updateBtn = document.getElementById('update-button')

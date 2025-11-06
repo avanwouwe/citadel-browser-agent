@@ -61,7 +61,7 @@ async function renderPage() {
     const allowed = !reason
 
     const installButton = document.getElementById("installButton")
-    installButton.onclick = () => { sendMessage('ApproveExtension', { tabId: tabState.tabId, storePage }) }
+    installButton.onclick = () => callServiceWorker('ApproveExtension', { tabId: tabState.tabId, storePage })
     installButton.disabled = !allowed
     showAnalysis()
 
@@ -69,7 +69,7 @@ async function renderPage() {
 }
 
 async function fetchStoreInfo(storeUrl) {
-    const html = await sendMessagePromise('FetchExtensionPage', { url: storeUrl })
+    const html = await callServiceWorker('FetchExtensionPage', { url: storeUrl })
     const dom = html2dom(html.content)
     dom.url = storeUrl
 
