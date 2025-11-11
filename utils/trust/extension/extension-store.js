@@ -29,17 +29,13 @@ class ExtensionStore {
     }
 
     /**
-     * Fetches and extracts an extension package
-     * @param {string} url - URL to download the extension from
-     * @returns {Promise<Object>} - Object containing unzipped entries
-     */
-    static async fetchPackage(url) {
-        const response = await fetch(url)
-        if (!response.ok) throw new Error("Failed to download extension: " + response.status)
-
-        const buffer = await response.arrayBuffer()
-        const zipBuffer = ExtensionStore.#stripCrxHeader(buffer)
-        const { entries } = await unzipit.unzip(zipBuffer)
+     * Praes an extension package and returns structured contents
+     * @param {ArrayBuffer} buffer - buffer containing the extension CRX file
+     * @returns {Promise<Object>} - Object containing CRX contents
+     * */
+    static async parsePackage(buffer) {
+        buffer = await ExtensionStore.#stripCrxHeader(buffer)
+        const { entries } = await unzipit.unzip(buffer);
         return entries
     }
 

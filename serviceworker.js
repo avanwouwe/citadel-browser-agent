@@ -1,4 +1,5 @@
 importScripts('config.js');
+importScripts('utils/node.js');
 importScripts('utils/definitions.js');
 importScripts('utils/context.js');
 importScripts('utils/utils.js');
@@ -34,8 +35,8 @@ importScripts('utils/blacklist/blacklist.js');
 importScripts('utils/blacklist/ignorelist.js');
 importScripts('utils/blacklist/exceptionlist.js');
 importScripts('utils/blacklist/ipv4range.js');
-importScripts('utils/trust/extension/acorn-walk.js');
-importScripts('utils/trust/extension/acorn.js');
+importScripts('utils/trust/extension/babel-parser.js');
+importScripts('utils/trust/extension/babel-traverse.js');
 importScripts('utils/trust/extension/extension.js');
 importScripts('utils/trust/extension/extension-store.js');
 importScripts('utils/trust/extension/extension-analysis.js');

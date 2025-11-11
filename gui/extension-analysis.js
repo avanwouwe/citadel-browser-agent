@@ -30,14 +30,16 @@ async function renderPage() {
     renderStoreInfo(storeInfo)
 
     setStatus(t('extension-analysis.block-page.status.analyze-manifest'), true)
-    const entries = await ExtensionStore.fetchPackage(storeInfo.downloadUrl)
+    const response = await fetch(storeInfo.downloadUrl)
+    if (!response.ok) throw new Error("unable to download extension: " + response.status)
+    const buffer = await response.arrayBuffer()
+    const entries = await ExtensionStore.parsePackage(buffer)
     const manifest = await ExtensionStore.getManifest(entries)
     renderManifestInfo(manifest)
 
     setStatus(t('extension-analysis.block-page.status.analyze-code'), true)
-    const staticAnalysis = ExtensionStore.analyseStatically(entries)
 
-    scores = ExtensionAnalysis.calculateRisk(storeInfo, manifest, staticAnalysis)
+    scores = ExtensionAnalysis.calculateRisk(storeInfo, manifest)
     renderScore("global", scores)
     renderScore("likelihood", scores)
     renderScore("impact", scores)

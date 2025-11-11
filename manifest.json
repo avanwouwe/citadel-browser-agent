@@ -22,7 +22,7 @@
     "<all_urls>"
   ],
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; connect-src * data:; style-src 'self'; img-src 'self' data: https://*.googleusercontent.com https://addons.mozilla.org https://store-images.s-microsoft.com https://*.operacdn.com"
+    "extension_pages": "default-src 'self'; connect-src * data:; style-src 'self'; img-src 'self' data: https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://lh5.googleusercontent.com https://addons.mozilla.org https://store-images.s-microsoft.com https://addons-static.operacdn.com"
   },
   "web_accessible_resources": [
     {
@@ -41,6 +41,7 @@
     "service_worker": "serviceworker.js",
     "scripts": [
       "/config.js",
+      "/utils/node.js",
       "/utils/definitions.js",
       "/utils/context.js",
       "/utils/utils.js",
@@ -76,8 +77,8 @@
       "/utils/blacklist/ignorelist.js",
       "/utils/blacklist/exceptionlist.js",
       "/utils/blacklist/ipv4range.js",
-      "/utils/trust/extension/acorn-walk.js",
-      "/utils/trust/extension/acorn.js",
+      "/utils/trust/extension/babel-parser.js",
+      "/utils/trust/extension/babel-traverse.js",
       "/utils/trust/extension/extension.js",
       "/utils/trust/extension/extension-store.js",
       "/utils/trust/extension/extension-analysis.js",
