@@ -261,9 +261,10 @@ class ExpressionResolver {
                 return { path: "chrome.DYNAMIC", hasDynamic: true };
             }
 
-            if (methodName === "then") {
+            if (methodName === "then" || methodName === "catch" || methodName === "finally") {
                 const promiseResult = this.resolveExpression(node.callee.object);
-                if (promiseResult?.path && /^(chrome|navigator|browser)/.test(promiseResult.path)) {
+                if (promiseResult?.path) {
+                    // Pass through the promise result, maintaining isPromise flag
                     return promiseResult;
                 }
                 return null;
@@ -277,16 +278,31 @@ class ExpressionResolver {
 
         // IIFE: (function() { return chrome; })()
         if ((node.callee.type === "FunctionExpression" ||
-                node.callee.type === "ArrowFunctionExpression") &&
+                node.callee.type === "ArrowFunctionExpression" ||
+                node.callee.type === "AsyncFunctionExpression") &&  // ✅ Added async
             node.callee.body) {
             const body = node.callee.body;
+
+            // For async functions, the result is wrapped in a Promise
+            const isAsync = node.callee.async || node.callee.type === "AsyncFunctionExpression";
+
             if (body.type === "BlockStatement" && body.body.length === 1 &&
                 body.body[0].type === "ReturnStatement") {
-                return this.resolveExpression(body.body[0].argument);
+                const result = this.resolveExpression(body.body[0].argument);
+                // Async functions wrap result in Promise - mark it
+                if (isAsync && result?.path) {
+                    return { path: result.path, hasDynamic: result.hasDynamic, isPromise: true };
+                }
+                return result;
             }
-            if (node.callee.type === "ArrowFunctionExpression" &&
+            if ((node.callee.type === "ArrowFunctionExpression" ||
+                    node.callee.type === "AsyncFunctionExpression") &&
                 body.type !== "BlockStatement") {
-                return this.resolveExpression(body);
+                const result = this.resolveExpression(body);
+                if (isAsync && result?.path) {
+                    return { path: result.path, hasDynamic: result.hasDynamic, isPromise: true };
+                }
+                return result;
             }
         }
 
@@ -820,6 +836,23 @@ class VariableTracker {
 
         if (p.parentPath.isCallExpression()) {
             const callExpr = p.parentPath.node;
+
+            // Check if this is a Promise .then() callback
+            if (callExpr.callee.type === "MemberExpression" &&
+                callExpr.callee.property.type === "Identifier" &&
+                (callExpr.callee.property.name === "then" ||
+                    callExpr.callee.property.name === "catch")) {
+
+                // Resolve what the promise contains
+                const promiseResult = this.resolver.resolveExpression(callExpr.callee.object);
+                if (promiseResult?.path && params.length > 0 && params[0].type === "Identifier") {
+                    // First parameter of .then() receives the resolved value
+                    this.vars.set(params[0].name, new Set([promiseResult.path]));
+                    this.log(`Promise callback: ${params[0].name} = ${promiseResult.path}`);
+                }
+            }
+
+            // Track named parameters
             for (let i = 0; i < params.length; i++) {
                 const param = params[i];
                 const arg = callExpr.arguments[i];
@@ -888,6 +921,22 @@ class CallHandler {
     handleCall(p) {
         const callee = p.node.callee;
         this.log(`handleCall: callee type = ${callee.type}`);
+
+        // Skip Promise methods - they're not API calls
+        if (callee.type === "MemberExpression" &&
+            callee.property.type === "Identifier") {
+            const methodName = callee.property.name;
+            if (methodName === "then" ||
+                methodName === "catch" ||
+                methodName === "finally" ||
+                methodName === "all" ||
+                methodName === "race" ||
+                methodName === "allSettled" ||
+                methodName === "any") {
+                // This is a Promise method, not a chrome API call
+                return;
+            }
+        }
 
         // eval() variants
         if (callee.type === "Identifier" && callee.name === "eval") {
