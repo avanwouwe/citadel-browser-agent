@@ -111,19 +111,22 @@ simpleCheck("Proxy with get trap",
 simpleCheck("eval with chrome API",
     `
     eval("chrome.runtime.sendMessage('hi')");
-    `
+    `,
+    "DYNAMIC"
 );
 
 simpleCheck("Function constructor with chrome API",
     `
     new Function("chrome", "chrome.runtime.sendMessage('hi')")(chrome);
-    `
+    `,
+    "DYNAMIC"
 );
 
 simpleCheck("Indirect eval",
     `
     (1, eval)("chrome.runtime.sendMessage('hi')");
-    `
+    `,
+    "DYNAMIC"
 );
 
 // === Array/Object method tricks ===
@@ -138,14 +141,17 @@ simpleCheck("Object.keys to iterate chrome properties",
     `
     const keys = Object.keys(chrome);
     chrome[keys[0]]; // accessing chrome properties dynamically
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Object.getOwnPropertyDescriptor",
     `
-    const desc = Object.getOwnPropertyDescriptor(chrome, "runtime");
+    var t = chrome;
+    const desc = Object.getOwnPropertyDescriptor(t, "runtime");
     desc.value.sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === Call/Apply/Bind methods ===
@@ -280,28 +286,32 @@ simpleCheck("charAt/charCodeAt obfuscation",
     `
     const s = "runtime";
     chrome[s.charAt(0) + s.slice(1)].sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("split and join obfuscation",
     `
     const parts = "run,time".split(",");
     chrome[parts.join("")].sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("String.fromCharCode obfuscation",
     `
     const key = String.fromCharCode(114,117,110,116,105,109,101); // "runtime"
     chrome[key].sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Base64 decode for API name",
     `
     const key = atob("cnVudGltZQ=="); // "runtime"
     chrome[key].sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === Optional chaining (might hide intent) ===
@@ -332,7 +342,8 @@ simpleCheck("WeakMap storing chrome reference",
     const key = {};
     map.set(key, chrome.runtime);
     map.get(key).sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Map storing chrome API path",
@@ -340,7 +351,8 @@ simpleCheck("Map storing chrome API path",
     const map = new Map();
     map.set("api", chrome.runtime);
     map.get("api").sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === Getter/Setter tricks ===
@@ -419,7 +431,8 @@ simpleCheck("Computed access through variable chain",
     `
     const keys = { ns: "runtime", method: "sendMessage" };
     chrome[keys.ns][keys.method]("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === toString/valueOf tricks ===
@@ -435,7 +448,8 @@ simpleCheck("Generator yielding chrome reference",
     `
     function* gen() { yield chrome.runtime; }
     gen().next().value.sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === Async/await obfuscation ===
