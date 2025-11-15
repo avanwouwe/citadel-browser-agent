@@ -485,3 +485,263 @@ simpleCheck("Dynamic member access using literals",
     chrome[k + "ime"].sendMessage("hi");
     `
 );
+
+// === Cross-function tracking ===
+simpleCheck("Chrome passed as function parameter",
+    `
+    function helper(api) {
+        api.sendMessage("hi");
+    }
+    helper(chrome.runtime);
+    `
+);
+
+simpleCheck("Function returning chrome",
+    `
+    function getChromeAPI() {
+        return chrome.runtime;
+    }
+    getChromeAPI().sendMessage("hi");
+    `
+);
+
+simpleCheck("Nested function returns",
+    `
+    function outer() {
+        return function inner() {
+            return chrome.runtime;
+        };
+    }
+    outer()().sendMessage("hi");
+    `
+);
+
+// === Closure scenarios ===
+simpleCheck("Closure capturing chrome",
+    `
+    const api = chrome.runtime;
+    function send() {
+        api.sendMessage("hi");
+    }
+    send();
+    `
+);
+
+simpleCheck("IIFE with closure",
+    `
+    const sender = (function() {
+        const api = chrome.runtime;
+        return function() {
+            api.sendMessage("hi");
+        };
+    })();
+    sender();
+    `
+);
+
+// === Multiple API detection ===
+simpleCheck("Multiple distinct chrome APIs",
+    `
+    chrome.runtime.sendMessage("hi");
+    chrome.storage.local.get("key");
+    chrome.tabs.query({});
+    `,
+    ["chrome.runtime.sendMessage", "chrome.storage.local.get", "chrome.tabs.query"]
+);
+
+simpleCheck("Multiple APIs through aliases",
+    `
+    const rt = chrome.runtime;
+    const st = chrome.storage;
+    rt.sendMessage("hi");
+    st.local.get("key");
+    `,
+    ["chrome.runtime.sendMessage", "chrome.storage.local.get"]
+);
+
+// === Function factories ===
+simpleCheck("Factory function creating chrome accessor",
+    `
+    function createAPI() {
+        const api = chrome.runtime;
+        return { send: () => api.sendMessage("hi") };
+    }
+    createAPI().send();
+    `
+);
+
+// === Mixed obfuscation ===
+simpleCheck("Combining proxy and destructuring",
+    `
+    const p = new Proxy(chrome, {});
+    const { runtime: rt } = p;
+    rt.sendMessage("hi");
+    `
+);
+
+simpleCheck("Combining IIFE, ternary, and alias",
+    `
+    const api = (function() {
+        return true ? chrome : {};
+    })();
+    const rt = api.runtime;
+    rt.sendMessage("hi");
+    `
+);
+
+// === Array/Object methods ===
+simpleCheck("forEach with chrome",
+    `
+    ["sendMessage"].forEach(method => {
+        chrome.runtime[method]("hi");
+    });
+    `,
+    "chrome.runtime.DYNAMIC" // Dynamic because method name is in array
+);
+
+simpleCheck("Array.map returning chrome",
+    `
+    const apis = [chrome.runtime].map(x => x);
+    apis[0].sendMessage("hi");
+    `
+);
+
+// === Destructuring in parameters ===
+simpleCheck("Destructuring in function param",
+    `
+    function send({ runtime }) {
+        runtime.sendMessage("hi");
+    }
+    send(chrome);
+    `
+);
+
+simpleCheck("Nested destructuring in param",
+    `
+    function send({ runtime: { sendMessage } }) {
+        sendMessage("hi");
+    }
+    send(chrome);
+    `
+);
+
+// === Rest/Spread parameters ===
+simpleCheck("Rest parameter with chrome",
+    `
+    function wrapper(...args) {
+        args[0].sendMessage("hi");
+    }
+    wrapper(chrome.runtime);
+    `
+);
+
+simpleCheck("Spread in array with chrome",
+    `
+    const parts = [chrome.runtime];
+    const [api, ...rest] = parts;
+    api.sendMessage("hi");
+    `
+);
+
+// === Conditional assignment ===
+simpleCheck("Conditional chrome assignment",
+    `
+    const api = Math.random() > 0.5 ? chrome.runtime : chrome.runtime;
+    api.sendMessage("hi");
+    `
+);
+
+simpleCheck("Switch-based API selection",
+    `
+    let api;
+    switch("runtime") {
+        case "runtime":
+            api = chrome.runtime;
+            break;
+    }
+    api.sendMessage("hi");
+    `
+);
+
+// === Deep nesting ===
+simpleCheck("Deep object nesting",
+    `
+    const level1 = { level2: { level3: { api: chrome.runtime } } };
+    level1.level2.level3.api.sendMessage("hi");
+    `
+);
+
+simpleCheck("Multiple function wrappers",
+    `
+    function f1() { return f2(); }
+    function f2() { return f3(); }
+    function f3() { return chrome.runtime; }
+    f1().sendMessage("hi");
+    `
+);
+
+// === Object/Array manipulation ===
+simpleCheck("Object.entries on chrome",
+    `
+    const entries = Object.entries({api: chrome.runtime});
+    entries[0][1].sendMessage("hi");
+    `
+);
+
+simpleCheck("Object.values on chrome wrapper",
+    `
+    const values = Object.values({api: chrome.runtime});
+    values[0].sendMessage("hi");
+    `
+);
+
+// === Default parameters ===
+simpleCheck("Default parameter with chrome",
+    `
+    function send(api = chrome.runtime) {
+        api.sendMessage("hi");
+    }
+    send();
+    `
+);
+
+// === Logical assignment ===
+simpleCheck("Logical OR assignment",
+    `
+    let api;
+    api ||= chrome.runtime;
+    api.sendMessage("hi");
+    `
+);
+
+simpleCheck("Nullish coalescing assignment",
+    `
+    let api;
+    api ??= chrome.runtime;
+    api.sendMessage("hi");
+    `
+);
+
+// === Complex real-world pattern ===
+simpleCheck("Module pattern with chrome",
+    `
+    const MyModule = (function() {
+        const _chrome = chrome;
+        return {
+            send: function() {
+                _chrome.runtime.sendMessage("hi");
+            }
+        };
+    })();
+    MyModule.send();
+    `
+);
+
+simpleCheck("Async module loader pattern",
+    `
+    async function loadAPI() {
+        return Promise.resolve(chrome.runtime);
+    }
+    loadAPI().then(api => api.sendMessage("hi"));
+    `
+);
