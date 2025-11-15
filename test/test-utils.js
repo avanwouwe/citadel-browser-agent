@@ -40,7 +40,7 @@
 async function simpleCheck(name, code, required = "chrome.runtime.sendMessage") {
     check(name, async () => {
         const files = { "main.js": code };
-        const result = await StaticAnalysis.analyze(["main.js"], id => files[id])
+        const result = await StaticAnalysis.analyze(["main.js"], id => files[id], true)
         if (! result.apis.some(api => api.startsWith(required))) throw new Error(`${JSON.stringify(result.apis)}`);
     });
 }
