@@ -966,8 +966,24 @@ class CallHandler {
     }
 
     handleCall(p) {
-        const callee = p.node.callee;
+        let callee = p.node.callee;
         this.log(`handleCall: callee type = ${callee.type}`);
+
+        // Reflect API
+        if (this._handleReflect(p, callee)) return;
+
+        // Object methods
+        if (this._handleObjectMethods(p, callee)) return;
+
+        // Map.set(key, chrome.runtime)
+        if (this._handleMapSet(p, callee)) return;
+
+        // Unwrap .call() and .apply() to get the actual function being invoked
+        if (callee.type === "MemberExpression" &&
+            callee.property.type === "Identifier" &&
+            (callee.property.name === "call" || callee.property.name === "apply" || callee.property.name === "bind")) {
+            callee = callee.object;
+        }
 
         // Skip Promise methods - they're not API calls
         if (callee.type === "MemberExpression" &&
@@ -1014,15 +1030,6 @@ class CallHandler {
             this._checkDynamicCallArgs(p);  // ✅ Check if chrome is passed
             return;
         }
-
-        // Reflect API
-        if (this._handleReflect(p, callee)) return;
-
-        // Object methods
-        if (this._handleObjectMethods(p, callee)) return;
-
-        // Map.set(key, chrome.runtime)
-        if (this._handleMapSet(p, callee)) return;
 
         // Regular chrome API calls (including OptionalMemberExpression)
         const calleeResult = this.resolver.resolveExpression(callee);
