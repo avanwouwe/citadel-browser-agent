@@ -153,6 +153,10 @@ class ExpressionResolver {
             case "Identifier":
                 return this._resolveIdentifier(node);
 
+            case "ThisExpression":
+                // Handle `this` by searching for matching instance properties
+                return { path: "this", hasDynamic: false };
+
             case "CallExpression":
                 return this._resolveCallExpression(node);
 
@@ -202,6 +206,23 @@ class ExpressionResolver {
         return null;
     }
     _resolveCallExpression(node) {
+        // Handle static method calls like API.get()
+        if (node.callee.type === "MemberExpression" &&
+            node.callee.object.type === "Identifier") {
+            const className = node.callee.object.name;
+            const methodName = node.callee.property.name;
+
+            if (this.vars.get(className)?.has("class")) {
+                const staticMethodKey = `${className}.${methodName}()`;
+                if (this.vars.has(staticMethodKey)) {
+                    const retVal = this.vars.get(staticMethodKey);
+                    if (retVal.size === 1 && !retVal.has("*")) {
+                        return { path: Array.from(retVal)[0], hasDynamic: false };
+                    }
+                }
+            }
+        }
+
         // Handle Reflect.get() calls
         if (node.callee.type === "MemberExpression" &&
             node.callee.object.type === "Identifier" &&
@@ -322,7 +343,7 @@ class ExpressionResolver {
             const isComputed = node.computed;
             const isOptional = node.optional || node.type === "OptionalMemberExpression";
 
-            // ✅ FIXED: Only treat as dynamic if it's COMPUTED, not just optional
+            // Only treat as dynamic if it's COMPUTED, not just optional
             if (isComputed) {
                 const evaluated = this.evaluator.tryEvaluate(node.property);
                 if (evaluated !== null) {
@@ -391,6 +412,29 @@ class ExpressionResolver {
 
         let basePath = baseResult.path;
         if (!basePath) return null;
+
+        // Handle 'this' by checking for any class_instance that has this property
+        if (basePath === "this") {
+            if (chain.length > 0) {
+                // Check all tracked vars for *_instance.propName
+                for (const [key, value] of this.vars.entries()) {
+                    if (key.endsWith(`_instance.${chain[0]}`)) {
+                        if (value.size === 1 && !value.has("*")) {
+                            basePath = Array.from(value)[0];
+                            chain.shift();
+
+                            if (/^(chrome|navigator|browser)/.test(basePath)) {
+                                return {
+                                    path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
+                                    hasDynamic: hasDynamic
+                                };
+                            }
+                        }
+                    }
+                }
+            }
+            return null;
+        }
 
         // Handle arguments object similar to arrays
         if (basePath === "arguments") {
@@ -598,6 +642,8 @@ class VariableTracker {
 
     _handleObjectExpression(idName, init) {
         let foundSpread = false;
+        let toStringValue = null;
+
         for (const prop of init.properties) {
             if (prop.type === "SpreadElement") {
                 const result = this.resolver.resolveExpression(prop.argument);
@@ -611,8 +657,27 @@ class VariableTracker {
             if (prop.type === "ObjectProperty" || prop.type === "ObjectMethod") {
                 let key = null;
 
+                // Check for toString method
+                const propName = prop.key.type === "Identifier" ? prop.key.name :
+                    (prop.key.type === "StringLiteral" ? prop.key.value : null);
+
+                if (propName === "toString") {
+                    // Check if it's an arrow function or method that returns a literal
+                    if (prop.value?.type === "ArrowFunctionExpression" &&
+                        prop.value.body.type === "StringLiteral") {
+                        toStringValue = prop.value.body.value;
+                        this.log(`toString method returns: ${toStringValue}`);
+                    } else if (prop.type === "ObjectMethod" &&
+                        prop.body.body.length === 1 &&
+                        prop.body.body[0].type === "ReturnStatement" &&
+                        prop.body.body[0].argument?.type === "StringLiteral") {
+                        toStringValue = prop.body.body[0].argument.value;
+                        this.log(`toString method returns: ${toStringValue}`);
+                    }
+                }
+
                 if (prop.computed) {
-                    // ✅ NEW: Handle Symbol.for() as key
+                    // Handle Symbol.for() as key
                     if (prop.key.type === "CallExpression" &&
                         prop.key.callee.type === "MemberExpression" &&
                         prop.key.callee.object.type === "Identifier" &&
@@ -620,10 +685,8 @@ class VariableTracker {
                         prop.key.callee.property.name === "for" &&
                         prop.key.arguments.length === 1 &&
                         prop.key.arguments[0].type === "StringLiteral") {
-                        // Store with a symbol prefix to distinguish from regular properties
                         key = `Symbol.for(${prop.key.arguments[0].value})`;
                     } else {
-                        // Regular computed property
                         key = this.evaluator.tryEvaluate(prop.key);
                         if (key === null && prop.key.type === "Identifier" && this.vars.has(prop.key.name)) {
                             const values = this.vars.get(prop.key.name);
@@ -633,11 +696,10 @@ class VariableTracker {
                         }
                     }
                 } else {
-                    key = prop.key.type === "Identifier" ? prop.key.name :
-                        (prop.key.type === "StringLiteral" ? prop.key.value : null);
+                    key = propName;
                 }
 
-                if (key) {
+                if (key && key !== "toString") {
                     if (prop.type === "ObjectMethod" && prop.kind === "get") {
                         if (prop.body.body.length === 1 &&
                             prop.body.body[0].type === "ReturnStatement") {
@@ -657,8 +719,14 @@ class VariableTracker {
                 }
             }
         }
+
         if (!foundSpread) {
-            this.vars.set(idName, new Set(["Object"]));
+            // If toString returns a literal, track that instead of "Object"
+            if (toStringValue !== null) {
+                this.vars.set(idName, new Set([toStringValue]));
+            } else {
+                this.vars.set(idName, new Set(["Object"]));
+            }
         }
     }
 
@@ -709,9 +777,8 @@ class VariableTracker {
                     }
                 }
 
-                // ✅ NEW: Track assignments in constructor
+                // Track assignments in constructor
                 if (item.type === "ClassMethod" && item.kind === "constructor") {
-                    // Walk through constructor body to find this.prop = value assignments
                     for (const stmt of item.body.body) {
                         if (stmt.type === "ExpressionStatement" &&
                             stmt.expression.type === "AssignmentExpression" &&
@@ -726,6 +793,21 @@ class VariableTracker {
                                     this.log(`Constructor: ${p.node.id.name}_instance.${key} = ${result.path}`);
                                 }
                             }
+                        }
+                    }
+                }
+
+                // Track static methods that return chrome APIs
+                if (item.type === "ClassMethod" && item.static &&
+                    item.body.body.length === 1 &&
+                    item.body.body[0].type === "ReturnStatement") {
+
+                    const result = this.resolver.resolveExpression(item.body.body[0].argument);
+                    if (result?.path && /^(chrome|navigator|browser)/.test(result.path)) {
+                        const methodName = item.key.name || item.key.value;
+                        if (methodName) {
+                            this.vars.set(`${p.node.id.name}.${methodName}()`, new Set([result.path]));
+                            this.log(`Static method: ${p.node.id.name}.${methodName}() returns ${result.path}`);
                         }
                     }
                 }
