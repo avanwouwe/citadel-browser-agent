@@ -518,7 +518,7 @@ class ExpressionResolver {
 
         // Handle window/globalThis/self wrappers
         if (basePath === "window") {
-            if (chain.length > 0 && (chain[0] === "chrome" || chain[0] === "navigator" || chain[0] === "browser")) {
+            if (chain.length > 0 && StaticAnalysisUtils.isBrowserAPI(chain[0])) {
                 basePath = chain.shift();
             } else {
                 return null;
@@ -641,6 +641,37 @@ class VariableTracker {
                     }
                 }
                 return;
+            }
+
+            // Special case for destructuring from named array
+            if (id.type === "ArrayPattern" && init.type === "Identifier") {
+                const arrayName = init.name;
+                if (this.vars.has(arrayName) && this.vars.get(arrayName).has("Array")) {
+                    // Destructure from tracked array elements
+                    for (let i = 0; i < id.elements.length; i++) {
+                        const element = id.elements[i];
+
+                        // Handle rest elements: ...rest
+                        if (element?.type === "RestElement" && element.argument.type === "Identifier") {
+                            // Rest gets remaining elements - mark as Array
+                            this.vars.set(element.argument.name, new Set(["Array"]));
+                            this.log(`Rest element: ${element.argument.name} = Array`);
+                            continue;
+                        }
+
+                        if (element?.type === "Identifier") {
+                            const elemKey = `${arrayName}[${i}]`;
+                            if (this.vars.has(elemKey)) {
+                                const elemPath = this.vars.get(elemKey);
+                                this.vars.set(element.name, elemPath);
+                                this.log(`Array destructure from named: ${element.name} = ${Array.from(elemPath)[0]}`);
+                            } else {
+                                this.vars.set(element.name, new Set(["*"]));
+                            }
+                        }
+                    }
+                    return;
+                }
             }
 
             const result = this.resolver.resolveExpression(init);
@@ -927,6 +958,20 @@ class VariableTracker {
     _handleFunction(p) {
         const params = p.node.params;
 
+        // Track default parameter values (e.g., function foo(api = chrome.runtime))
+        for (const param of params) {
+            if (param.type === "AssignmentPattern") {
+                // param.left is the parameter name, param.right is the default value
+                if (param.left.type === "Identifier") {
+                    const result = this.resolver.resolveExpression(param.right);
+                    if (result?.path) {
+                        this.vars.set(param.left.name, new Set([result.path]));
+                        this.log(`Default parameter: ${param.left.name} = ${result.path}`);
+                    }
+                }
+            }
+        }
+
         if (p.parentPath.isCallExpression()) {
             const callExpr = p.parentPath.node;
 
@@ -949,10 +994,14 @@ class VariableTracker {
             for (let i = 0; i < params.length; i++) {
                 const param = params[i];
                 const arg = callExpr.arguments[i];
-                if (param.type === "Identifier" && arg) {
+
+                // Handle AssignmentPattern (default params)
+                const paramName = param.type === "AssignmentPattern" ? param.left : param;
+
+                if (paramName.type === "Identifier" && arg) {
                     const result = this.resolver.resolveExpression(arg);
                     if (result?.path) {
-                        this.vars.set(param.name, new Set([result.path]));
+                        this.vars.set(paramName.name, new Set([result.path]));
                         this.vars.set(`arguments[${i}]`, new Set([result.path]));
                     }
                 }
@@ -1044,6 +1093,22 @@ class CallHandler {
                 methodName === "any") {
                 return;
             }
+
+            // Detect Promise.resolve(chrome.runtime) or Promise.reject(chrome.*)
+            if ((methodName === "resolve" || methodName === "reject") &&
+                callee.object.type === "Identifier" &&
+                callee.object.name === "Promise") {
+                const [arg] = p.node.arguments;
+                if (arg) {
+                    const result = this.resolver.resolveExpression(arg);
+                    if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
+                        this.calls.add("chrome.DYNAMIC");
+                        this.log(`Promise.${methodName}(${result.path})`);
+                        return;
+                    }
+                }
+            }
+
         }
 
         // Handle SequenceExpression like (1, eval) - check the last expression
@@ -1073,7 +1138,7 @@ class CallHandler {
         if (callee.type === "NewExpression" &&
             callee.callee.type === "Identifier" &&
             callee.callee.name === "Function") {
-            this._checkDynamicCallArgs(p);  // ✅ Check if chrome is passed
+            this._checkDynamicCallArgs(p);  // Check if chrome is passed
             return;
         }
 
@@ -1110,6 +1175,31 @@ class CallHandler {
                 }
             }
         }
+
+        // Flag any function call that receives chrome as argument
+        if (actualCallee.type === "Identifier") {
+            // Check if this is a user function (not built-ins we already handled)
+            const funcName = actualCallee.name;
+            const isBuiltIn = funcName === "eval" ||
+                funcName === "Function" ||
+                funcName === "require" ||
+                funcName === "importScripts" ||
+                funcName === "atob" ||
+                funcName === "btoa";
+
+            if (!isBuiltIn && p.node.arguments.length > 0) {
+                // Check if any argument is a chrome reference
+                for (const arg of p.node.arguments) {
+                    const result = this.resolver.resolveExpression(arg);
+                    if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
+                        this.calls.add("chrome.DYNAMIC");
+                        this.log(`Chrome passed to function: ${funcName}(${result.path})`);
+                        return;
+                    }
+                }
+            }
+        }
+
     }
 
     _checkDynamicCallArgs(callPath) {
@@ -1203,7 +1293,7 @@ class CallHandler {
                 const [target, source] = p.node.arguments;
                 if (target && source) {
                     const result = this.resolver.resolveExpression(source);
-                    if (result?.path && BrowserAPIUtils.isBrowserAPI(result.path)) {
+                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                         if (target.type === "Identifier") {
                             this.vars.set(target.name, new Set([result.path]));
                         }
@@ -1212,16 +1302,39 @@ class CallHandler {
             } else if (method === "keys" || method === "getOwnPropertyDescriptor") {
                 const [target] = p.node.arguments;
                 const result = this.resolver.resolveExpression(target);
-                if (result?.path && BrowserAPIUtils.isBrowserAPI(result.path)) {
+                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                     this.calls.add(`${result.path}.DYNAMIC`);
                 }
             } else if (method === "entries" || method === "values") {
                 const [target] = p.node.arguments;
                 const result = this.resolver.resolveExpression(target);
-                if (result?.path && BrowserAPIUtils.isBrowserAPI(result.path)) {
+
+                let hasChromeProperties = false;
+
+                // Check if resolved target is chrome
+                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                    hasChromeProperties = true;
+                }
+                // Check if target is an object literal with chrome properties
+                else if (target?.type === "ObjectExpression") {
+                    for (const prop of target.properties) {
+                        if (prop.type === "ObjectProperty" && prop.value) {
+                            const propResult = this.resolver.resolveExpression(prop.value);
+                            if (StaticAnalysisUtils.isBrowserAPI(propResult?.path)) {
+                                hasChromeProperties = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (hasChromeProperties) {
+                    this.calls.add("chrome.DYNAMIC");
+                    this.log(`Object.${method} on chrome-containing object`);
+
                     const parent = p.parentPath;
                     if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
-                        this.vars.set(`${parent.node.id.name}[0]`, new Set([`${result.path}.DYNAMIC`]));
+                        this.vars.set(`${parent.node.id.name}[0]`, new Set(["chrome.DYNAMIC"]));
                     }
                 }
             }

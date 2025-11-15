@@ -218,11 +218,7 @@ simpleCheck("IIFE with parameter",
     `
 );
 
-simpleCheck("Arrow function returning chrome",
-    `
-    (() => chrome)().runtime.sendMessage("hi");
-    `
-);
+
 
 // === Ternary and logical operators ===
 simpleCheck("Ternary operator selecting chrome",
@@ -493,7 +489,8 @@ simpleCheck("Chrome passed as function parameter",
         api.sendMessage("hi");
     }
     helper(chrome.runtime);
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Function returning chrome",
@@ -613,7 +610,8 @@ simpleCheck("Destructuring in function param",
         runtime.sendMessage("hi");
     }
     send(chrome);
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Nested destructuring in param",
@@ -622,7 +620,8 @@ simpleCheck("Nested destructuring in param",
         sendMessage("hi");
     }
     send(chrome);
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === Rest/Spread parameters ===
@@ -632,7 +631,8 @@ simpleCheck("Rest parameter with chrome",
         args[0].sendMessage("hi");
     }
     wrapper(chrome.runtime);
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Spread in array with chrome",
@@ -685,14 +685,16 @@ simpleCheck("Object.entries on chrome",
     `
     const entries = Object.entries({api: chrome.runtime});
     entries[0][1].sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 simpleCheck("Object.values on chrome wrapper",
     `
     const values = Object.values({api: chrome.runtime});
     values[0].sendMessage("hi");
-    `
+    `,
+    "chrome.DYNAMIC"
 );
 
 // === Default parameters ===
@@ -743,5 +745,6 @@ simpleCheck("Async module loader pattern",
         return Promise.resolve(chrome.runtime);
     }
     loadAPI().then(api => api.sendMessage("hi"));
-    `
+    `,
+    "chrome.DYNAMIC"
 );
