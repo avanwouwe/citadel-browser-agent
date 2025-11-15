@@ -431,6 +431,27 @@ class ExpressionResolver {
                 }
             }
 
+            // Check for deep nested paths progressively
+            // e.g., level1.level2.level3.api
+            for (let i = 1; i < chain.length; i++) {
+                const nestedPath = `${node.name}.${chain.slice(0, i + 1).join(".")}`;
+                if (this.vars.has(nestedPath)) {
+                    const tracked = this.vars.get(nestedPath);
+                    if (tracked.size === 1 && !tracked.has("*")) {
+                        const basePath = Array.from(tracked)[0];
+                        // Remove the resolved part from chain
+                        chain.splice(0, i + 1);
+
+                        if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
+                            return {
+                                path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
+                                hasDynamic: hasDynamic
+                            };
+                        }
+                    }
+                }
+            }
+
             // Check for array element: arr[1]
             const elemPath = `${node.name}[${chain[0]}]`;
             if (this.vars.has(elemPath)) {
@@ -710,7 +731,7 @@ class VariableTracker {
         for (const prop of init.properties) {
             if (prop.type === "SpreadElement") {
                 const result = this.resolver.resolveExpression(prop.argument);
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
                     this.vars.set(idName, new Set([result.path]));
                     foundSpread = true;
                     break;
@@ -720,12 +741,10 @@ class VariableTracker {
             if (prop.type === "ObjectProperty" || prop.type === "ObjectMethod") {
                 let key = null;
 
-                // Check for toString method
                 const propName = prop.key.type === "Identifier" ? prop.key.name :
                     (prop.key.type === "StringLiteral" ? prop.key.value : null);
 
                 if (propName === "toString") {
-                    // Check if it's an arrow function or method that returns a literal
                     if (prop.value?.type === "ArrowFunctionExpression" &&
                         prop.value.body.type === "StringLiteral") {
                         toStringValue = prop.value.body.value;
@@ -740,7 +759,6 @@ class VariableTracker {
                 }
 
                 if (prop.computed) {
-                    // Handle Symbol.for() as key
                     if (prop.key.type === "CallExpression" &&
                         prop.key.callee.type === "MemberExpression" &&
                         prop.key.callee.object.type === "Identifier" &&
@@ -767,7 +785,7 @@ class VariableTracker {
                         if (prop.body.body.length === 1 &&
                             prop.body.body[0].type === "ReturnStatement") {
                             const retVal = this.resolver.resolveExpression(prop.body.body[0].argument);
-                            if (StaticAnalysisUtils.isBrowserAPI(retVal?.path)) {
+                            if (retVal?.path && StaticAnalysisUtils.isBrowserAPI(retVal.path)) {
                                 this.vars.set(`${idName}.${key}`, new Set([retVal.path]));
                                 this.log(`Getter: ${idName}.${key} = ${retVal.path}`);
                             }
@@ -778,17 +796,45 @@ class VariableTracker {
                             this.vars.set(`${idName}.${key}`, new Set([propResult.path]));
                             this.log(`Object property: ${idName}.${key} = ${propResult.path}`);
                         }
+
+                        // Recursively handle nested objects
+                        if (prop.value.type === "ObjectExpression") {
+                            const nestedPrefix = `${idName}.${key}`;
+                            this._handleNestedObjectProperties(nestedPrefix, prop.value);
+                        }
                     }
                 }
             }
         }
 
         if (!foundSpread) {
-            // If toString returns a literal, track that instead of "Object"
             if (toStringValue !== null) {
                 this.vars.set(idName, new Set([toStringValue]));
             } else {
                 this.vars.set(idName, new Set(["Object"]));
+            }
+        }
+    }
+
+// Helper to recursively track nested object properties
+    _handleNestedObjectProperties(prefix, objectExpr) {
+        for (const prop of objectExpr.properties) {
+            if (prop.type === "ObjectProperty") {
+                const key = prop.key.type === "Identifier" ? prop.key.name :
+                    (prop.key.type === "StringLiteral" ? prop.key.value : null);
+
+                if (key && prop.value) {
+                    const propResult = this.resolver.resolveExpression(prop.value);
+                    if (propResult?.path) {
+                        this.vars.set(`${prefix}.${key}`, new Set([propResult.path]));
+                        this.log(`Nested object property: ${prefix}.${key} = ${propResult.path}`);
+                    }
+
+                    // Continue recursion
+                    if (prop.value.type === "ObjectExpression") {
+                        this._handleNestedObjectProperties(`${prefix}.${key}`, prop.value);
+                    }
+                }
             }
         }
     }
@@ -1157,7 +1203,7 @@ class CallHandler {
                 const [target, source] = p.node.arguments;
                 if (target && source) {
                     const result = this.resolver.resolveExpression(source);
-                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                    if (result?.path && BrowserAPIUtils.isBrowserAPI(result.path)) {
                         if (target.type === "Identifier") {
                             this.vars.set(target.name, new Set([result.path]));
                         }
@@ -1166,12 +1212,91 @@ class CallHandler {
             } else if (method === "keys" || method === "getOwnPropertyDescriptor") {
                 const [target] = p.node.arguments;
                 const result = this.resolver.resolveExpression(target);
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                if (result?.path && BrowserAPIUtils.isBrowserAPI(result.path)) {
                     this.calls.add(`${result.path}.DYNAMIC`);
+                }
+            } else if (method === "entries" || method === "values") {
+                const [target] = p.node.arguments;
+                const result = this.resolver.resolveExpression(target);
+                if (result?.path && BrowserAPIUtils.isBrowserAPI(result.path)) {
+                    const parent = p.parentPath;
+                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                        this.vars.set(`${parent.node.id.name}[0]`, new Set([`${result.path}.DYNAMIC`]));
+                    }
                 }
             }
             return true;
         }
+
+        // Handle Array methods like map, filter
+        if (callee.type === "MemberExpression" &&
+            callee.property.type === "Identifier") {
+            const method = callee.property.name;
+
+            if (method === "map" || method === "filter") {
+                const [callback] = p.node.arguments;
+                let hasChromeElements = false;
+                let chromeElementPath = null;
+
+                // Check if it's an inline array like [chrome.runtime].map()
+                if (callee.object.type === "ArrayExpression") {
+                    for (const elem of callee.object.elements) {
+                        if (elem) {
+                            const elemResult = this.resolver.resolveExpression(elem);
+                            if (elemResult?.path && StaticAnalysisUtils.isBrowserAPI(elemResult.path)) {
+                                hasChromeElements = true;
+                                chromeElementPath = elemResult.path;
+                                break;
+                            }
+                        }
+                    }
+                }
+                // Check named arrays: const arr = [chrome.runtime]; arr.map(...)
+                else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
+                    const arrayType = this.vars.get(callee.object.name);
+                    if (arrayType.has("Array")) {
+                        const arrayName = callee.object.name;
+
+                        // Check array[0], array[1], etc.
+                        for (let i = 0; i < 10; i++) {
+                            const elemKey = `${arrayName}[${i}]`;
+                            if (this.vars.has(elemKey)) {
+                                const elemPath = this.vars.get(elemKey);
+                                if (elemPath.size === 1 && !elemPath.has("*")) {
+                                    const path = Array.from(elemPath)[0];
+                                    if (StaticAnalysisUtils.isBrowserAPI(path)) {
+                                        hasChromeElements = true;
+                                        chromeElementPath = path;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (hasChromeElements && callback) {
+                    const parent = p.parentPath;
+                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                        const resultArrayName = parent.node.id.name;
+
+                        // For identity function (x => x), preserve chrome references
+                        if (callback.type === "ArrowFunctionExpression" &&
+                            callback.params.length === 1 &&
+                            callback.params[0].type === "Identifier" &&
+                            callback.body.type === "Identifier" &&
+                            callback.body.name === callback.params[0].name) {
+                            this.vars.set(`${resultArrayName}[0]`, new Set([chromeElementPath]));
+                            this.vars.set(resultArrayName, new Set(["Array"]));
+                            this.log(`Array.${method} identity: ${resultArrayName}[0] = ${chromeElementPath}`);
+                        } else {
+                            this.vars.set(resultArrayName, new Set(["Array"]));
+                        }
+                    }
+                }
+            }
+        }
+
         return false;
     }
 
