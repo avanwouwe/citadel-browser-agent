@@ -41,7 +41,7 @@
     "service_worker": "serviceworker.js",
     "scripts": [
       "/config.js",
-      "/utils/node.js",
+      "/utils/shim-node-to-browser.js",
       "/utils/definitions.js",
       "/utils/context.js",
       "/utils/utils.js",
@@ -77,8 +77,6 @@
       "/utils/blacklist/ignorelist.js",
       "/utils/blacklist/exceptionlist.js",
       "/utils/blacklist/ipv4range.js",
-      "/utils/trust/extension/babel-parser.js",
-      "/utils/trust/extension/babel-traverse.js",
       "/utils/trust/extension/extension.js",
       "/utils/trust/extension/extension-store.js",
       "/utils/trust/extension/extension-analysis.js",

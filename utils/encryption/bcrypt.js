@@ -84,7 +84,7 @@ class Bcrypt {
             throw Error("illegal arguments: " + typeof rounds);
 
         function _async(callback) {
-            Bcrypt.nextTick(function () {
+            process.nextTick(function () {
                 // Pretty thin, but salting is fast enough
                 try {
                     callback(null, Bcrypt.genSaltSync(rounds));
@@ -143,7 +143,7 @@ class Bcrypt {
             else if (typeof password === "string" && typeof salt === "string")
                 Bcrypt.#hash(password, salt, callback, progressCallback);
             else
-                Bcrypt.nextTick(
+                process.nextTick(
                     callback.bind(
                         this,
                         Error("Illegal arguments: " + typeof password + ", " + typeof salt),
@@ -211,7 +211,7 @@ class Bcrypt {
     static compare(password, hash, callback, progressCallback) {
         function _async(callback) {
             if (typeof password !== "string" || typeof hash !== "string") {
-                Bcrypt.nextTick(
+                process.nextTick(
                     callback.bind(
                         this,
                         Error(
@@ -222,7 +222,7 @@ class Bcrypt {
                 return;
             }
             if (hash.length !== 60) {
-                Bcrypt.nextTick(callback.bind(this, null, false));
+                process.nextTick(callback.bind(this, null, false));
                 return;
             }
             Bcrypt.hash(
@@ -289,11 +289,6 @@ class Bcrypt {
             throw Error("Illegal arguments: " + typeof password);
         return Bcrypt.utf8Length(password) > 72;
     }
-
-    /**
-     * Continues with the callback on the next tick.
-     */
-    static nextTick = typeof setImmediate === "function" ? setImmediate : (callback) => setTimeout(callback, 0)
 
     /**
      * Calculates the byte length of a string encoded as UTF8.
@@ -837,7 +832,7 @@ class Bcrypt {
         if (rounds < 4 || rounds > 31) {
             err = Error("Illegal number of rounds (4-31): " + rounds);
             if (callback) {
-                Bcrypt.nextTick(callback.bind(this, err));
+                process.nextTick(callback.bind(this, err));
                 return;
             } else throw err;
         }
@@ -846,7 +841,7 @@ class Bcrypt {
                 "Illegal salt length: " + salt.length + " != " + Bcrypt.BCRYPT_SALT_LEN,
             );
             if (callback) {
-                Bcrypt.nextTick(callback.bind(this, err));
+                process.nextTick(callback.bind(this, err));
                 return;
             } else throw err;
         }
@@ -893,7 +888,7 @@ class Bcrypt {
                     return;
                 } else return ret;
             }
-            if (callback) Bcrypt.nextTick(next);
+            if (callback) process.nextTick(next);
         }
 
         // Async
@@ -920,7 +915,7 @@ class Bcrypt {
         if (typeof password !== "string" || typeof salt !== "string") {
             err = Error("Invalid string / salt: Not a string");
             if (callback) {
-                Bcrypt.nextTick(callback.bind(this, err));
+                process.nextTick(callback.bind(this, err));
                 return;
             } else throw err;
         }
@@ -930,7 +925,7 @@ class Bcrypt {
         if (salt.charAt(0) !== "$" || salt.charAt(1) !== "2") {
             err = Error("Invalid salt version: " + salt.substring(0, 2));
             if (callback) {
-                Bcrypt.nextTick(callback.bind(this, err));
+                process.nextTick(callback.bind(this, err));
                 return;
             } else throw err;
         }
@@ -943,7 +938,7 @@ class Bcrypt {
             ) {
                 err = Error("Invalid salt revision: " + salt.substring(2, 4));
                 if (callback) {
-                    Bcrypt.nextTick(callback.bind(this, err));
+                    process.nextTick(callback.bind(this, err));
                     return;
                 } else throw err;
             }
@@ -954,7 +949,7 @@ class Bcrypt {
         if (salt.charAt(offset + 2) > "$") {
             err = Error("Missing salt rounds");
             if (callback) {
-                Bcrypt.nextTick(callback.bind(this, err));
+                process.nextTick(callback.bind(this, err));
                 return;
             } else throw err;
         }
