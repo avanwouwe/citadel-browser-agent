@@ -57,7 +57,7 @@ class StaticAnalysis {
     }
 }
 
-class JavascriptConstants {
+class Javascript {
     static DYNAMIC = "DYNAMIC";
     static DYNAMIC_CODE = "DYNAMIC_CODE";
     static WILDCARD = "*";
@@ -70,15 +70,50 @@ class JavascriptConstants {
     static ARGUMENTS = "arguments";
     static THIS = "this";
 
-    static BROWSER_GLOBALS = ["chrome", "browser", "navigator", "window", "globalThis", "self"];
     static PROMISE_METHODS = ["then", "catch", "finally", "all", "race", "allSettled", "any"];
     static DYNAMIC_CODE_FUNCS = ["eval", "Function"];
-}
 
-class StaticAnalysisUtils {
+    // Additional useful constants
+    static WINDOW_ALIASES = ["window", "globalThis", "self"];
+    static REFLECT = "Reflect";
+    static SYMBOL = "Symbol";
+    static PROMISE = "Promise";
+    static PROXY = "Proxy";
+
+    // Object methods
+    static OBJECT_ASSIGN = "assign";
+    static OBJECT_KEYS = "keys";
+    static OBJECT_ENTRIES = "entries";
+    static OBJECT_VALUES = "values";
+    static OBJECT_GET_OWN_PROPERTY_DESCRIPTOR = "getOwnPropertyDescriptor";
+
+    // Reflect methods
+    static REFLECT_GET = "get";
+    static REFLECT_APPLY = "apply";
+
+    // Array methods
+    static ARRAY_MAP = "map";
+    static ARRAY_FILTER = "filter";
+
+    // Map methods
+    static MAP_SET = "set";
+    static MAP_GET = "get";
+
+    // Common methods
+    static TO_STRING = "toString";
+    static NEXT = "next";
+    static CALL = "call";
+    static APPLY = "apply";
+    static BIND = "bind";
+
+    // Special markers
+    static INSTANCE_SUFFIX = "_instance";
+    static CONTAINS_KEY = "__contains";
+
     static isBrowserAPI(path) {
         return path && /^(chrome|navigator|browser)($|\.)/.test(path);
     }
+
 }
 
 class DependencyResolver {
@@ -128,7 +163,7 @@ class ExpressionEvaluator {
                     } else if (node.expressions[i].type === "Identifier" &&
                         this.vars.has(node.expressions[i].name)) {
                         const values = this.vars.get(node.expressions[i].name);
-                        if (values.size === 1 && !values.has("*")) {
+                        if (values.size === 1 && !values.has(Javascript.WILDCARD)) {
                             result += Array.from(values)[0];
                         } else {
                             return null;
@@ -147,13 +182,13 @@ class ExpressionEvaluator {
         }
         if (node.type === "Identifier" && this.vars.has(node.name)) {
             const values = this.vars.get(node.name);
-            if (values.size === 1 && !values.has("*")) {
+            if (values.size === 1 && !values.has(Javascript.WILDCARD)) {
                 return Array.from(values)[0];
             }
         }
         if (node.type === "CallExpression" &&
             node.callee.type === "MemberExpression" &&
-            node.callee.property.name === "toString") {
+            node.callee.property.name === Javascript.TO_STRING) {
             return null;
         }
         if (node.type === "ObjectExpression") {
@@ -161,7 +196,7 @@ class ExpressionEvaluator {
                 const propName = prop.key?.type === "Identifier" ? prop.key.name :
                     (prop.key?.type === "StringLiteral" ? prop.key.value : null);
 
-                if (propName === "toString") {
+                if (propName === Javascript.TO_STRING) {
                     // Arrow function: () => "runtime"
                     if (prop.value?.type === "ArrowFunctionExpression" &&
                         prop.value.body.type === "StringLiteral") {
@@ -199,7 +234,7 @@ class ExpressionResolver {
             'MemberExpression': () => this._resolveMemberExpression(node),
             'OptionalMemberExpression': () => this._resolveMemberExpression(node),
             'Identifier': () => this._resolveIdentifier(node),
-            'ThisExpression': () => ({ path: "this", hasDynamic: false }),
+            'ThisExpression': () => ({ path: Javascript.THIS, hasDynamic: false }),
             'CallExpression': () => this._resolveCallExpression(node),
             'ConditionalExpression': () => this._resolveConditional(node),
             'LogicalExpression': () => this._resolveLogical(node),
@@ -220,18 +255,18 @@ class ExpressionResolver {
         const name = node.name;
 
         // Browser APIs
-        if (StaticAnalysisUtils.isBrowserAPI(name)) {
+        if (Javascript.isBrowserAPI(name)) {
             return { path: name, hasDynamic: false };
         }
 
         // Global objects that wrap window
-        if (name === "window" || name === "globalThis" || name === "self") {
-            return { path: "window", hasDynamic: false };
+        if (Javascript.WINDOW_ALIASES.includes(name)) {
+            return { path: Javascript.WINDOW, hasDynamic: false };
         }
 
         // Special identifiers
-        if (name === "arguments") {
-            return { path: "arguments", hasDynamic: false };
+        if (name === Javascript.ARGUMENTS) {
+            return { path: Javascript.ARGUMENTS, hasDynamic: false };
         }
 
         // Variable lookup
@@ -242,7 +277,7 @@ class ExpressionResolver {
         if (!this.vars.has(name)) return null;
 
         const values = this.vars.get(name);
-        if (values.size === 1 && !values.has("*")) {
+        if (values.size === 1 && !values.has(Javascript.WILDCARD)) {
             return { path: Array.from(values)[0], hasDynamic: false };
         }
 
@@ -274,13 +309,13 @@ class ExpressionResolver {
         const className = node.callee.object.name;
         const methodName = node.callee.property.name;
 
-        if (!this.vars.get(className)?.has("class")) return null;
+        if (!this.vars.get(className)?.has(Javascript.CLASS)) return null;
 
         const staticMethodKey = `${className}.${methodName}()`;
         if (!this.vars.has(staticMethodKey)) return null;
 
         const retVal = this.vars.get(staticMethodKey);
-        if (retVal.size === 1 && !retVal.has("*")) {
+        if (retVal.size === 1 && !retVal.has(Javascript.WILDCARD)) {
             return { path: Array.from(retVal)[0], hasDynamic: false };
         }
 
@@ -290,27 +325,27 @@ class ExpressionResolver {
     _resolveReflectGet(node) {
         if (node.callee.type !== "MemberExpression") return null;
         if (node.callee.object.type !== "Identifier") return null;
-        if (node.callee.object.name !== "Reflect") return null;
-        if (node.callee.property.name !== "get") return null;
+        if (node.callee.object.name !== Javascript.REFLECT) return null;
+        if (node.callee.property.name !== Javascript.REFLECT_GET) return null;
 
         const [target, prop] = node.arguments;
         const targetResult = this.resolveExpression(target);
 
-        if (!StaticAnalysisUtils.isBrowserAPI(targetResult?.path)) return null;
+        if (!Javascript.isBrowserAPI(targetResult?.path)) return null;
 
         const propValue = this.evaluator.tryEvaluate(prop);
         if (propValue !== null) {
             return { path: `${targetResult.path}.${propValue}`, hasDynamic: false };
         }
 
-        return { path: `${targetResult.path}.DYNAMIC`, hasDynamic: true };
+        return { path: `${targetResult.path}.${Javascript.DYNAMIC}`, hasDynamic: true };
     }
 
     _resolvePromiseMethod(node) {
         if (node.callee.type !== "MemberExpression") return null;
 
         const methodName = node.callee.property.name;
-        if (!["then", "catch", "finally"].includes(methodName)) return null;
+        if (!Javascript.PROMISE_METHODS.includes(methodName)) return null;
 
         const promiseResult = this.resolveExpression(node.callee.object);
         return promiseResult?.path ? promiseResult : null;
@@ -318,34 +353,34 @@ class ExpressionResolver {
 
     _resolveMapGet(node) {
         if (node.callee.type !== "MemberExpression") return null;
-        if (node.callee.property.name !== "get") return null;
+        if (node.callee.property.name !== Javascript.MAP_GET) return null;
         if (node.callee.object.type !== "Identifier") return null;
 
         const objName = node.callee.object.name;
         const mapValues = this.vars.get(objName);
 
-        if (!mapValues?.has("Map") && !mapValues?.has("WeakMap")) return null;
+        if (!mapValues?.has(Javascript.MAP) && !mapValues?.has(Javascript.WEAK_MAP)) return null;
 
         // Check if we know what the map contains
-        const containsKey = `${objName}.__contains`;
+        const containsKey = `${objName}.${Javascript.CONTAINS_KEY}`;
         if (this.vars.has(containsKey)) {
             const chromePath = this.vars.get(containsKey);
             if (chromePath.size === 1) {
                 const path = Array.from(chromePath)[0];
-                return { path: `${path}.DYNAMIC`, hasDynamic: true };
+                return { path: `${path}.${Javascript.DYNAMIC}`, hasDynamic: true };
             }
         }
 
         // Fallback: map contains unknown chrome API
-        return { path: "chrome.DYNAMIC", hasDynamic: true };
+        return { path: `chrome.${Javascript.DYNAMIC}`, hasDynamic: true };
     }
 
     _resolveIteratorNext(node) {
         if (node.callee.type !== "MemberExpression") return null;
-        if (node.callee.property.name !== "next") return null;
+        if (node.callee.property.name !== Javascript.NEXT) return null;
 
         // Iterator.next() returns chrome API dynamically
-        return { path: "chrome.DYNAMIC", hasDynamic: true };
+        return { path: `chrome.${Javascript.DYNAMIC}`, hasDynamic: true };
     }
 
     _resolveIIFE(node) {
@@ -387,12 +422,12 @@ class ExpressionResolver {
 
     _resolveConditional(node) {
         const consequent = this.resolveExpression(node.consequent);
-        if (StaticAnalysisUtils.isBrowserAPI(consequent?.path)) {
+        if (Javascript.isBrowserAPI(consequent?.path)) {
             return consequent;
         }
 
         const alternate = this.resolveExpression(node.alternate);
-        if (StaticAnalysisUtils.isBrowserAPI(alternate?.path)) {
+        if (Javascript.isBrowserAPI(alternate?.path)) {
             return alternate;
         }
 
@@ -413,10 +448,10 @@ class ExpressionResolver {
         }
 
         // For || and ??, return first browser API found
-        if (StaticAnalysisUtils.isBrowserAPI(leftResult?.path)) {
+        if (Javascript.isBrowserAPI(leftResult?.path)) {
             return leftResult;
         }
-        if (StaticAnalysisUtils.isBrowserAPI(rightResult?.path)) {
+        if (Javascript.isBrowserAPI(rightResult?.path)) {
             return rightResult;
         }
 
@@ -430,8 +465,8 @@ class ExpressionResolver {
         if (!this.vars.has(node.callee.name)) return null;
 
         const classInfo = this.vars.get(node.callee.name);
-        if (classInfo.has("class")) {
-            return { path: node.callee.name + "_instance", hasDynamic: false };
+        if (classInfo.has(Javascript.CLASS)) {
+            return { path: node.callee.name + Javascript.INSTANCE_SUFFIX, hasDynamic: false };
         }
 
         return null;
@@ -461,7 +496,7 @@ class ExpressionResolver {
         const finalPath = this._resolveMemberPathFromBase(baseResult.path, chain);
         if (!finalPath) return null;
 
-        if (StaticAnalysisUtils.isBrowserAPI(finalPath)) {
+        if (Javascript.isBrowserAPI(finalPath)) {
             return {
                 path: finalPath,
                 hasDynamic: hasDynamic || baseResult.hasDynamic
@@ -499,12 +534,12 @@ class ExpressionResolver {
         // Try variable lookup for computed properties
         if (propertyNode.type === "Identifier" && this.vars.has(propertyNode.name)) {
             const values = this.vars.get(propertyNode.name);
-            if (values.size === 1 && !values.has("*")) {
+            if (values.size === 1 && !values.has(Javascript.WILDCARD)) {
                 return { value: Array.from(values)[0], isDynamic: false };
             }
         }
 
-        return { value: "DYNAMIC", isDynamic: true };
+        return { value: Javascript.DYNAMIC, isDynamic: true };
     }
 
     _getBaseObject(memberExpr) {
@@ -528,10 +563,10 @@ class ExpressionResolver {
             const trackedPath = `${baseName}.${pathSegments.join(".")}`;
 
             const tracked = this.vars.get(trackedPath);
-            if (tracked?.size === 1 && !tracked.has("*")) {
+            if (tracked?.size === 1 && !tracked.has(Javascript.WILDCARD)) {
                 const resolvedBase = Array.from(tracked)[0];
 
-                if (StaticAnalysisUtils.isBrowserAPI(resolvedBase)) {
+                if (Javascript.isBrowserAPI(resolvedBase)) {
                     const remainingChain = chain.slice(depth);
                     const fullPath = remainingChain.length
                         ? `${resolvedBase}.${remainingChain.join(".")}`
@@ -547,10 +582,10 @@ class ExpressionResolver {
             const elemPath = `${baseName}[${chain[0]}]`;
             const tracked = this.vars.get(elemPath);
 
-            if (tracked?.size === 1 && !tracked.has("*")) {
+            if (tracked?.size === 1 && !tracked.has(Javascript.WILDCARD)) {
                 const resolvedBase = Array.from(tracked)[0];
 
-                if (StaticAnalysisUtils.isBrowserAPI(resolvedBase)) {
+                if (Javascript.isBrowserAPI(resolvedBase)) {
                     const remainingChain = chain.slice(1);
                     const fullPath = remainingChain.length
                         ? `${resolvedBase}.${remainingChain.join(".")}`
@@ -566,15 +601,15 @@ class ExpressionResolver {
 
     _resolveMemberPathFromBase(basePath, chain) {
         // Handle special base cases
-        if (basePath === "this") {
+        if (basePath === Javascript.THIS) {
             return this._resolveThisProperty(chain);
         }
 
-        if (basePath === "arguments") {
+        if (basePath === Javascript.ARGUMENTS) {
             return this._resolveArgumentsAccess(chain);
         }
 
-        if (basePath === "window") {
+        if (basePath === Javascript.WINDOW) {
             return this._resolveWindowProperty(chain);
         }
 
@@ -583,7 +618,7 @@ class ExpressionResolver {
             const propertyPath = `${basePath}.${chain[0]}`;
             const tracked = this.vars.get(propertyPath);
 
-            if (tracked?.size === 1 && !tracked.has("*")) {
+            if (tracked?.size === 1 && !tracked.has(Javascript.WILDCARD)) {
                 basePath = Array.from(tracked)[0];
                 chain = chain.slice(1);
             }
@@ -594,7 +629,7 @@ class ExpressionResolver {
             const elemPath = `${basePath}[${chain[0]}]`;
             const tracked = this.vars.get(elemPath);
 
-            if (tracked?.size === 1 && !tracked.has("*")) {
+            if (tracked?.size === 1 && !tracked.has(Javascript.WILDCARD)) {
                 basePath = Array.from(tracked)[0];
                 chain = chain.slice(1);
             }
@@ -609,11 +644,11 @@ class ExpressionResolver {
 
         // Search for matching instance property across all tracked classes
         for (const [key, value] of this.vars.entries()) {
-            if (key.endsWith(`_instance.${chain[0]}`)) {
-                if (value.size === 1 && !value.has("*")) {
+            if (key.endsWith(`${Javascript.INSTANCE_SUFFIX}.${chain[0]}`)) {
+                if (value.size === 1 && !value.has(Javascript.WILDCARD)) {
                     const basePath = Array.from(value)[0];
 
-                    if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
+                    if (Javascript.isBrowserAPI(basePath)) {
                         const remainingChain = chain.slice(1);
                         return remainingChain.length
                             ? `${basePath}.${remainingChain.join(".")}`
@@ -629,10 +664,10 @@ class ExpressionResolver {
     _resolveArgumentsAccess(chain) {
         if (chain.length === 0) return null;
 
-        const argPath = `arguments[${chain[0]}]`;
+        const argPath = `${Javascript.ARGUMENTS}[${chain[0]}]`;
         const tracked = this.vars.get(argPath);
 
-        if (tracked?.size === 1 && !tracked.has("*")) {
+        if (tracked?.size === 1 && !tracked.has(Javascript.WILDCARD)) {
             const basePath = Array.from(tracked)[0];
             const remainingChain = chain.slice(1);
             return remainingChain.length
@@ -647,7 +682,7 @@ class ExpressionResolver {
         if (chain.length === 0) return null;
 
         // window.chrome -> chrome
-        if (StaticAnalysisUtils.isBrowserAPI(chain[0])) {
+        if (Javascript.isBrowserAPI(chain[0])) {
             return chain.join(".");
         }
 
@@ -675,7 +710,7 @@ class VariableTracker {
                         key = evaluated;
                     } else if (prop.key.type === "Identifier" && this.vars.has(prop.key.name)) {
                         const values = this.vars.get(prop.key.name);
-                        if (values.size === 1 && !values.has("*")) {
+                        if (values.size === 1 && !values.has(Javascript.WILDCARD)) {
                             key = Array.from(values)[0];
                         }
                     }
@@ -736,7 +771,7 @@ class VariableTracker {
                                 this.vars.set(element.name, new Set([literalValue]));
                                 this.log(`Array destructure: ${element.name} = ${literalValue}`);
                             } else {
-                                this.vars.set(element.name, new Set(["*"]));
+                                this.vars.set(element.name, new Set([Javascript.WILDCARD]));
                             }
                         }
                     }
@@ -747,7 +782,7 @@ class VariableTracker {
             // Special case for destructuring from named array
             if (id.type === "ArrayPattern" && init.type === "Identifier") {
                 const arrayName = init.name;
-                if (this.vars.has(arrayName) && this.vars.get(arrayName).has("Array")) {
+                if (this.vars.has(arrayName) && this.vars.get(arrayName).has(Javascript.ARRAY)) {
                     // Destructure from tracked array elements
                     for (let i = 0; i < id.elements.length; i++) {
                         const element = id.elements[i];
@@ -755,8 +790,8 @@ class VariableTracker {
                         // Handle rest elements: ...rest
                         if (element?.type === "RestElement" && element.argument.type === "Identifier") {
                             // Rest gets remaining elements - mark as Array
-                            this.vars.set(element.argument.name, new Set(["Array"]));
-                            this.log(`Rest element: ${element.argument.name} = Array`);
+                            this.vars.set(element.argument.name, new Set([Javascript.ARRAY]));
+                            this.log(`Rest element: ${element.argument.name} = ${Javascript.ARRAY}`);
                             continue;
                         }
 
@@ -767,7 +802,7 @@ class VariableTracker {
                                 this.vars.set(element.name, elemPath);
                                 this.log(`Array destructure from named: ${element.name} = ${Array.from(elemPath)[0]}`);
                             } else {
-                                this.vars.set(element.name, new Set(["*"]));
+                                this.vars.set(element.name, new Set([Javascript.WILDCARD]));
                             }
                         }
                     }
@@ -776,7 +811,7 @@ class VariableTracker {
             }
 
             const result = this.resolver.resolveExpression(init);
-            const base = result?.path || "*";
+            const base = result?.path || Javascript.WILDCARD;
             this.handleNestedPattern(id, base);
             return;
         }
@@ -784,8 +819,8 @@ class VariableTracker {
         if (id.type === "Identifier") {
             // Track assignments to eval or Function constructor
             if (init.type === "Identifier" &&
-                (init.name === "eval" || init.name === "Function")) {
-                this.vars.set(id.name, new Set(["DYNAMIC_CODE"]));
+                Javascript.DYNAMIC_CODE_FUNCS.includes(init.name)) {
+                this.vars.set(id.name, new Set([Javascript.DYNAMIC_CODE]));
                 this.log(`Dynamic code: ${id.name} = ${init.name}`);
                 return;
             }
@@ -793,10 +828,10 @@ class VariableTracker {
             // Also track window.eval, globalThis.eval, etc.
             if (init.type === "MemberExpression" &&
                 init.object.type === "Identifier" &&
-                (init.object.name === "window" || init.object.name === "globalThis" || init.object.name === "self") &&
+                Javascript.WINDOW_ALIASES.includes(init.object.name) &&
                 init.property.type === "Identifier" &&
-                (init.property.name === "eval" || init.property.name === "Function")) {
-                this.vars.set(id.name, new Set(["DYNAMIC_CODE"]));
+                Javascript.DYNAMIC_CODE_FUNCS.includes(init.property.name)) {
+                this.vars.set(id.name, new Set([Javascript.DYNAMIC_CODE]));
                 this.log(`Dynamic code: ${id.name} = ${init.object.name}.${init.property.name}`);
                 return;
             }
@@ -811,7 +846,7 @@ class VariableTracker {
                         }
                     }
                 }
-                this.vars.set(id.name, new Set(["Array"]));
+                this.vars.set(id.name, new Set([Javascript.ARRAY]));
                 return;
             }
 
@@ -824,18 +859,17 @@ class VariableTracker {
             if (init.type === "CallExpression" &&
                 init.callee.type === "MemberExpression" &&
                 init.callee.object.type === "Identifier" &&
-                init.callee.object.name === "Symbol" &&
+                init.callee.object.name === Javascript.SYMBOL &&
                 init.callee.property.name === "for" &&
                 init.arguments.length === 1 &&
                 init.arguments[0].type === "StringLiteral") {
-                this.vars.set(id.name, new Set([`Symbol.for(${init.arguments[0].value})`]));
-                this.log(`Symbol: ${id.name} = Symbol.for(${init.arguments[0].value})`);
+                this.vars.set(id.name, new Set([`${Javascript.SYMBOL}.for(${init.arguments[0].value})`]));
+                this.log(`Symbol: ${id.name} = ${Javascript.SYMBOL}.for(${init.arguments[0].value})`);
                 return;
             }
 
-
             if (init.type === "NewExpression" && init.callee.type === "Identifier") {
-                if (init.callee.name === "Map" || init.callee.name === "WeakMap") {
+                if (init.callee.name === Javascript.MAP || init.callee.name === Javascript.WEAK_MAP) {
                     this.vars.set(id.name, new Set([init.callee.name]));
                     return;
                 }
@@ -851,7 +885,7 @@ class VariableTracker {
             if (init.type === "StringLiteral") {
                 this.vars.set(id.name, new Set([init.value]));
             } else {
-                this.vars.set(id.name, new Set(["*"]));
+                this.vars.set(id.name, new Set([Javascript.WILDCARD]));
             }
         }
     }
@@ -863,7 +897,7 @@ class VariableTracker {
         for (const prop of init.properties) {
             if (prop.type === "SpreadElement") {
                 const result = this.resolver.resolveExpression(prop.argument);
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                if (Javascript.isBrowserAPI(result?.path)) {
                     this.vars.set(idName, new Set([result.path]));
                     foundSpread = true;
                     break;
@@ -876,17 +910,17 @@ class VariableTracker {
                 const propName = prop.key.type === "Identifier" ? prop.key.name :
                     (prop.key.type === "StringLiteral" ? prop.key.value : null);
 
-                if (propName === "toString") {
+                if (propName === Javascript.TO_STRING) {
                     if (prop.value?.type === "ArrowFunctionExpression" &&
                         prop.value.body.type === "StringLiteral") {
                         toStringValue = prop.value.body.value;
-                        this.log(`toString method returns: ${toStringValue}`);
+                        this.log(`${Javascript.TO_STRING} method returns: ${toStringValue}`);
                     } else if (prop.type === "ObjectMethod" &&
                         prop.body.body.length === 1 &&
                         prop.body.body[0].type === "ReturnStatement" &&
                         prop.body.body[0].argument?.type === "StringLiteral") {
                         toStringValue = prop.body.body[0].argument.value;
-                        this.log(`toString method returns: ${toStringValue}`);
+                        this.log(`${Javascript.TO_STRING} method returns: ${toStringValue}`);
                     }
                 }
 
@@ -894,16 +928,16 @@ class VariableTracker {
                     if (prop.key.type === "CallExpression" &&
                         prop.key.callee.type === "MemberExpression" &&
                         prop.key.callee.object.type === "Identifier" &&
-                        prop.key.callee.object.name === "Symbol" &&
+                        prop.key.callee.object.name === Javascript.SYMBOL &&
                         prop.key.callee.property.name === "for" &&
                         prop.key.arguments.length === 1 &&
                         prop.key.arguments[0].type === "StringLiteral") {
-                        key = `Symbol.for(${prop.key.arguments[0].value})`;
+                        key = `${Javascript.SYMBOL}.for(${prop.key.arguments[0].value})`;
                     } else {
                         key = this.evaluator.tryEvaluate(prop.key);
                         if (key === null && prop.key.type === "Identifier" && this.vars.has(prop.key.name)) {
                             const values = this.vars.get(prop.key.name);
-                            if (values.size === 1 && !values.has("*")) {
+                            if (values.size === 1 && !values.has(Javascript.WILDCARD)) {
                                 key = Array.from(values)[0];
                             }
                         }
@@ -912,12 +946,12 @@ class VariableTracker {
                     key = propName;
                 }
 
-                if (key && key !== "toString") {
+                if (key && key !== Javascript.TO_STRING) {
                     if (prop.type === "ObjectMethod" && prop.kind === "get") {
                         if (prop.body.body.length === 1 &&
                             prop.body.body[0].type === "ReturnStatement") {
                             const retVal = this.resolver.resolveExpression(prop.body.body[0].argument);
-                            if (StaticAnalysisUtils.isBrowserAPI(retVal?.path)) {
+                            if (Javascript.isBrowserAPI(retVal?.path)) {
                                 this.vars.set(`${idName}.${key}`, new Set([retVal.path]));
                                 this.log(`Getter: ${idName}.${key} = ${retVal.path}`);
                             }
@@ -943,12 +977,12 @@ class VariableTracker {
             if (toStringValue !== null) {
                 this.vars.set(idName, new Set([toStringValue]));
             } else {
-                this.vars.set(idName, new Set(["Object"]));
+                this.vars.set(idName, new Set([Javascript.OBJECT]));
             }
         }
     }
 
-// Helper to recursively track nested object properties
+    // Helper to recursively track nested object properties
     _handleNestedObjectProperties(prefix, objectExpr) {
         for (const prop of objectExpr.properties) {
             if (prop.type === "ObjectProperty") {
@@ -978,7 +1012,7 @@ class VariableTracker {
         // Handle destructuring assignments
         if (left.type === "ObjectPattern" || left.type === "ArrayPattern") {
             const result = this.resolver.resolveExpression(right);
-            const base = result?.path || "*";
+            const base = result?.path || Javascript.WILDCARD;
             this.handleNestedPattern(left, base);
             return;
         }
@@ -993,29 +1027,29 @@ class VariableTracker {
                 this._updateVariable(left.name, right.value);
             } else {
                 // Unknown value (object literal, complex expression, etc.)
-                this._updateVariable(left.name, "*");
+                this._updateVariable(left.name, Javascript.WILDCARD);
             }
         }
 
         // Track Map assignments for chrome API storage
         if (left.type === "MemberExpression" &&
             left.object.type === "Identifier" &&
-            this.vars.get(left.object.name)?.has("Map")) {
+            this.vars.get(left.object.name)?.has(Javascript.MAP)) {
             const result = this.resolver.resolveExpression(right);
-            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                this.vars.set(left.object.name, new Set(["Map"]));
+            if (Javascript.isBrowserAPI(result?.path)) {
+                this.vars.set(left.object.name, new Set([Javascript.MAP]));
             }
         }
     }
 
-// Helper: Update variable with browser API taint preservation
+    // Helper: Update variable with browser API taint preservation
     _updateVariable(varName, newValue) {
         if (this.vars.has(varName)) {
             const existing = this.vars.get(varName);
             const hasBrowserTaint = Array.from(existing).some(v =>
-                StaticAnalysisUtils.isBrowserAPI(v)
+                Javascript.isBrowserAPI(v)
             );
-            const newIsBrowser = StaticAnalysisUtils.isBrowserAPI(newValue);
+            const newIsBrowser = Javascript.isBrowserAPI(newValue);
 
             if (hasBrowserTaint && newIsBrowser) {
                 // Both are browser APIs - merge for branch analysis
@@ -1037,15 +1071,15 @@ class VariableTracker {
 
     _handleClass(p) {
         if (p.node.id) {
-            this.vars.set(p.node.id.name, new Set(["class"]));
+            this.vars.set(p.node.id.name, new Set([Javascript.CLASS]));
 
             for (const item of p.node.body.body) {
                 if (item.type === "ClassProperty" && item.value) {
                     const result = this.resolver.resolveExpression(item.value);
-                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                    if (Javascript.isBrowserAPI(result?.path)) {
                         const key = item.key.name || item.key.value;
                         if (key) {
-                            this.vars.set(`${p.node.id.name}_instance.${key}`, new Set([result.path]));
+                            this.vars.set(`${p.node.id.name}${Javascript.INSTANCE_SUFFIX}.${key}`, new Set([result.path]));
                         }
                     }
                 }
@@ -1061,9 +1095,9 @@ class VariableTracker {
                             const key = stmt.expression.left.property.name || stmt.expression.left.property.value;
                             if (key) {
                                 const result = this.resolver.resolveExpression(stmt.expression.right);
-                                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                                    this.vars.set(`${p.node.id.name}_instance.${key}`, new Set([result.path]));
-                                    this.log(`Constructor: ${p.node.id.name}_instance.${key} = ${result.path}`);
+                                if (Javascript.isBrowserAPI(result?.path)) {
+                                    this.vars.set(`${p.node.id.name}${Javascript.INSTANCE_SUFFIX}.${key}`, new Set([result.path]));
+                                    this.log(`Constructor: ${p.node.id.name}${Javascript.INSTANCE_SUFFIX}.${key} = ${result.path}`);
                                 }
                             }
                         }
@@ -1076,7 +1110,7 @@ class VariableTracker {
                     item.body.body[0].type === "ReturnStatement") {
 
                     const result = this.resolver.resolveExpression(item.body.body[0].argument);
-                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                    if (Javascript.isBrowserAPI(result?.path)) {
                         const methodName = item.key.name || item.key.value;
                         if (methodName) {
                             this.vars.set(`${p.node.id.name}.${methodName}()`, new Set([result.path]));
@@ -1108,16 +1142,15 @@ class VariableTracker {
         if (p.parentPath.isCallExpression()) {
             const callExpr = p.parentPath.node;
 
-            // Check if this is a Promise .then() callback
+            // Check if this is a Promise callback
             if (callExpr.callee.type === "MemberExpression" &&
                 callExpr.callee.property.type === "Identifier" &&
-                (callExpr.callee.property.name === "then" ||
-                    callExpr.callee.property.name === "catch")) {
+                Javascript.PROMISE_METHODS.includes(callExpr.callee.property.name)) {
 
                 // Resolve what the promise contains
                 const promiseResult = this.resolver.resolveExpression(callExpr.callee.object);
                 if (promiseResult?.path && params.length > 0 && params[0].type === "Identifier") {
-                    // First parameter of .then() receives the resolved value
+                    // First parameter receives the resolved value
                     this.vars.set(params[0].name, new Set([promiseResult.path]));
                     this.log(`Promise callback: ${params[0].name} = ${promiseResult.path}`);
                 }
@@ -1135,7 +1168,7 @@ class VariableTracker {
                     const result = this.resolver.resolveExpression(arg);
                     if (result?.path) {
                         this.vars.set(paramName.name, new Set([result.path]));
-                        this.vars.set(`arguments[${i}]`, new Set([result.path]));
+                        this.vars.set(`${Javascript.ARGUMENTS}[${i}]`, new Set([result.path]));
                     }
                 }
             }
@@ -1146,8 +1179,8 @@ class VariableTracker {
                 if (arg) {
                     const result = this.resolver.resolveExpression(arg);
                     if (result?.path) {
-                        this.vars.set(`arguments[${i}]`, new Set([result.path]));
-                        this.log(`arguments[${i}] = ${result.path}`);
+                        this.vars.set(`${Javascript.ARGUMENTS}[${i}]`, new Set([result.path]));
+                        this.log(`${Javascript.ARGUMENTS}[${i}] = ${result.path}`);
                     }
                 }
             }
@@ -1177,7 +1210,7 @@ class APICollector {
 
         // postprocess
         const result = Array.from(calls).map(name =>
-            name.includes("DYNAMIC") ? name.replace(/\.DYNAMIC.*/, ".DYNAMIC") : name
+            name.includes(Javascript.DYNAMIC) ? name.replace(/\.DYNAMIC.*/, `.${Javascript.DYNAMIC}`) : name
         );
 
         return Array.from(new Set(result)).sort();
@@ -1220,13 +1253,13 @@ class CallHandler {
 
         if (calleeResult?.path) {
             // Check for dynamic code marker
-            if (calleeResult.path === "DYNAMIC_CODE") {
+            if (calleeResult.path === Javascript.DYNAMIC_CODE) {
                 this._checkDynamicCallArgs(p);
                 return;
             }
 
             // Direct chrome API call
-            if (StaticAnalysisUtils.isBrowserAPI(calleeResult.path)) {
+            if (Javascript.isBrowserAPI(calleeResult.path)) {
                 this.calls.add(calleeResult.path);
                 this.log(`Call: ${calleeResult.path}`);
                 return;
@@ -1244,15 +1277,15 @@ class CallHandler {
     }
 
     handleNew(p) {
-        if (p.node.callee.type === "Identifier" && p.node.callee.name === "Proxy") {
+        if (p.node.callee.type === "Identifier" && p.node.callee.name === Javascript.PROXY) {
             const [target] = p.node.arguments;
             const result = this.resolver.resolveExpression(target);
 
-            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+            if (Javascript.isBrowserAPI(result?.path)) {
                 const parent = p.parentPath;
                 if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
                     this.vars.set(parent.node.id.name, new Set([result.path]));
-                    this.log(`Proxy: ${parent.node.id.name} = ${result.path}`);
+                    this.log(`${Javascript.PROXY}: ${parent.node.id.name} = ${result.path}`);
                 }
             }
         }
@@ -1269,15 +1302,15 @@ class CallHandler {
 
     _handleReflect(p, callee) {
         if (callee.type !== "MemberExpression") return false;
-        if (callee.object.type !== "Identifier" || callee.object.name !== "Reflect") return false;
+        if (callee.object.type !== "Identifier" || callee.object.name !== Javascript.REFLECT) return false;
 
         const method = callee.property.name;
 
-        if (method === "get") {
+        if (method === Javascript.REFLECT_GET) {
             const [target, prop] = p.node.arguments;
             const targetResult = this.resolver.resolveExpression(target);
 
-            if (StaticAnalysisUtils.isBrowserAPI(targetResult?.path)) {
+            if (Javascript.isBrowserAPI(targetResult?.path)) {
                 const propValue = this.evaluator.tryEvaluate(prop);
 
                 if (propValue !== null) {
@@ -1287,28 +1320,28 @@ class CallHandler {
                     const parent = p.parentPath;
                     if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
                         this.vars.set(parent.node.id.name, new Set([fullPath]));
-                        this.log(`Reflect.get: ${parent.node.id.name} = ${fullPath}`);
+                        this.log(`${Javascript.REFLECT}.${Javascript.REFLECT_GET}: ${parent.node.id.name} = ${fullPath}`);
                     }
 
                     // Store on node for chained member access
                     p.node._resolvedPath = fullPath;
                 } else {
-                    this.calls.add(`${targetResult.path}.DYNAMIC`);
+                    this.calls.add(`${targetResult.path}.${Javascript.DYNAMIC}`);
                 }
             } else {
-                this.calls.add("chrome.DYNAMIC");
+                this.calls.add(`chrome.${Javascript.DYNAMIC}`);
             }
             return true;
         }
 
-        if (method === "apply") {
+        if (method === Javascript.REFLECT_APPLY) {
             const [target] = p.node.arguments;
             const result = this.resolver.resolveExpression(target);
 
-            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+            if (Javascript.isBrowserAPI(result?.path)) {
                 this.calls.add(result.path);
             } else {
-                this.calls.add("chrome.DYNAMIC");
+                this.calls.add(`chrome.${Javascript.DYNAMIC}`);
             }
             return true;
         }
@@ -1318,19 +1351,19 @@ class CallHandler {
 
     _handleObjectMethods(p, callee) {
         if (callee.type !== "MemberExpression") return false;
-        if (callee.object.type !== "Identifier" || callee.object.name !== "Object") return false;
+        if (callee.object.type !== "Identifier" || callee.object.name !== Javascript.OBJECT) return false;
 
         const method = callee.property.name;
 
-        if (method === "assign") {
+        if (method === Javascript.OBJECT_ASSIGN) {
             return this._handleObjectAssign(p);
         }
 
-        if (method === "keys" || method === "getOwnPropertyDescriptor") {
+        if (method === Javascript.OBJECT_KEYS || method === Javascript.OBJECT_GET_OWN_PROPERTY_DESCRIPTOR) {
             return this._handleObjectIntrospection(p, method);
         }
 
-        if (method === "entries" || method === "values") {
+        if (method === Javascript.OBJECT_ENTRIES || method === Javascript.OBJECT_VALUES) {
             return this._handleObjectIteration(p, method);
         }
 
@@ -1343,7 +1376,7 @@ class CallHandler {
 
         const method = callee.property.name;
 
-        if (method === "map" || method === "filter") {
+        if (method === Javascript.ARRAY_MAP || method === Javascript.ARRAY_FILTER) {
             const [callback] = p.node.arguments;
             let hasChromeElements = false;
             let chromeElementPath = null;
@@ -1353,7 +1386,7 @@ class CallHandler {
                 for (const elem of callee.object.elements) {
                     if (elem) {
                         const elemResult = this.resolver.resolveExpression(elem);
-                        if (StaticAnalysisUtils.isBrowserAPI(elemResult?.path)) {
+                        if (Javascript.isBrowserAPI(elemResult?.path)) {
                             hasChromeElements = true;
                             chromeElementPath = elemResult.path;
                             break;
@@ -1364,7 +1397,7 @@ class CallHandler {
             // Check named arrays: const arr = [chrome.runtime]; arr.map(...)
             else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
                 const arrayType = this.vars.get(callee.object.name);
-                if (arrayType.has("Array")) {
+                if (arrayType.has(Javascript.ARRAY)) {
                     const arrayName = callee.object.name;
 
                     // Check array[0], array[1], etc.
@@ -1372,9 +1405,9 @@ class CallHandler {
                         const elemKey = `${arrayName}[${i}]`;
                         if (this.vars.has(elemKey)) {
                             const elemPath = this.vars.get(elemKey);
-                            if (elemPath.size === 1 && !elemPath.has("*")) {
+                            if (elemPath.size === 1 && !elemPath.has(Javascript.WILDCARD)) {
                                 const path = Array.from(elemPath)[0];
-                                if (StaticAnalysisUtils.isBrowserAPI(path)) {
+                                if (Javascript.isBrowserAPI(path)) {
                                     hasChromeElements = true;
                                     chromeElementPath = path;
                                     break;
@@ -1397,10 +1430,10 @@ class CallHandler {
                         callback.body.type === "Identifier" &&
                         callback.body.name === callback.params[0].name) {
                         this.vars.set(`${resultArrayName}[0]`, new Set([chromeElementPath]));
-                        this.vars.set(resultArrayName, new Set(["Array"]));
-                        this.log(`Array.${method} identity: ${resultArrayName}[0] = ${chromeElementPath}`);
+                        this.vars.set(resultArrayName, new Set([Javascript.ARRAY]));
+                        this.log(`${Javascript.ARRAY}.${method} identity: ${resultArrayName}[0] = ${chromeElementPath}`);
                     } else {
-                        this.vars.set(resultArrayName, new Set(["Array"]));
+                        this.vars.set(resultArrayName, new Set([Javascript.ARRAY]));
                     }
                 }
             }
@@ -1417,10 +1450,10 @@ class CallHandler {
         if (target && source) {
             const result = this.resolver.resolveExpression(source);
 
-            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+            if (Javascript.isBrowserAPI(result?.path)) {
                 if (target.type === "Identifier") {
                     this.vars.set(target.name, new Set([result.path]));
-                    this.log(`Object.assign: ${target.name} = ${result.path}`);
+                    this.log(`${Javascript.OBJECT}.${Javascript.OBJECT_ASSIGN}: ${target.name} = ${result.path}`);
                 }
             }
         }
@@ -1432,9 +1465,9 @@ class CallHandler {
         const [target] = p.node.arguments;
         const result = this.resolver.resolveExpression(target);
 
-        if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-            this.calls.add(`${result.path}.DYNAMIC`);
-            this.log(`Object.${method} on ${result.path}`);
+        if (Javascript.isBrowserAPI(result?.path)) {
+            this.calls.add(`${result.path}.${Javascript.DYNAMIC}`);
+            this.log(`${Javascript.OBJECT}.${method} on ${result.path}`);
         }
 
         return true;
@@ -1447,7 +1480,7 @@ class CallHandler {
         let hasChromeProperties = false;
 
         // Check resolved target
-        if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+        if (Javascript.isBrowserAPI(result?.path)) {
             hasChromeProperties = true;
         }
         // Check object literal properties
@@ -1455,7 +1488,7 @@ class CallHandler {
             for (const prop of target.properties) {
                 if (prop.type === "ObjectProperty" && prop.value) {
                     const propResult = this.resolver.resolveExpression(prop.value);
-                    if (StaticAnalysisUtils.isBrowserAPI(propResult?.path)) {
+                    if (Javascript.isBrowserAPI(propResult?.path)) {
                         hasChromeProperties = true;
                         break;
                     }
@@ -1464,13 +1497,13 @@ class CallHandler {
         }
 
         if (hasChromeProperties) {
-            this.calls.add("chrome.DYNAMIC");
-            this.log(`Object.${method} on chrome-containing object`);
+            this.calls.add(`chrome.${Javascript.DYNAMIC}`);
+            this.log(`${Javascript.OBJECT}.${method} on chrome-containing object`);
 
             // Track array element
             const parent = p.parentPath;
             if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
-                this.vars.set(`${parent.node.id.name}[0]`, new Set(["chrome.DYNAMIC"]));
+                this.vars.set(`${parent.node.id.name}[0]`, new Set([`chrome.${Javascript.DYNAMIC}`]));
             }
         }
 
@@ -1479,19 +1512,19 @@ class CallHandler {
 
     _handleMapSet(p, callee) {
         if (callee.type !== "MemberExpression") return false;
-        if (callee.property.name !== "set") return false;
+        if (callee.property.name !== Javascript.MAP_SET) return false;
         if (callee.object.type !== "Identifier") return false;
 
         const mapName = callee.object.name;
         const mapType = this.vars.get(mapName);
 
-        if (mapType?.has("Map") || mapType?.has("WeakMap")) {
+        if (mapType?.has(Javascript.MAP) || mapType?.has(Javascript.WEAK_MAP)) {
             const [key, value] = p.node.arguments;
             const result = this.resolver.resolveExpression(value);
 
-            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                this.vars.set(`${mapName}.__contains`, new Set([result.path]));
-                this.log(`Map ${mapName} contains: ${result.path}`);
+            if (Javascript.isBrowserAPI(result?.path)) {
+                this.vars.set(`${mapName}.${Javascript.CONTAINS_KEY}`, new Set([result.path]));
+                this.log(`${Javascript.MAP} ${mapName} contains: ${result.path}`);
             }
 
             return true;
@@ -1505,9 +1538,9 @@ class CallHandler {
     _unwrapCallApplyBind(callee) {
         if (callee.type === "MemberExpression" &&
             callee.property.type === "Identifier" &&
-            (callee.property.name === "call" ||
-                callee.property.name === "apply" ||
-                callee.property.name === "bind")) {
+            (callee.property.name === Javascript.CALL ||
+                callee.property.name === Javascript.APPLY ||
+                callee.property.name === Javascript.BIND)) {
             return callee.object;
         }
         return callee;
@@ -1518,12 +1551,12 @@ class CallHandler {
         if (callee.property.type !== "Identifier") return false;
 
         const method = callee.property.name;
-        return JavascriptConstants.PROMISE_METHODS.includes(method);
+        return Javascript.PROMISE_METHODS.includes(method);
     }
 
     _handlePromiseFactory(p, callee) {
         if (callee.type !== "MemberExpression") return false;
-        if (callee.object.type !== "Identifier" || callee.object.name !== "Promise") return false;
+        if (callee.object.type !== "Identifier" || callee.object.name !== Javascript.PROMISE) return false;
 
         const method = callee.property.name;
 
@@ -1533,9 +1566,9 @@ class CallHandler {
             if (arg) {
                 const result = this.resolver.resolveExpression(arg);
 
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                    this.calls.add(`${result.path}.DYNAMIC`);
-                    this.log(`Promise.${method}(${result.path})`);
+                if (Javascript.isBrowserAPI(result?.path)) {
+                    this.calls.add(`${result.path}.${Javascript.DYNAMIC}`);
+                    this.log(`${Javascript.PROMISE}.${method}(${result.path})`);
                     return true;
                 }
             }
@@ -1549,14 +1582,14 @@ class CallHandler {
     _handleDynamicCode(p, callee) {
         // Direct eval() or Function() call
         if (callee.type === "Identifier") {
-            if (JavascriptConstants.DYNAMIC_CODE_FUNCS.includes(callee.name)) {
+            if (Javascript.DYNAMIC_CODE_FUNCS.includes(callee.name)) {
                 this._checkDynamicCallArgs(p);
                 return true;
             }
 
             // Check if it's an alias to eval/Function
             const values = this.vars.get(callee.name);
-            if (values?.has("DYNAMIC_CODE")) {
+            if (values?.has(Javascript.DYNAMIC_CODE)) {
                 this._checkDynamicCallArgs(p);
                 return true;
             }
@@ -1567,7 +1600,7 @@ class CallHandler {
             const lastExpr = callee.expressions[callee.expressions.length - 1];
 
             if (lastExpr.type === "Identifier" &&
-                JavascriptConstants.DYNAMIC_CODE_FUNCS.includes(lastExpr.name)) {
+                Javascript.DYNAMIC_CODE_FUNCS.includes(lastExpr.name)) {
                 this._checkDynamicCallArgs(p);
                 return true;
             }
@@ -1580,7 +1613,7 @@ class CallHandler {
         if (callee.type === "NewExpression" &&
             callee.callee.type === "Identifier" &&
             callee.callee.name === "Function") {
-            this.calls.add("DYNAMIC");
+            this.calls.add(Javascript.DYNAMIC);
             return true;
         }
         return false;
@@ -1592,7 +1625,7 @@ class CallHandler {
         for (const arg of callPath.node.arguments) {
             const result = this.resolver.resolveExpression(arg);
 
-            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+            if (Javascript.isBrowserAPI(result?.path)) {
                 if (!mostSpecificPath || result.path.length > mostSpecificPath.length) {
                     mostSpecificPath = result.path;
                 }
@@ -1600,25 +1633,25 @@ class CallHandler {
         }
 
         if (mostSpecificPath) {
-            this.calls.add(`${mostSpecificPath}.DYNAMIC`);
+            this.calls.add(`${mostSpecificPath}.${Javascript.DYNAMIC}`);
             this.log(`Dynamic code with chrome: ${mostSpecificPath}`);
         }
 
-        this.calls.add("DYNAMIC");
+        this.calls.add(Javascript.DYNAMIC);
     }
 
     // ===== INSTANCE METHOD CALLS =====
 
     _handleInstanceMethodCall(path) {
-        if (!path.includes("_instance")) return false;
+        if (!path.includes(Javascript.INSTANCE_SUFFIX)) return false;
 
         // Look for matching instance properties
         for (const [key, value] of this.vars.entries()) {
             if (key.startsWith(path) && value.size === 1) {
                 const chromePath = Array.from(value)[0];
 
-                if (StaticAnalysisUtils.isBrowserAPI(chromePath)) {
-                    this.calls.add(`${chromePath}.DYNAMIC`);
+                if (Javascript.isBrowserAPI(chromePath)) {
+                    this.calls.add(`${chromePath}.${Javascript.DYNAMIC}`);
                     this.log(`Instance method: ${path} -> ${chromePath}`);
                     return true;
                 }
@@ -1626,7 +1659,7 @@ class CallHandler {
         }
 
         // Fallback
-        this.calls.add("chrome.DYNAMIC");
+        this.calls.add(`chrome.${Javascript.DYNAMIC}`);
         return true;
     }
 
@@ -1648,7 +1681,7 @@ class CallHandler {
 
                     // Add all possible chrome API paths (even if "*" is also in the set)
                     for (const val of possibleValues) {
-                        if (StaticAnalysisUtils.isBrowserAPI(val)) {
+                        if (Javascript.isBrowserAPI(val)) {
                             this.calls.add(`${val}.${methodName}`);
                             this.log(`Multi-value call: ${val}.${methodName}`);
                             foundChrome = true;
@@ -1668,10 +1701,10 @@ class CallHandler {
                 let foundAny = false;
 
                 for (const val of possibleValues) {
-                    if (val === "DYNAMIC_CODE") {
-                        this.calls.add("DYNAMIC");
+                    if (val === Javascript.DYNAMIC_CODE) {
+                        this.calls.add(Javascript.DYNAMIC);
                         foundAny = true;
-                    } else if (StaticAnalysisUtils.isBrowserAPI(val)) {
+                    } else if (Javascript.isBrowserAPI(val)) {
                         this.calls.add(val);
                         this.log(`Identifier call: ${val}`);
                         foundAny = true;
@@ -1692,14 +1725,14 @@ class CallHandler {
             const funcName = callee.name;
 
             // Skip eval/Function - they're handled specially in _handleDynamicCode()
-            if (funcName === "eval" || funcName === "Function") return;
+            if (Javascript.DYNAMIC_CODE_FUNCS.includes(funcName)) return;
 
             // Check if any argument is a chrome reference
             for (const arg of p.node.arguments) {
                 const result = this.resolver.resolveExpression(arg);
 
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                    this.calls.add(`${result.path}.DYNAMIC`);
+                if (Javascript.isBrowserAPI(result?.path)) {
+                    this.calls.add(`${result.path}.${Javascript.DYNAMIC}`);
                     this.log(`Chrome passed to function: ${funcName}(${result.path})`);
                 }
             }
