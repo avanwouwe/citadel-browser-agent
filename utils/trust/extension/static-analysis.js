@@ -1194,182 +1194,396 @@ class CallHandler {
     }
 
     handleCall(p) {
-        let callee = p.node.callee;
-        this.log(`handleCall: callee type = ${callee.type}`);
+        const callee = p.node.callee;
+        this.log(`handleCall: ${callee.type}`);
 
-        // Reflect API
-        if (this._handleReflect(p, callee)) return;
+        // Handle special patterns first (these return early if matched)
+        if (this._handleSpecialPatterns(p, callee)) return;
 
-        // Object methods
-        if (this._handleObjectMethods(p, callee)) return;
+        // Unwrap .call()/.apply()/.bind() to get actual function
+        const unwrapped = this._unwrapCallApplyBind(callee);
 
-        // Map.set(key, chrome.runtime)
-        if (this._handleMapSet(p, callee)) return;
+        // Skip Promise chain methods (they're not API calls themselves)
+        if (this._isPromiseChainMethod(unwrapped)) return;
 
-        // Unwrap .call() and .apply() to get the actual function being invoked
-        if (callee.type === "MemberExpression" &&
-            callee.property.type === "Identifier" &&
-            (callee.property.name === "call" || callee.property.name === "apply" || callee.property.name === "bind")) {
-            callee = callee.object;
-        }
+        // Handle Promise.resolve/reject with chrome argument
+        if (this._handlePromiseFactory(p, unwrapped)) return;
 
-        // Skip Promise methods - they're not API calls
-        if (callee.type === "MemberExpression" &&
-            callee.property.type === "Identifier") {
-            const methodName = callee.property.name;
-            if (methodName === "then" ||
-                methodName === "catch" ||
-                methodName === "finally" ||
-                methodName === "all" ||
-                methodName === "race" ||
-                methodName === "allSettled" ||
-                methodName === "any") {
-                return;
-            }
+        // Handle dynamic code execution (eval, Function constructor, etc.)
+        if (this._handleDynamicCode(p, unwrapped)) return;
 
-            // Detect Promise.resolve(chrome.runtime) or Promise.reject(chrome.*)
-            if ((methodName === "resolve" || methodName === "reject") &&
-                callee.object.type === "Identifier" &&
-                callee.object.name === "Promise") {
-                const [arg] = p.node.arguments;
-                if (arg) {
-                    const result = this.resolver.resolveExpression(arg);
-                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                        this.calls.add(`${result.path}.DYNAMIC`);
-                        this.log(`Promise.${methodName}(${result.path})`);
-                        return;
-                    }
-                }
-            }
+        // Handle immediate invocation of new Function()
+        if (this._handleImmediateFunctionConstruction(callee)) return;
 
-        }
+        // Resolve the callee to see what's being called
+        const calleeResult = this.resolver.resolveExpression(unwrapped);
 
-        // Handle SequenceExpression like (1, eval) - check the last expression
-        let actualCallee = callee;
-        if (callee.type === "SequenceExpression") {
-            actualCallee = callee.expressions[callee.expressions.length - 1];
-        }
-
-        // eval() and Function() - always suspicious
-        if (actualCallee.type === "Identifier") {
-            if (actualCallee.name === "eval" || actualCallee.name === "Function") {
+        if (calleeResult?.path) {
+            // Check for dynamic code marker
+            if (calleeResult.path === "DYNAMIC_CODE") {
                 this._checkDynamicCallArgs(p);
                 return;
             }
 
-            // Check if identifier is an alias to eval/Function
-            if (this.vars.has(actualCallee.name)) {
-                const values = this.vars.get(actualCallee.name);
-                if (values.has("DYNAMIC_CODE")) {
-                    this._checkDynamicCallArgs(p);
-                    return;
-                }
-            }
-        }
-
-        // new Function()(...) immediate call - always suspicious
-        if (callee.type === "NewExpression" &&
-            callee.callee.type === "Identifier" &&
-            callee.callee.name === "Function") {
-            this._checkDynamicCallArgs(p);  // Check if chrome is passed
-            return;
-        }
-
-        // Regular chrome API calls (including OptionalMemberExpression)
-        const calleeResult = this.resolver.resolveExpression(callee);
-        if (calleeResult?.path) {
-            // Check if the path is the special DYNAMIC_CODE marker
-            if (calleeResult.path === "DYNAMIC_CODE") {
-                this.calls.add("DYNAMIC");
-                return;
-            }
-
+            // Direct chrome API call
             if (StaticAnalysisUtils.isBrowserAPI(calleeResult.path)) {
                 this.calls.add(calleeResult.path);
                 this.log(`Call: ${calleeResult.path}`);
                 return;
             }
-            // Handle instance_class.method()
-            if (calleeResult.path.includes("_instance")) {
-                // Extract any chrome path from the instance properties
-                // e.g., "Wrapper_instance.api" might map to "chrome.runtime"
-                let foundChromePath = false;
-                for (const [key, value] of this.vars.entries()) {
-                    if (key.startsWith(calleeResult.path) && value.size === 1) {
-                        const path = Array.from(value)[0];
-                        if (StaticAnalysisUtils.isBrowserAPI(path)) {
-                            this.calls.add(`${path}.DYNAMIC`);
-                            foundChromePath = true;
+
+            // Instance method call (e.g., wrapper_instance.method())
+            if (this._handleInstanceMethodCall(calleeResult.path)) return;
+        }
+
+        // Handle variables with multiple possible values (from branching)
+        if (this._handleMultiValueVariable(p, unwrapped)) return;
+
+        // Check if chrome is passed as argument to any function
+        this._checkChromeAsArgument(p, unwrapped);
+    }
+
+    handleNew(p) {
+        if (p.node.callee.type === "Identifier" && p.node.callee.name === "Proxy") {
+            const [target] = p.node.arguments;
+            const result = this.resolver.resolveExpression(target);
+
+            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                const parent = p.parentPath;
+                if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                    this.vars.set(parent.node.id.name, new Set([result.path]));
+                    this.log(`Proxy: ${parent.node.id.name} = ${result.path}`);
+                }
+            }
+        }
+    }
+
+    // ===== SPECIAL PATTERN HANDLERS =====
+
+    _handleSpecialPatterns(p, callee) {
+        return this._handleReflect(p, callee)
+            || this._handleObjectMethods(p, callee)
+            || this._handleArrayMethods(p, callee)
+            || this._handleMapSet(p, callee);
+    }
+
+    _handleReflect(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.object.type !== "Identifier" || callee.object.name !== "Reflect") return false;
+
+        const method = callee.property.name;
+
+        if (method === "get") {
+            const [target, prop] = p.node.arguments;
+            const targetResult = this.resolver.resolveExpression(target);
+
+            if (StaticAnalysisUtils.isBrowserAPI(targetResult?.path)) {
+                const propValue = this.evaluator.tryEvaluate(prop);
+
+                if (propValue !== null) {
+                    const fullPath = `${targetResult.path}.${propValue}`;
+
+                    // Track for variable assignment
+                    const parent = p.parentPath;
+                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                        this.vars.set(parent.node.id.name, new Set([fullPath]));
+                        this.log(`Reflect.get: ${parent.node.id.name} = ${fullPath}`);
+                    }
+
+                    // Store on node for chained member access
+                    p.node._resolvedPath = fullPath;
+                } else {
+                    this.calls.add(`${targetResult.path}.DYNAMIC`);
+                }
+            } else {
+                this.calls.add("chrome.DYNAMIC");
+            }
+            return true;
+        }
+
+        if (method === "apply") {
+            const [target] = p.node.arguments;
+            const result = this.resolver.resolveExpression(target);
+
+            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                this.calls.add(result.path);
+            } else {
+                this.calls.add("chrome.DYNAMIC");
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    _handleObjectMethods(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.object.type !== "Identifier" || callee.object.name !== "Object") return false;
+
+        const method = callee.property.name;
+
+        if (method === "assign") {
+            return this._handleObjectAssign(p);
+        }
+
+        if (method === "keys" || method === "getOwnPropertyDescriptor") {
+            return this._handleObjectIntrospection(p, method);
+        }
+
+        if (method === "entries" || method === "values") {
+            return this._handleObjectIteration(p, method);
+        }
+
+        return false;
+    }
+
+    _handleArrayMethods(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.property.type !== "Identifier") return false;
+
+        const method = callee.property.name;
+
+        if (method === "map" || method === "filter") {
+            const [callback] = p.node.arguments;
+            let hasChromeElements = false;
+            let chromeElementPath = null;
+
+            // Check if it's an inline array like [chrome.runtime].map()
+            if (callee.object.type === "ArrayExpression") {
+                for (const elem of callee.object.elements) {
+                    if (elem) {
+                        const elemResult = this.resolver.resolveExpression(elem);
+                        if (StaticAnalysisUtils.isBrowserAPI(elemResult?.path)) {
+                            hasChromeElements = true;
+                            chromeElementPath = elemResult.path;
                             break;
                         }
                     }
                 }
-                if (!foundChromePath) {
-                    this.calls.add("chrome.DYNAMIC");  // Fallback if we can't determine
-                }
-                return;
             }
-        }
+            // Check named arrays: const arr = [chrome.runtime]; arr.map(...)
+            else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
+                const arrayType = this.vars.get(callee.object.name);
+                if (arrayType.has("Array")) {
+                    const arrayName = callee.object.name;
 
-        // Handle case where callee could be multiple chrome paths
-        // e.g., api.get() where api could be chrome.cookies OR chrome.storage
-        if (callee.type === "MemberExpression" && callee.object.type === "Identifier") {
-            const objName = callee.object.name;
-            if (this.vars.has(objName)) {
-                const possibleValues = this.vars.get(objName);
-                if (possibleValues.size > 1) {
-                    const methodName = callee.property.type === "Identifier"
-                        ? callee.property.name
-                        : null;
-
-                    if (methodName) {
-                        // Add all possible chrome API paths
-                        for (const val of possibleValues) {
-                            if (StaticAnalysisUtils.isBrowserAPI(val)) {
-                                this.calls.add(`${val}.${methodName}`);
-                                this.log(`Multiple paths call: ${val}.${methodName}`);
+                    // Check array[0], array[1], etc.
+                    for (let i = 0; i < 10; i++) {
+                        const elemKey = `${arrayName}[${i}]`;
+                        if (this.vars.has(elemKey)) {
+                            const elemPath = this.vars.get(elemKey);
+                            if (elemPath.size === 1 && !elemPath.has("*")) {
+                                const path = Array.from(elemPath)[0];
+                                if (StaticAnalysisUtils.isBrowserAPI(path)) {
+                                    hasChromeElements = true;
+                                    chromeElementPath = path;
+                                    break;
+                                }
                             }
                         }
-                        return;
+                    }
+                }
+            }
+
+            if (hasChromeElements && callback) {
+                const parent = p.parentPath;
+                if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                    const resultArrayName = parent.node.id.name;
+
+                    // For identity function (x => x), preserve chrome references
+                    if (callback.type === "ArrowFunctionExpression" &&
+                        callback.params.length === 1 &&
+                        callback.params[0].type === "Identifier" &&
+                        callback.body.type === "Identifier" &&
+                        callback.body.name === callback.params[0].name) {
+                        this.vars.set(`${resultArrayName}[0]`, new Set([chromeElementPath]));
+                        this.vars.set(resultArrayName, new Set(["Array"]));
+                        this.log(`Array.${method} identity: ${resultArrayName}[0] = ${chromeElementPath}`);
+                    } else {
+                        this.vars.set(resultArrayName, new Set(["Array"]));
+                    }
+                }
+            }
+
+            return hasChromeElements;
+        }
+
+        return false;
+    }
+
+    _handleObjectAssign(p) {
+        const [target, source] = p.node.arguments;
+
+        if (target && source) {
+            const result = this.resolver.resolveExpression(source);
+
+            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                if (target.type === "Identifier") {
+                    this.vars.set(target.name, new Set([result.path]));
+                    this.log(`Object.assign: ${target.name} = ${result.path}`);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    _handleObjectIntrospection(p, method) {
+        const [target] = p.node.arguments;
+        const result = this.resolver.resolveExpression(target);
+
+        if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+            this.calls.add(`${result.path}.DYNAMIC`);
+            this.log(`Object.${method} on ${result.path}`);
+        }
+
+        return true;
+    }
+
+    _handleObjectIteration(p, method) {
+        const [target] = p.node.arguments;
+        const result = this.resolver.resolveExpression(target);
+
+        let hasChromeProperties = false;
+
+        // Check resolved target
+        if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+            hasChromeProperties = true;
+        }
+        // Check object literal properties
+        else if (target?.type === "ObjectExpression") {
+            for (const prop of target.properties) {
+                if (prop.type === "ObjectProperty" && prop.value) {
+                    const propResult = this.resolver.resolveExpression(prop.value);
+                    if (StaticAnalysisUtils.isBrowserAPI(propResult?.path)) {
+                        hasChromeProperties = true;
+                        break;
                     }
                 }
             }
         }
 
-        // Plain identifier calls
-        if (actualCallee.type === "Identifier" && this.vars.has(actualCallee.name)) {
-            for (const val of this.vars.get(actualCallee.name)) {
-                if (val === "DYNAMIC_CODE") {
-                    this.calls.add("DYNAMIC");
-                } else if (StaticAnalysisUtils.isBrowserAPI(val)) {
-                    this.calls.add(val);
+        if (hasChromeProperties) {
+            this.calls.add("chrome.DYNAMIC");
+            this.log(`Object.${method} on chrome-containing object`);
+
+            // Track array element
+            const parent = p.parentPath;
+            if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                this.vars.set(`${parent.node.id.name}[0]`, new Set(["chrome.DYNAMIC"]));
+            }
+        }
+
+        return true;
+    }
+
+    _handleMapSet(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.property.name !== "set") return false;
+        if (callee.object.type !== "Identifier") return false;
+
+        const mapName = callee.object.name;
+        const mapType = this.vars.get(mapName);
+
+        if (mapType?.has("Map") || mapType?.has("WeakMap")) {
+            const [key, value] = p.node.arguments;
+            const result = this.resolver.resolveExpression(value);
+
+            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                this.vars.set(`${mapName}.__contains`, new Set([result.path]));
+                this.log(`Map ${mapName} contains: ${result.path}`);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    // ===== CALLEE UNWRAPPING AND FILTERING =====
+
+    _unwrapCallApplyBind(callee) {
+        if (callee.type === "MemberExpression" &&
+            callee.property.type === "Identifier" &&
+            (callee.property.name === "call" ||
+                callee.property.name === "apply" ||
+                callee.property.name === "bind")) {
+            return callee.object;
+        }
+        return callee;
+    }
+
+    _isPromiseChainMethod(callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.property.type !== "Identifier") return false;
+
+        const method = callee.property.name;
+        return JavascriptConstants.PROMISE_METHODS.includes(method);
+    }
+
+    _handlePromiseFactory(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.object.type !== "Identifier" || callee.object.name !== "Promise") return false;
+
+        const method = callee.property.name;
+
+        if (method === "resolve" || method === "reject") {
+            const [arg] = p.node.arguments;
+
+            if (arg) {
+                const result = this.resolver.resolveExpression(arg);
+
+                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                    this.calls.add(`${result.path}.DYNAMIC`);
+                    this.log(`Promise.${method}(${result.path})`);
+                    return true;
                 }
             }
         }
 
-        // Flag any function call that receives chrome as argument
-        if (actualCallee.type === "Identifier") {
-            // Check if this is a user function (not built-ins we already handled)
-            const funcName = actualCallee.name;
-            const isBuiltIn = funcName === "eval" ||
-                funcName === "Function" ||
-                funcName === "require" ||
-                funcName === "importScripts" ||
-                funcName === "atob" ||
-                funcName === "btoa";
+        return false;
+    }
 
-            if (!isBuiltIn && p.node.arguments.length > 0) {
-                // Check if any argument is a chrome reference
-                for (const arg of p.node.arguments) {
-                    const result = this.resolver.resolveExpression(arg);
-                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                        this.calls.add(`${result.path}.DYNAMIC`);
-                        this.log(`Chrome passed to function: ${funcName}(${result.path})`);
-                        return;
-                    }
-                }
+    // ===== DYNAMIC CODE HANDLERS =====
+
+    _handleDynamicCode(p, callee) {
+        // Direct eval() or Function() call
+        if (callee.type === "Identifier") {
+            if (JavascriptConstants.DYNAMIC_CODE_FUNCS.includes(callee.name)) {
+                this._checkDynamicCallArgs(p);
+                return true;
+            }
+
+            // Check if it's an alias to eval/Function
+            const values = this.vars.get(callee.name);
+            if (values?.has("DYNAMIC_CODE")) {
+                this._checkDynamicCallArgs(p);
+                return true;
             }
         }
+
+        // Handle SequenceExpression like (1, eval)
+        if (callee.type === "SequenceExpression") {
+            const lastExpr = callee.expressions[callee.expressions.length - 1];
+
+            if (lastExpr.type === "Identifier" &&
+                JavascriptConstants.DYNAMIC_CODE_FUNCS.includes(lastExpr.name)) {
+                this._checkDynamicCallArgs(p);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    _handleImmediateFunctionConstruction(callee) {
+        if (callee.type === "NewExpression" &&
+            callee.callee.type === "Identifier" &&
+            callee.callee.name === "Function") {
+            this.calls.add("DYNAMIC");
+            return true;
+        }
+        return false;
     }
 
     _checkDynamicCallArgs(callPath) {
@@ -1377,8 +1591,8 @@ class CallHandler {
 
         for (const arg of callPath.node.arguments) {
             const result = this.resolver.resolveExpression(arg);
+
             if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                // Keep the most specific (longest) path
                 if (!mostSpecificPath || result.path.length > mostSpecificPath.length) {
                     mostSpecificPath = result.path;
                 }
@@ -1387,220 +1601,108 @@ class CallHandler {
 
         if (mostSpecificPath) {
             this.calls.add(`${mostSpecificPath}.DYNAMIC`);
+            this.log(`Dynamic code with chrome: ${mostSpecificPath}`);
         }
 
         this.calls.add("DYNAMIC");
     }
-    handleNew(p) {
-        if (p.node.callee.type === "Identifier") {
-            if (p.node.callee.name === "Proxy") {
-                const [target] = p.node.arguments;
-                const result = this.resolver.resolveExpression(target);
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                    const parent = p.parentPath;
-                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
-                        this.vars.set(parent.node.id.name, new Set([result.path]));
-                    }
+
+    // ===== INSTANCE METHOD CALLS =====
+
+    _handleInstanceMethodCall(path) {
+        if (!path.includes("_instance")) return false;
+
+        // Look for matching instance properties
+        for (const [key, value] of this.vars.entries()) {
+            if (key.startsWith(path) && value.size === 1) {
+                const chromePath = Array.from(value)[0];
+
+                if (StaticAnalysisUtils.isBrowserAPI(chromePath)) {
+                    this.calls.add(`${chromePath}.DYNAMIC`);
+                    this.log(`Instance method: ${path} -> ${chromePath}`);
+                    return true;
                 }
             }
         }
+
+        // Fallback
+        this.calls.add("chrome.DYNAMIC");
+        return true;
     }
 
-    _handleReflect(p, callee) {
-        if (callee.type === "MemberExpression" &&
-            callee.object.type === "Identifier" &&
-            callee.object.name === "Reflect") {
-            const method = callee.property.name;
+    // ===== MULTI-VALUE VARIABLE HANDLING =====
 
-            if (method === "get") {
-                const [target, prop] = p.node.arguments;
-                const targetResult = this.resolver.resolveExpression(target);
-                if (StaticAnalysisUtils.isBrowserAPI(targetResult?.path)) {
-                    const propValue = this.evaluator.tryEvaluate(prop);
-                    if (propValue !== null) {
-                        const fullPath = `${targetResult.path}.${propValue}`;
+    _handleMultiValueVariable(p, callee) {
+        // Handle case where variable can have multiple chrome API values
+        if (callee.type === "MemberExpression" && callee.object.type === "Identifier") {
+            const objName = callee.object.name;
+            const possibleValues = this.vars.get(objName);
 
-                        // Track result for chained calls
-                        const parent = p.parentPath;
-                        if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
-                            this.vars.set(parent.node.id.name, new Set([fullPath]));
-                            this.log(`Reflect.get tracked: ${parent.node.id.name} = ${fullPath}`);
+            if (possibleValues && possibleValues.size > 0) {
+                const methodName = callee.property.type === "Identifier"
+                    ? callee.property.name
+                    : (callee.computed ? this.evaluator.tryEvaluate(callee.property) : null);
+
+                if (methodName) {
+                    let foundChrome = false;
+
+                    // Add all possible chrome API paths (even if "*" is also in the set)
+                    for (const val of possibleValues) {
+                        if (StaticAnalysisUtils.isBrowserAPI(val)) {
+                            this.calls.add(`${val}.${methodName}`);
+                            this.log(`Multi-value call: ${val}.${methodName}`);
+                            foundChrome = true;
                         }
-
-                        // Also mark the CallExpression itself so it can be used in member expressions
-                        // Store the result so getMemberPath can use it
-                        p.node._resolvedPath = fullPath;
-
-                        return true;
-                    } else {
-                        this.calls.add(`${targetResult.path}.DYNAMIC`);
                     }
-                } else {
-                    this.calls.add("chrome.DYNAMIC");
-                }
-                return true;
-            }
 
-            if (method === "apply") {
-                const [target] = p.node.arguments;
-                const result = this.resolver.resolveExpression(target);
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                    this.calls.add(result.path);
-                } else {
-                    this.calls.add("chrome.DYNAMIC");
+                    return foundChrome;
                 }
-                return true;
             }
         }
+
+        // Plain identifier with multiple values
+        if (callee.type === "Identifier") {
+            const possibleValues = this.vars.get(callee.name);
+
+            if (possibleValues && possibleValues.size > 0) {
+                let foundAny = false;
+
+                for (const val of possibleValues) {
+                    if (val === "DYNAMIC_CODE") {
+                        this.calls.add("DYNAMIC");
+                        foundAny = true;
+                    } else if (StaticAnalysisUtils.isBrowserAPI(val)) {
+                        this.calls.add(val);
+                        this.log(`Identifier call: ${val}`);
+                        foundAny = true;
+                    }
+                }
+
+                return foundAny;
+            }
+        }
+
         return false;
     }
 
-    _handleObjectMethods(p, callee) {
-        if (callee.type === "MemberExpression" &&
-            callee.object.type === "Identifier" &&
-            callee.object.name === "Object") {
-            const method = callee.property.name;
+    // ===== CHROME AS ARGUMENT DETECTION =====
 
-            if (method === "assign") {
-                const [target, source] = p.node.arguments;
-                if (target && source) {
-                    const result = this.resolver.resolveExpression(source);
-                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                        if (target.type === "Identifier") {
-                            this.vars.set(target.name, new Set([result.path]));
-                        }
-                    }
-                }
-            } else if (method === "keys" || method === "getOwnPropertyDescriptor") {
-                const [target] = p.node.arguments;
-                const result = this.resolver.resolveExpression(target);
+    _checkChromeAsArgument(p, callee) {
+        if (callee.type === "Identifier") {
+            const funcName = callee.name;
+
+            // Skip eval/Function - they're handled specially in _handleDynamicCode()
+            if (funcName === "eval" || funcName === "Function") return;
+
+            // Check if any argument is a chrome reference
+            for (const arg of p.node.arguments) {
+                const result = this.resolver.resolveExpression(arg);
+
                 if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                     this.calls.add(`${result.path}.DYNAMIC`);
-                }
-            } else if (method === "entries" || method === "values") {
-                const [target] = p.node.arguments;
-                const result = this.resolver.resolveExpression(target);
-
-                let hasChromeProperties = false;
-
-                // Check if resolved target is chrome
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                    hasChromeProperties = true;
-                }
-                // Check if target is an object literal with chrome properties
-                else if (target?.type === "ObjectExpression") {
-                    for (const prop of target.properties) {
-                        if (prop.type === "ObjectProperty" && prop.value) {
-                            const propResult = this.resolver.resolveExpression(prop.value);
-                            if (StaticAnalysisUtils.isBrowserAPI(propResult?.path)) {
-                                hasChromeProperties = true;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                if (hasChromeProperties) {
-                    this.calls.add("chrome.DYNAMIC");
-                    this.log(`Object.${method} on chrome-containing object`);
-
-                    const parent = p.parentPath;
-                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
-                        this.vars.set(`${parent.node.id.name}[0]`, new Set(["chrome.DYNAMIC"]));
-                    }
-                }
-            }
-            return true;
-        }
-
-        // Handle Array methods like map, filter
-        if (callee.type === "MemberExpression" &&
-            callee.property.type === "Identifier") {
-            const method = callee.property.name;
-
-            if (method === "map" || method === "filter") {
-                const [callback] = p.node.arguments;
-                let hasChromeElements = false;
-                let chromeElementPath = null;
-
-                // Check if it's an inline array like [chrome.runtime].map()
-                if (callee.object.type === "ArrayExpression") {
-                    for (const elem of callee.object.elements) {
-                        if (elem) {
-                            const elemResult = this.resolver.resolveExpression(elem);
-                            if (StaticAnalysisUtils.isBrowserAPI(elemResult?.path)) {
-                                hasChromeElements = true;
-                                chromeElementPath = elemResult.path;
-                                break;
-                            }
-                        }
-                    }
-                }
-                // Check named arrays: const arr = [chrome.runtime]; arr.map(...)
-                else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
-                    const arrayType = this.vars.get(callee.object.name);
-                    if (arrayType.has("Array")) {
-                        const arrayName = callee.object.name;
-
-                        // Check array[0], array[1], etc.
-                        for (let i = 0; i < 10; i++) {
-                            const elemKey = `${arrayName}[${i}]`;
-                            if (this.vars.has(elemKey)) {
-                                const elemPath = this.vars.get(elemKey);
-                                if (elemPath.size === 1 && !elemPath.has("*")) {
-                                    const path = Array.from(elemPath)[0];
-                                    if (StaticAnalysisUtils.isBrowserAPI(path)) {
-                                        hasChromeElements = true;
-                                        chromeElementPath = path;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (hasChromeElements && callback) {
-                    const parent = p.parentPath;
-                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
-                        const resultArrayName = parent.node.id.name;
-
-                        // For identity function (x => x), preserve chrome references
-                        if (callback.type === "ArrowFunctionExpression" &&
-                            callback.params.length === 1 &&
-                            callback.params[0].type === "Identifier" &&
-                            callback.body.type === "Identifier" &&
-                            callback.body.name === callback.params[0].name) {
-                            this.vars.set(`${resultArrayName}[0]`, new Set([chromeElementPath]));
-                            this.vars.set(resultArrayName, new Set(["Array"]));
-                            this.log(`Array.${method} identity: ${resultArrayName}[0] = ${chromeElementPath}`);
-                        } else {
-                            this.vars.set(resultArrayName, new Set(["Array"]));
-                        }
-                    }
+                    this.log(`Chrome passed to function: ${funcName}(${result.path})`);
                 }
             }
         }
-
-        return false;
-    }
-
-    _handleMapSet(p, callee) {
-        if (callee.type === "MemberExpression" &&
-            callee.property.name === "set" &&
-            callee.object.type === "Identifier") {
-            const mapName = callee.object.name;
-            if (this.vars.get(mapName)?.has("Map") || this.vars.get(mapName)?.has("WeakMap")) {
-                const [key, value] = p.node.arguments;
-                const result = this.resolver.resolveExpression(value);
-                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
-                    // Mark this map as containing chrome APIs
-                    this.vars.set(`${mapName}.__contains`, new Set([result.path]));
-                    this.log(`Map ${mapName} contains: ${result.path}`);
-                }
-                return true;
-            }
-        }
-        return false;
     }
 }
