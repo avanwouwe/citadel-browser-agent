@@ -279,6 +279,15 @@ class ExpressionResolver {
                     if (this.vars.has(objName)) {
                         const mapValues = this.vars.get(objName);
                         if (mapValues.has("Map") || mapValues.has("WeakMap")) {
+                            // Check if we know what the map contains
+                            const containsKey = `${objName}.__contains`;
+                            if (this.vars.has(containsKey)) {
+                                const chromePath = this.vars.get(containsKey);
+                                if (chromePath.size === 1) {
+                                    const path = Array.from(chromePath)[0];
+                                    return { path: `${path}.DYNAMIC`, hasDynamic: true };
+                                }
+                            }
                             return { path: "chrome.DYNAMIC", hasDynamic: true };
                         }
                     }
@@ -1102,7 +1111,7 @@ class CallHandler {
                 if (arg) {
                     const result = this.resolver.resolveExpression(arg);
                     if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
-                        this.calls.add("chrome.DYNAMIC");
+                        this.calls.add(`${result.path}.DYNAMIC`);
                         this.log(`Promise.${methodName}(${result.path})`);
                         return;
                     }
@@ -1158,7 +1167,22 @@ class CallHandler {
             }
             // Handle instance_class.method()
             if (calleeResult.path.includes("_instance")) {
-                this.calls.add("chrome.DYNAMIC");
+                // Extract any chrome path from the instance properties
+                // e.g., "Wrapper_instance.api" might map to "chrome.runtime"
+                let foundChromePath = false;
+                for (const [key, value] of this.vars.entries()) {
+                    if (key.startsWith(calleeResult.path) && value.size === 1) {
+                        const path = Array.from(value)[0];
+                        if (StaticAnalysisUtils.isBrowserAPI(path)) {
+                            this.calls.add(`${path}.DYNAMIC`);
+                            foundChromePath = true;
+                            break;
+                        }
+                    }
+                }
+                if (!foundChromePath) {
+                    this.calls.add("chrome.DYNAMIC");  // Fallback if we can't determine
+                }
                 return;
             }
         }
@@ -1192,33 +1216,34 @@ class CallHandler {
                 for (const arg of p.node.arguments) {
                     const result = this.resolver.resolveExpression(arg);
                     if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
-                        this.calls.add("chrome.DYNAMIC");
+                        this.calls.add(`${result.path}.DYNAMIC`);
                         this.log(`Chrome passed to function: ${funcName}(${result.path})`);
                         return;
                     }
                 }
             }
         }
-
     }
 
     _checkDynamicCallArgs(callPath) {
-        let hasChromeArg = false;
+        let mostSpecificPath = null;
 
         for (const arg of callPath.node.arguments) {
             const result = this.resolver.resolveExpression(arg);
-            if (result?.path && /^(chrome|navigator|browser)/.test(result.path)) {
-                hasChromeArg = true;
-                break;
+            if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
+                // Keep the most specific (longest) path
+                if (!mostSpecificPath || result.path.length > mostSpecificPath.length) {
+                    mostSpecificPath = result.path;
+                }
             }
         }
 
-        if (hasChromeArg) {
-            this.calls.add("chrome.DYNAMIC");
+        if (mostSpecificPath) {
+            this.calls.add(`${mostSpecificPath}.DYNAMIC`);
         }
+
         this.calls.add("DYNAMIC");
     }
-
     handleNew(p) {
         if (p.node.callee.type === "Identifier") {
             if (p.node.callee.name === "Proxy") {
@@ -1423,7 +1448,8 @@ class CallHandler {
                 const result = this.resolver.resolveExpression(value);
                 if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                     // Mark this map as containing chrome APIs
-                    this.vars.set(mapName, new Set(["Map"]));
+                    this.vars.set(`${mapName}.__contains`, new Set([result.path]));
+                    this.log(`Map ${mapName} contains: ${result.path}`);
                 }
                 return true;
             }

@@ -339,7 +339,7 @@ simpleCheck("WeakMap storing chrome reference",
     map.set(key, chrome.runtime);
     map.get(key).sendMessage("hi");
     `,
-    "chrome.DYNAMIC"
+    "chrome.runtime.DYNAMIC"
 );
 
 simpleCheck("Map storing chrome API path",
@@ -348,7 +348,7 @@ simpleCheck("Map storing chrome API path",
     map.set("api", chrome.runtime);
     map.get("api").sendMessage("hi");
     `,
-    "chrome.DYNAMIC"
+    "chrome.runtime.DYNAMIC"
 );
 
 // === Getter/Setter tricks ===
@@ -490,7 +490,7 @@ simpleCheck("Chrome passed as function parameter",
     }
     helper(chrome.runtime);
     `,
-    "chrome.DYNAMIC"
+    "chrome.runtime.DYNAMIC"
 );
 
 simpleCheck("Function returning chrome",
@@ -632,7 +632,7 @@ simpleCheck("Rest parameter with chrome",
     }
     wrapper(chrome.runtime);
     `,
-    "chrome.DYNAMIC"
+    "chrome.runtime.DYNAMIC"
 );
 
 simpleCheck("Spread in array with chrome",
@@ -746,5 +746,5 @@ simpleCheck("Async module loader pattern",
     }
     loadAPI().then(api => api.sendMessage("hi"));
     `,
-    "chrome.DYNAMIC"
+    "chrome.runtime.DYNAMIC"
 );
