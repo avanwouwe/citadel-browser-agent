@@ -57,6 +57,24 @@ class StaticAnalysis {
     }
 }
 
+class JavascriptConstants {
+    static DYNAMIC = "DYNAMIC";
+    static DYNAMIC_CODE = "DYNAMIC_CODE";
+    static WILDCARD = "*";
+    static ARRAY = "Array";
+    static MAP = "Map";
+    static WEAK_MAP = "WeakMap";
+    static CLASS = "class";
+    static OBJECT = "Object";
+    static WINDOW = "window";
+    static ARGUMENTS = "arguments";
+    static THIS = "this";
+
+    static BROWSER_GLOBALS = ["chrome", "browser", "navigator", "window", "globalThis", "self"];
+    static PROMISE_METHODS = ["then", "catch", "finally", "all", "race", "allSettled", "any"];
+    static DYNAMIC_CODE_FUNCS = ["eval", "Function"];
+}
+
 class StaticAnalysisUtils {
     static isBrowserAPI(path) {
         return path && /^(chrome|navigator|browser)($|\.)/.test(path);
@@ -170,393 +188,467 @@ class ExpressionResolver {
         this.evaluator = evaluator;
     }
 
+    /**
+     * Main entry point: resolve an expression to its API path
+     * Returns: { path: string, hasDynamic: boolean, isPromise?: boolean } | null
+     */
     resolveExpression(node) {
         if (!node) return null;
 
-        switch (node.type) {
-            case "MemberExpression":
-            case "OptionalMemberExpression":
-                return this.getMemberPath(node);
+        const handlers = {
+            'MemberExpression': () => this._resolveMemberExpression(node),
+            'OptionalMemberExpression': () => this._resolveMemberExpression(node),
+            'Identifier': () => this._resolveIdentifier(node),
+            'ThisExpression': () => ({ path: "this", hasDynamic: false }),
+            'CallExpression': () => this._resolveCallExpression(node),
+            'ConditionalExpression': () => this._resolveConditional(node),
+            'LogicalExpression': () => this._resolveLogical(node),
+            'SequenceExpression': () => this.resolveExpression(node.expressions[node.expressions.length - 1]),
+            'AssignmentExpression': () => this.resolveExpression(node.right),
+            'NewExpression': () => this._resolveNewExpression(node),
+            'AwaitExpression': () => this.resolveExpression(node.argument),
+            'YieldExpression': () => this.resolveExpression(node.argument),
+        };
 
-            case "Identifier":
-                return this._resolveIdentifier(node);
-
-            case "ThisExpression":
-                // Handle `this` by searching for matching instance properties
-                return { path: "this", hasDynamic: false };
-
-            case "CallExpression":
-                return this._resolveCallExpression(node);
-
-            case "ConditionalExpression":
-                return this._resolveConditional(node);
-
-            case "LogicalExpression":
-                return this._resolveLogical(node);
-
-            case "SequenceExpression":
-                return this.resolveExpression(node.expressions[node.expressions.length - 1]);
-
-            case "AssignmentExpression":
-                return this.resolveExpression(node.right);
-
-            case "NewExpression":
-                return this._resolveNew(node);
-
-            case "AwaitExpression":
-                return this.resolveExpression(node.argument);
-
-            case "YieldExpression":
-                return this.resolveExpression(node.argument);
-
-            default:
-                return null;
-        }
+        const handler = handlers[node.type];
+        return handler ? handler() : null;
     }
+
+    // ===== IDENTIFIER RESOLUTION =====
 
     _resolveIdentifier(node) {
-        if (StaticAnalysisUtils.isBrowserAPI(node.name)) {
-            return { path: node.name, hasDynamic: false };
+        const name = node.name;
+
+        // Browser APIs
+        if (StaticAnalysisUtils.isBrowserAPI(name)) {
+            return { path: name, hasDynamic: false };
         }
-        if (node.name === "window" || node.name === "globalThis" || node.name === "self") {
+
+        // Global objects that wrap window
+        if (name === "window" || name === "globalThis" || name === "self") {
             return { path: "window", hasDynamic: false };
         }
-        // Handle 'arguments' as a special identifier
-        if (node.name === "arguments") {
+
+        // Special identifiers
+        if (name === "arguments") {
             return { path: "arguments", hasDynamic: false };
         }
-        if (this.vars.has(node.name)) {
-            const values = this.vars.get(node.name);
-            if (values.size === 1 && !values.has("*")) {
-                return { path: Array.from(values)[0], hasDynamic: false };
-            }
+
+        // Variable lookup
+        return this._resolveFromVariableMap(name);
+    }
+
+    _resolveFromVariableMap(name) {
+        if (!this.vars.has(name)) return null;
+
+        const values = this.vars.get(name);
+        if (values.size === 1 && !values.has("*")) {
+            return { path: Array.from(values)[0], hasDynamic: false };
         }
+
         return null;
     }
+
+    // ===== CALL EXPRESSION RESOLUTION =====
+
     _resolveCallExpression(node) {
-        // Handle static method calls like API.get()
-        if (node.callee.type === "MemberExpression" &&
-            node.callee.object.type === "Identifier") {
-            const className = node.callee.object.name;
-            const methodName = node.callee.property.name;
-
-            if (this.vars.get(className)?.has("class")) {
-                const staticMethodKey = `${className}.${methodName}()`;
-                if (this.vars.has(staticMethodKey)) {
-                    const retVal = this.vars.get(staticMethodKey);
-                    if (retVal.size === 1 && !retVal.has("*")) {
-                        return { path: Array.from(retVal)[0], hasDynamic: false };
-                    }
-                }
-            }
-        }
-
-        // Handle Reflect.get() calls
-        if (node.callee.type === "MemberExpression" &&
-            node.callee.object.type === "Identifier" &&
-            node.callee.object.name === "Reflect" &&
-            node.callee.property.name === "get") {
-
-            const [target, prop] = node.arguments;
-            const targetResult = this.resolveExpression(target);
-
-            if (StaticAnalysisUtils.isBrowserAPI(targetResult?.path)) {
-                const propValue = this.evaluator.tryEvaluate(prop);
-                if (propValue !== null) {
-                    return { path: `${targetResult.path}.${propValue}`, hasDynamic: false };
-                } else {
-                    return { path: `${targetResult.path}.DYNAMIC`, hasDynamic: true };
-                }
-            }
-        }
-
-        if (node.callee.type === "MemberExpression") {
-            const methodName = node.callee.property.name;
-
-            if (methodName === "get") {
-                if (node.callee.object.type === "Identifier") {
-                    const objName = node.callee.object.name;
-                    if (this.vars.has(objName)) {
-                        const mapValues = this.vars.get(objName);
-                        if (mapValues.has("Map") || mapValues.has("WeakMap")) {
-                            // Check if we know what the map contains
-                            const containsKey = `${objName}.__contains`;
-                            if (this.vars.has(containsKey)) {
-                                const chromePath = this.vars.get(containsKey);
-                                if (chromePath.size === 1) {
-                                    const path = Array.from(chromePath)[0];
-                                    return { path: `${path}.DYNAMIC`, hasDynamic: true };
-                                }
-                            }
-                            return { path: "chrome.DYNAMIC", hasDynamic: true };
-                        }
-                    }
-                }
-            }
-
-            if (methodName === "next") {
-                return { path: "chrome.DYNAMIC", hasDynamic: true };
-            }
-
-            if (methodName === "then" || methodName === "catch" || methodName === "finally") {
-                const promiseResult = this.resolveExpression(node.callee.object);
-                if (promiseResult?.path) {
-                    // Pass through the promise result, maintaining isPromise flag
-                    return promiseResult;
-                }
-                return null;
-            }
-        }
-
-        // Check if this CallExpression has a resolved path from Reflect.get
+        // Check for stored resolution from Reflect.get
         if (node._resolvedPath) {
             return { path: node._resolvedPath, hasDynamic: false };
         }
 
-        // IIFE: (function() { return chrome; })()
-        if ((node.callee.type === "FunctionExpression" ||
-                node.callee.type === "ArrowFunctionExpression" ||
-                node.callee.type === "AsyncFunctionExpression") &&
-            node.callee.body) {
-            const body = node.callee.body;
+        // Handle different call patterns
+        return this._resolveStaticMethodCall(node)
+            || this._resolveReflectGet(node)
+            || this._resolvePromiseMethod(node)
+            || this._resolveMapGet(node)
+            || this._resolveIteratorNext(node)
+            || this._resolveIIFE(node)
+            || null;
+    }
 
-            // For async functions, the result is wrapped in a Promise
-            const isAsync = node.callee.async || node.callee.type === "AsyncFunctionExpression";
+    _resolveStaticMethodCall(node) {
+        if (node.callee.type !== "MemberExpression") return null;
+        if (node.callee.object.type !== "Identifier") return null;
 
-            if (body.type === "BlockStatement" && body.body.length === 1 &&
-                body.body[0].type === "ReturnStatement") {
-                const result = this.resolveExpression(body.body[0].argument);
-                // Async functions wrap result in Promise - mark it
-                if (isAsync && result?.path) {
-                    return { path: result.path, hasDynamic: result.hasDynamic, isPromise: true };
-                }
-                return result;
-            }
-            if ((node.callee.type === "ArrowFunctionExpression" ||
-                    node.callee.type === "AsyncFunctionExpression") &&
-                body.type !== "BlockStatement") {
-                const result = this.resolveExpression(body);
-                if (isAsync && result?.path) {
-                    return { path: result.path, hasDynamic: result.hasDynamic, isPromise: true };
-                }
-                return result;
-            }
+        const className = node.callee.object.name;
+        const methodName = node.callee.property.name;
+
+        if (!this.vars.get(className)?.has("class")) return null;
+
+        const staticMethodKey = `${className}.${methodName}()`;
+        if (!this.vars.has(staticMethodKey)) return null;
+
+        const retVal = this.vars.get(staticMethodKey);
+        if (retVal.size === 1 && !retVal.has("*")) {
+            return { path: Array.from(retVal)[0], hasDynamic: false };
         }
 
         return null;
     }
+
+    _resolveReflectGet(node) {
+        if (node.callee.type !== "MemberExpression") return null;
+        if (node.callee.object.type !== "Identifier") return null;
+        if (node.callee.object.name !== "Reflect") return null;
+        if (node.callee.property.name !== "get") return null;
+
+        const [target, prop] = node.arguments;
+        const targetResult = this.resolveExpression(target);
+
+        if (!StaticAnalysisUtils.isBrowserAPI(targetResult?.path)) return null;
+
+        const propValue = this.evaluator.tryEvaluate(prop);
+        if (propValue !== null) {
+            return { path: `${targetResult.path}.${propValue}`, hasDynamic: false };
+        }
+
+        return { path: `${targetResult.path}.DYNAMIC`, hasDynamic: true };
+    }
+
+    _resolvePromiseMethod(node) {
+        if (node.callee.type !== "MemberExpression") return null;
+
+        const methodName = node.callee.property.name;
+        if (!["then", "catch", "finally"].includes(methodName)) return null;
+
+        const promiseResult = this.resolveExpression(node.callee.object);
+        return promiseResult?.path ? promiseResult : null;
+    }
+
+    _resolveMapGet(node) {
+        if (node.callee.type !== "MemberExpression") return null;
+        if (node.callee.property.name !== "get") return null;
+        if (node.callee.object.type !== "Identifier") return null;
+
+        const objName = node.callee.object.name;
+        const mapValues = this.vars.get(objName);
+
+        if (!mapValues?.has("Map") && !mapValues?.has("WeakMap")) return null;
+
+        // Check if we know what the map contains
+        const containsKey = `${objName}.__contains`;
+        if (this.vars.has(containsKey)) {
+            const chromePath = this.vars.get(containsKey);
+            if (chromePath.size === 1) {
+                const path = Array.from(chromePath)[0];
+                return { path: `${path}.DYNAMIC`, hasDynamic: true };
+            }
+        }
+
+        // Fallback: map contains unknown chrome API
+        return { path: "chrome.DYNAMIC", hasDynamic: true };
+    }
+
+    _resolveIteratorNext(node) {
+        if (node.callee.type !== "MemberExpression") return null;
+        if (node.callee.property.name !== "next") return null;
+
+        // Iterator.next() returns chrome API dynamically
+        return { path: "chrome.DYNAMIC", hasDynamic: true };
+    }
+
+    _resolveIIFE(node) {
+        const callee = node.callee;
+        const validTypes = ["FunctionExpression", "ArrowFunctionExpression", "AsyncFunctionExpression"];
+
+        if (!validTypes.includes(callee.type)) return null;
+        if (!callee.body) return null;
+
+        const isAsync = callee.async || callee.type === "AsyncFunctionExpression";
+
+        // Handle block statements with single return
+        if (callee.body.type === "BlockStatement") {
+            if (callee.body.body.length !== 1) return null;
+            if (callee.body.body[0].type !== "ReturnStatement") return null;
+
+            const result = this.resolveExpression(callee.body.body[0].argument);
+            return this._wrapIfAsync(result, isAsync);
+        }
+
+        // Handle arrow function with expression body
+        if (callee.type === "ArrowFunctionExpression" && callee.body.type !== "BlockStatement") {
+            const result = this.resolveExpression(callee.body);
+            return this._wrapIfAsync(result, isAsync);
+        }
+
+        return null;
+    }
+
+    _wrapIfAsync(result, isAsync) {
+        if (!result?.path) return result;
+        if (isAsync) {
+            return { ...result, isPromise: true };
+        }
+        return result;
+    }
+
+    // ===== CONDITIONAL & LOGICAL EXPRESSIONS =====
 
     _resolveConditional(node) {
         const consequent = this.resolveExpression(node.consequent);
         if (StaticAnalysisUtils.isBrowserAPI(consequent?.path)) {
             return consequent;
         }
+
         const alternate = this.resolveExpression(node.alternate);
         if (StaticAnalysisUtils.isBrowserAPI(alternate?.path)) {
             return alternate;
         }
+
         return null;
     }
 
     _resolveLogical(node) {
-        if (node.operator === "||" || node.operator === "&&" || node.operator === "??") {
-            const left = this.resolveExpression(node.left);
-            const right = this.resolveExpression(node.right);
+        const { operator, left, right } = node;
 
-            if (node.operator === "&&") {
-                return right?.path ? right : left;
-            }
+        if (!["||", "&&", "??"].includes(operator)) return null;
 
-            if (StaticAnalysisUtils.isBrowserAPI(left?.path)) {
-                return left;
-            }
-            if (StaticAnalysisUtils.isBrowserAPI(right?.path)) {
-                return right;
-            }
+        const leftResult = this.resolveExpression(left);
+        const rightResult = this.resolveExpression(right);
+
+        // For &&, prefer right side (the one that's actually returned if left is truthy)
+        if (operator === "&&") {
+            return rightResult?.path ? rightResult : leftResult;
         }
+
+        // For || and ??, return first browser API found
+        if (StaticAnalysisUtils.isBrowserAPI(leftResult?.path)) {
+            return leftResult;
+        }
+        if (StaticAnalysisUtils.isBrowserAPI(rightResult?.path)) {
+            return rightResult;
+        }
+
         return null;
     }
 
-    _resolveNew(node) {
-        if (node.callee.type === "Identifier" && this.vars.has(node.callee.name)) {
-            const classInfo = this.vars.get(node.callee.name);
-            if (classInfo.has("class")) {
-                return { path: node.callee.name + "_instance", hasDynamic: false };
-            }
+    // ===== NEW EXPRESSION =====
+
+    _resolveNewExpression(node) {
+        if (node.callee.type !== "Identifier") return null;
+        if (!this.vars.has(node.callee.name)) return null;
+
+        const classInfo = this.vars.get(node.callee.name);
+        if (classInfo.has("class")) {
+            return { path: node.callee.name + "_instance", hasDynamic: false };
         }
+
         return null;
+    }
+
+    // ===== MEMBER EXPRESSION RESOLUTION =====
+
+    _resolveMemberExpression(node) {
+        return this.getMemberPath(node);
     }
 
     getMemberPath(memberExpr) {
+        const { chain, hasDynamic } = this._buildPropertyChain(memberExpr);
+        const baseNode = this._getBaseObject(memberExpr);
+
+        // Try tracked properties first (before resolving base)
+        const trackedResult = this._resolveFromTrackedProperties(baseNode, chain);
+        if (trackedResult) {
+            return { ...trackedResult, hasDynamic: hasDynamic || trackedResult.hasDynamic };
+        }
+
+        // Resolve base object
+        const baseResult = this.resolveExpression(baseNode);
+        if (!baseResult?.path) return null;
+
+        // Handle special base cases
+        const finalPath = this._resolveMemberPathFromBase(baseResult.path, chain);
+        if (!finalPath) return null;
+
+        if (StaticAnalysisUtils.isBrowserAPI(finalPath)) {
+            return {
+                path: finalPath,
+                hasDynamic: hasDynamic || baseResult.hasDynamic
+            };
+        }
+
+        return null;
+    }
+
+    _buildPropertyChain(memberExpr) {
         const chain = [];
         let node = memberExpr;
         let hasDynamic = false;
 
         while (node && (node.type === "MemberExpression" || node.type === "OptionalMemberExpression")) {
-            const isComputed = node.computed;
-            const isOptional = node.optional || node.type === "OptionalMemberExpression";
-
-            // Only treat as dynamic if it's COMPUTED, not just optional
-            if (isComputed) {
-                const evaluated = this.evaluator.tryEvaluate(node.property);
-                if (evaluated !== null) {
-                    chain.unshift(evaluated);
-                } else if (node.property.type === "Identifier" && this.vars.has(node.property.name)) {
-                    const values = this.vars.get(node.property.name);
-                    if (values.size === 1 && !values.has("*")) {
-                        const val = Array.from(values)[0];
-                        chain.unshift(val);
-                    } else {
-                        chain.unshift("DYNAMIC");
-                        hasDynamic = true;
-                    }
-                } else {
-                    chain.unshift("DYNAMIC");
-                    hasDynamic = true;
-                }
+            if (node.computed) {
+                const evaluated = this._evaluateProperty(node.property);
+                chain.unshift(evaluated.value);
+                hasDynamic = hasDynamic || evaluated.isDynamic;
             } else if (node.property.type === "Identifier") {
-                // Regular property access (including optional like ?.runtime)
                 chain.unshift(node.property.name);
             }
             node = node.object;
         }
 
-        // Check for tracked properties/array elements FIRST, before resolving base
-        if (node?.type === "Identifier" && chain.length > 0) {
-            // Check for object property: wrapper.api
-            const propPath = `${node.name}.${chain[0]}`;
-            if (this.vars.has(propPath)) {
-                const tracked = this.vars.get(propPath);
-                if (tracked.size === 1 && !tracked.has("*")) {
-                    const basePath = Array.from(tracked)[0];
-                    chain.shift();
+        return { chain, hasDynamic };
+    }
 
-                    if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
-                        return {
-                            path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
-                            hasDynamic: hasDynamic
-                        };
-                    }
-                }
-            }
+    _evaluateProperty(propertyNode) {
+        const evaluated = this.evaluator.tryEvaluate(propertyNode);
+        if (evaluated !== null) {
+            return { value: evaluated, isDynamic: false };
+        }
 
-            // Check for deep nested paths progressively
-            // e.g., level1.level2.level3.api
-            for (let i = 1; i < chain.length; i++) {
-                const nestedPath = `${node.name}.${chain.slice(0, i + 1).join(".")}`;
-                if (this.vars.has(nestedPath)) {
-                    const tracked = this.vars.get(nestedPath);
-                    if (tracked.size === 1 && !tracked.has("*")) {
-                        const basePath = Array.from(tracked)[0];
-                        // Remove the resolved part from chain
-                        chain.splice(0, i + 1);
-
-                        if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
-                            return {
-                                path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
-                                hasDynamic: hasDynamic
-                            };
-                        }
-                    }
-                }
-            }
-
-            // Check for array element: arr[1]
-            const elemPath = `${node.name}[${chain[0]}]`;
-            if (this.vars.has(elemPath)) {
-                const tracked = this.vars.get(elemPath);
-                if (tracked.size === 1 && !tracked.has("*")) {
-                    const basePath = Array.from(tracked)[0];
-                    chain.shift();
-
-                    if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
-                        return {
-                            path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
-                            hasDynamic: hasDynamic
-                        };
-                    }
-                }
+        // Try variable lookup for computed properties
+        if (propertyNode.type === "Identifier" && this.vars.has(propertyNode.name)) {
+            const values = this.vars.get(propertyNode.name);
+            if (values.size === 1 && !values.has("*")) {
+                return { value: Array.from(values)[0], isDynamic: false };
             }
         }
 
-        // Resolve the base object
-        const baseResult = this.resolveExpression(node);
+        return { value: "DYNAMIC", isDynamic: true };
+    }
 
-        if (!baseResult) return null;
+    _getBaseObject(memberExpr) {
+        let node = memberExpr;
+        while (node && (node.type === "MemberExpression" || node.type === "OptionalMemberExpression")) {
+            node = node.object;
+        }
+        return node;
+    }
 
-        let basePath = baseResult.path;
-        if (!basePath) return null;
-
-        // Handle 'this' by checking for any class_instance that has this property
-        if (basePath === "this") {
-            if (chain.length > 0) {
-                // Check all tracked vars for *_instance.propName
-                for (const [key, value] of this.vars.entries()) {
-                    if (key.endsWith(`_instance.${chain[0]}`)) {
-                        if (value.size === 1 && !value.has("*")) {
-                            basePath = Array.from(value)[0];
-                            chain.shift();
-
-                            if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
-                                return {
-                                    path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
-                                    hasDynamic: hasDynamic
-                                };
-                            }
-                        }
-                    }
-                }
-            }
+    _resolveFromTrackedProperties(baseNode, chain) {
+        if (!baseNode || baseNode.type !== "Identifier" || chain.length === 0) {
             return null;
         }
 
-        // Handle arguments object similar to arrays
-        if (basePath === "arguments") {
-            // Check for arguments[0], arguments[1], etc.
-            if (chain.length > 0 && this.vars.has(`arguments[${chain[0]}]`)) {
-                const elemPath = this.vars.get(`arguments[${chain[0]}]`);
-                if (elemPath.size === 1 && !elemPath.has("*")) {
-                    basePath = Array.from(elemPath)[0];
-                    chain.shift();
+        const baseName = baseNode.name;
+
+        // Try progressively longer paths: obj.a, obj.a.b, obj.a.b.c
+        for (let depth = 1; depth <= chain.length; depth++) {
+            const pathSegments = chain.slice(0, depth);
+            const trackedPath = `${baseName}.${pathSegments.join(".")}`;
+
+            const tracked = this.vars.get(trackedPath);
+            if (tracked?.size === 1 && !tracked.has("*")) {
+                const resolvedBase = Array.from(tracked)[0];
+
+                if (StaticAnalysisUtils.isBrowserAPI(resolvedBase)) {
+                    const remainingChain = chain.slice(depth);
+                    const fullPath = remainingChain.length
+                        ? `${resolvedBase}.${remainingChain.join(".")}`
+                        : resolvedBase;
+
+                    return { path: fullPath, hasDynamic: false };
                 }
-            } else {
-                // Can't resolve arguments without index
-                return null;
             }
         }
 
-        // Handle window/globalThis/self wrappers
+        // Check array element: obj[0]
+        if (chain.length > 0) {
+            const elemPath = `${baseName}[${chain[0]}]`;
+            const tracked = this.vars.get(elemPath);
+
+            if (tracked?.size === 1 && !tracked.has("*")) {
+                const resolvedBase = Array.from(tracked)[0];
+
+                if (StaticAnalysisUtils.isBrowserAPI(resolvedBase)) {
+                    const remainingChain = chain.slice(1);
+                    const fullPath = remainingChain.length
+                        ? `${resolvedBase}.${remainingChain.join(".")}`
+                        : resolvedBase;
+
+                    return { path: fullPath, hasDynamic: false };
+                }
+            }
+        }
+
+        return null;
+    }
+
+    _resolveMemberPathFromBase(basePath, chain) {
+        // Handle special base cases
+        if (basePath === "this") {
+            return this._resolveThisProperty(chain);
+        }
+
+        if (basePath === "arguments") {
+            return this._resolveArgumentsAccess(chain);
+        }
+
         if (basePath === "window") {
-            if (chain.length > 0 && StaticAnalysisUtils.isBrowserAPI(chain[0])) {
-                basePath = chain.shift();
-            } else {
-                return null;
+            return this._resolveWindowProperty(chain);
+        }
+
+        // Check for object property: basePath.prop
+        if (chain.length > 0) {
+            const propertyPath = `${basePath}.${chain[0]}`;
+            const tracked = this.vars.get(propertyPath);
+
+            if (tracked?.size === 1 && !tracked.has("*")) {
+                basePath = Array.from(tracked)[0];
+                chain = chain.slice(1);
             }
         }
 
-        // Check for object property access: wrapper.api where wrapper = { api: chrome.runtime }
-        if (chain.length > 0 && this.vars.has(`${basePath}.${chain[0]}`)) {
-            const propPath = this.vars.get(`${basePath}.${chain[0]}`);
-            if (propPath.size === 1 && !propPath.has("*")) {
-                basePath = Array.from(propPath)[0];
-                chain.shift();
+        // Check for array element: basePath[index]
+        if (chain.length > 0) {
+            const elemPath = `${basePath}[${chain[0]}]`;
+            const tracked = this.vars.get(elemPath);
+
+            if (tracked?.size === 1 && !tracked.has("*")) {
+                basePath = Array.from(tracked)[0];
+                chain = chain.slice(1);
             }
         }
 
-        // Check for array element access: arr[1] where arr = [null, chrome.runtime]
-        if (chain.length > 0 && this.vars.has(`${basePath}[${chain[0]}]`)) {
-            const elemPath = this.vars.get(`${basePath}[${chain[0]}]`);
-            if (elemPath.size === 1 && !elemPath.has("*")) {
-                basePath = Array.from(elemPath)[0];
-                chain.shift();
+        // Build final path
+        return chain.length ? `${basePath}.${chain.join(".")}` : basePath;
+    }
+
+    _resolveThisProperty(chain) {
+        if (chain.length === 0) return null;
+
+        // Search for matching instance property across all tracked classes
+        for (const [key, value] of this.vars.entries()) {
+            if (key.endsWith(`_instance.${chain[0]}`)) {
+                if (value.size === 1 && !value.has("*")) {
+                    const basePath = Array.from(value)[0];
+
+                    if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
+                        const remainingChain = chain.slice(1);
+                        return remainingChain.length
+                            ? `${basePath}.${remainingChain.join(".")}`
+                            : basePath;
+                    }
+                }
             }
         }
 
-        if (StaticAnalysisUtils.isBrowserAPI(basePath)) {
-            return {
-                path: chain.length ? `${basePath}.${chain.join(".")}` : basePath,
-                hasDynamic: hasDynamic || baseResult.hasDynamic
-            };
+        return null;
+    }
+
+    _resolveArgumentsAccess(chain) {
+        if (chain.length === 0) return null;
+
+        const argPath = `arguments[${chain[0]}]`;
+        const tracked = this.vars.get(argPath);
+
+        if (tracked?.size === 1 && !tracked.has("*")) {
+            const basePath = Array.from(tracked)[0];
+            const remainingChain = chain.slice(1);
+            return remainingChain.length
+                ? `${basePath}.${remainingChain.join(".")}`
+                : basePath;
+        }
+
+        return null;
+    }
+
+    _resolveWindowProperty(chain) {
+        if (chain.length === 0) return null;
+
+        // window.chrome -> chrome
+        if (StaticAnalysisUtils.isBrowserAPI(chain[0])) {
+            return chain.join(".");
         }
 
         return null;
