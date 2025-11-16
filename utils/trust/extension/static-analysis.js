@@ -701,6 +701,16 @@ class VariableTracker {
     handleNestedPattern(pattern, base) {
         if (pattern.type === "ObjectPattern") {
             for (const prop of pattern.properties) {
+                // Handle rest elements: {...rest}
+                if (prop.type === "RestElement") {
+                    if (prop.argument.type === "Identifier") {
+                        // Rest element gets the same base (we can't easily exclude specific properties)
+                        this.vars.set(prop.argument.name, new Set([base]));
+                        this.log(`Rest element: ${prop.argument.name} = ${base}`);
+                    }
+                    continue;
+                }
+
                 if (prop.type !== "ObjectProperty") continue;
 
                 let key;
@@ -724,16 +734,61 @@ class VariableTracker {
                 const value = prop.value;
 
                 if (value.type === "Identifier") {
-                    this.vars.set(value.name, new Set([`${base}.${key}`]));
+                    // Check for default value: {api = chrome.runtime}
+                    if (prop.value.type === "AssignmentPattern") {
+                        const defaultValue = this.resolver.resolveExpression(prop.value.right);
+                        if (defaultValue?.path) {
+                            this.vars.set(prop.value.left.name, new Set([defaultValue.path]));
+                            this.log(`Destructure with default: ${prop.value.left.name} = ${defaultValue.path}`);
+                        } else {
+                            this.vars.set(prop.value.left.name, new Set([`${base}.${key}`]));
+                        }
+                    } else {
+                        this.vars.set(value.name, new Set([`${base}.${key}`]));
+                    }
                 } else if (value.type === "ObjectPattern") {
                     this.handleNestedPattern(value, `${base}.${key}`);
+                } else if (value.type === "AssignmentPattern") {
+                    // Handle default values: {api = chrome.runtime}
+                    if (value.left.type === "Identifier") {
+                        const defaultValue = this.resolver.resolveExpression(value.right);
+                        if (defaultValue?.path) {
+                            // Store both the path and the default
+                            this.vars.set(value.left.name, new Set([`${base}.${key}`, defaultValue.path]));
+                            this.log(`Destructure with default: ${value.left.name} = ${base}.${key} or ${defaultValue.path}`);
+                        } else {
+                            this.vars.set(value.left.name, new Set([`${base}.${key}`]));
+                        }
+                    }
                 }
             }
         } else if (pattern.type === "ArrayPattern") {
             for (let i = 0; i < pattern.elements.length; i++) {
                 const element = pattern.elements[i];
+
+                // Handle rest elements: [...rest]
+                if (element?.type === "RestElement") {
+                    if (element.argument.type === "Identifier") {
+                        // Rest gets remaining elements - mark as Array
+                        this.vars.set(element.argument.name, new Set([Javascript.ARRAY]));
+                        this.log(`Rest element: ${element.argument.name} = ${Javascript.ARRAY}`);
+                    }
+                    continue;
+                }
+
                 if (element?.type === "Identifier") {
                     this.vars.set(element.name, new Set([`${base}[${i}]`]));
+                } else if (element?.type === "AssignmentPattern") {
+                    // Handle default values in array: [api = chrome.runtime]
+                    if (element.left.type === "Identifier") {
+                        const defaultValue = this.resolver.resolveExpression(element.right);
+                        if (defaultValue?.path) {
+                            this.vars.set(element.left.name, new Set([`${base}[${i}]`, defaultValue.path]));
+                            this.log(`Array destructure with default: ${element.left.name} = ${base}[${i}] or ${defaultValue.path}`);
+                        } else {
+                            this.vars.set(element.left.name, new Set([`${base}[${i}]`]));
+                        }
+                    }
                 }
             }
         }
@@ -745,6 +800,8 @@ class VariableTracker {
             AssignmentExpression: (p) => this._handleAssignment(p),
             ClassDeclaration: (p) => this._handleClass(p),
             Function: (p) => this._handleFunction(p),
+            CatchClause: (p) => this._handleCatchClause(p),
+            ForOfStatement: (p) => this._handleForOf(p),
         };
     }
 
@@ -844,6 +901,24 @@ class VariableTracker {
                         if (elemResult?.path) {
                             this.vars.set(`${id.name}[${i}]`, new Set([elemResult.path]));
                         }
+
+                        // Handle nested arrays: [[chrome.runtime]]
+                        if (elem.type === "ArrayExpression") {
+                            // Mark this element as an array
+                            this.vars.set(`${id.name}[${i}]`, new Set([Javascript.ARRAY]));
+
+                            // Track the nested array's elements
+                            for (let j = 0; j < elem.elements.length; j++) {
+                                const nestedElem = elem.elements[j];
+                                if (nestedElem) {
+                                    const nestedResult = this.resolver.resolveExpression(nestedElem);
+                                    if (nestedResult?.path) {
+                                        this.vars.set(`${id.name}[${i}][${j}]`, new Set([nestedResult.path]));
+                                        this.log(`Nested array element: ${id.name}[${i}][${j}] = ${nestedResult.path}`);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
                 this.vars.set(id.name, new Set([Javascript.ARRAY]));
@@ -871,6 +946,34 @@ class VariableTracker {
             if (init.type === "NewExpression" && init.callee.type === "Identifier") {
                 if (init.callee.name === Javascript.MAP || init.callee.name === Javascript.WEAK_MAP) {
                     this.vars.set(id.name, new Set([init.callee.name]));
+                    return;
+                }
+            }
+
+            if (init.type === "NewExpression" && init.callee.type === "Identifier") {
+                if (init.callee.name === Javascript.MAP || init.callee.name === Javascript.WEAK_MAP) {
+                    this.vars.set(id.name, new Set([init.callee.name]));
+                    return;
+                }
+
+                // Add Set tracking
+                if (init.callee.name === "Set") {
+                    this.vars.set(id.name, new Set(["Set"]));
+
+                    // Track Set contents if initialized with array
+                    if (init.arguments.length > 0 && init.arguments[0].type === "ArrayExpression") {
+                        const arrayArg = init.arguments[0];
+                        for (let i = 0; i < arrayArg.elements.length; i++) {
+                            const elem = arrayArg.elements[i];
+                            if (elem) {
+                                const elemResult = this.resolver.resolveExpression(elem);
+                                if (elemResult?.path) {
+                                    this.vars.set(`${id.name}[${i}]`, new Set([elemResult.path]));
+                                    this.log(`Set element: ${id.name}[${i}] = ${elemResult.path}`);
+                                }
+                            }
+                        }
+                    }
                     return;
                 }
             }
@@ -1031,13 +1134,38 @@ class VariableTracker {
             }
         }
 
-        // Track Map assignments for chrome API storage
-        if (left.type === "MemberExpression" &&
-            left.object.type === "Identifier" &&
-            this.vars.get(left.object.name)?.has(Javascript.MAP)) {
-            const result = this.resolver.resolveExpression(right);
-            if (Javascript.isBrowserAPI(result?.path)) {
-                this.vars.set(left.object.name, new Set([Javascript.MAP]));
+        // Handle dynamic property assignment: obj["key"] = chrome.runtime
+        if (left.type === "MemberExpression" && left.object.type === "Identifier") {
+            const objName = left.object.name;
+
+            // Get the property key
+            let propKey;
+            if (left.computed) {
+                propKey = this.evaluator.tryEvaluate(left.property);
+                if (propKey === null && left.property.type === "Identifier") {
+                    const values = this.vars.get(left.property.name);
+                    if (values?.size === 1 && !values.has(Javascript.WILDCARD)) {
+                        propKey = Array.from(values)[0];
+                    }
+                }
+            } else {
+                propKey = left.property.name;
+            }
+
+            if (propKey) {
+                const result = this.resolver.resolveExpression(right);
+                if (result?.path) {
+                    this.vars.set(`${objName}.${propKey}`, new Set([result.path]));
+                    this.log(`Dynamic property assignment: ${objName}.${propKey} = ${result.path}`);
+                }
+            }
+
+            // Track Map assignments for chrome API storage
+            if (this.vars.get(objName)?.has(Javascript.MAP)) {
+                const result = this.resolver.resolveExpression(right);
+                if (Javascript.isBrowserAPI(result?.path)) {
+                    this.vars.set(objName, new Set([Javascript.MAP]));
+                }
             }
         }
     }
@@ -1066,6 +1194,24 @@ class VariableTracker {
         } else {
             // First assignment
             this.vars.set(varName, new Set([newValue]));
+        }
+    }
+
+    _handleCatchClause(p) {
+        const param = p.node.param;
+        if (!param) return;
+
+        // Handle catch (e) { ... }
+        if (param.type === "Identifier") {
+            // We don't know what was thrown, mark as dynamic
+            this.vars.set(param.name, new Set([Javascript.WILDCARD]));
+            this.log(`Catch parameter: ${param.name} = ${Javascript.WILDCARD}`);
+        }
+
+        // Handle catch ({api}) { ... } - destructuring in catch
+        if (param.type === "ObjectPattern" || param.type === "ArrayPattern") {
+            // The thrown value is unknown, use wildcard as base
+            this.handleNestedPattern(param, Javascript.WILDCARD);
         }
     }
 
@@ -1186,6 +1332,58 @@ class VariableTracker {
             }
         }
     }
+
+    _handleForOf(p) {
+        const left = p.node.left;
+        const right = p.node.right;
+
+        // Get what we're iterating over
+        let iterableElements = null;
+
+        if (right.type === "Identifier" && this.vars.has(right.name)) {
+            const arrayType = this.vars.get(right.name);
+            if (arrayType.has(Javascript.ARRAY)) {
+                // Collect all tracked elements from this array
+                iterableElements = [];
+                for (let i = 0; i < 10; i++) {
+                    const elemKey = `${right.name}[${i}]`;
+                    if (this.vars.has(elemKey)) {
+                        const elemPath = this.vars.get(elemKey);
+                        if (elemPath.size > 0) {
+                            iterableElements.push(...Array.from(elemPath));
+                        }
+                    }
+                }
+            }
+        } else if (right.type === "ArrayExpression") {
+            // Inline array
+            iterableElements = [];
+            for (const elem of right.elements) {
+                if (elem) {
+                    const result = this.resolver.resolveExpression(elem);
+                    if (result?.path) {
+                        iterableElements.push(result.path);
+                    }
+                }
+            }
+        }
+
+        if (iterableElements && iterableElements.length > 0) {
+            // Track the loop variable
+            if (left.type === "VariableDeclaration" &&
+                left.declarations.length > 0 &&
+                left.declarations[0].id.type === "Identifier") {
+
+                const loopVar = left.declarations[0].id.name;
+                // If all elements are browser APIs, track them
+                const browserAPIs = iterableElements.filter(path => Javascript.isBrowserAPI(path));
+                if (browserAPIs.length > 0) {
+                    this.vars.set(loopVar, new Set(browserAPIs));
+                    this.log(`for...of: ${loopVar} iterates over ${browserAPIs.join(', ')}`);
+                }
+            }
+        }
+    }
 }
 
 class APICollector {
@@ -1248,6 +1446,70 @@ class CallHandler {
         // Handle immediate invocation of new Function()
         if (this._handleImmediateFunctionConstruction(callee)) return;
 
+// Handle Array.from as a static method
+        if (callee.type === "MemberExpression" &&
+            callee.object.type === "Identifier" &&
+            callee.object.name === Javascript.ARRAY &&
+            callee.property.name === "from") {
+
+            const [iterable] = p.node.arguments;
+
+            let hasChromeElements = false;
+            let chromeElementPath = null;
+
+            // Handle new Set([chrome.runtime])
+            if (iterable?.type === "NewExpression" &&
+                iterable.callee.type === "Identifier" &&
+                iterable.callee.name === "Set" &&
+                iterable.arguments.length > 0 &&
+                iterable.arguments[0].type === "ArrayExpression") {
+
+                for (const elem of iterable.arguments[0].elements) {
+                    if (elem) {
+                        const elemResult = this.resolver.resolveExpression(elem);
+                        if (Javascript.isBrowserAPI(elemResult?.path)) {
+                            hasChromeElements = true;
+                            chromeElementPath = elemResult.path;
+                            break;
+                        }
+                    }
+                }
+            }
+            // Handle named Set: const set = new Set([...]); Array.from(set)
+            else if (iterable?.type === "Identifier" && this.vars.has(iterable.name)) {
+                const setType = this.vars.get(iterable.name);
+                if (setType.has("Set")) {
+                    // Check what the set contains
+                    const setName = iterable.name;
+                    for (let i = 0; i < 10; i++) {
+                        const elemKey = `${setName}[${i}]`;
+                        if (this.vars.has(elemKey)) {
+                            const elemPath = this.vars.get(elemKey);
+                            if (elemPath.size === 1 && !elemPath.has(Javascript.WILDCARD)) {
+                                const path = Array.from(elemPath)[0];
+                                if (Javascript.isBrowserAPI(path)) {
+                                    hasChromeElements = true;
+                                    chromeElementPath = path;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasChromeElements) {
+                const parent = p.parentPath;
+                if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                    const resultName = parent.node.id.name;
+                    this.vars.set(resultName, new Set([Javascript.ARRAY]));
+                    this.vars.set(`${resultName}[0]`, new Set([chromeElementPath]));
+                    this.log(`Array.from: ${resultName}[0] = ${chromeElementPath}`);
+                }
+            }
+            return;
+        }
+
         // Resolve the callee to see what's being called
         const calleeResult = this.resolver.resolveExpression(unwrapped);
 
@@ -1297,7 +1559,9 @@ class CallHandler {
         return this._handleReflect(p, callee)
             || this._handleObjectMethods(p, callee)
             || this._handleArrayMethods(p, callee)
-            || this._handleMapSet(p, callee);
+            || this._handleMapSet(p, callee)
+            || this._handleArrayMutationMethods(p, callee)
+            || this._handleAdvancedArrayMethods(p, callee); // Add this
     }
 
     _handleReflect(p, callee) {
@@ -1354,6 +1618,7 @@ class CallHandler {
         if (callee.object.type !== "Identifier" || callee.object.name !== Javascript.OBJECT) return false;
 
         const method = callee.property.name;
+        this.log(`Object method called: ${method}`); // ADD THIS DEBUG LINE
 
         if (method === Javascript.OBJECT_ASSIGN) {
             return this._handleObjectAssign(p);
@@ -1367,9 +1632,94 @@ class CallHandler {
             return this._handleObjectIteration(p, method);
         }
 
+// Object.defineProperty
+        if (method === "defineProperty") {
+            const [target, prop, descriptor] = p.node.arguments;
+
+            if (target?.type === "Identifier" && descriptor?.type === "ObjectExpression") {
+                const targetName = target.name;
+                const propName = this.evaluator.tryEvaluate(prop);
+
+                if (propName !== null) {
+                    // Look for value or get property in descriptor
+                    for (const descProp of descriptor.properties) {
+                        // Handle ObjectMethod (for shorthand syntax: get() { })
+                        // Check if it's a method named "get" OR if it's actually a getter (kind: "get")
+                        if (descProp.type === "ObjectMethod" &&
+                            (descProp.kind === "get" || descProp.key?.name === "get")) {
+                            const getterBody = descProp.body.body;
+                            if (getterBody.length === 1 && getterBody[0].type === "ReturnStatement") {
+                                const result = this.resolver.resolveExpression(getterBody[0].argument);
+                                if (result?.path) {
+                                    this.vars.set(`${targetName}.${propName}`, new Set([result.path]));
+                                    this.log(`Object.defineProperty getter: ${targetName}.${propName} = ${result.path}`);
+                                }
+                            }
+                        }
+                        // Handle ObjectProperty (for: get: function() { } or get: () => {})
+                        else if (descProp.type === "ObjectProperty") {
+                            const descKey = descProp.key.name || descProp.key.value;
+
+                            if (descKey === "value") {
+                                const result = this.resolver.resolveExpression(descProp.value);
+                                if (result?.path) {
+                                    this.vars.set(`${targetName}.${propName}`, new Set([result.path]));
+                                    this.log(`Object.defineProperty value: ${targetName}.${propName} = ${result.path}`);
+                                }
+                            } else if (descKey === "get") {
+                                // Handle FunctionExpression, ArrowFunctionExpression
+                                let getterBody = null;
+
+                                if (descProp.value.type === "FunctionExpression") {
+                                    if (descProp.value.body.type === "BlockStatement") {
+                                        getterBody = descProp.value.body.body;
+                                    }
+                                } else if (descProp.value.type === "ArrowFunctionExpression") {
+                                    if (descProp.value.body.type === "BlockStatement") {
+                                        getterBody = descProp.value.body.body;
+                                    } else {
+                                        // Arrow function with expression body
+                                        const result = this.resolver.resolveExpression(descProp.value.body);
+                                        if (result?.path) {
+                                            this.vars.set(`${targetName}.${propName}`, new Set([result.path]));
+                                            this.log(`Object.defineProperty arrow getter: ${targetName}.${propName} = ${result.path}`);
+                                        }
+                                        continue;
+                                    }
+                                }
+
+                                if (getterBody && getterBody.length === 1 && getterBody[0].type === "ReturnStatement") {
+                                    const result = this.resolver.resolveExpression(getterBody[0].argument);
+                                    if (result?.path) {
+                                        this.vars.set(`${targetName}.${propName}`, new Set([result.path]));
+                                        this.log(`Object.defineProperty function getter: ${targetName}.${propName} = ${result.path}`);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        // Object.create
+        if (method === "create") {
+            const [proto] = p.node.arguments;
+            const result = this.resolver.resolveExpression(proto);
+
+            if (Javascript.isBrowserAPI(result?.path)) {
+                const parent = p.parentPath;
+                if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                    this.vars.set(parent.node.id.name, new Set([result.path]));
+                    this.log(`Object.create: ${parent.node.id.name} = ${result.path}`);
+                }
+            }
+            return true;
+        }
+
         return false;
     }
-
     _handleArrayMethods(p, callee) {
         if (callee.type !== "MemberExpression") return false;
         if (callee.property.type !== "Identifier") return false;
@@ -1436,6 +1786,368 @@ class CallHandler {
                         this.vars.set(resultArrayName, new Set([Javascript.ARRAY]));
                     }
                 }
+            }
+
+            return hasChromeElements;
+        }
+
+        return false;
+    }
+
+    _handleArrayMutationMethods(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.object.type !== "Identifier") return false;
+        if (callee.property.type !== "Identifier") return false;
+
+        const arrayName = callee.object.name;
+        const method = callee.property.name;
+
+        // Check if we're tracking this as an array
+        const arrayType = this.vars.get(arrayName);
+        if (!arrayType?.has(Javascript.ARRAY)) return false;
+
+        // Handle push/unshift - adds elements to array
+        if (method === "push" || method === "unshift") {
+            const args = p.node.arguments;
+
+            // Find the next available index
+            let maxIndex = -1;
+            for (const key of this.vars.keys()) {
+                if (key.startsWith(`${arrayName}[`)) {
+                    const match = key.match(/\[(\d+)\]/);
+                    if (match) {
+                        maxIndex = Math.max(maxIndex, parseInt(match[1]));
+                    }
+                }
+            }
+
+            for (let i = 0; i < args.length; i++) {
+                const result = this.resolver.resolveExpression(args[i]);
+                if (result?.path) {
+                    const newIndex = method === "push" ? maxIndex + 1 + i : i;
+                    this.vars.set(`${arrayName}[${newIndex}]`, new Set([result.path]));
+                    this.log(`Array.${method}: ${arrayName}[${newIndex}] = ${result.path}`);
+                }
+            }
+            return true;
+        }
+
+        // Handle pop/shift - removes and returns element
+        if (method === "pop" || method === "shift") {
+            let elemPath = null;
+
+            if (method === "pop") {
+                // Find the highest index
+                let maxIndex = -1;
+                for (const key of this.vars.keys()) {
+                    if (key.startsWith(`${arrayName}[`)) {
+                        const match = key.match(/\[(\d+)\]/);
+                        if (match) {
+                            maxIndex = Math.max(maxIndex, parseInt(match[1]));
+                        }
+                    }
+                }
+
+                if (maxIndex >= 0) {
+                    const elemKey = `${arrayName}[${maxIndex}]`;
+                    if (this.vars.has(elemKey)) {
+                        elemPath = this.vars.get(elemKey);
+                    }
+                }
+            } else { // shift
+                // Return element at index 0
+                const elemKey = `${arrayName}[0]`;
+                if (this.vars.has(elemKey)) {
+                    elemPath = this.vars.get(elemKey);
+                }
+            }
+
+            if (elemPath) {
+                // Track the return value in parent assignment
+                const parent = p.parentPath;
+                if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                    this.vars.set(parent.node.id.name, elemPath);
+                    this.log(`Array.${method}: ${parent.node.id.name} = ${Array.from(elemPath)[0]}`);
+                } else if (parent.isAssignmentExpression() && parent.node.left.type === "Identifier") {
+                    this.vars.set(parent.node.left.name, elemPath);
+                    this.log(`Array.${method}: ${parent.node.left.name} = ${Array.from(elemPath)[0]}`);
+                }
+            }
+            return true;
+        }
+
+        // Handle splice - can add/remove elements
+        if (method === "splice") {
+            const [startArg, deleteCountArg, ...itemsToAdd] = p.node.arguments;
+
+            // Try to evaluate start index
+            const startIndex = this.evaluator.tryEvaluate(startArg);
+
+            if (startIndex !== null && typeof startIndex === "string" && !isNaN(startIndex)) {
+                const start = parseInt(startIndex);
+
+                // Track items being added to the original array
+                for (let i = 0; i < itemsToAdd.length; i++) {
+                    const result = this.resolver.resolveExpression(itemsToAdd[i]);
+                    if (result?.path) {
+                        this.vars.set(`${arrayName}[${start + i}]`, new Set([result.path]));
+                        this.log(`Array.splice: ${arrayName}[${start + i}] = ${result.path}`);
+                    }
+                }
+
+                // Track removed elements being returned (if deleteCount > 0)
+                const deleteCount = this.evaluator.tryEvaluate(deleteCountArg);
+                if (deleteCount !== null && parseInt(deleteCount) > 0) {
+                    const count = parseInt(deleteCount);
+
+                    // splice returns an array of removed elements
+                    const parent = p.parentPath;
+
+                    // Handle: const result = arr.splice(...)
+                    if (parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                        const resultArrayName = parent.node.id.name;
+                        this.vars.set(resultArrayName, new Set([Javascript.ARRAY]));
+
+                        // Track specific removed elements
+                        for (let i = 0; i < count; i++) {
+                            const elemKey = `${arrayName}[${start + i}]`;
+                            if (this.vars.has(elemKey)) {
+                                const elemPath = this.vars.get(elemKey);
+                                this.vars.set(`${resultArrayName}[${i}]`, elemPath);
+                                this.log(`Array.splice result: ${resultArrayName}[${i}] = ${Array.from(elemPath)[0]}`);
+                            }
+                        }
+                    }
+                    // Handle: const [api] = arr.splice(...)
+                    else if (parent.isVariableDeclarator() && parent.node.id.type === "ArrayPattern") {
+                        const pattern = parent.node.id;
+
+                        // Destructure the result array
+                        for (let i = 0; i < pattern.elements.length && i < count; i++) {
+                            const element = pattern.elements[i];
+
+                            if (element?.type === "Identifier") {
+                                const elemKey = `${arrayName}[${start + i}]`;
+                                if (this.vars.has(elemKey)) {
+                                    const elemPath = this.vars.get(elemKey);
+                                    this.vars.set(element.name, elemPath);
+                                    this.log(`Array.splice destructured: ${element.name} = ${Array.from(elemPath)[0]}`);
+                                }
+                            }
+                        }
+                    }
+                    // Handle: [api] = arr.splice(...) (assignment, not declaration)
+                    else if (parent.isAssignmentExpression() && parent.node.left.type === "ArrayPattern") {
+                        const pattern = parent.node.left;
+
+                        // Destructure the result array
+                        for (let i = 0; i < pattern.elements.length && i < count; i++) {
+                            const element = pattern.elements[i];
+
+                            if (element?.type === "Identifier") {
+                                const elemKey = `${arrayName}[${start + i}]`;
+                                if (this.vars.has(elemKey)) {
+                                    const elemPath = this.vars.get(elemKey);
+                                    this.vars.set(element.name, elemPath);
+                                    this.log(`Array.splice destructured: ${element.name} = ${Array.from(elemPath)[0]}`);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            return true;
+        }
+
+        return false;
+    }
+
+    _handleAdvancedArrayMethods(p, callee) {
+        if (callee.type !== "MemberExpression") return false;
+        if (callee.property.type !== "Identifier") return false;
+
+        const method = callee.property.name;
+
+        // Array.find - returns element or undefined
+        if (method === "find" || method === "findLast") {
+            const parent = p.parentPath;
+
+            // Check if array contains chrome elements
+            let hasChromeElements = false;
+            let chromeElementPath = null;
+
+            // Check inline array: [chrome.runtime].find()
+            if (callee.object.type === "ArrayExpression") {
+                for (const elem of callee.object.elements) {
+                    if (elem) {
+                        const elemResult = this.resolver.resolveExpression(elem);
+                        if (Javascript.isBrowserAPI(elemResult?.path)) {
+                            hasChromeElements = true;
+                            chromeElementPath = elemResult.path;
+                            break;
+                        }
+                    }
+                }
+            }
+            // Check named array
+            else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
+                const arrayType = this.vars.get(callee.object.name);
+                if (arrayType.has(Javascript.ARRAY)) {
+                    const arrayName = callee.object.name;
+
+                    // Check array elements
+                    for (let i = 0; i < 10; i++) {
+                        const elemKey = `${arrayName}[${i}]`;
+                        if (this.vars.has(elemKey)) {
+                            const elemPath = this.vars.get(elemKey);
+                            if (elemPath.size === 1 && !elemPath.has(Javascript.WILDCARD)) {
+                                const path = Array.from(elemPath)[0];
+                                if (Javascript.isBrowserAPI(path)) {
+                                    hasChromeElements = true;
+                                    chromeElementPath = path;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasChromeElements && parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                this.vars.set(parent.node.id.name, new Set([chromeElementPath]));
+                this.log(`Array.${method}: ${parent.node.id.name} = ${chromeElementPath}`);
+            }
+
+            return hasChromeElements;
+        }
+
+        // Array.reduce - returns accumulated value
+        if (method === "reduce" || method === "reduceRight") {
+            const parent = p.parentPath;
+
+            // Check if array contains chrome elements
+            let hasChromeElements = false;
+            let chromeElementPath = null;
+
+            if (callee.object.type === "ArrayExpression") {
+                for (const elem of callee.object.elements) {
+                    if (elem) {
+                        const elemResult = this.resolver.resolveExpression(elem);
+                        if (Javascript.isBrowserAPI(elemResult?.path)) {
+                            hasChromeElements = true;
+                            chromeElementPath = elemResult.path;
+                            break;
+                        }
+                    }
+                }
+            } else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
+                const arrayType = this.vars.get(callee.object.name);
+                if (arrayType.has(Javascript.ARRAY)) {
+                    const arrayName = callee.object.name;
+
+                    for (let i = 0; i < 10; i++) {
+                        const elemKey = `${arrayName}[${i}]`;
+                        if (this.vars.has(elemKey)) {
+                            const elemPath = this.vars.get(elemKey);
+                            if (elemPath.size === 1 && !elemPath.has(Javascript.WILDCARD)) {
+                                const path = Array.from(elemPath)[0];
+                                if (Javascript.isBrowserAPI(path)) {
+                                    hasChromeElements = true;
+                                    chromeElementPath = path;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (hasChromeElements && parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                const resultName = parent.node.id.name;
+                // Reduce returns an array that accumulates elements
+                this.vars.set(resultName, new Set([Javascript.ARRAY]));
+                this.vars.set(`${resultName}[0]`, new Set([chromeElementPath]));
+                this.log(`Array.${method}: ${resultName}[0] = ${chromeElementPath}`);
+            }
+
+            return hasChromeElements;
+        }
+
+// Array.flatMap - returns flattened array
+        if (method === "flatMap") {
+            const parent = p.parentPath;
+
+            let hasChromeElements = false;
+            let chromeElementPath = null;
+
+            // Check if array contains nested arrays with chrome
+            if (callee.object.type === "ArrayExpression") {
+                // [[chrome.runtime]].flatMap()
+                for (const elem of callee.object.elements) {
+                    if (elem && elem.type === "ArrayExpression") {
+                        for (const nestedElem of elem.elements) {
+                            if (nestedElem) {
+                                const elemResult = this.resolver.resolveExpression(nestedElem);
+                                if (Javascript.isBrowserAPI(elemResult?.path)) {
+                                    hasChromeElements = true;
+                                    chromeElementPath = elemResult.path;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (hasChromeElements) break;
+                }
+            } else if (callee.object.type === "Identifier" && this.vars.has(callee.object.name)) {
+                const arrayType = this.vars.get(callee.object.name);
+                if (arrayType.has(Javascript.ARRAY)) {
+                    const arrayName = callee.object.name;
+
+                    // Check if array elements are themselves arrays with chrome
+                    for (let i = 0; i < 10; i++) {
+                        const elemKey = `${arrayName}[${i}]`;
+                        if (this.vars.has(elemKey)) {
+                            const elemPath = this.vars.get(elemKey);
+
+                            // Check if this element is also an array
+                            if (elemPath.has(Javascript.ARRAY)) {
+                                // Check nested array's elements
+                                for (let j = 0; j < 10; j++) {
+                                    const nestedKey = `${elemKey}[${j}]`;
+                                    if (this.vars.has(nestedKey)) {
+                                        const nestedPath = this.vars.get(nestedKey);
+                                        if (nestedPath.size === 1 && !nestedPath.has(Javascript.WILDCARD)) {
+                                            const path = Array.from(nestedPath)[0];
+                                            if (Javascript.isBrowserAPI(path)) {
+                                                hasChromeElements = true;
+                                                chromeElementPath = path;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Also check if the element itself is a chrome API
+                            if (!hasChromeElements && elemPath.size === 1 && !elemPath.has(Javascript.WILDCARD)) {
+                                const path = Array.from(elemPath)[0];
+                                if (Javascript.isBrowserAPI(path)) {
+                                    hasChromeElements = true;
+                                    chromeElementPath = path;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasChromeElements) break;
+                    }
+                }
+            }
+
+            if (hasChromeElements && parent.isVariableDeclarator() && parent.node.id.type === "Identifier") {
+                const resultName = parent.node.id.name;
+                this.vars.set(resultName, new Set([Javascript.ARRAY]));
+                this.vars.set(`${resultName}[0]`, new Set([chromeElementPath]));
+                this.log(`Array.flatMap: ${resultName}[0] = ${chromeElementPath}`);
             }
 
             return hasChromeElements;
