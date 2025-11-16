@@ -771,7 +771,7 @@ class VariableTracker {
         for (const prop of init.properties) {
             if (prop.type === "SpreadElement") {
                 const result = this.resolver.resolveExpression(prop.argument);
-                if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
+                if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                     this.vars.set(idName, new Set([result.path]));
                     foundSpread = true;
                     break;
@@ -825,7 +825,7 @@ class VariableTracker {
                         if (prop.body.body.length === 1 &&
                             prop.body.body[0].type === "ReturnStatement") {
                             const retVal = this.resolver.resolveExpression(prop.body.body[0].argument);
-                            if (retVal?.path && StaticAnalysisUtils.isBrowserAPI(retVal.path)) {
+                            if (StaticAnalysisUtils.isBrowserAPI(retVal?.path)) {
                                 this.vars.set(`${idName}.${key}`, new Set([retVal.path]));
                                 this.log(`Getter: ${idName}.${key} = ${retVal.path}`);
                             }
@@ -883,6 +883,7 @@ class VariableTracker {
         const left = p.node.left;
         const right = p.node.right;
 
+        // Handle destructuring assignments
         if (left.type === "ObjectPattern" || left.type === "ArrayPattern") {
             const result = this.resolver.resolveExpression(right);
             const base = result?.path || "*";
@@ -890,17 +891,21 @@ class VariableTracker {
             return;
         }
 
+        // Handle simple identifier assignments
         if (left.type === "Identifier") {
             const result = this.resolver.resolveExpression(right);
+
             if (result?.path) {
-                this.vars.set(left.name, new Set([result.path]));
+                this._updateVariable(left.name, result.path);
             } else if (right.type === "StringLiteral") {
-                this.vars.set(left.name, new Set([right.value]));
+                this._updateVariable(left.name, right.value);
             } else {
-                this.vars.set(left.name, new Set(["*"]));
+                // Unknown value (object literal, complex expression, etc.)
+                this._updateVariable(left.name, "*");
             }
         }
 
+        // Track Map assignments for chrome API storage
         if (left.type === "MemberExpression" &&
             left.object.type === "Identifier" &&
             this.vars.get(left.object.name)?.has("Map")) {
@@ -908,6 +913,33 @@ class VariableTracker {
             if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                 this.vars.set(left.object.name, new Set(["Map"]));
             }
+        }
+    }
+
+// Helper: Update variable with browser API taint preservation
+    _updateVariable(varName, newValue) {
+        if (this.vars.has(varName)) {
+            const existing = this.vars.get(varName);
+            const hasBrowserTaint = Array.from(existing).some(v =>
+                StaticAnalysisUtils.isBrowserAPI(v)
+            );
+            const newIsBrowser = StaticAnalysisUtils.isBrowserAPI(newValue);
+
+            if (hasBrowserTaint && newIsBrowser) {
+                // Both are browser APIs - merge for branch analysis
+                existing.add(newValue);
+                this.log(`Variable ${varName}: merged ${newValue}`);
+            } else if (hasBrowserTaint) {
+                // Conservative analysis: keep browser taint even when assigning non-browser
+                existing.add(newValue);
+                this.log(`Variable ${varName}: kept browser taint, added ${newValue}`);
+            } else {
+                // No browser involvement - simple replacement
+                this.vars.set(varName, new Set([newValue]));
+            }
+        } else {
+            // First assignment
+            this.vars.set(varName, new Set([newValue]));
         }
     }
 
@@ -1110,7 +1142,7 @@ class CallHandler {
                 const [arg] = p.node.arguments;
                 if (arg) {
                     const result = this.resolver.resolveExpression(arg);
-                    if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
+                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                         this.calls.add(`${result.path}.DYNAMIC`);
                         this.log(`Promise.${methodName}(${result.path})`);
                         return;
@@ -1187,6 +1219,31 @@ class CallHandler {
             }
         }
 
+        // Handle case where callee could be multiple chrome paths
+        // e.g., api.get() where api could be chrome.cookies OR chrome.storage
+        if (callee.type === "MemberExpression" && callee.object.type === "Identifier") {
+            const objName = callee.object.name;
+            if (this.vars.has(objName)) {
+                const possibleValues = this.vars.get(objName);
+                if (possibleValues.size > 1) {
+                    const methodName = callee.property.type === "Identifier"
+                        ? callee.property.name
+                        : null;
+
+                    if (methodName) {
+                        // Add all possible chrome API paths
+                        for (const val of possibleValues) {
+                            if (StaticAnalysisUtils.isBrowserAPI(val)) {
+                                this.calls.add(`${val}.${methodName}`);
+                                this.log(`Multiple paths call: ${val}.${methodName}`);
+                            }
+                        }
+                        return;
+                    }
+                }
+            }
+        }
+
         // Plain identifier calls
         if (actualCallee.type === "Identifier" && this.vars.has(actualCallee.name)) {
             for (const val of this.vars.get(actualCallee.name)) {
@@ -1194,8 +1251,6 @@ class CallHandler {
                     this.calls.add("DYNAMIC");
                 } else if (StaticAnalysisUtils.isBrowserAPI(val)) {
                     this.calls.add(val);
-                } else if (val === "*") {
-                    this.calls.add("chrome.DYNAMIC");
                 }
             }
         }
@@ -1215,7 +1270,7 @@ class CallHandler {
                 // Check if any argument is a chrome reference
                 for (const arg of p.node.arguments) {
                     const result = this.resolver.resolveExpression(arg);
-                    if (result?.path && StaticAnalysisUtils.isBrowserAPI(result.path)) {
+                    if (StaticAnalysisUtils.isBrowserAPI(result?.path)) {
                         this.calls.add(`${result.path}.DYNAMIC`);
                         this.log(`Chrome passed to function: ${funcName}(${result.path})`);
                         return;
@@ -1381,7 +1436,7 @@ class CallHandler {
                     for (const elem of callee.object.elements) {
                         if (elem) {
                             const elemResult = this.resolver.resolveExpression(elem);
-                            if (elemResult?.path && StaticAnalysisUtils.isBrowserAPI(elemResult.path)) {
+                            if (StaticAnalysisUtils.isBrowserAPI(elemResult?.path)) {
                                 hasChromeElements = true;
                                 chromeElementPath = elemResult.path;
                                 break;

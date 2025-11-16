@@ -37,14 +37,34 @@
 })();
 
 
-async function simpleCheck(name, code, required = "chrome.runtime.sendMessage") {
+async function simpleCheck(name, code, required = "chrome.runtime.sendMessage", forbidden = []) {
     check(name, async () => {
         const files = { "main.js": code };
         const result = await StaticAnalysis.analyze(["main.js"], id => files[id], true)
 
-        const requiredApis = Array.isArray(required) ? required : [required];
-        if (!requiredApis.some(req => result.apis.includes(req))) {
-            throw new Error(`${JSON.stringify(result.apis)}`);
+        // Check required APIs (presence)
+        if (required) {
+            const requiredApis = Array.isArray(required) ? required : [required];
+            if (!requiredApis.some(req => result.apis.includes(req))) {
+                throw new Error(`Expected APIs not found: ${JSON.stringify(result.apis)}`);
+            }
+        }
+
+        // Check forbidden APIs (absence)
+        if (forbidden.length > 0 || typeof forbidden === 'string') {
+            const forbiddenApis = Array.isArray(forbidden) ? forbidden : [forbidden];
+
+            // Special case: "*" means no APIs should be detected at all
+            if (forbiddenApis.includes("*")) {
+                if (result.apis.length > 0) {
+                    throw new Error(`Expected no APIs but found: ${JSON.stringify(result.apis)}`);
+                }
+            } else {
+                const foundForbidden = forbiddenApis.filter(api => result.apis.includes(api));
+                if (foundForbidden.length > 0) {
+                    throw new Error(`Unexpected APIs found: ${JSON.stringify(foundForbidden)} in ${JSON.stringify(result.apis)}`);
+                }
+            }
         }
     });
 }

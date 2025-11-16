@@ -748,3 +748,334 @@ simpleCheck("Async module loader pattern",
     `,
     "chrome.runtime.DYNAMIC"
 );
+
+// === Test: val === "*" scenarios ===
+
+// 1. Function hidden via ternary - Chrome should be detected at definition
+simpleCheck("Function from ternary operator",
+    `
+    const fn1 = chrome.runtime.sendMessage;
+    const fn2 = () => console.log("safe");
+    const x = Math.random() > 0.5 ? fn1 : fn2;
+    x("hi");
+    `,
+    "chrome.runtime.sendMessage"  // Should detect at assignment, not call
+);
+
+// 2. Function from array - Chrome detected when array is built
+simpleCheck("Function from array",
+    `
+    const fns = [chrome.runtime.sendMessage, () => console.log("safe")];
+    const x = fns[0];
+    x("hi");
+    `,
+    "chrome.runtime.sendMessage"  // Should detect in array element
+);
+
+// 3. Multi-branch worst-case analysis
+simpleCheck("All branches tracked in union",
+    `
+    const a = chrome.cookies;
+    const b = {safe: "object"};
+    const x = Math.random() > 0.5 ? a : b;
+    const y = x.getAll;  // Could be chrome.cookies.getAll OR b.getAll
+    y();
+    `,
+    "chrome.cookies.getAll"  // Should detect via a branch
+);
+
+// 4. Dynamic import (truly unknown)
+simpleCheck("Dynamic require - can't analyze",
+    `
+    const moduleName = atob("c29tZU1vZHVsZQ==");  // base64 "someModule"
+    const helper = require(moduleName);
+    helper.doSomething();
+    `,
+    null,
+    ["*"]
+    );
+
+// 5. External function that we DO analyze (via reconstitution)
+// This would require multi-file test setup, skip for now
+
+// 6. Truly unknown complex expression
+simpleCheck("Complex unknown expression",
+    `
+    const factory = (() => {
+        return Math.random() > 0.5 
+            ? (x) => x.toUpperCase() 
+            : (x) => x.toLowerCase();
+    })();
+    const result = factory("test");
+    result();  // result is a string, calling it makes no sense but tests unknown
+    `,
+    null,
+    ["*"]  // Should detect nothing (no chrome)
+);
+
+// 7. Method on unknown object
+simpleCheck("Method on unknown object",
+    `
+    const config = JSON.parse(someExternalString);
+    config.handler();
+    `,
+    null,
+    ["*"]  // No chrome, should detect nothing
+);
+
+// 8. Aliasing chain that IS tracked
+simpleCheck("Aliasing chain fully tracked",
+    `
+    const a = chrome.cookies;
+    const b = a;
+    const c = b;
+    const method = c.getAll;
+    method();
+    `,
+    "chrome.cookies.getAll"  // All aliases tracked
+);
+
+// 9. Function parameter (currently not tracked)
+simpleCheck("Function parameter - limitation",
+    `
+    function wrapper(api) {
+        return function() { api.getAll(); };
+    }
+    const fn = wrapper(chrome.cookies);
+    fn();
+    `,
+    "chrome.cookies.DYNAMIC"  // We added the "chrome passed to function" detection
+);
+
+// 10. Closure with all paths tracked
+simpleCheck("Closure with conditional assignment",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.cookies;
+    } else {
+        api = chrome.storage;
+    }
+    api.get("key");
+    `,
+    ["chrome.cookies.get","chrome.storage.get"]
+);
+
+// === Variable assignment and merging test cases ===
+
+// 1. Sequential overwrites - KEEP (since we do not deal with branching)
+simpleCheck("Sequential overwrite - non-browser replaces browser",
+    `
+    let api = chrome.runtime;
+    api = "something";
+    api.sendMessage("hi");  // "something".sendMessage() - not a chrome call
+    `
+);
+
+simpleCheck("Sequential overwrite - browser replaces browser",
+    `
+    let api = chrome.cookies;
+    api = chrome.storage;
+    api.get("key");
+    `,
+    ["chrome.cookies.get","chrome.storage.get"] // we do not manage branches, both are possible
+);
+
+// 2. Conditional branching - should MERGE both paths
+simpleCheck("Conditional assignment - both chrome APIs",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.cookies;
+    } else {
+        api = chrome.storage;
+    }
+    api.get("key");
+    `,
+    ["chrome.cookies.get", "chrome.storage.get"]  // Both possibilities
+);
+
+simpleCheck("Ternary operator - merging",
+    `
+    const api = Math.random() > 0.5 ? chrome.cookies : chrome.storage;
+    api.getAll();
+    `,
+    ["chrome.cookies.getAll", "chrome.storage.getAll"]
+);
+
+simpleCheck("Switch statement - multiple branches",
+    `
+    let api;
+    switch(Math.random() > 0.5 ? "a" : "b") {
+        case "a":
+            api = chrome.cookies;
+            break;
+        case "b":
+            api = chrome.storage;
+            break;
+    }
+    api.get("key");
+    `,
+    ["chrome.cookies.get", "chrome.storage.get"]
+);
+
+// 3. Mixed chrome and navigator APIs - should merge
+simpleCheck("Merging chrome and navigator APIs",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.cookies;
+    } else {
+        api = navigator.geolocation;
+    }
+    api.getCurrentPosition();
+    `,
+    ["chrome.cookies.getCurrentPosition", "navigator.geolocation.getCurrentPosition"]
+);
+
+// 4. One branch assigns, other doesn't
+simpleCheck("Only one branch assigns browser API",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.cookies;
+    }
+    // If condition is false, api is undefined
+    // But we track the chrome.cookies possibility
+    if (api) api.getAll();
+    `,
+    "chrome.cookies.getAll"  // Should detect the one branch
+);
+
+// 5. Separate variables - no merging
+simpleCheck("Different variables - no cross-contamination",
+    `
+    let a, b;
+    if (Math.random() > 0.5) {
+        a = chrome.cookies;
+    } else {
+        b = chrome.storage;
+    }
+    a.getAll();
+    b.get("key");
+    `,
+    ["chrome.cookies.getAll", "chrome.storage.get"]  // Each call detected separately
+);
+
+// 6. Multiple reassignments in same branch
+simpleCheck("Multiple assignments in same branch",
+    `
+    let api = chrome.cookies;
+    api = chrome.storage;  // Overwrites
+    api = chrome.tabs;     // Overwrites again
+    api.query({});
+    `,
+    "chrome.tabs.query"  // Only last one
+);
+
+// 7. Merging then accessing different methods
+simpleCheck("Merged variable with different method calls",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.cookies;
+    } else {
+        api = chrome.storage.local;
+    }
+    api.get("key");
+    api.set("key", "value");
+    `,
+    [
+        "chrome.cookies.get",
+        "chrome.storage.local.get",
+        "chrome.cookies.set",
+        "chrome.storage.local.set"
+    ]  // All combinations
+);
+
+// 8. Assignment of method reference (not namespace)
+simpleCheck("Assigning method references",
+    `
+    let fn1 = chrome.cookies.getAll;
+    let fn2 = chrome.storage.get;
+    let fn;
+    if (Math.random() > 0.5) {
+        fn = fn1;
+    } else {
+        fn = fn2;
+    }
+    fn("key");
+    `,
+    ["chrome.cookies.getAll", "chrome.storage.get"]  // Both methods
+);
+
+// 9. Overwrite with non-chrome in one branch
+simpleCheck("One branch chrome, other non-chrome",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.cookies;
+    } else {
+        api = {safe: "object"};
+    }
+    api.get();
+    `,
+    "chrome.cookies.get"  // Should still detect chrome branch
+);
+
+// 10. Multiple assignments in different scopes
+simpleCheck("Assignments in nested scopes",
+    `
+    let api = chrome.cookies;
+    {
+        api = chrome.storage;
+    }
+    api.get("key");
+    `,
+    "chrome.storage.get"  // Inner scope overwrites
+);
+
+// 11. Loop with assignment (all iterations overwrite)
+simpleCheck("Assignment in loop",
+    `
+    let api;
+    for (let i = 0; i < 2; i++) {
+        if (i === 0) api = chrome.cookies;
+        else api = chrome.storage;
+    }
+    api.get("key");
+    `,
+    ["chrome.cookies.get", "chrome.storage.get"]  // Both loop paths
+);
+
+// 12. No assignment at all
+simpleCheck("Variable never assigned browser API",
+    `
+    let api = "notBrowser";
+    api.get("key");
+    `,
+    null,
+    ["*"]
+);
+
+simpleCheck("Simple assignment test",
+    `
+    let api;
+    api = chrome.cookies;
+    api.get();
+    `,
+    "chrome.cookies.get"
+);
+
+
+simpleCheck("Debug - assignment in if-else",
+    `
+    let api;
+    if (Math.random() > 0.5) {
+        api = chrome.runtime;
+    } else {
+        api = {safe: "object"};
+    }
+    api.sendMessage("hi");
+    `,
+);
