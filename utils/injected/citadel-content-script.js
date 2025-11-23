@@ -229,8 +229,9 @@ async function checkLogin(event, button) {
             repeatEvent(event, button)
         } else {
             loginForm.password.reuse = await loginForm.password.reuse
-            await sendMessage("account-usage", { report: loginForm })
         }
+
+        await sendMessage("account-usage", { report: loginForm })
     }
 
     if (loginForm?.totp) sendMessage("receive-totp")
