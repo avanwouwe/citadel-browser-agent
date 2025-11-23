@@ -6,6 +6,7 @@ class Extension {
     static exceptions
 
     static Risk = class {
+        static UNKNOWN = "UNKNOWN"
         static LOW = "LOW"
         static MEDIUM = "MEDIUM"
         static HIGH = "HIGH"
@@ -259,9 +260,10 @@ class Extension {
         }
 
         static ofScore(score) {
-            if (score < 4.0) return Extension.Risk.LOW
-            if (score < 7.0) return Extension.Risk.MEDIUM
-            if (score < 8.5) return Extension.Risk.HIGH
+            if (score == null) return Extension.Risk.UNKNOWN
+            if (score < 4.0)   return Extension.Risk.LOW
+            if (score < 7.0)   return Extension.Risk.MEDIUM
+            if (score < 8.5)   return Extension.Risk.HIGH
             return Extension.Risk.CRITICAL
         }
 

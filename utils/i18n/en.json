@@ -125,6 +125,7 @@
       }
     },
     "levels": {
+      "unknown": "Unknown Risk",
       "low": "Low Risk",
       "medium": "Medium Risk",
       "high": "High Risk",
@@ -146,12 +147,12 @@
       },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {
-        "blocked": "The extension you are trying to install has been blocked because",
+        "blocked": "The extension you are trying to install was blocked because",
         "blacklist-extension": "it has been blacklisted",
         "blacklist-category": "the category it belongs to has been blacklisted",
-        "risk-global": "the overall risk level is too high",
-        "risk-impact": "it has a has too much access to sensitive data",
-        "risk-likelihood": "the probability that it is malware or can be hacked is too high"
+        "risk-global": "the overall risk level is too high or unknown",
+        "risk-impact": "the risk of it's access to sensitive data is too high or unknown ",
+        "risk-likelihood": "the probability that it is malware or can be hacked is too high or unknown"
       },
       "details": {
         "header": "Extension Details",

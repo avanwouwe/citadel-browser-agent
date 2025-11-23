@@ -124,6 +124,7 @@
       }
     },
     "levels": {
+      "unknown": "Risque Inconnu",
       "low": "Risque Faible",
       "medium": "Risque Moyen",
       "high": "Risque Élevé",
@@ -148,9 +149,9 @@
         "blocked": "L’extension que vous essayez d’installer a été bloquée car",
         "blacklist-extension": "elle a été interdite",
         "blacklist-category": "la catégorie à laquelle elle appartient a été interdite",
-        "risk-global": "le niveau de risque global est trop élevé",
-        "risk-impact": "elle a un accès trop étendu aux données sensibles",
-        "risk-likelihood": "le probabilité qu’il s’agisse d’un logiciel malveillant ou qu’elle puisse être piratée est trop élevé"
+        "risk-global": "le niveau global de risque est trop élevé ou inconnu",
+        "risk-impact": "le risque lié à son accès à des données sensibles est trop élevé ou inconnu",
+        "risk-likelihood": "la probabilité qu’il s’agisse d’un logiciel malveillant ou qu’il puisse être piraté est trop élevée ou inconnue"
       },
       "details": {
         "header": "Détails de l’extension",

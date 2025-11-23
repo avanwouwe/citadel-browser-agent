@@ -1,5 +1,6 @@
 :root {
     /* Risk level colors */
+    --color-risk-unknown: #adacac;
     --color-risk-low: #218838;
     --color-risk-medium: #e67e22;
     --color-risk-high: #e74c3c;
@@ -88,6 +89,7 @@ body {
     font-weight: bold;
     font-size: 1.5em;
 }
+.risk-unknown { color: var(--color-risk-unknown); font-weight: bold;}
 .risk-low    { color: var(--color-risk-low); font-weight: bold;}
 .risk-medium { color: var(--color-risk-medium); font-weight: bold;}
 .risk-high   { color: var(--color-risk-high); font-weight: bold;}
@@ -256,6 +258,9 @@ button:disabled {
     /* color: #8e2c5a; */
 }
 
+.risk-score.risk-unknown {
+    background: var(--color-risk-unknown);
+}
 .risk-score.risk-low {
     background: var(--color-risk-low);
 }

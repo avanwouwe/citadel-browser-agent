@@ -52,11 +52,11 @@ async function renderPage() {
         reason = 'blacklist-extension'
     } else if (!allowCategory) {
         reason = 'blacklist-category'
-    } else if (scores.global > config.risk.maxGlobal) {
+    } else if (scores.global == null || scores.global > config.risk.maxGlobal) {
         reason = 'risk-global'
-    } else if (scores.impact > config.risk.maxImpact) {
+    } else if (scores.impact == null || scores.impact > config.risk.maxImpact) {
         reason = 'risk-impact'
-    } else if (scores.likelihood > config.risk.maxLikelihood) {
+    } else if (scores.likelihood == null || scores.likelihood > config.risk.maxLikelihood) {
         reason = 'risk-likelihood'
     }
 
@@ -192,7 +192,7 @@ function renderScore(type, scores) {
     const html = `
         <div class="risk-score ${riskClass}">
             <small>${scoreLabel}</small>
-            <p>${score} / 10</p>
+            <p>${score ?? "??"} / 10</p>
             <strong>
                 ${riskLabel}
                     <span class="help">
@@ -211,9 +211,9 @@ function renderScore(type, scores) {
 
     const element = document.getElementById(id)
     element.innerHTML = html
-}
+} z
 
-function formatScore(score) { return score ? Number(score).toFixed(1) : "??" }
+function formatScore(score) { return score != null ? Number(score).toFixed(1) : score }
 
 function showAnalysis() {
     document.getElementById("status").hidden = true

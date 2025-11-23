@@ -21,7 +21,7 @@ class ExtensionAnalysis {
     }
 
     static calculateRisk(storeInfo, manifest, staticAnalysis) {
-        return { likelihood: 2.0, impact: 2.0 , global: 7.0 }
+        return { likelihood: null, impact: null , global: null }
     }
 
     static approve(tabId, url) {
