@@ -155,7 +155,6 @@ function isProtected(sitename) {
     return matchDomain(sitename, config.domain.isApplication)  === true ||
         matchDomain(sitename, config.company.applications) === true ||
         matchDomain(sitename, config.company.domains) === true
-
 }
 
 function getRandomInt(min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {
@@ -294,6 +293,10 @@ function matchDomain(hostname, domainPatterns) {
     domainPatterns = domainPatterns ?? {}
 
     let parts = hostname.split('.');
+
+    if (IPv4Range.isIPV4(hostname)) {
+        parts = parts.reverse()
+    }
 
     for (let i = 0; i < parts.length; i++) {
         const domainToCheck = parts.slice(i).join('.')

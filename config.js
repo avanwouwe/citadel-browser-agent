@@ -327,7 +327,7 @@ class Config {
                 allowed: true,
             },
             id: {
-                allowed: [],
+                allowed: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi"],
                 forbidden: [],
             },
             category: {
@@ -364,9 +364,33 @@ class Config {
     ]
 
     static #init(config) {
-        applyPath(config, this.#domainPatterns, (patterns) => Object.fromEntries(patterns.map(domain => [domain, true])))
+        applyPath(config, this.#domainPatterns, (patterns) => {
+            return Object.fromEntries(
+                patterns.map(Config.#netmaskToDomain)
+                .map(domain => [domain, true])
+            )
+        })
 
         Log.init(config)
+    }
+
+    static #netmaskToDomain(netmask) {
+        const ip = netmask.replace(/(?<=\.|^)x(?=\.|$)/g, "0")
+
+        if (! IPv4Range.isIPV4(ip)) {
+            return netmask
+        }
+
+        if (/(^|\.)x\..*\d/.test(netmask)) {
+            console.error(`non-contiguous 'x' parts in netmask: ${netmask}`)
+            return netmask
+        }
+
+        // Store inverted form: e.g. "192.168.x.x" -> "168.192"
+        return netmask.split('.')
+            .filter(p => p !== 'x')
+            .reverse()
+            .join('.')
     }
 
     static load(newConfig) {
