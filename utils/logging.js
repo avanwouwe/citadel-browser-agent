@@ -117,12 +117,13 @@ class Log {
 
         if (! isProtected(url.hostname) && Log.#levelValue[level] < config.logging.maskUrlLevel) {
             url.username ? url.username = url.username.hashDJB2() : undefined
-            url.password ? url.password = url.password.hashDJB2() : undefined
             url.hostname ? url.hostname = url.hostname.hashDJB2() : undefined
             url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashDJB2() : undefined
             url.hash ? url.hash = url.hash.hashDJB2() : undefined
             url.search ? url.search = url.search.hashDJB2() : undefined
         }
+
+        url.password ? url.password = '-masked-' : undefined
 
         return url.toString()
     }
