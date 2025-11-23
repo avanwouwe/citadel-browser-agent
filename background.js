@@ -250,8 +250,6 @@ function logDownload(event, timestamp, result, level, description) {
 	if (event.exists) download.exists = event.exists
 	if (event.incognito) download.incognito = event.incognito
 
-	description = description.replace("@@URL@@", logger.maskUrl(event.url, level))
-
 	logger.log(timestamp, "download", result, event.url, level, { download }, description, event.referrer, uniqueId)
 }
 
@@ -522,7 +520,7 @@ function reportInteractions() {
 						"https://" + it.appName,
 						Log.INFO,
 						it.interactions,
-						`'${it.appName}' received ${it.interactions} interactions on ${date}`
+						`'@@URL@@' received ${it.interactions} interactions on ${date}`
 						, undefined
 						, undefined
 						, false
