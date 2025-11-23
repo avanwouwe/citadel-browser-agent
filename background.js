@@ -127,23 +127,25 @@ function evaluateRequest(details) {
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
-	if (
-		! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
-		Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
-	) {
-		if (getDomain(details.initiator?.toURL()?.hostname) === getDomain(url.hostname) && AppStats.forURL(details.initiator)?.isAuthenticated) {
-			result.result = "protocol warning"
-			result.level = Log.WARN
-			result.value = url.protocol
-			result.description = `use of protocol type '${url.protocol}' by '${getSitename(details.initiator)}'`
+	if (isProtected(url.hostname)) {
+		if (
+			! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
+			Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
+		) {
+			if (getDomain(details.initiator?.toURL()?.hostname) === getDomain(url.hostname) && AppStats.forURL(details.initiator)?.isAuthenticated) {
+				result.result = "protocol warning"
+				result.level = Log.WARN
+				result.value = url.protocol
+				result.description = `use of protocol type '${url.protocol}' by '${getSitename(details.initiator)}'`
+			}
 		}
-	}
 
-	if (url.password.isNotEmpty()) {
-		result.result = "URL auth warning"
-		result.level = Log.WARN
-		result.value = url.username
-		result.description = `password of '${url.username}' in URL`
+		if (url.password.isNotEmpty()) {
+			result.result = "URL auth warning"
+			result.level = Log.WARN
+			result.value = url.username
+			result.description = `password of '${url.username}' in URL`
+		}
 	}
 
 	const blacklist = blacklistURL?.find(url) ?? blacklistIP?.find(ip)
