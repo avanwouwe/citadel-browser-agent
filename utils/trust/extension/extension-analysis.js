@@ -12,7 +12,7 @@ class ExtensionAnalysis {
             evaluateBlacklist(extensionId, config.extensions.id.allowed, config.extensions.id.forbidden, false) ||
             Extension.exceptions[extensionId] ||
             ExtensionAnalysis.approved.includes(extensionId) ||
-            await Extension.isInstalled(extensionId)
+            Browser.version.brand !== Browser.Firefox && await Extension.isInstalled(extensionId)
         ) {
             return
         }
