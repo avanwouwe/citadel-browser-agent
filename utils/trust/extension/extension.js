@@ -271,15 +271,7 @@ class Extension {
     }
 
     static async isInstalled(extensionId) {
-        return new Promise((resolve) => {
-            chrome.management.get(extensionId, () => {
-                if (chrome.runtime.lastError) {
-                    resolve(false)
-                } else {
-                    resolve(true)
-                }
-            })
-        })
+        return chrome.management.get(extensionId).then(() => true, () => false)
     }
 
     static async flush() {
@@ -300,8 +292,7 @@ class Extension {
                 config.extensions.id.allowed.includes(ext.id) ||
                 Extension.exceptions[ext.id] ||
                 ext.installType === "admin" ||
-                ! Extension.#SIDELOAD_TYPES.includes(ext.installType) && config.extensions.id.allowed.includes("*") ||
-                config.extensions.allowSideloading && config.extensions.id.allowed.includes("*")
+                (config.extensions.allowSideloading || ! Extension.#SIDELOAD_TYPES.includes(ext.installType)) && config.extensions.id.allowed.includes("*")
             ) continue
 
             if (config.extensions.allowExisting) {
