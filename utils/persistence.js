@@ -127,6 +127,12 @@ class ChangeTrackingObject {
         // Create a proxy to intercept property changes
         this.#proxy = new Proxy(target, ChangeTrackingObject.#handler)
         this.#proxy.isDirty = false
+        Object.defineProperty(this.#proxy, 'clear', {
+            value: this.clear.bind(this),
+            enumerable: false,
+            writable: false,
+            configurable: false
+        })
         return this.#proxy
     }
 
