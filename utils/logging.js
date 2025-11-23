@@ -41,8 +41,8 @@ class Log {
 
         if (throttle && Log.#throttles?.[levelValue]?.throttle()) { return }
 
-        url = this.maskUrl(url, level)
-        initiator = this.maskUrl(initiator, level)
+        url = this.maskUrl(url, level, config)
+        initiator = this.maskUrl(initiator, level, config)
 
         url = truncateString(url, config.logging.maxUrlLength) ?? "".emptyToUndefined()
         initiator = truncateString(initiator, config.logging.maxUrlLength) ?? "".emptyToUndefined()
@@ -106,10 +106,8 @@ class Log {
 
     }
 
-    maskUrl(url, level) {
+    maskUrl(url, level, config) {
         if (!url) return url
-
-        const config = Config.forURL(url)
 
         const urlObj = url.toURL()
         if (! urlObj) return url    // if we can't parse the URL, we can't mask it
