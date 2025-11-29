@@ -17,6 +17,7 @@ class Action {
     static BLOCK = "BLOCK"
 
     static values= [this.NOTHING, this.NOTIFY, this.WARN, this.BLOCK]
+    static indexOf(value) { return this.values.indexOf(value) }
 }
 
 class Audit {

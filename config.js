@@ -175,6 +175,7 @@ class Config {
                 domains: [ ]
             },
             passwordReuse: {
+                action: "WARN",
                 exceptions: {
                     allowed: false,
                     groups: [ ]

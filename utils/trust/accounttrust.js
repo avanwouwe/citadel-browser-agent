@@ -23,6 +23,7 @@ class AccountTrust {
         for (const acct of failingAccounts) {
             const accountKey = AccountTrust.accountKey(acct.username, acct.system)
             const finding = this.#audit.getFinding(accountKey)
+            acct.report = {...acct.report}
             acct.report.state = finding?.getState() ?? State.FAILING
             acct.report.nextState = finding?.getNextState() ?? { state : State.FAILING }
         }
@@ -51,17 +52,10 @@ class AccountTrust {
             const warnTrigger = config.account.trigger.warn
             const blockTrigger = config.account.trigger.block
 
-            let action = Action.NOTHING
-            for (const i of Action.values) {
-                if (acct.report.issues.count >= config.account.actions[i]) {
-                    action = i
-                }
-            }
-
-            const control = new Control(accountKey, action, warnTrigger, blockTrigger)
+            const control = new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
             const report = {
                 name: accountKey,
-                passed: action === Action.NOTHING || action === Action.SKIP,
+                passed: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
                 timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? nowTimestamp()
             }
             control.addReport(report)
@@ -81,11 +75,20 @@ class AccountTrust {
 
         const apps = app ? [[appName, app]] : AppStats.allApps()
         for (const [system, app] of apps) {
-            for (const [username, report] of AppStats.allAccounts(app)) {
+            for (const [username, details] of AppStats.allAccounts(app)) {
                 if (!AccountTrust.checkFor(username, system)) continue
 
+                const report = { ...details }
+                report.action = report?.issues?.reuse ? config.account.passwordReuse.action : Action.NOTHING
+
                 const issueCount = report.issues?.count ?? 0
-                if (issueCount >= config.account.actions.NOTIFY) {
+                for (const currAction of Action.values) {
+                    if (issueCount >= config.account.actions[currAction] && State.indexOf(currAction) > State.indexOf(report.action)) {
+                        report.action = currAction
+                    }
+                }
+
+                if (Action.indexOf(report.action) >= Action.indexOf(Action.NOTIFY)) {
                     const description = {
                         numberOfDigits:     t("accounttrust.password.quality.number-digits",     { min: config.account.passwordPolicy.minNumberOfDigits }),
                         numberOfLetters:    t("accounttrust.password.quality.number-letters",    { min: config.account.passwordPolicy.minNumberOfLetters }),
