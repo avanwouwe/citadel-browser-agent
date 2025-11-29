@@ -6,7 +6,18 @@ class PasswordCheck {
         return ! PasswordCheck.#knownAccounts.includes(username)
     }
 
-    static analyzePassword(username, password) {
+    static analyzeAccount(username, password) {
+        const passwordAnalysis = PasswordCheck.analyzePassword(password)
+
+        const nonLetterChar = /[^\p{L}]+/gu
+        const u = username.toLowerCase().replace(nonLetterChar, '')
+        const p = password.toLowerCase().replace(nonLetterChar, '')
+        passwordAnalysis.usernameInPassword = (u.includes(p) || p.includes(u)) ? 1 : 0
+
+        return passwordAnalysis
+    }
+
+    static analyzePassword(password) {
         const passwordAnalysis = {
             length: password !== undefined ? password.length : 0,
             numberOfDigits: 0,
@@ -36,12 +47,61 @@ class PasswordCheck {
             }
         }
 
-        const nonLetterChar = /[^\p{L}]+/gu
-        const u = username.toLowerCase().replace(nonLetterChar, '')
-        const p = password.toLowerCase().replace(nonLetterChar, '')
-        passwordAnalysis.usernameInPassword = (u.includes(p) || p.includes(u)) ? 1 : 0
-
         return passwordAnalysis
+    }
+
+    static #HEX_FORMAT_REGEX = /^[0-9a-fA-F\s-]+$/
+
+    static isSecret(str) {
+        if (str == null || str.length < 10) return false
+
+        const analysis = PasswordCheck.analyzePassword(str)
+        const isHex = PasswordCheck.#HEX_FORMAT_REGEX.test(str)
+
+        return analysis.entropy > 3.8 ||
+            isHex && analysis.entropy > 3.4 ||
+            analysis.numberOfSymbols + analysis.numberOfUpperCase + analysis.numberOfDigits >= 4 &&  analysis.numberOfLowerCase > 0 && analysis.entropy > 3.2 ||
+            analysis.numberOfSymbols >= 2 && analysis.numberOfUpperCase >= 2 && analysis.numberOfDigits >= 2 && analysis.numberOfLowerCase >= 0 && analysis.entropy > 3.2
+    }
+
+    static maskIfSecret(str, visibleStart = 3, visibleEnd = 3, maskChar = '•') {
+        if (! PasswordCheck.isSecret(str)) return str
+
+        const len = str?.length || 0
+        if (len <= visibleStart + visibleEnd) {
+            // too short, just mask everything
+            return maskChar.repeat(len)
+        }
+        const start = str.slice(0, visibleStart)
+        const end   = str.slice(-visibleEnd)
+        const maskedSection = maskChar.repeat(5)
+        return `${start}${maskedSection}${end}`
+    }
+
+    static #NON_DIGIT_REGEX = /[^0-9]+/
+    static #CREDITCARD_FORMAT_REGEX = /^\s*[0-9\s-]+\s*$/
+
+    static isCreditCard(str) {
+        if (str == null || str.length < 13 || ! PasswordCheck.#CREDITCARD_FORMAT_REGEX.test(str)) return false
+
+        const digits = str.replace(PasswordCheck.#NON_DIGIT_REGEX, '')
+
+        if (digits.length < 13 || digits.length > 19) return false
+
+        // Apply the Luhn algorithm
+        let sum = 0
+        let shouldDouble = false;
+        for (let i = digits.length - 1; i >= 0; i--) {
+            let d = parseInt(digits.charAt(i), 10)
+            if (shouldDouble) {
+                d *= 2
+                if (d > 9) d -= 9
+            }
+            sum += d
+            shouldDouble = !shouldDouble
+        }
+
+        return (sum % 10 === 0)
     }
 
     static getDomainFromUsername(username) {

@@ -238,6 +238,8 @@ async function checkLogin(event, button) {
 }
 
 function analyzeForm(formElements, eventElement) {
+    formElements = formElements.filter(elem => elem.value?.length < 100 && ! PasswordCheck.isCreditCard(elem.value))
+
     let username, password, TOTP
     const formHasPassword = formElements.some(elem => elem.type === 'password')
 
@@ -255,7 +257,7 @@ function analyzeForm(formElements, eventElement) {
 
         if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
             if (! MFACheck.isTOTP(elem.value)) {
-                    debug("found password")
+                debug("found password")
 
                 password = elem.value
                 continue
@@ -280,6 +282,8 @@ function analyzeForm(formElements, eventElement) {
         username = findUsernameInAncestors(eventElement)
     }
 
+    username = PasswordCheck.maskIfSecret(username)
+
     debug("form username is ", username)
     debug("form password is ", password ? "<masked>" : undefined)
     debug("form TOTP is ", TOTP)
@@ -298,7 +302,7 @@ function analyzeForm(formElements, eventElement) {
     }
 
     if (password) {
-        login.password = PasswordCheck.analyzePassword(sessionState.auth.username, password)
+        login.password = PasswordCheck.analyzeAccount(sessionState.auth.username, password)
 
         const salt = PasswordCheck.getSalt()
         if (salt) {
