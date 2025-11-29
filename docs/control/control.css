@@ -1,0 +1,463 @@
+/* ============================================
+   Citadel Control Pages - Shared Styles
+   ============================================ */
+
+:root {
+    /* Color Palette */
+    --primary-color: #2563eb;
+    --primary-dark: #1e40af;
+    --secondary-color: #64748b;
+
+    /* Status Colors */
+    --status-failed: #dc2626;
+    --status-failed-bg: #fee2e2;
+    --status-passed: #16a34a;
+    --status-passed-bg: #dcfce7;
+    --status-warning: #ea580c;
+    --status-warning-bg: #ffedd5;
+
+    /* Neutral Colors */
+    --gray-50: #f8fafc;
+    --gray-100: #f1f5f9;
+    --gray-200: #e2e8f0;
+    --gray-300: #cbd5e1;
+    --gray-600: #475569;
+    --gray-700: #334155;
+    --gray-900: #0f172a;
+
+    /* Spacing */
+    --spacing-xs: 0.5rem;
+    --spacing-sm: 1rem;
+    --spacing-md: 1.5rem;
+    --spacing-lg: 2rem;
+    --spacing-xl: 3rem;
+
+    /* Border Radius */
+    --radius-sm: 0.375rem;
+    --radius-md: 0.5rem;
+    --radius-lg: 0.75rem;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+    line-height: 1.6;
+    color: var(--gray-900);
+    background-color: var(--gray-50);
+    padding: var(--spacing-md);
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+}
+
+/* ============================================
+   Typography
+   ============================================ */
+
+h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-sm);
+    line-height: 1.2;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-900);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 2px solid var(--gray-200);
+}
+
+h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: var(--spacing-sm);
+}
+
+h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: var(--spacing-sm);
+}
+
+p {
+    margin-bottom: var(--spacing-md);
+    color: var(--gray-700);
+}
+
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+strong {
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+/* ============================================
+   Header
+   ============================================ */
+
+.page-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    padding: var(--spacing-lg);
+}
+
+.breadcrumb {
+    font-size: 0.875rem;
+    margin-bottom: var(--spacing-sm);
+    opacity: 0.9;
+}
+
+.breadcrumb a {
+    color: white;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.breadcrumb .current {
+    font-weight: 600;
+}
+
+.page-header h1 {
+    color: white;
+    margin-bottom: var(--spacing-md);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-md);
+    border-radius: 9999px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.failed {
+    background-color: var(--status-failed);
+    color: white;
+}
+
+.status-badge.passed {
+    background-color: var(--status-passed);
+    color: white;
+}
+
+.status-badge.warning {
+    background-color: var(--status-warning);
+    color: white;
+}
+
+.status-inline {
+    font-weight: 600;
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-sm);
+}
+
+.status-inline.passed {
+    background-color: var(--status-passed-bg);
+    color: var(--status-passed);
+}
+
+.status-inline.failed {
+    background-color: var(--status-failed-bg);
+    color: var(--status-failed);
+}
+
+/* ============================================
+   Sections
+   ============================================ */
+
+section {
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+section:last-of-type {
+    border-bottom: none;
+}
+
+/* ============================================
+   Control Info Section
+   ============================================ */
+
+.control-info {
+    background-color: var(--gray-50);
+}
+
+/* ============================================
+   Security Importance Section
+   ============================================ */
+
+.importance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.importance-item {
+    background-color: var(--gray-50);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--gray-200);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.importance-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.importance-item .icon {
+    font-size: 2rem;
+    margin-bottom: var(--spacing-sm);
+}
+
+.importance-item h3 {
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-xs);
+}
+
+.importance-item p {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+    color: var(--gray-600);
+}
+
+/* ============================================
+   Remediation Section
+   ============================================ */
+
+.remediation-intro {
+    color: var(--gray-600);
+    margin-bottom: var(--spacing-lg);
+}
+
+/* Platform Tabs */
+.platform-tabs {
+    display: flex;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    padding: var(--spacing-sm) var(--spacing-md);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.tab-button:hover {
+    color: var(--primary-color);
+    background-color: var(--gray-50);
+}
+
+.tab-button.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.platform-icon {
+    font-size: 1.25rem;
+}
+
+/* Platform Content */
+.platform-panel {
+    display: none;
+}
+
+.platform-panel.active {
+    display: block;
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Methods */
+.method {
+    background-color: var(--gray-50);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-md);
+    border-left: 4px solid var(--primary-color);
+}
+
+.method h4 {
+    color: var(--primary-color);
+    margin-bottom: var(--spacing-sm);
+}
+
+/* Lists */
+ol, ul {
+    margin-left: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+}
+
+ol li, ul li {
+    margin-bottom: var(--spacing-xs);
+    color: var(--gray-700);
+    padding-left: var(--spacing-xs);
+}
+
+ol li::marker {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+/* Keyboard Keys */
+kbd {
+    background-color: var(--gray-100);
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-sm);
+    box-shadow: 0 2px 0 var(--gray-300);
+    padding: 0.125rem 0.375rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+/* Note */
+.note {
+    background-color: #eff6ff;
+    border-left: 4px solid var(--primary-color);
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    color: var(--gray-700);
+}
+
+/* Warning Box */
+.warning-box {
+    background-color: var(--status-warning-bg);
+    border: 1px solid var(--status-warning);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-md);
+}
+
+.warning-box strong {
+    display: block;
+    color: var(--status-warning);
+    margin-bottom: var(--spacing-sm);
+}
+
+.warning-box ul {
+    margin-bottom: 0;
+}
+
+/* ============================================
+   Verification Section
+   ============================================ */
+
+.verification {
+    background-color: var(--status-passed-bg);
+}
+
+/* ============================================
+   Help Section
+   ============================================ */
+
+.help {
+    background-color: var(--gray-50);
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+
+.page-footer {
+    padding: var(--spacing-md) var(--spacing-lg);
+    background-color: var(--gray-100);
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--gray-600);
+}
+
+.page-footer p {
+    margin-bottom: 0;
+}
+
+/* ============================================
+   Responsive Design
+   ============================================ */
+
+@media (max-width: 768px) {
+    body {
+        padding: 0;
+    }
+
+    .container {
+        border-radius: 0;
+    }
+
+    h1 {
+        font-size: 1.75rem;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+
+    section {
+        padding: var(--spacing-md);
+    }
+}
