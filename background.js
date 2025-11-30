@@ -524,7 +524,7 @@ function reportInteractions() {
 						"https://" + it.appName,
 						Log.INFO,
 						undefined,
-						`'@@URL@@' received interactions on ${date}`
+						`@@URL@@ received interactions on ${date}`
 						, undefined
 						, undefined
 						, false
