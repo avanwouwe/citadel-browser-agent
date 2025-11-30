@@ -13,6 +13,23 @@
             text-align: center;
         }
 
+        .controls-hero-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-md);
+        }
+
+        .controls-hero-logo {
+            height: 72px;
+            width: auto;
+            position: relative;
+            top: -5px;  /* Change this value to move up/down - negative = up, positive = down */
+        }
+
+        .controls-hero h1 {
+            margin-bottom: 0;
+        }
         .controls-hero h1 {
             color: white;
             font-size: 2.5rem;
@@ -51,7 +68,7 @@
         .control-item-platforms {
             position: absolute;
             top: var(--spacing-md);
-            right: var(--spacing-md);
+            right: calc(var(--spacing-md) + 50px); /* Moved left to avoid chevron */
             display: flex;
             gap: var(--spacing-xs);
             align-items: center;
@@ -69,7 +86,7 @@
         }
 
         .control-item-content {
-            padding-right: 80px; /* Make space for platform badges */
+            padding-right: 140px; /* Increased to accommodate icons moved left */
         }
 
         .control-item-title {
@@ -101,7 +118,10 @@
 <body>
 <div class="container">
     <header class="controls-hero">
-        <h1>Security Controls</h1>
+        <div class="controls-hero-title">
+            <img src="../img/logo.png" alt="Citadel" class="controls-hero-logo">
+            <h1>Security Controls</h1>
+        </div>
         <p>Citadel monitors your device to ensure it meets security and compliance requirements. Click any control below to learn more and get help fixing issues.</p>
     </header>
 
