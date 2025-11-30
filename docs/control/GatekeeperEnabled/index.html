@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GatekeeperEnabled Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">GatekeeperEnabled</span>
+        </div>
+        <h1>GatekeeperEnabled Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The GatekeeperEnabled control verifies that macOS Gatekeeper is enabled and actively
+            protecting your Mac. Gatekeeper checks all applications you download and open to ensure
+            they're from identified developers and haven't been tampered with by malware.
+        </p>
+        <p>
+            <strong>Important:</strong> Gatekeeper is your first line of defense against malicious
+            software on macOS. When you download and try to open an application, Gatekeeper verifies
+            it's been signed by an identified Apple developer and checks with Apple to ensure it hasn't
+            been reported as malware. Without Gatekeeper, you could unknowingly run malicious applications
+            that appear legitimate but have been modified to steal your data, install malware, or compromise
+            your system. Disabling Gatekeeper is like removing the lock from your front door.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Malware Prevention</h3>
+                <p>Gatekeeper blocks unsigned or malicious applications from running, preventing malware
+                    infections from downloaded software before they can compromise your Mac.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">✓</div>
+                <h3>Developer Verification</h3>
+                <p>Gatekeeper verifies that applications come from identified developers, ensuring you're
+                    running genuine software and not malware disguised as legitimate applications.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔍</div>
+                <h3>Tampering Detection</h3>
+                <p>Gatekeeper checks that applications haven't been modified after being signed by their
+                    developers, protecting you from trojaned or backdoored versions of legitimate software.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Enabling Gatekeeper on macOS</h3>
+
+                <div class="method">
+                    <h4>Re-enabling Gatekeeper:</h4>
+                    <ol>
+                        <li>Open <strong>Terminal</strong> (Applications → Utilities → Terminal)</li>
+                        <li>Type: <kbd>sudo spctl --master-enable</kbd></li>
+                        <li>Press <strong>Enter</strong></li>
+                        <li>Enter your administrator password when prompted (you won't see it as you type)</li>
+                        <li>Press <strong>Enter</strong> again</li>
+                        <li>Gatekeeper is now enabled</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Verify Gatekeeper settings in System Settings:</h4>
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>Privacy & Security</strong></li>
+                        <li>Scroll down to the <strong>Security</strong> section</li>
+                        <li>Under <strong>"Allow applications downloaded from:"</strong>, select:
+                            <ul>
+                                <li><strong>App Store and identified developers</strong> (recommended)</li>
+                                <li>OR <strong>App Store</strong> (most secure, but some work apps may be blocked)</li>
+                            </ul>
+                        </li>
+                        <li>Do NOT select "Anywhere" - this disables Gatekeeper protection</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Note:</strong> On some macOS versions, the "Anywhere" option is hidden by default. This is intentional for security reasons.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>The recommended setting is "App Store and identified developers"</li>
+                        <li>If you need to run an unsigned app temporarily, right-click it and select "Open" instead of disabling Gatekeeper</li>
+                        <li>Gatekeeper may prevent some older or unsigned applications from running - this is intentional</li>
+                        <li>Contact IT support if a work-related application is blocked by Gatekeeper</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling Gatekeeper, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify Gatekeeper is enabled:</h4>
+                    <ol>
+                        <li>Open <strong>Terminal</strong> (Applications → Utilities → Terminal)</li>
+                        <li>Type: <kbd>spctl --status</kbd></li>
+                        <li>Press <strong>Enter</strong></li>
+                        <li>You should see: <strong>"assessments enabled"</strong></li>
+                        <li>If you see "assessments disabled", Gatekeeper is not enabled</li>
+                    </ol>
+                    <p><strong>Alternative:</strong> Check <strong>System Settings</strong> → <strong>Privacy & Security</strong> and verify "Allow applications downloaded from" is NOT set to "Anywhere".</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

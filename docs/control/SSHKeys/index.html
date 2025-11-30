@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSHKeys Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">SSHKeys</span>
+        </div>
+        <h1>SSHKeys Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The SSHKeys control verifies that all SSH private keys on your computer are
+            encrypted with a passphrase. SSH keys are commonly used by developers and system
+            administrators to authenticate to servers, push code to repositories, and access
+            remote systems.
+        </p>
+        <p>
+            <strong>Important:</strong> An unencrypted SSH private key is like leaving your house
+            key under the doormat. Anyone who gains access to your computer (through theft, malware,
+            or even a backup) can use your SSH key to impersonate you. They can access any server,
+            code repository, or system that trusts that key - without needing to know any passwords.
+            Adding a passphrase encrypts the key, so even if someone steals the file, they cannot use
+            it without the passphrase.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🔑</div>
+                <h3>Access Control</h3>
+                <p>SSH keys often grant access to critical systems, production servers, and code repositories.
+                    Unencrypted keys allow anyone who steals them to impersonate you on these systems.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">💼</div>
+                <h3>Code Repository Security</h3>
+                <p>Stolen SSH keys can be used to push malicious code to your repositories, steal proprietary
+                    source code, or access sensitive company information stored in version control.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🚨</div>
+                <h3>Audit Trail</h3>
+                <p>When someone uses your stolen SSH key, all actions appear to come from you, making it
+                    difficult to detect the breach and potentially implicating you in malicious activities.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Encrypting SSH Keys on Windows</h3>
+
+                <div class="note">
+                    <strong>Note:</strong> You'll need to regenerate your SSH keys with a passphrase. This is the safest approach.
+                </div>
+
+                <div class="method">
+                    <h4>Step 1: Back up your current keys</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong></li>
+                        <li>Navigate to <kbd>C:\Users\YourUsername\.ssh</kbd> (replace YourUsername with your actual username)</li>
+                        <li>Copy the entire <strong>.ssh</strong> folder to a safe location as a backup</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Generate new encrypted SSH keys</h4>
+                    <ol>
+                        <li>Open <strong>PowerShell</strong> or <strong>Command Prompt</strong></li>
+                        <li>Type: <kbd>ssh-keygen -t ed25519 -C "your.email@example.com"</kbd></li>
+                        <li>Press <strong>Enter</strong> to accept the default file location</li>
+                        <li>When prompted for a passphrase, <strong>enter a strong passphrase</strong> (don't leave it empty!)</li>
+                        <li>Re-enter the same passphrase to confirm</li>
+                        <li>Your new encrypted key pair is now created</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Update your keys on remote services</h4>
+                    <ol>
+                        <li>Display your new public key by typing: <kbd>type %USERPROFILE%\.ssh\id_ed25519.pub</kbd></li>
+                        <li>Copy the entire output (starts with "ssh-ed25519")</li>
+                        <li>Add this public key to your services:
+                            <ul>
+                                <li><strong>GitHub:</strong> Settings → SSH and GPG keys → New SSH key</li>
+                                <li><strong>GitLab:</strong> Preferences → SSH Keys → Add new key</li>
+                                <li><strong>Servers:</strong> Add to ~/.ssh/authorized_keys on each server</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Use a strong, unique passphrase - this protects your key if it's stolen</li>
+                        <li>Store your passphrase in a password manager</li>
+                        <li>You'll need to enter the passphrase the first time you use the key after each restart</li>
+                        <li>Don't delete your old keys until you've verified the new ones work</li>
+                        <li>Update the public key on all services that use your SSH key</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Encrypting SSH Keys on macOS</h3>
+
+                <div class="note">
+                    <strong>Note:</strong> You'll need to regenerate your SSH keys with a passphrase. This is the safest approach.
+                </div>
+
+                <div class="method">
+                    <h4>Step 1: Back up your current keys</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong></li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>G</kbd> to open "Go to Folder"</li>
+                        <li>Type <kbd>~/.ssh</kbd> and press <strong>Enter</strong></li>
+                        <li>Copy the entire <strong>.ssh</strong> folder to a safe location as a backup</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Generate new encrypted SSH keys</h4>
+                    <ol>
+                        <li>Open <strong>Terminal</strong> (in Applications → Utilities)</li>
+                        <li>Type: <kbd>ssh-keygen -t ed25519 -C "your.email@example.com"</kbd></li>
+                        <li>Press <strong>Enter</strong> to accept the default file location</li>
+                        <li>When prompted for a passphrase, <strong>enter a strong passphrase</strong> (don't leave it empty!)</li>
+                        <li>Re-enter the same passphrase to confirm</li>
+                        <li>Your new encrypted key pair is now created</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Configure macOS Keychain to remember your passphrase</h4>
+                    <ol>
+                        <li>In Terminal, type: <kbd>ssh-add --apple-use-keychain ~/.ssh/id_ed25519</kbd></li>
+                        <li>Enter your passphrase when prompted</li>
+                        <li>macOS will now remember your passphrase in the Keychain</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 4: Update your keys on remote services</h4>
+                    <ol>
+                        <li>Display your new public key by typing: <kbd>cat ~/.ssh/id_ed25519.pub</kbd></li>
+                        <li>Copy the entire output (starts with "ssh-ed25519")</li>
+                        <li>Add this public key to your services:
+                            <ul>
+                                <li><strong>GitHub:</strong> Settings → SSH and GPG keys → New SSH key</li>
+                                <li><strong>GitLab:</strong> Preferences → SSH Keys → Add new key</li>
+                                <li><strong>Servers:</strong> Add to ~/.ssh/authorized_keys on each server</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Use a strong, unique passphrase - this protects your key if it's stolen</li>
+                        <li>Store your passphrase in a password manager</li>
+                        <li>The macOS Keychain will remember your passphrase so you don't need to enter it repeatedly</li>
+                        <li>Don't delete your old keys until you've verified the new ones work</li>
+                        <li>Update the public key on all services that use your SSH key</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After generating encrypted SSH keys, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify your SSH key is encrypted:</h4>
+                    <ol>
+                        <li>Open <strong>PowerShell</strong> or <strong>Command Prompt</strong></li>
+                        <li>Type: <kbd>ssh-keygen -y -f %USERPROFILE%\.ssh\id_ed25519</kbd></li>
+                        <li>If the key is encrypted, you'll be prompted for the passphrase</li>
+                        <li>If it displays the public key without asking for a passphrase, the key is not encrypted</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify your SSH key is encrypted:</h4>
+                    <ol>
+                        <li>Open <strong>Terminal</strong></li>
+                        <li>Type: <kbd>ssh-keygen -y -f ~/.ssh/id_ed25519</kbd></li>
+                        <li>If the key is encrypted, you'll be prompted for the passphrase</li>
+                        <li>If it displays the public key without asking for a passphrase, the key is not encrypted</li>
+                    </ol>
+                    <p class="note"><strong>Note:</strong> If you've added the key to Keychain, macOS might auto-fill the passphrase. This is normal and secure.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoUpdates Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">AutoUpdates</span>
+        </div>
+        <h1>AutoUpdates Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The AutoUpdates control verifies that your operating system is configured to
+            automatically download and install security updates. This ensures your computer
+            stays protected without requiring you to manually check for and install updates.
+        </p>
+        <p>
+            <strong>Important:</strong> Manual updates aren't enough. Security vulnerabilities are
+            discovered constantly, and attackers often exploit them within hours of their disclosure.
+            Automatic updates ensure critical security patches are installed as soon as they're available,
+            protecting you even when you're busy or forget to check manually.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">⚡</div>
+                <h3>Immediate Protection</h3>
+                <p>Security vulnerabilities are often exploited within hours of being discovered. Automatic
+                    updates ensure you're protected as quickly as possible without waiting for manual intervention.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔄</div>
+                <h3>Consistent Coverage</h3>
+                <p>Automatic updates work even when you're busy, on vacation, or simply forget to check.
+                    This ensures continuous protection without gaps in your security coverage.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Zero-Day Protection</h3>
+                <p>When critical zero-day vulnerabilities are discovered, automatic updates can deploy
+                    emergency patches immediately, protecting you from attacks before they become widespread.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Enabling Automatic Updates on Windows</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>Windows Update</strong> (or <strong>Update & Security</strong> on older versions)</li>
+                        <li>Click <strong>Advanced options</strong></li>
+                        <li>Under <strong>"Additional options"</strong>, ensure the following are enabled:
+                            <ul>
+                                <li><strong>"Receive updates for other Microsoft products"</strong> - Turn this on</li>
+                                <li><strong>"Download updates over metered connections"</strong> - Consider enabling if you have sufficient data</li>
+                            </ul>
+                        </li>
+                        <li>Go back and verify <strong>"Automatic updates"</strong> is set to on</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Note:</strong> Windows 10 and 11 have automatic updates enabled by default. If you see options to disable it, make sure they remain in the "on" position.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Windows may automatically restart to install updates - save your work regularly</li>
+                        <li>You can set "Active hours" to prevent restarts during your work time</li>
+                        <li>Some updates require you to manually restart - don't postpone these indefinitely</li>
+                        <li>Keep your computer connected to power and the internet regularly to receive updates</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Enabling Automatic Updates on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>General</strong> and then <strong>Software Update</strong></li>
+                        <li>Click the <strong>ⓘ</strong> icon next to "Automatic updates"</li>
+                        <li>Enable all the following options:
+                            <ul>
+                                <li><strong>"Check for updates"</strong></li>
+                                <li><strong>"Download new updates when available"</strong></li>
+                                <li><strong>"Install macOS updates"</strong></li>
+                                <li><strong>"Install application updates from the App Store"</strong></li>
+                                <li><strong>"Install Security Responses and system files"</strong></li>
+                            </ul>
+                        </li>
+                        <li>Click <strong>Done</strong></li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Note:</strong> On older macOS versions, these options are found in <strong>System Preferences</strong> → <strong>Software Update</strong> → <strong>Advanced</strong> button.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>macOS automatic updates are disabled by default - you must enable them</li>
+                        <li>Your Mac will notify you when a restart is needed to complete updates</li>
+                        <li>Major macOS upgrades may still require manual approval</li>
+                        <li>Keep your Mac connected to power and WiFi regularly, especially overnight</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling automatic updates, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To check automatic update settings:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Windows Update</strong></li>
+                        <li>Click <strong>Advanced options</strong></li>
+                        <li>Verify that automatic updates are enabled</li>
+                        <li>Check that <strong>"Receive updates for other Microsoft products"</strong> is on</li>
+                        <li>Return to Windows Update and click <strong>Check for updates</strong> to ensure it's working</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To check automatic update settings:</h4>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> → <strong>General</strong> → <strong>Software Update</strong></li>
+                        <li>Click the <strong>ⓘ</strong> icon next to "Automatic updates"</li>
+                        <li>Verify that all automatic update options are checked</li>
+                        <li>Click <strong>Done</strong></li>
+                        <li>The main Software Update screen should show when updates were last checked</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

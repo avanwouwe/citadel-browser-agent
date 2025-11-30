@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnusedFiles Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">UnusedFiles</span>
+        </div>
+        <h1>UnusedFiles Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The UnusedFiles control scans your Downloads folder for files that haven't been
+            accessed in an extended period (typically 90 days or more). Old, forgotten files
+            in your Downloads folder can accumulate sensitive data and create security risks.
+        </p>
+        <p>
+            <strong>Important:</strong> Your Downloads folder is meant to be temporary storage,
+            not a long-term filing system. Over time, it becomes cluttered with documents,
+            spreadsheets, PDFs, and other files you downloaded once and forgot about. These
+            forgotten files often contain sensitive information - customer data, financial reports,
+            internal documents, passwords, or personal information. If your computer is compromised
+            or stolen, attackers gain access to months or years of accumulated downloads, potentially
+            exposing far more data than you realize.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">📦</div>
+                <h3>Data Minimization</h3>
+                <p>Every file on your computer is a potential target for thieves and malware. Regularly
+                    purging unused files reduces the amount of sensitive data at risk if your device is compromised.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🕵️</div>
+                <h3>Forgotten Sensitive Data</h3>
+                <p>Old downloads often contain sensitive information you've forgotten about - contracts,
+                    reports, customer lists, or financial data that you no longer need but remains exposed.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🧹</div>
+                <h3>Digital Hygiene</h3>
+                <p>Regular cleanup of unused files is a fundamental security practice, similar to
+                    shredding paper documents you no longer need rather than leaving them in piles.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Cleaning Up Old Downloads on Windows</h3>
+
+                <div class="method">
+                    <h4>Step 1: Find old files</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong></li>
+                        <li>Navigate to your <strong>Downloads</strong> folder</li>
+                        <li>Click on the <strong>Date modified</strong> column header to sort by date</li>
+                        <li>Scroll down to see the oldest files</li>
+                        <li>Identify files you haven't used in 90+ days</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Review and decide</h4>
+                    <p>For each old file, ask yourself:</p>
+                    <ul>
+                        <li><strong>"Have I used this in the last 3 months?"</strong> - If no, you probably don't need it</li>
+                        <li><strong>"Is this stored elsewhere?"</strong> - If it's in email, cloud storage, or a work system, delete the download</li>
+                        <li><strong>"Would I miss this if it was gone?"</strong> - If not, delete it</li>
+                        <li><strong>"Do I even remember what this is?"</strong> - If not, it's safe to delete</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Archive or delete</h4>
+                    <ol>
+                        <li><strong>If you need to keep a file:</strong>
+                            <ul>
+                                <li>Move it to a proper location (Documents, OneDrive, SharePoint)</li>
+                                <li>Don't leave it in Downloads</li>
+                            </ul>
+                        </li>
+                        <li><strong>If you don't need the file:</strong>
+                            <ul>
+                                <li>Select the file(s)</li>
+                                <li>Press <kbd>Shift</kbd> + <kbd>Delete</kbd> for permanent deletion</li>
+                                <li>Click <strong>Yes</strong> to confirm</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Downloads is for temporary files - move important files to Documents or cloud storage</li>
+                        <li>If you need something again, you can usually re-download or re-export it</li>
+                        <li>Make this a monthly habit to prevent accumulation</li>
+                        <li>When in doubt about a file's importance, ask a colleague or manager</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Cleaning Up Old Downloads on macOS</h3>
+
+                <div class="method">
+                    <h4>Step 1: Find old files</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong></li>
+                        <li>Click on <strong>Downloads</strong> in the sidebar</li>
+                        <li>Change view to <strong>List view</strong> (View → as List, or press <kbd>Command</kbd> + <kbd>2</kbd>)</li>
+                        <li>Click on the <strong>Date Modified</strong> or <strong>Date Last Opened</strong> column to sort</li>
+                        <li>Identify files you haven't used in 90+ days</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Review and decide</h4>
+                    <p>For each old file, ask yourself:</p>
+                    <ul>
+                        <li><strong>"Have I used this in the last 3 months?"</strong> - If no, you probably don't need it</li>
+                        <li><strong>"Is this stored elsewhere?"</strong> - If it's in email, iCloud, or a work system, delete the download</li>
+                        <li><strong>"Would I miss this if it was gone?"</strong> - If not, delete it</li>
+                        <li><strong>"Do I even remember what this is?"</strong> - If not, it's safe to delete</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Archive or delete</h4>
+                    <ol>
+                        <li><strong>If you need to keep a file:</strong>
+                            <ul>
+                                <li>Move it to a proper location (Documents, iCloud Drive, company storage)</li>
+                                <li>Don't leave it in Downloads</li>
+                            </ul>
+                        </li>
+                        <li><strong>If you don't need the file:</strong>
+                            <ul>
+                                <li>Select the file(s)</li>
+                                <li>Press <kbd>Command</kbd> + <kbd>Delete</kbd> to move to Trash</li>
+                                <li>Empty the Trash: <strong>Finder</strong> → <strong>Empty Trash</strong></li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Automatic cleanup:</strong> You can configure macOS to automatically delete files from Downloads after 30 days. Go to <strong>Finder</strong> → <strong>Settings</strong> → <strong>Advanced</strong> and set "Remove items from the Bin after 30 days".
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Downloads is for temporary files - move important files to Documents or cloud storage</li>
+                        <li>If you need something again, you can usually re-download or re-export it</li>
+                        <li>Make this a monthly habit to prevent accumulation</li>
+                        <li>When in doubt about a file's importance, ask a colleague or manager</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After cleaning up old files, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify your Downloads folder is clean:</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong> and navigate to <strong>Downloads</strong></li>
+                        <li>Click the <strong>Date modified</strong> column to sort by date</li>
+                        <li>Scroll to the oldest files</li>
+                        <li>Files older than 90 days should be either moved to proper storage or deleted</li>
+                        <li>Your Downloads folder should only contain recent files you're actively using</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify your Downloads folder is clean:</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and click on <strong>Downloads</strong></li>
+                        <li>Switch to <strong>List view</strong> (<kbd>Command</kbd> + <kbd>2</kbd>)</li>
+                        <li>Click <strong>Date Modified</strong> to sort by date</li>
+                        <li>Scroll to the oldest files</li>
+                        <li>Files older than 90 days should be either moved to proper storage or deleted</li>
+                    </ol>
+                    <p class="note"><strong>Tip:</strong> Right-click a file and select <strong>Get Info</strong> to see both when it was created and when it was last opened.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

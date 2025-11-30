@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RemovableStorage Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">RemovableStorage</span>
+        </div>
+        <h1>RemovableStorage Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The RemovableStorage control verifies that no USB storage devices (flash drives,
+            external hard drives, USB SD card readers, etc.) are currently connected to your
+            computer. This control helps prevent data loss and malware infections.
+        </p>
+        <p>
+            <strong>Important:</strong> USB storage devices pose two major security risks. First,
+            they can introduce malware to your computer - even trusted-looking USB drives can be
+            infected or deliberately weaponized to install malicious software when plugged in.
+            Second, they make it easy to copy and remove sensitive company data, either accidentally
+            or intentionally. A single USB drive can hold thousands of documents that could then be
+            lost, stolen, or leaked.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🦠</div>
+                <h3>Malware Distribution</h3>
+                <p>USB devices are a common malware distribution method. Infected drives can automatically
+                    run malicious code when connected, compromising your computer before you even open any files.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📤</div>
+                <h3>Data Exfiltration</h3>
+                <p>USB drives make it trivially easy to copy large amounts of sensitive data from your
+                    computer. Lost or stolen drives containing company data can lead to serious security breaches.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔓</div>
+                <h3>Unencrypted Storage</h3>
+                <p>Unlike your encrypted hard drive, most USB drives are not encrypted. If lost or stolen,
+                    anyone can read the files on them without any password or authentication.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Removing USB Storage Devices on Windows</h3>
+
+                <div class="method">
+                    <h4>Step 1: Identify connected USB storage devices</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>System</strong></li>
+                        <li>Click <strong>Storage</strong></li>
+                        <li>Look under <strong>"Storage devices"</strong> for any external drives</li>
+                        <li>Note which drives are USB devices (they'll often show as "Removable Disk" or have a drive letter like D:, E:, etc.)</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Safely eject the USB device</h4>
+                    <ol>
+                        <li>Click the <strong>Show hidden icons</strong> arrow in the system tray (bottom-right corner)</li>
+                        <li>Click the <strong>USB icon</strong> (Safely Remove Hardware)</li>
+                        <li>Click on the device you want to remove</li>
+                        <li>Wait for the "Safe to Remove Hardware" message</li>
+                        <li>Physically unplug the USB device from your computer</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Alternative:</strong> You can also right-click on the drive in File Explorer and select <strong>Eject</strong>.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Always eject USB devices properly before unplugging to avoid data corruption</li>
+                        <li>Use approved cloud storage (OneDrive, SharePoint) instead of USB drives for file transfer</li>
+                        <li>If you must use a USB drive temporarily, remove it as soon as you're done</li>
+                        <li>Never use unknown or found USB drives - they may be deliberately infected</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Removing USB Storage Devices on macOS</h3>
+
+                <div class="method">
+                    <h4>Step 1: Identify connected USB storage devices</h4>
+                    <ol>
+                        <li>Look at your Desktop - USB drives typically appear as icons</li>
+                        <li>Open <strong>Finder</strong> and check the sidebar under <strong>Locations</strong></li>
+                        <li>External drives and USB devices will be listed there</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Safely eject the USB device</h4>
+                    <ol>
+                        <li>In <strong>Finder</strong>, find the USB device in the sidebar</li>
+                        <li>Click the <strong>eject icon</strong> (⏏) next to the device name</li>
+                        <li>Wait for the device to disappear from the sidebar and desktop</li>
+                        <li>Physically unplug the USB device from your Mac</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Alternative methods:</strong>
+                    <ul>
+                        <li>Right-click the device icon on the desktop and select <strong>Eject</strong></li>
+                        <li>Drag the device icon to the Trash (it will change to an eject symbol)</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Always eject USB devices properly before unplugging to avoid data corruption</li>
+                        <li>Use approved cloud storage (iCloud Drive, company storage) instead of USB drives for file transfer</li>
+                        <li>If you must use a USB drive temporarily, remove it as soon as you're done</li>
+                        <li>Never use unknown or found USB drives - they may be deliberately infected</li>
+                        <li>If you see "The disk wasn't ejected properly" warning, you unplugged too soon</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After removing all USB storage devices, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify no USB storage devices are connected:</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong></li>
+                        <li>Click <strong>This PC</strong> in the left sidebar</li>
+                        <li>Check under <strong>Devices and drives</strong></li>
+                        <li>You should only see your main hard drive (usually C:)</li>
+                        <li>Any drives labeled as "Removable Disk" or external drives indicate connected USB storage</li>
+                    </ol>
+                    <p><strong>Alternative:</strong> Open <strong>Settings</strong> → <strong>System</strong> → <strong>Storage</strong> and check that no external storage devices are listed.</p>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify no USB storage devices are connected:</h4>
+                    <ol>
+                        <li>Check your <strong>Desktop</strong> - no external drive icons should be visible</li>
+                        <li>Open <strong>Finder</strong></li>
+                        <li>Look at the sidebar under <strong>Locations</strong></li>
+                        <li>Only your main hard drive (Macintosh HD) and network locations should appear</li>
+                        <li>If you see any external drives or USB devices, they need to be ejected</li>
+                    </ol>
+                    <p><strong>Alternative:</strong> Click the <strong>Apple menu</strong> → <strong>About This Mac</strong> → <strong>Storage</strong> (or <strong>System Report</strong> → <strong>Hardware</strong> → <strong>USB</strong>) to see all connected devices.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

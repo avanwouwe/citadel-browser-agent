@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SystemIntegrityProtection Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">SystemIntegrityProtection</span>
+        </div>
+        <h1>SystemIntegrityProtection Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The SystemIntegrityProtection control verifies that macOS System Integrity Protection
+            (SIP) is enabled. SIP is a security feature that protects critical system files and
+            processes from being modified, even by users with administrator privileges or by malware
+            with root access.
+        </p>
+        <p>
+            <strong>Important:</strong> SIP works at a fundamental level in macOS, preventing unauthorized
+            modifications to essential system files, frameworks, and applications. Even if malware gains
+            administrative access to your Mac, SIP prevents it from tampering with core macOS components.
+            SIP is usually only disabled intentionally by developers or system administrators for very
+            specific technical reasons, but doing so significantly weakens your Mac's security by removing
+            this fundamental protection layer.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🔒</div>
+                <h3>System Integrity</h3>
+                <p>SIP prevents malware and unauthorized software from modifying critical macOS components,
+                    ensuring your system remains in a known, secure state.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🦠</div>
+                <h3>Rootkit Prevention</h3>
+                <p>Even advanced malware with root access cannot bypass SIP to install rootkits or modify
+                    protected system files, providing defense against sophisticated attacks.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Kernel Protection</h3>
+                <p>SIP prevents unauthorized kernel extensions and system modifications that could compromise
+                    your Mac's security, stability, and privacy at the deepest level.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Enabling System Integrity Protection on macOS</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ This requires advanced technical steps:</strong>
+                    <ul>
+                        <li>Re-enabling SIP requires booting into Recovery Mode</li>
+                        <li>The process varies depending on your Mac model (Intel vs Apple Silicon)</li>
+                        <li>Incorrect steps could cause problems with your system</li>
+                        <li><strong>We strongly recommend contacting IT support for assistance</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Why might SIP be disabled?</h4>
+                    <p>SIP is usually only disabled for specific technical reasons:</p>
+                    <ul>
+                        <li>Installing certain developer tools or kernel extensions</li>
+                        <li>Running older professional software incompatible with SIP</li>
+                        <li>Troubleshooting system issues under IT supervision</li>
+                        <li>Using virtualization or low-level development tools</li>
+                    </ul>
+                    <p>
+                        If you disabled SIP for a specific task, it should be re-enabled afterward.
+                        Contact IT support to determine if you still need SIP disabled or if it can be safely re-enabled.
+                    </p>
+                </div>
+
+                <div class="method">
+                    <h4>Re-enabling SIP (Intel Macs):</h4>
+                    <ol>
+                        <li>Restart your Mac</li>
+                        <li>Hold <kbd>Command</kbd> + <kbd>R</kbd> during startup to enter Recovery Mode</li>
+                        <li>Wait for the macOS Utilities window to appear</li>
+                        <li>Click <strong>Utilities</strong> → <strong>Terminal</strong> from the menu bar</li>
+                        <li>Type: <kbd>csrutil enable</kbd></li>
+                        <li>Press <strong>Enter</strong></li>
+                        <li>You should see "Successfully enabled System Integrity Protection"</li>
+                        <li>Click <strong>Apple menu</strong> → <strong>Restart</strong></li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Re-enabling SIP (Apple Silicon Macs):</h4>
+                    <ol>
+                        <li>Shut down your Mac completely</li>
+                        <li>Press and hold the <strong>Power button</strong> until you see "Loading startup options"</li>
+                        <li>Click <strong>Options</strong> and then <strong>Continue</strong></li>
+                        <li>Select your user account and enter your password</li>
+                        <li>Click <strong>Utilities</strong> → <strong>Terminal</strong> from the menu bar</li>
+                        <li>Type: <kbd>csrutil enable</kbd></li>
+                        <li>Press <strong>Enter</strong></li>
+                        <li>You should see "Successfully enabled System Integrity Protection"</li>
+                        <li>Click <strong>Apple menu</strong> → <strong>Restart</strong></li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Recovery Mode looks different from normal macOS - this is expected</li>
+                        <li>Make sure you type the command exactly: <kbd>csrutil enable</kbd></li>
+                        <li>You must restart after running the command for SIP to take effect</li>
+                        <li>If you have software that requires SIP disabled, it may stop working</li>
+                        <li>Contact IT support if you encounter any errors or issues</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling System Integrity Protection, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify SIP is enabled:</h4>
+                    <ol>
+                        <li>Open <strong>Terminal</strong> (Applications → Utilities → Terminal)</li>
+                        <li>Type: <kbd>csrutil status</kbd></li>
+                        <li>Press <strong>Enter</strong></li>
+                        <li>You should see: <strong>"System Integrity Protection status: enabled."</strong></li>
+                        <li>If you see "disabled" or any individual protections disabled, SIP is not fully enabled</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

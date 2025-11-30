@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MissingApplications Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">MissingApplications</span>
+        </div>
+        <h1>MissingApplications Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The MissingApplications control verifies that all required applications for your
+            organization are installed on your computer. The specific list of required applications
+            is configured by your IT team based on security requirements, your role, and business needs.
+        </p>
+        <p>
+            <strong>Important:</strong> Citadel will tell you which specific application(s) need to be
+            installed. Required applications are typically essential security tools (antivirus, VPN,
+            backup software), mandatory business applications, or compliance tools that protect both
+            you and the organization. Operating without these applications leaves your device vulnerable
+            to security threats and may prevent you from securely accessing company resources.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Essential Protection</h3>
+                <p>Required applications often include critical security tools like antivirus software,
+                    endpoint protection, or VPN clients that are necessary to protect your device from threats.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔐</div>
+                <h3>Secure Access</h3>
+                <p>Some required applications are necessary to securely connect to company systems, encrypt
+                    communications, or authenticate properly. Without them, you may be unable to work securely.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚖️</div>
+                <h3>Compliance</h3>
+                <p>Regulations and security frameworks often mandate specific tools and controls. Required
+                    applications ensure your device meets these compliance requirements.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Installing Required Applications on Windows</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support:</strong>
+                    <ul>
+                        <li>Required applications must be obtained from approved, official sources</li>
+                        <li>Your IT team will provide the correct version, license, and installation instructions</li>
+                        <li>Some applications require special configuration or company-specific settings</li>
+                        <li>Installing the wrong version or from an untrusted source creates security risks</li>
+                        <li><strong>Please contact your IT support team to get the required application</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The name of the missing application (from Citadel notification)</li>
+                        <li>Your computer name, username, and Windows version</li>
+                        <li>Your department and role</li>
+                        <li>When you need the application installed by</li>
+                        <li>Whether you've had this application before or if this is a new requirement</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>If IT has provided you with an installer:</h4>
+                    <ol>
+                        <li>Download the installer only from the source provided by IT (email, internal portal, etc.)</li>
+                        <li>Locate the downloaded file in your Downloads folder</li>
+                        <li>Double-click the installer file (usually .exe or .msi)</li>
+                        <li>Click <strong>Yes</strong> when prompted for administrator permission</li>
+                        <li>Follow all installation wizard instructions</li>
+                        <li>Enter any license keys or configuration details provided by IT</li>
+                        <li>Click <strong>Finish</strong> when installation is complete</li>
+                        <li>Restart your computer if prompted</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Self-Service Options:</strong> Your organization may have a self-service portal or software catalog where you can install approved applications yourself. Ask IT support about this option.
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Installing Required Applications on macOS</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support:</strong>
+                    <ul>
+                        <li>Required applications must be obtained from approved, official sources</li>
+                        <li>Your IT team will provide the correct version, license, and installation instructions</li>
+                        <li>Some applications require special configuration or company-specific settings</li>
+                        <li>Installing the wrong version or from an untrusted source creates security risks</li>
+                        <li><strong>Please contact your IT support team to get the required application</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The name of the missing application (from Citadel notification)</li>
+                        <li>Your computer name, username, and macOS version</li>
+                        <li>Your department and role</li>
+                        <li>When you need the application installed by</li>
+                        <li>Whether you've had this application before or if this is a new requirement</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>If IT has provided you with an installer:</h4>
+                    <ol>
+                        <li>Download the installer only from the source provided by IT (email, internal portal, etc.)</li>
+                        <li>Locate the downloaded file in your Downloads folder</li>
+                        <li>If it's a <strong>.dmg</strong> file:
+                            <ul>
+                                <li>Double-click to mount the disk image</li>
+                                <li>Drag the application to your Applications folder</li>
+                                <li>Eject the disk image when done</li>
+                            </ul>
+                        </li>
+                        <li>If it's a <strong>.pkg</strong> file:
+                            <ul>
+                                <li>Double-click to run the installer</li>
+                                <li>Follow the installation wizard instructions</li>
+                                <li>Enter your password when prompted</li>
+                            </ul>
+                        </li>
+                        <li>Launch the application and complete any initial setup</li>
+                        <li>Restart your Mac if prompted</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Self-Service Options:</strong> Your organization may use an MDM system or self-service portal where you can install approved applications yourself. Ask IT support about this option.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After installing the required application, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify the application is installed:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Apps</strong> → <strong>Installed apps</strong></li>
+                        <li>Search for the application name in the search box</li>
+                        <li>The application should appear in the list</li>
+                        <li>Alternatively, check the <strong>Start menu</strong> - the application should be listed there</li>
+                        <li>Try launching the application to ensure it's working properly</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify the application is installed:</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and click <strong>Applications</strong></li>
+                        <li>Search for the application name using the search box</li>
+                        <li>The application should appear in the Applications folder</li>
+                        <li>Alternatively, open <strong>Launchpad</strong> and search for the app</li>
+                        <li>Try launching the application to ensure it's working properly</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

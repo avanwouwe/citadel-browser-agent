@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProtectionStatus Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">ProtectionStatus</span>
+        </div>
+        <h1>ProtectionStatus Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The ProtectionStatus control verifies that critical Windows Security Center features
+            are active and functioning properly. This includes Internet security settings, the
+            Windows Security Center service itself, and User Account Control (UAC).
+        </p>
+        <p>
+            <strong>Important:</strong> Windows Security Center is the central hub that monitors and
+            manages your computer's security features. When Security Center reports problems, it means
+            fundamental protections are compromised. User Account Control (UAC) prevents unauthorized
+            programs from making system changes without your permission. Internet security settings
+            control how Windows handles potentially dangerous downloads and websites. If these
+            components aren't working correctly, your computer lacks essential protections even if
+            other security software is installed.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🎯</div>
+                <h3>Core Security Functions</h3>
+                <p>Windows Security Center manages fundamental protections like firewall, antivirus, and
+                    system updates. If it's not functioning, multiple security layers may be compromised.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🚫</div>
+                <h3>Unauthorized Changes</h3>
+                <p>User Account Control prevents malware and unauthorized users from making system-level
+                    changes without your explicit permission, blocking many common attack techniques.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🌐</div>
+                <h3>Web Protection</h3>
+                <p>Internet security settings protect you from malicious downloads, dangerous websites,
+                    and exploits delivered through your web browser.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Fixing Windows Security Center Issues</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support:</strong>
+                    <ul>
+                        <li>Security Center issues can indicate serious system problems</li>
+                        <li>Incorrectly changing these settings can weaken your computer's security</li>
+                        <li>IT support can diagnose the root cause and fix it properly</li>
+                        <li><strong>Please contact your IT support team for assistance</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The specific Security Center feature that's failing (from Citadel notification)</li>
+                        <li>Your computer name, username, and Windows version</li>
+                        <li>Any error messages in Windows Security Center</li>
+                        <li>When the problem started (if you know)</li>
+                        <li>Whether you've recently installed or uninstalled any security software</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Simple fix to try first - Restart your computer:</h4>
+                    <ol>
+                        <li>Save all your work</li>
+                        <li>Restart your computer</li>
+                        <li>After restart, check Windows Security Center again</li>
+                        <li>Many temporary service issues resolve after a restart</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Check Windows Security Center status:</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>Privacy & security</strong></li>
+                        <li>Click <strong>Windows Security</strong></li>
+                        <li>Review each section for any warnings or errors:
+                            <ul>
+                                <li><strong>Virus & threat protection</strong> - should show green checkmark</li>
+                                <li><strong>Firewall & network protection</strong> - should show green checkmark</li>
+                                <li><strong>App & browser control</strong> - should show green checkmark</li>
+                            </ul>
+                        </li>
+                        <li>Click on any section showing a warning to see more details</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>If the issue is User Account Control:</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and type <strong>UAC</strong></li>
+                        <li>Select <strong>Change User Account Control settings</strong></li>
+                        <li>Move the slider to at least the second level from the top (not the bottom!)</li>
+                        <li>Recommended setting: <strong>"Notify me only when apps try to make changes"</strong></li>
+                        <li>Click <strong>OK</strong></li>
+                        <li>Click <strong>Yes</strong> when prompted</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Never disable User Account Control completely (slider at bottom)</li>
+                        <li>UAC prompts may be annoying, but they protect you from malware</li>
+                        <li>If Security Center shows persistent errors after restart, contact IT immediately</li>
+                        <li>Don't install third-party "security cleaners" or "optimizers" - they often cause more problems</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After fixing Security Center issues, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify Security Center is healthy:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Privacy & security</strong> → <strong>Windows Security</strong></li>
+                        <li>Click <strong>Open Windows Security</strong></li>
+                        <li>Review the main dashboard</li>
+                        <li>All sections should show <strong>green checkmarks</strong> (✓)</li>
+                        <li>No warnings or errors should be displayed</li>
+                        <li>The message should say "No actions needed" or "Your device is being protected"</li>
+                    </ol>
+                    <p class="note"><strong>Note:</strong> Yellow warnings about recommendations are usually okay, but red X marks or error messages indicate problems.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

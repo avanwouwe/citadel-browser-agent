@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SensitiveFiles Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">SensitiveFiles</span>
+        </div>
+        <h1>SensitiveFiles Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The SensitiveFiles control scans your Downloads folder for files that may contain
+            sensitive credentials, such as password lists, backup codes, recovery codes, and
+            emergency kits (like 1Password Emergency Kits). These files should not be stored
+            in plaintext on your computer.
+        </p>
+        <p>
+            <strong>Important:</strong> Your Downloads folder is one of the least secure places
+            on your computer. Many applications have access to it, it's often not backed up securely,
+            and malware specifically targets this folder. Recovery codes and emergency kits are as
+            good as passwords - if someone finds your 1Password Emergency Kit or backup codes in your
+            Downloads folder, they can use them to gain complete access to your accounts, even if you
+            have strong passwords and two-factor authentication enabled.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🎯</div>
+                <h3>High-Value Targets</h3>
+                <p>Backup codes, recovery codes, and emergency kits are specifically designed to bypass
+                    normal security measures. If stolen, they give attackers complete access to your accounts.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📂</div>
+                <h3>Exposed Location</h3>
+                <p>The Downloads folder is easily accessible to malware, backup systems, and anyone who
+                    gains access to your computer. It's the first place attackers look for valuable information.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔐</div>
+                <h3>Bypassing 2FA</h3>
+                <p>Recovery and backup codes are specifically designed to work when you've lost access
+                    to your two-factor authentication. Stolen codes completely bypass this security layer.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Securing Sensitive Files on Windows</h3>
+
+                <div class="method">
+                    <h4>Step 1: Locate the sensitive files</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong></li>
+                        <li>Navigate to your <strong>Downloads</strong> folder</li>
+                        <li>Look for files with names containing:
+                            <ul>
+                                <li>"password", "emergency kit", or "backup codes"</li>
+                                <li>"recovery codes" or "2fa codes"</li>
+                                <li>1Password Emergency Kit PDFs</li>
+                                <li>Any files containing lists of codes or credentials</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Store codes securely</h4>
+                    <ol>
+                        <li><strong>For password manager emergency kits (1Password, Bitwarden, etc.):</strong>
+                            <ul>
+                                <li>Print the emergency kit and store it in a physically secure location (safe, locked drawer)</li>
+                                <li>OR save it to an encrypted USB drive stored securely</li>
+                                <li>Never leave it in Downloads or on your Desktop</li>
+                            </ul>
+                        </li>
+                        <li><strong>For backup/recovery codes (GitHub, Google, etc.):</strong>
+                            <ul>
+                                <li>Store them in your password manager (1Password, Bitwarden, etc.)</li>
+                                <li>OR print them and store physically in a secure location</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Securely delete the files</h4>
+                    <ol>
+                        <li>Select the sensitive file(s) in Downloads</li>
+                        <li>Press <kbd>Shift</kbd> + <kbd>Delete</kbd> to permanently delete (bypassing Recycle Bin)</li>
+                        <li>Click <strong>Yes</strong> to confirm permanent deletion</li>
+                        <li>Empty your <strong>Recycle Bin</strong> if you deleted without Shift key</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Make sure you've stored the codes securely before deleting them</li>
+                        <li>Never store recovery codes in regular documents or notes apps</li>
+                        <li>If you're unsure what a file is, ask IT support before deleting</li>
+                        <li>Consider using a password manager to securely store all backup codes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Securing Sensitive Files on macOS</h3>
+
+                <div class="method">
+                    <h4>Step 1: Locate the sensitive files</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong></li>
+                        <li>Click on <strong>Downloads</strong> in the sidebar</li>
+                        <li>Look for files with names containing:
+                            <ul>
+                                <li>"password", "emergency kit", or "backup codes"</li>
+                                <li>"recovery codes" or "2fa codes"</li>
+                                <li>1Password Emergency Kit PDFs</li>
+                                <li>Any files containing lists of codes or credentials</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Store codes securely</h4>
+                    <ol>
+                        <li><strong>For password manager emergency kits (1Password, Bitwarden, etc.):</strong>
+                            <ul>
+                                <li>Print the emergency kit and store it in a physically secure location (safe, locked drawer)</li>
+                                <li>OR save it to an encrypted disk image stored securely</li>
+                                <li>Never leave it in Downloads or on your Desktop</li>
+                            </ul>
+                        </li>
+                        <li><strong>For backup/recovery codes (GitHub, Google, etc.):</strong>
+                            <ul>
+                                <li>Store them in your password manager (1Password, Bitwarden, etc.)</li>
+                                <li>OR print them and store physically in a secure location</li>
+                            </ul>
+                        </li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Securely delete the files</h4>
+                    <ol>
+                        <li>Select the sensitive file(s) in Downloads</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Delete</kbd> to move to Trash</li>
+                        <li>Open <strong>Finder</strong> and select <strong>Empty Trash</strong> from the Finder menu</li>
+                        <li>OR press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>Delete</kbd> to empty trash immediately</li>
+                        <li>Click <strong>Empty Trash</strong> to confirm</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>For secure deletion:</strong> Hold <kbd>Command</kbd> + <kbd>Option</kbd> while emptying Trash to securely erase files (prevents recovery).
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Make sure you've stored the codes securely before deleting them</li>
+                        <li>Never store recovery codes in regular Notes or TextEdit documents</li>
+                        <li>If you're unsure what a file is, ask IT support before deleting</li>
+                        <li>Consider using a password manager to securely store all backup codes</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After securing and deleting sensitive files, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify your Downloads folder is clean:</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong> and go to <strong>Downloads</strong></li>
+                        <li>Search for files containing "password", "recovery", "backup", or "emergency"</li>
+                        <li>Use the search box in the top-right: <kbd>*password*</kbd> or <kbd>*recovery*</kbd></li>
+                        <li>No sensitive files should appear in the results</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify your Downloads folder is clean:</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and navigate to <strong>Downloads</strong></li>
+                        <li>Press <kbd>Command</kbd> + <kbd>F</kbd> to search</li>
+                        <li>Search for files containing "password", "recovery", "backup", or "emergency"</li>
+                        <li>Set the search scope to "Downloads"</li>
+                        <li>No sensitive files should appear in the results</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

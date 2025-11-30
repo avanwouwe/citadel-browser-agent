@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WirelessNetworking Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">WirelessNetworking</span>
+        </div>
+        <h1>WirelessNetworking Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The WirelessNetworking control checks for saved wireless networks that use insecure
+            or outdated encryption protocols. This includes networks using WEP, open/unencrypted
+            networks, or older WPA versions that have known security vulnerabilities.
+        </p>
+        <p>
+            <strong>Important:</strong> Citadel will tell you which specific network(s) are using
+            insecure encryption. Weak WiFi encryption is like having a conversation in a room where
+            anyone nearby can listen in. Attackers within range of the network can intercept and read
+            all data transmitted between your Mac and the WiFi router - including passwords, emails,
+            messages, and any information you send or receive. They can also perform man-in-the-middle
+            attacks, inserting themselves between you and websites to steal credentials or inject malicious
+            content. Using insecure wireless networks exposes everything you do online to potential eavesdroppers.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">📡</div>
+                <h3>Traffic Interception</h3>
+                <p>Weak WiFi encryption allows attackers to capture and read all your network traffic,
+                    including passwords, emails, and sensitive data transmitted over the network.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🎭</div>
+                <h3>Man-in-the-Middle Attacks</h3>
+                <p>Insecure networks make it easy for attackers to position themselves between you and
+                    the websites you visit, stealing credentials and injecting malicious content.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔓</div>
+                <h3>Automatic Connection Risk</h3>
+                <p>If saved, your Mac may automatically connect to these insecure networks without warning,
+                    exposing you to attacks whenever you're in range.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Removing Insecure Wireless Networks on macOS</h3>
+
+                <div class="method">
+                    <h4>Forget the insecure network:</h4>
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>Network</strong> (or <strong>Wi-Fi</strong>)</li>
+                        <li>Click <strong>Wi-Fi</strong> in the left sidebar if needed</li>
+                        <li>Click <strong>Advanced</strong> (or <strong>Details</strong>)</li>
+                        <li>You'll see a list of known networks under <strong>"Preferred Networks"</strong></li>
+                        <li>Find the insecure network (Citadel told you the name)</li>
+                        <li>Select it and click the <strong>−</strong> (minus) button to remove it</li>
+                        <li>Click <strong>OK</strong> to confirm</li>
+                        <li>Click <strong>Apply</strong> if prompted</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>If this is your home network:</h4>
+                    <p>If the insecure network is your home WiFi, you should upgrade your router's security:</p>
+                    <ol>
+                        <li>Access your router's admin panel (usually http://192.168.1.1 or http://192.168.0.1)</li>
+                        <li>Log in with your router's admin credentials</li>
+                        <li>Find the <strong>Wireless Security</strong> or <strong>WiFi Security</strong> settings</li>
+                        <li>Change the security type to <strong>WPA3</strong> (best) or <strong>WPA2</strong> (acceptable)</li>
+                        <li>Save the settings and reconnect your Mac using the updated security</li>
+                    </ol>
+                    <p><strong>Need help?</strong> Contact your internet service provider or IT support if you're unsure how to update your router settings.</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Avoid connecting to open/unencrypted public WiFi networks when possible</li>
+                        <li>If you must use public WiFi, use a VPN to encrypt your traffic</li>
+                        <li>WPA3 is the most secure - upgrade your home router if it only supports WPA2 or older</li>
+                        <li>WEP encryption is completely broken and provides no real security</li>
+                        <li>After forgetting a network, your Mac won't automatically reconnect to it</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After removing the insecure network, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify the insecure network is removed:</h4>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> → <strong>Network</strong> → <strong>Wi-Fi</strong></li>
+                        <li>Click <strong>Advanced</strong> (or <strong>Details</strong>)</li>
+                        <li>Review the list of <strong>Preferred Networks</strong></li>
+                        <li>The insecure network should no longer appear in the list</li>
+                        <li>If you're currently connected to it, you should disconnect and connect to a secure network</li>
+                    </ol>
+                    <p class="note"><strong>What's secure?</strong> Look for networks showing "WPA2" or "WPA3" security. Avoid networks showing "WEP", "Open", or "None".</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

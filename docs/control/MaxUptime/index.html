@@ -13,15 +13,14 @@
             <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">MaxUptime</span>
         </div>
         <h1>MaxUptime Control</h1>
-        <div class="status-badge failed">Control Failed</div>
     </header>
 
     <section class="control-info">
         <h2>What does this control check?</h2>
         <p>
-            The MaxUptime control verifies that your computer has been restarted within the last
-            <strong>7 days</strong>. If your system has been running continuously for longer than
-            this period, the control will fail.
+            The MaxUptime control verifies that your computer has been restarted
+            recently. If your system has been running continuously for too long,
+            you may need to restart it.
         </p>
     </section>
 
@@ -35,13 +34,13 @@
                     Running without rebooting means you may be vulnerable to known security threats.</p>
             </div>
             <div class="importance-item">
-                <div class="icon">🛡️</div>
-                <h3>Memory Protection</h3>
-                <p>Rebooting clears system memory, removing any potential malware or processes that
-                    may be running in the background without your knowledge.</p>
+                <div class="icon">⚡</div>
+                <h3>Performance</h3>
+                <p>Regular restarts help maintain optimal system performance by clearing temporary files,
+                    freeing up system resources, and preventing slowdowns from accumulated processes.</p>
             </div>
             <div class="importance-item">
-                <div class="icon">⚡</div>
+                <div class="icon">🛡️</div>
                 <h3>System Stability</h3>
                 <p>Regular restarts prevent memory leaks and system degradation, ensuring your
                     computer runs efficiently and securely.</p>
@@ -51,47 +50,27 @@
 
     <section class="remediation">
         <h2>How to fix this</h2>
-        <p class="remediation-intro">Select your operating system below for specific instructions:</p>
 
         <div class="platform-tabs">
-            <button class="tab-button active" data-platform="windows">
-                <span class="platform-icon">🪟</span> Windows
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
             </button>
             <button class="tab-button" data-platform="macos">
-                <span class="platform-icon">🍎</span> macOS
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
         </div>
 
         <div class="platform-content">
             <!-- Windows Instructions -->
-            <div class="platform-panel active" id="windows">
+            <div class="platform-panel" id="windows">
                 <h3>Restarting Windows</h3>
 
                 <div class="method">
-                    <h4>Method 1: Using the Start Menu</h4>
                     <ol>
                         <li>Click the <strong>Start</strong> button (Windows logo) in the bottom-left corner</li>
                         <li>Click the <strong>Power</strong> icon</li>
                         <li>Select <strong>Restart</strong></li>
                         <li>Wait for your computer to shut down and restart completely</li>
-                    </ol>
-                </div>
-
-                <div class="method">
-                    <h4>Method 2: Using Keyboard Shortcut</h4>
-                    <ol>
-                        <li>Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>Delete</kbd></li>
-                        <li>Click the <strong>Power</strong> icon in the bottom-right corner</li>
-                        <li>Select <strong>Restart</strong></li>
-                    </ol>
-                </div>
-
-                <div class="method">
-                    <h4>Method 3: From the Desktop</h4>
-                    <ol>
-                        <li>Press <kbd>Alt</kbd> + <kbd>F4</kbd> from the desktop (minimize all windows first)</li>
-                        <li>Select <strong>Restart</strong> from the dropdown menu</li>
-                        <li>Click <strong>OK</strong></li>
                     </ol>
                 </div>
 
@@ -110,31 +89,11 @@
                 <h3>Restarting macOS</h3>
 
                 <div class="method">
-                    <h4>Method 1: Using the Apple Menu</h4>
                     <ol>
-                        <li>Click the <strong>Apple menu</strong> () in the top-left corner</li>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
                         <li>Select <strong>Restart...</strong></li>
                         <li>Click <strong>Restart</strong> in the confirmation dialog</li>
                         <li>Wait for your Mac to shut down and restart completely</li>
-                    </ol>
-                </div>
-
-                <div class="method">
-                    <h4>Method 2: Using Keyboard Shortcut</h4>
-                    <ol>
-                        <li>Press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Power</kbd> button</li>
-                        <li>Your Mac will restart immediately</li>
-                    </ol>
-                    <p class="note"><strong>Note:</strong> On newer MacBooks with Touch ID, press the Touch ID button instead of the Power button.</p>
-                </div>
-
-                <div class="method">
-                    <h4>Method 3: Scheduled Restart</h4>
-                    <ol>
-                        <li>Open <strong>System Settings</strong> (or System Preferences)</li>
-                        <li>Go to <strong>General</strong> > <strong>Login Items</strong> (or <strong>Energy Saver</strong>)</li>
-                        <li>Click <strong>Schedule...</strong> button</li>
-                        <li>Check <strong>Restart</strong> and set your preferred schedule</li>
                     </ol>
                 </div>
 
@@ -153,29 +112,14 @@
 
     <section class="verification">
         <h2>Verifying the fix</h2>
-        <p>After restarting your computer:</p>
-        <ol>
-            <li>Wait for Citadel to run its next scheduled check (usually within 1 hour)</li>
-            <li>Alternatively, you can manually trigger a Citadel check from your system tray/menu bar</li>
-            <li>The MaxUptime control should now show as <span class="status-inline passed">Passed</span></li>
-        </ol>
-    </section>
-
-    <section class="help">
-        <h2>Still need help?</h2>
-        <p>If you're still experiencing issues after following these steps:</p>
-        <ul>
-            <li>Contact your IT support team</li>
-            <li>Check the <a href="../docs/troubleshooting">Citadel troubleshooting guide</a></li>
-            <li>View the <a href="../docs/faq">frequently asked questions</a></li>
-        </ul>
+        <p>After restarting your computer, Citadel will automatically verify this control when your browser restarts.</p>
     </section>
 
     <footer class="page-footer">
-        <p>Last updated: January 2025 | <a href="../">Back to Citadel Home</a></p>
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
     </footer>
 </div>
 
-<script src="../scripts/control.js"></script>
+<script src="../script.js"></script>
 </body>
 </html>

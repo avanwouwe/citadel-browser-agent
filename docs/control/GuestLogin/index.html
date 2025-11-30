@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GuestLogin Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">GuestLogin</span>
+        </div>
+        <h1>GuestLogin Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The GuestLogin control verifies that the Guest User account is disabled on your Mac.
+            The Guest account allows anyone to use your computer without a password, creating a
+            backdoor that bypasses all normal security controls.
+        </p>
+        <p>
+            <strong>Important:</strong> When Guest login is enabled, anyone can click "Guest" on your
+            login screen and access your Mac without knowing any password. While the Guest account has
+            limited access compared to your main account, it still allows someone to browse the internet,
+            access shared files, potentially install software, and use your Mac's network connection for
+            malicious purposes. If your Mac is lost or stolen, the Guest account gives thieves immediate
+            access to use your device. Additionally, the Guest account bypasses audit logs, making it
+            impossible to track who used your Mac and what they did.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🚪</div>
+                <h3>Unauthorized Access</h3>
+                <p>Guest accounts allow anyone to use your Mac without authentication, completely bypassing
+                    password protection and giving strangers access to your device.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📝</div>
+                <h3>No Audit Trail</h3>
+                <p>Activity in the Guest account can't be traced to a specific person, making it impossible
+                    to investigate security incidents or determine who accessed your Mac.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🌐</div>
+                <h3>Network Abuse</h3>
+                <p>Guest users can access the internet through your Mac, potentially using your network
+                    connection for illegal activities, malware distribution, or attacks on other systems.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Disabling Guest Login on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>Users & Groups</strong> (or just <strong>Users</strong>)</li>
+                        <li>You may need to click the lock icon and enter your password to make changes</li>
+                        <li>In the left sidebar, find <strong>Guest User</strong></li>
+                        <li>Click on <strong>Guest User</strong></li>
+                        <li>Toggle <strong>"Allow guests to log in to this computer"</strong> to <strong>Off</strong></li>
+                        <li>Also ensure <strong>"Allow guest users to connect to shared folders"</strong> is <strong>Off</strong></li>
+                        <li>Close System Settings</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Note:</strong> On macOS Ventura (13) and later, the option might be worded as "Allow guests to log in" or found under a different submenu. The concept is the same - make sure guest access is disabled.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Disabling Guest login will not affect your ability to use your Mac normally</li>
+                        <li>If someone legitimately needs to use your Mac, create a separate standard user account instead</li>
+                        <li>Guest login creates security and compliance risks even if you "trust" the people around you</li>
+                        <li>Some organizations completely remove the Guest account option via MDM</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After disabling Guest login, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify Guest login is disabled:</h4>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> → <strong>Users & Groups</strong></li>
+                        <li>Click on <strong>Guest User</strong> in the sidebar</li>
+                        <li>Verify that <strong>"Allow guests to log in to this computer"</strong> is toggled <strong>Off</strong></li>
+                        <li>Also check that <strong>"Allow guest users to connect to shared folders"</strong> is <strong>Off</strong></li>
+                    </ol>
+                    <p><strong>Alternative check:</strong> Log out of your Mac (Apple menu → Log Out). The login screen should NOT show a "Guest" option.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

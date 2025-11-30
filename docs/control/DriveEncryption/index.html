@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DriveEncryption Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">DriveEncryption</span>
+        </div>
+        <h1>DriveEncryption Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The DriveEncryption control verifies that your computer's hard drive is encrypted.
+            Encryption protects your data by making it unreadable to anyone who doesn't have
+            the correct password or key.
+        </p>
+        <p>
+            <strong>Important:</strong> Even if you have a password to log into your computer,
+            a criminal who steals your laptop can remove the hard drive and read all your files
+            by connecting it to another computer. Disk encryption prevents this by making all
+            data unreadable without the encryption key, regardless of which computer the drive
+            is connected to.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🔒</div>
+                <h3>Data Protection</h3>
+                <p>If your laptop is lost or stolen, encryption ensures that your files, documents, and
+                    personal information cannot be accessed by unauthorized individuals.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Compliance</h3>
+                <p>Many regulations and policies require encryption to protect sensitive business data
+                    and personal information, helping your organization meet legal requirements.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔐</div>
+                <h3>Privacy</h3>
+                <p>Encryption protects your privacy by ensuring that your emails, photos, passwords,
+                    and browsing history remain confidential even if your device is compromised.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Enabling BitLocker on Windows</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and type <strong>BitLocker</strong></li>
+                        <li>Select <strong>Manage BitLocker</strong> from the results</li>
+                        <li>Find your system drive (usually C:) and click <strong>Turn on BitLocker</strong></li>
+                        <li>Choose how to unlock your drive at startup (recommended: <strong>Enter a password</strong>)</li>
+                        <li>Create a strong password and click <strong>Next</strong></li>
+                        <li>Choose how to back up your recovery key:
+                            <ul>
+                                <li><strong>Save to your Microsoft account</strong> (recommended)</li>
+                                <li>Save to a USB flash drive</li>
+                                <li>Save to a file</li>
+                                <li>Print the recovery key</li>
+                            </ul>
+                        </li>
+                        <li>Choose <strong>Encrypt used disk space only</strong> (faster) or <strong>Encrypt entire drive</strong> (more secure)</li>
+                        <li>Select <strong>New encryption mode</strong></li>
+                        <li>Click <strong>Start encrypting</strong></li>
+                        <li>Wait for the encryption process to complete (this may take some time)</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>BitLocker is only available on Windows Pro, Enterprise, and Education editions</li>
+                        <li>Save your recovery key in a safe place - you'll need it if you forget your password</li>
+                        <li>Your computer must remain plugged in during the encryption process</li>
+                        <li>You may need to restart your computer to complete the setup</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Enabling FileVault on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>Privacy & Security</strong> (or <strong>Security & Privacy</strong>)</li>
+                        <li>Click the <strong>FileVault</strong> tab</li>
+                        <li>Click the lock icon and enter your administrator password to make changes</li>
+                        <li>Click <strong>Turn On FileVault...</strong></li>
+                        <li>Choose how to unlock your disk and reset your password if needed:
+                            <ul>
+                                <li><strong>iCloud account</strong> (recommended for personal Macs)</li>
+                                <li>Create a recovery key and store it safely</li>
+                            </ul>
+                        </li>
+                        <li>Click <strong>Continue</strong></li>
+                        <li>Click <strong>Restart</strong> to begin encryption</li>
+                        <li>After restarting, encryption will continue in the background</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Save your recovery key in a safe place if you chose that option</li>
+                        <li>Encryption happens in the background and may take several hours</li>
+                        <li>Your Mac must remain powered on (can be sleeping) during encryption</li>
+                        <li>You can continue using your Mac normally while encryption is in progress</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling encryption, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To check encryption status manually:</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and type <strong>BitLocker</strong></li>
+                        <li>Select <strong>Manage BitLocker</strong></li>
+                        <li>Your system drive should show <strong>"BitLocker on"</strong></li>
+                    </ol>
+                    <p>Alternatively, go to <strong>Settings → Privacy & security → Device encryption</strong>.</p>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To check encryption status manually:</h4>
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> and select <strong>System Settings</strong></li>
+                        <li>Go to <strong>Privacy & Security</strong></li>
+                        <li>Click <strong>FileVault</strong></li>
+                        <li>It should show <strong>"FileVault is turned on"</strong></li>
+                    </ol>
+                    <p>You can also check encryption progress from this screen while it's encrypting.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../script.js"></script>
+</body>
+</html>

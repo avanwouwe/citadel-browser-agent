@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SystemUpdated Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">SystemUpdated</span>
+        </div>
+        <h1>SystemUpdated Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The SystemUpdated control verifies that your operating system has all the latest
+            security updates and patches installed. Keeping your system up to date is one of
+            the most important steps you can take to protect your device.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Security Patches</h3>
+                <p>Software updates fix known security vulnerabilities that attackers actively exploit.
+                    Running outdated software leaves you exposed to these well-documented threats.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔒</div>
+                <h3>Data Protection</h3>
+                <p>Security vulnerabilities in outdated systems can allow attackers to steal your data,
+                    passwords, and personal information. Updates close these security holes.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">✨</div>
+                <h3>New Features</h3>
+                <p>Updates often include improvements to existing security features, better performance,
+                    and new protections against emerging threats.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Installing Windows Updates</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong> (gear icon)</li>
+                        <li>Click <strong>Windows Update</strong> (or <strong>Update & Security</strong> on older versions)</li>
+                        <li>Click <strong>Check for updates</strong></li>
+                        <li>If updates are available, click <strong>Download</strong> or <strong>Download and install</strong></li>
+                        <li>Wait for the updates to download and install (this may take some time)</li>
+                        <li>Click <strong>Restart now</strong> if prompted</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Save all your work before starting the update process</li>
+                        <li>Keep your computer plugged in during updates</li>
+                        <li>Some updates require multiple restarts - this is normal</li>
+                        <li>Do not turn off your computer while updates are installing</li>
+                        <li>You may need to check for updates multiple times until no more are available</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Installing macOS Updates</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>General</strong> and then <strong>Software Update</strong></li>
+                        <li>Wait while your Mac checks for available updates</li>
+                        <li>If updates are available, click <strong>Update Now</strong> or <strong>Upgrade Now</strong></li>
+                        <li>Enter your password if prompted</li>
+                        <li>Wait for the updates to download and install</li>
+                        <li>Click <strong>Restart</strong> when prompted</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Save all your work before starting the update process</li>
+                        <li>Keep your Mac plugged in during updates</li>
+                        <li>Major macOS upgrades can take 30-60 minutes or longer</li>
+                        <li>Do not close your laptop lid while updates are installing</li>
+                        <li>If using FileVault, make sure you know your encryption password</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After installing updates and restarting, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To check if updates are complete:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Windows Update</strong></li>
+                        <li>Click <strong>Check for updates</strong></li>
+                        <li>It should show <strong>"You're up to date"</strong> or list only optional updates</li>
+                        <li>Look for <strong>"Last checked"</strong> to confirm recent update check</li>
+                    </ol>
+                    <p class="note"><strong>Note:</strong> If you see "Restart required" or "Restart pending", you must restart your computer to complete the updates.</p>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To check if updates are complete:</h4>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> → <strong>General</strong> → <strong>Software Update</strong></li>
+                        <li>It should show <strong>"Your Mac is up to date"</strong></li>
+                        <li>The page will display when your Mac last checked for updates</li>
+                    </ol>
+                    <p class="note"><strong>Note:</strong> If you see "Updates available" or "Restart to finish installing", you need to complete those steps first.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Controls - Citadel</title>
+    <link rel="stylesheet" href="control.css">
+    <style>
+        .controls-hero {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: var(--spacing-xl) var(--spacing-lg);
+            text-align: center;
+        }
+
+        .controls-hero h1 {
+            color: white;
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .controls-hero p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.125rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .controls-list {
+            padding: var(--spacing-lg);
+        }
+
+        .control-item {
+            display: block;
+            position: relative;
+            padding: var(--spacing-md);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            margin-bottom: var(--spacing-md);
+            text-decoration: none;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .control-item:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .control-item-platforms {
+            position: absolute;
+            top: var(--spacing-md);
+            right: var(--spacing-md);
+            display: flex;
+            gap: var(--spacing-xs);
+            align-items: center;
+        }
+
+        .platform-badge {
+            width: 32px;
+            height: 32px;
+            filter: grayscale(100%);
+            opacity: 1;
+        }
+
+        .platform-badge.inactive {
+            opacity: 0.15;
+        }
+
+        .control-item-content {
+            padding-right: 80px; /* Make space for platform badges */
+        }
+
+        .control-item-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .control-item-description {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            line-height: 1.5;
+        }
+
+        .control-chevron {
+            position: absolute;
+            bottom: var(--spacing-md);
+            right: var(--spacing-md);
+            color: var(--gray-400);
+            font-size: 1.5rem;
+        }
+
+        .control-item:hover .control-chevron {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="controls-hero">
+        <h1>Security Controls</h1>
+        <p>Citadel monitors your device to ensure it meets security and compliance requirements. Click any control below to learn more and get help fixing issues.</p>
+    </header>
+
+    <div class="controls-list">
+        <!-- Both platforms -->
+        <a href="/control/BrowserUpdated" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Browser is updated</div>
+                <div class="control-item-description">Outdated browsers have security vulnerabilities that attackers can exploit</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/DriveEncryption" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Disk is encrypted</div>
+                <div class="control-item-description">Protects your data if your device is lost or stolen</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/MaxUptime" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">System was restarted recently</div>
+                <div class="control-item-description">Security updates often require a restart to take effect</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/SystemUpdated" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">System is up to date</div>
+                <div class="control-item-description">Keeps your operating system protected against the latest threats</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/LockScreen" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Screen locking is enabled</div>
+                <div class="control-item-description">Prevents unauthorized access when you step away from your device</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/Firewall" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Firewall is enabled</div>
+                <div class="control-item-description">Blocks unauthorized network connections and malicious traffic</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/AutoUpdates" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Automatic updates are enabled</div>
+                <div class="control-item-description">Ensures security patches are installed without manual intervention</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/SharingPreferences" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Sharing services are disabled</div>
+                <div class="control-item-description">Reduces attack surface by disabling unnecessary network services</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/SSHKeys" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">SSH private keys are secured</div>
+                <div class="control-item-description">Prevents unauthorized access to servers and code repositories</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/BootOptions" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Boot options are secure</div>
+                <div class="control-item-description">Prevents system tampering and ensures secure startup</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/RemovableStorage" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">No USB storage devices connected</div>
+                <div class="control-item-description">USB devices can introduce malware or allow data exfiltration</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/SensitiveFiles" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Sensitive data is protected</div>
+                <div class="control-item-description">Recovery codes and passwords should not be stored in plaintext</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/ExportedFiles" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Exported files are purged</div>
+                <div class="control-item-description">Old data exports can contain sensitive information</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/UnusedFiles" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Unused files are purged</div>
+                <div class="control-item-description">Old downloads can accumulate sensitive data over time</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/ForbiddenApplications" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">No forbidden applications installed</div>
+                <div class="control-item-description">Certain applications pose security or compliance risks</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/MissingApplications" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">All required applications installed</div>
+                <div class="control-item-description">Essential security tools must be present to protect your device</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/ForbiddenProcesses" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">No forbidden processes running</div>
+                <div class="control-item-description">Certain running processes indicate security or policy violations</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/MissingProcesses" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">All required processes running</div>
+                <div class="control-item-description">Critical security services must be active to protect your device</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <!-- macOS only -->
+        <a href="/control/SystemIntegrityProtection" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge inactive" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">System Integrity Protection is enabled</div>
+                <div class="control-item-description">Prevents unauthorized code from modifying critical system files</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/GatekeeperEnabled" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge inactive" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Gatekeeper is enabled</div>
+                <div class="control-item-description">Prevents installation of unverified and potentially malicious software</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/GuestLogin" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge inactive" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Guest login is disabled</div>
+                <div class="control-item-description">Guest accounts bypass security controls and audit trails</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/WirelessNetworking" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge inactive" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">No insecure wireless networks</div>
+                <div class="control-item-description">Weak WiFi encryption allows attackers to intercept your data</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <!-- Windows only -->
+        <a href="/control/ProtectionStatus" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge inactive" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Windows Security Centre features are active</div>
+                <div class="control-item-description">Core Windows security features must be enabled for protection</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+
+        <a href="/control/Antivirus" class="control-item">
+            <div class="control-item-platforms">
+                <img src="../img/windows-logo.png" alt="Windows" class="platform-badge" width="32" height="32">
+                <img src="../img/macos-logo.png" alt="macOS" class="platform-badge inactive" width="32" height="32">
+            </div>
+            <div class="control-item-content">
+                <div class="control-item-title">Antivirus protection is enabled</div>
+                <div class="control-item-description">Detects and blocks malware, viruses, and other threats</div>
+            </div>
+            <span class="control-chevron">›</span>
+        </a>
+    </div>
+
+    <footer class="page-footer">
+        <p><a href="/">Home</a></p>
+    </footer>
+</div>
+</body>
+</html>

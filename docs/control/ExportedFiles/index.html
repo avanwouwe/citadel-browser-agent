@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExportedFiles Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">ExportedFiles</span>
+        </div>
+        <h1>ExportedFiles Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The ExportedFiles control scans your Downloads folder for old data export files
+            (CSV, JSON, and TXT files with "export" in the name) that haven't been accessed
+            recently. These files often contain sensitive business data and should be deleted
+            when no longer needed.
+        </p>
+        <p>
+            <strong>Important:</strong> Data exports from business systems often contain sensitive
+            information like customer lists, financial data, employee information, or analytics.
+            These files accumulate over time in your Downloads folder and create security risks.
+            If your computer is compromised, stolen, or improperly disposed of, these old exports
+            can expose confidential business data. Many data breaches have occurred because of
+            forgotten export files containing thousands of customer records.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">📊</div>
+                <h3>Data Accumulation</h3>
+                <p>Export files accumulate over time as you download reports and data from various systems.
+                    Each file may contain sensitive information that's no longer needed but remains vulnerable.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🎯</div>
+                <h3>Breach Risk</h3>
+                <p>Old export files are often forgotten but remain accessible to malware, thieves, and
+                    unauthorized users. A single export file can contain thousands of sensitive records.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚖️</div>
+                <h3>Compliance</h3>
+                <p>Many regulations (GDPR, HIPAA, SOC 2) require proper handling and disposal of exported
+                    data. Keeping old exports indefinitely violates data retention policies.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Finding and Removing Old Export Files on Windows</h3>
+
+                <div class="method">
+                    <h4>Step 1: Find old export files</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong></li>
+                        <li>Navigate to your <strong>Downloads</strong> folder</li>
+                        <li>Click in the search box (top-right) and type: <kbd>*export*.csv OR *export*.json OR *export*.txt</kbd></li>
+                        <li>Press <strong>Enter</strong> to search</li>
+                        <li>Click <strong>Date modified</strong> column header to sort by date</li>
+                        <li>Identify files that are old and no longer needed</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Review and delete the files</h4>
+                    <ol>
+                        <li>For each old export file:
+                            <ul>
+                                <li>Ask yourself: "Do I still need this data?"</li>
+                                <li>If unsure, check when it was last modified or accessed</li>
+                                <li>If you haven't used it in 30+ days, you probably don't need it</li>
+                            </ul>
+                        </li>
+                        <li>Select the files you want to delete</li>
+                        <li>Press <kbd>Shift</kbd> + <kbd>Delete</kbd> for permanent deletion</li>
+                        <li>Click <strong>Yes</strong> to confirm</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>If you need the data long-term, export it again directly to a secure, backed-up location</li>
+                        <li>Don't keep exports "just in case" - download fresh data when you actually need it</li>
+                        <li>Regularly clean your Downloads folder to prevent accumulation</li>
+                        <li>When in doubt about whether to delete, consult with IT or your manager</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Finding and Removing Old Export Files on macOS</h3>
+
+                <div class="method">
+                    <h4>Step 1: Find old export files</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong></li>
+                        <li>Navigate to your <strong>Downloads</strong> folder</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>F</kbd> to open search</li>
+                        <li>Set the search scope to <strong>"Downloads"</strong></li>
+                        <li>Click the <strong>+</strong> button to add search criteria</li>
+                        <li>Set criteria to search for files:
+                            <ul>
+                                <li>Name contains "export"</li>
+                                <li>Kind is "CSV", "JSON", or "Plain Text"</li>
+                            </ul>
+                        </li>
+                        <li>Click on <strong>Date Modified</strong> to sort by date</li>
+                        <li>Identify files that are old and no longer needed</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Review and delete the files</h4>
+                    <ol>
+                        <li>For each old export file:
+                            <ul>
+                                <li>Ask yourself: "Do I still need this data?"</li>
+                                <li>Right-click and select <strong>Get Info</strong> to see when it was last opened</li>
+                                <li>If you haven't used it in 30+ days, you probably don't need it</li>
+                            </ul>
+                        </li>
+                        <li>Select the files you want to delete</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Delete</kbd> to move to Trash</li>
+                        <li>Empty the Trash: <strong>Finder</strong> → <strong>Empty Trash</strong></li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>For secure deletion:</strong> Hold <kbd>Command</kbd> + <kbd>Option</kbd> while clicking "Empty Trash" to securely erase files and prevent recovery.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>If you need the data long-term, export it again directly to a secure, backed-up location</li>
+                        <li>Don't keep exports "just in case" - download fresh data when you actually need it</li>
+                        <li>Regularly clean your Downloads folder to prevent accumulation</li>
+                        <li>When in doubt about whether to delete, consult with IT or your manager</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After deleting old export files, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify old exports are removed:</h4>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong> and go to <strong>Downloads</strong></li>
+                        <li>Search for: <kbd>*export*.csv OR *export*.json OR *export*.txt</kbd></li>
+                        <li>Review the results and check the <strong>Date modified</strong> column</li>
+                        <li>All remaining export files should be recent (less than 30 days old)</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify old exports are removed:</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and navigate to <strong>Downloads</strong></li>
+                        <li>Press <kbd>Command</kbd> + <kbd>F</kbd> to search</li>
+                        <li>Search for files with "export" in the name that are CSV, JSON, or TXT files</li>
+                        <li>Review the results and check <strong>Date Modified</strong></li>
+                        <li>All remaining export files should be recent (accessed within 30 days)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

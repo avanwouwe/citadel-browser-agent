@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antivirus Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">Antivirus</span>
+        </div>
+        <h1>Antivirus Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The Antivirus control verifies that antivirus protection is enabled and actively
+            protecting your Windows computer. This includes Windows Defender (the built-in antivirus)
+            or approved third-party antivirus software configured by your IT team.
+        </p>
+        <p>
+            <strong>Important:</strong> Antivirus software is your primary defense against malware,
+            viruses, ransomware, and other malicious software. It continuously scans files you download,
+            programs you run, and activities on your computer to detect and block threats in real-time.
+            Without active antivirus protection, your computer is vulnerable to infection from email
+            attachments, malicious websites, infected downloads, and exploits. Modern malware can steal
+            your passwords, encrypt your files for ransom, spy on your activities, or use your computer
+            to attack others - and without antivirus, these threats can operate undetected.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🦠</div>
+                <h3>Malware Detection</h3>
+                <p>Antivirus software detects and blocks viruses, trojans, ransomware, and other malicious
+                    software before they can infect your computer and steal or encrypt your data.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚡</div>
+                <h3>Real-Time Protection</h3>
+                <p>Antivirus works continuously in the background, scanning files as you download them and
+                    programs as you run them, catching threats before they can execute and cause damage.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔍</div>
+                <h3>Threat Intelligence</h3>
+                <p>Modern antivirus uses cloud-based threat intelligence to identify new malware variants
+                    and attack techniques, protecting you from the latest threats even if they're just hours old.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Enabling Antivirus Protection on Windows</h3>
+
+                <div class="method">
+                    <h4>Check Windows Security Center:</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>Privacy & security</strong></li>
+                        <li>Click <strong>Windows Security</strong></li>
+                        <li>Click <strong>Virus & threat protection</strong></li>
+                        <li>Check the status under <strong>"Virus & threat protection"</strong></li>
+                        <li>It should show a green checkmark and "No actions needed"</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>If Windows Defender is turned off:</h4>
+                    <ol>
+                        <li>In the <strong>Virus & threat protection</strong> screen</li>
+                        <li>Click <strong>Manage settings</strong> under "Virus & threat protection settings"</li>
+                        <li>Toggle <strong>Real-time protection</strong> to <strong>On</strong></li>
+                        <li>Also ensure <strong>Cloud-delivered protection</strong> is <strong>On</strong></li>
+                        <li>And <strong>Automatic sample submission</strong> is <strong>On</strong></li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Third-party antivirus:</strong> If your organization uses third-party antivirus software
+                    (like Symantec, McAfee, CrowdStrike, etc.), Windows Defender may be disabled automatically.
+                    In this case, verify the third-party antivirus is running and up to date instead.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>If you can't turn on Real-time protection, you may have third-party antivirus installed</li>
+                        <li>Never run two antivirus programs simultaneously - they will conflict</li>
+                        <li>If antivirus repeatedly turns itself off, you may have a malware infection - contact IT immediately</li>
+                        <li>Antivirus may slow down your computer slightly during scans - this is normal</li>
+                        <li>Don't disable antivirus to improve performance or to install software</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling antivirus protection, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify antivirus is active:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Privacy & security</strong> → <strong>Windows Security</strong></li>
+                        <li>Click <strong>Virus & threat protection</strong></li>
+                        <li>You should see a <strong>green checkmark</strong> and "No actions needed"</li>
+                        <li>Under "Current threats", it should show "No current threats"</li>
+                        <li>Check <strong>"Last scan"</strong> - it should show a recent date/time</li>
+                        <li>Under "Virus & threat protection settings", verify <strong>Real-time protection</strong> is <strong>On</strong></li>
+                    </ol>
+                    <p class="note"><strong>Note:</strong> If you see a yellow warning about Quick scan, that's a reminder to run a scan - not a critical issue. Click "Quick scan" to run it.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

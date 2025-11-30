@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForbiddenProcesses Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">ForbiddenProcesses</span>
+        </div>
+        <h1>ForbiddenProcesses Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The ForbiddenProcesses control checks for running programs or background services
+            that violate your organization's security or compliance policies. A "process" is
+            any program currently running on your computer, whether visible or in the background.
+            The specific list of forbidden processes is configured by your IT team.
+        </p>
+        <p>
+            <strong>Important:</strong> Citadel will tell you which specific process(es) need to be
+            stopped. Processes may be forbidden because they represent malware, unauthorized software,
+            cryptocurrency miners, remote access tools, or applications that violate security policies.
+            Some forbidden processes run invisibly in the background without your knowledge, consuming
+            resources, monitoring your activities, or communicating with external servers.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🦠</div>
+                <h3>Malware Detection</h3>
+                <p>Forbidden processes may indicate malware or potentially unwanted programs running on
+                    your device. Detecting and stopping these processes prevents damage and data theft.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">👁️</div>
+                <h3>Unauthorized Activity</h3>
+                <p>Some processes run without your knowledge, potentially monitoring your activities,
+                    stealing credentials, or providing remote access to attackers.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚠️</div>
+                <h3>Policy Enforcement</h3>
+                <p>Forbidden processes may represent unauthorized software, crypto miners, or tools that
+                    violate company policies and create security or legal risks for the organization.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Stopping Forbidden Processes on Windows</h3>
+
+                <div class="method">
+                    <h4>Step 1: Open Task Manager</h4>
+                    <ol>
+                        <li>Press <kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Esc</kbd> to open Task Manager</li>
+                        <li>OR right-click the taskbar and select <strong>Task Manager</strong></li>
+                        <li>If you see a simple view, click <strong>More details</strong> at the bottom</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Find and stop the forbidden process</h4>
+                    <ol>
+                        <li>Look through the <strong>Processes</strong> tab for the forbidden process name</li>
+                        <li>OR use the search box in the top-right to search for the process</li>
+                        <li>Right-click on the forbidden process</li>
+                        <li>Select <strong>End task</strong></li>
+                        <li>Click <strong>End process</strong> if prompted to confirm</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Prevent the process from restarting</h4>
+                    <p>Stopping a process is temporary - it may restart when you reboot or when its parent application runs. To permanently fix this:</p>
+                    <ol>
+                        <li>Identify which application is running the forbidden process</li>
+                        <li>Uninstall that application: <strong>Settings</strong> → <strong>Apps</strong> → <strong>Installed apps</strong></li>
+                        <li>OR contact IT support if you're unsure what to do</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Don't end processes you don't recognize - some are essential Windows system processes</li>
+                        <li>If the process immediately restarts, it may be malware - contact IT support</li>
+                        <li>Citadel will tell you the specific process name - only end that one</li>
+                        <li>Contact IT support if you need help identifying which app is causing the process</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Stopping Forbidden Processes on macOS</h3>
+
+                <div class="method">
+                    <h4>Step 1: Open Activity Monitor</h4>
+                    <ol>
+                        <li>Press <kbd>Command</kbd> + <kbd>Space</kbd> to open Spotlight</li>
+                        <li>Type <strong>Activity Monitor</strong> and press <strong>Enter</strong></li>
+                        <li>OR navigate to <strong>Applications</strong> → <strong>Utilities</strong> → <strong>Activity Monitor</strong></li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 2: Find and stop the forbidden process</h4>
+                    <ol>
+                        <li>Use the search box in the top-right to search for the forbidden process name</li>
+                        <li>Click on the forbidden process to select it</li>
+                        <li>Click the <strong>X</strong> button (stop icon) in the toolbar</li>
+                        <li>Select <strong>Quit</strong> or <strong>Force Quit</strong></li>
+                        <li>The process should disappear from the list</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Step 3: Prevent the process from restarting</h4>
+                    <p>Stopping a process is temporary - it may restart when you reboot or when its parent application runs. To permanently fix this:</p>
+                    <ol>
+                        <li>Identify which application is running the forbidden process</li>
+                        <li>Uninstall that application by moving it from Applications to Trash</li>
+                        <li>OR contact IT support if you're unsure what to do</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Don't quit processes you don't recognize - some are essential macOS system processes</li>
+                        <li>If the process immediately restarts, it may be malware - contact IT support</li>
+                        <li>Citadel will tell you the specific process name - only quit that one</li>
+                        <li>Contact IT support if you need help identifying which app is causing the process</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After stopping the forbidden process, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify the process is stopped:</h4>
+                    <ol>
+                        <li>Open <strong>Task Manager</strong> (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Esc</kbd>)</li>
+                        <li>Go to the <strong>Processes</strong> tab</li>
+                        <li>Search for the process name using the search box</li>
+                        <li>The forbidden process should not appear in the list</li>
+                        <li>If it reappears after a few minutes, the parent application may need to be uninstalled</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify the process is stopped:</h4>
+                    <ol>
+                        <li>Open <strong>Activity Monitor</strong></li>
+                        <li>Search for the process name in the search box</li>
+                        <li>The forbidden process should not appear in the results</li>
+                        <li>If it reappears after a few minutes, the parent application may need to be uninstalled</li>
+                        <li>Try restarting your Mac to see if the process stays gone</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

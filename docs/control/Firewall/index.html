@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firewall Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">Firewall</span>
+        </div>
+        <h1>Firewall Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The Firewall control verifies that your computer's built-in firewall is enabled
+            and actively protecting your device. A firewall monitors all network traffic and
+            blocks unauthorized connections from reaching your computer.
+        </p>
+        <p>
+            <strong>Important:</strong> Without a firewall, your computer is exposed to the internet
+            and any network you connect to. Attackers on the same WiFi network (at a coffee shop,
+            airport, or hotel) can scan for and exploit vulnerabilities in your system. A firewall
+            acts as a barrier, blocking these malicious connection attempts before they can reach your device.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🚧</div>
+                <h3>Network Protection</h3>
+                <p>Firewalls block unauthorized incoming connections from the internet and local networks,
+                    preventing attackers from accessing services running on your computer.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🦠</div>
+                <h3>Malware Defense</h3>
+                <p>Many types of malware try to communicate with external servers to download additional
+                    payloads or send stolen data. Firewalls can block these unauthorized connections.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📡</div>
+                <h3>Public WiFi Safety</h3>
+                <p>When connected to public or untrusted networks, a firewall is your first line of
+                    defense against other users on the same network attempting to attack your device.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Enabling Windows Firewall</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>Privacy & security</strong> (or <strong>Update & Security</strong> on older versions)</li>
+                        <li>Click <strong>Windows Security</strong></li>
+                        <li>Click <strong>Firewall & network protection</strong></li>
+                        <li>You'll see three network types: Domain, Private, and Public</li>
+                        <li>Click on each network type and ensure the firewall is <strong>On</strong></li>
+                        <li>If any firewall is off, toggle the switch to turn it on</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Quick access:</strong> You can also search for "Windows Defender Firewall" in the Start menu to access firewall settings directly.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>All three network types (Domain, Private, Public) should have the firewall enabled</li>
+                        <li>If you use third-party security software, it may manage the firewall - check with IT support</li>
+                        <li>Do not disable the firewall to fix network issues - contact IT support instead</li>
+                        <li>The firewall should be on even when connected to your home network</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Enabling Firewall on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>Network</strong></li>
+                        <li>Click <strong>Firewall</strong> in the left sidebar (or scroll down to find it)</li>
+                        <li>If the firewall is off, you may need to click the lock icon and enter your password</li>
+                        <li>Toggle the firewall switch to <strong>On</strong></li>
+                        <li>The status should now show <strong>"Firewall is turned on"</strong></li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Note:</strong> On older macOS versions, firewall settings are in <strong>System Preferences</strong> → <strong>Security & Privacy</strong> → <strong>Firewall</strong> tab.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>The macOS firewall is disabled by default - you must manually enable it</li>
+                        <li>Enabling the firewall will not block most normal applications from working</li>
+                        <li>If an app needs to accept incoming connections, macOS will ask for your permission</li>
+                        <li>The firewall should remain on even when connected to trusted networks</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling the firewall, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To check firewall status manually:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Privacy & security</strong> → <strong>Windows Security</strong></li>
+                        <li>Click <strong>Firewall & network protection</strong></li>
+                        <li>All three network types should show a green checkmark and "Firewall is on"</li>
+                        <li>If you see a red X or "Firewall is off", click that network and turn it on</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To check firewall status manually:</h4>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> → <strong>Network</strong> → <strong>Firewall</strong></li>
+                        <li>The status should show <strong>"Firewall is turned on"</strong></li>
+                        <li>The toggle switch should be in the <strong>On</strong> position</li>
+                    </ol>
+                    <p><strong>Alternative:</strong> On older macOS versions, check <strong>System Preferences</strong> → <strong>Security & Privacy</strong> → <strong>Firewall</strong> tab.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

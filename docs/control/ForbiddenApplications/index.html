@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ForbiddenApplications Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">ForbiddenApplications</span>
+        </div>
+        <h1>ForbiddenApplications Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The ForbiddenApplications control checks that you don't have any applications installed
+            that violate your organization's security or compliance policies. The specific list of
+            forbidden applications is configured by your IT team based on security requirements and
+            business needs.
+        </p>
+        <p>
+            <strong>Important:</strong> Citadel will tell you which specific application(s) need to be
+            removed. Applications may be forbidden for various reasons: they might pose security risks,
+            violate licensing agreements, conflict with company policies, leak sensitive data to
+            unauthorized services, or simply be unauthorized shadow IT tools. Your IT team has determined
+            that these specific applications should not be used on company devices.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🚨</div>
+                <h3>Security Risks</h3>
+                <p>Forbidden applications may contain malware, vulnerabilities, or features that expose
+                    your device and company data to security threats that your IT team has identified.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📤</div>
+                <h3>Data Leakage</h3>
+                <p>Some applications may upload your files or data to external services without proper
+                    encryption or authorization, potentially exposing confidential business information.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚖️</div>
+                <h3>Compliance</h3>
+                <p>Using unauthorized or unlicensed software can violate regulatory requirements, licensing
+                    agreements, and company policies, creating legal and financial risks for your organization.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Uninstalling Applications on Windows</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>Apps</strong></li>
+                        <li>Click <strong>Installed apps</strong> (or <strong>Apps & features</strong> on older versions)</li>
+                        <li>Scroll through the list to find the forbidden application</li>
+                        <li>Click the <strong>three dots</strong> (⋯) next to the application name</li>
+                        <li>Select <strong>Uninstall</strong></li>
+                        <li>Click <strong>Uninstall</strong> again to confirm</li>
+                        <li>Follow any additional prompts to complete the uninstallation</li>
+                        <li>Restart your computer if prompted</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Alternative method:</strong> Search for "Add or remove programs" in the Start menu to access the same settings.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Check with IT support if you need a replacement application for your work</li>
+                        <li>Some applications may require administrator privileges to uninstall</li>
+                        <li>If you can't find the application in the list, contact IT support for assistance</li>
+                        <li>Don't just delete the application folder - use the proper uninstall process</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Uninstalling Applications on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Open <strong>Finder</strong></li>
+                        <li>Click <strong>Applications</strong> in the sidebar</li>
+                        <li>Find the forbidden application in the list</li>
+                        <li>Drag the application to the <strong>Trash</strong></li>
+                        <li>OR right-click the application and select <strong>Move to Trash</strong></li>
+                        <li>Enter your password if prompted</li>
+                        <li>Empty the Trash: <strong>Finder</strong> → <strong>Empty Trash</strong></li>
+                        <li>Click <strong>Empty Trash</strong> to confirm</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>For stubborn applications:</strong> Some apps include their own uninstaller. Check if the application folder contains an "Uninstall" app, or look in Applications → Utilities.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Check with IT support if you need a replacement application for your work</li>
+                        <li>Some applications may require administrator privileges to uninstall</li>
+                        <li>If you can't find the application in Applications folder, contact IT support</li>
+                        <li>Some apps leave behind preference files - this is normal and not a security concern</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After uninstalling the forbidden application, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify the application is removed:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>Apps</strong> → <strong>Installed apps</strong></li>
+                        <li>Search for the application name in the search box</li>
+                        <li>The application should no longer appear in the list</li>
+                        <li>Restart your computer to ensure all components are removed</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify the application is removed:</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and click <strong>Applications</strong></li>
+                        <li>Use the search box (top-right) to search for the application name</li>
+                        <li>The application should no longer appear</li>
+                        <li>Check the <strong>Trash</strong> is empty</li>
+                        <li>Restart your Mac to ensure all components are removed</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LockScreen Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">LockScreen</span>
+        </div>
+        <h1>LockScreen Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The LockScreen control verifies that your computer is configured to automatically
+            lock the screen when you step away. This ensures your device requires a password
+            to access it after a short period of inactivity.
+        </p>
+        <p>
+            <strong>Important:</strong> Without automatic screen locking, anyone who approaches
+            your unattended computer can access all your files, emails, passwords, and applications
+            as if they were you. If they can access your email, they can reset passwords for virtually
+            any online account (banking, social media, work systems, etc.) by using the "forgot password"
+            feature. This creates serious security and privacy risks.
+        </p>
+    </section>
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🚫</div>
+                <h3>Unauthorized Access</h3>
+                <p>An unlocked computer allows anyone nearby to access your work, send messages as you,
+                    access confidential information, or install malicious software.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔐</div>
+                <h3>Data Protection</h3>
+                <p>Screen locking protects sensitive information displayed on your screen from being
+                    viewed or photographed when you step away from your desk.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📋</div>
+                <h3>Compliance</h3>
+                <p>Most security policies and regulatory requirements mandate automatic screen locking
+                    to prevent unauthorized access to company systems and data.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Enabling Screen Lock on Windows</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>Personalization</strong></li>
+                        <li>Click <strong>Lock screen</strong> in the left sidebar</li>
+                        <li>Scroll down and click <strong>Screen saver settings</strong></li>
+                        <li>In the dropdown menu, select any screen saver (e.g., <strong>Blank</strong>)</li>
+                        <li>Set <strong>Wait</strong> to <strong>10 minutes</strong> (or less)</li>
+                        <li>Check the box <strong>"On resume, display logon screen"</strong></li>
+                        <li>Click <strong>Apply</strong> and then <strong>OK</strong></li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Alternative method:</strong> You can also search for "Change screen saver" in the Start menu to access these settings directly.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Set the timeout to 10 minutes or less for better security</li>
+                        <li>The "On resume, display logon screen" option must be checked</li>
+                        <li>You can manually lock your screen anytime by pressing <kbd>Windows</kbd> + <kbd>L</kbd></li>
+                        <li>Make sure you know your login password before enabling this</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Enabling Screen Lock on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>Lock Screen</strong> (or <strong>Security & Privacy</strong> → <strong>General</strong> tab)</li>
+                        <li>Set <strong>"Require password after screen saver begins or display is off"</strong> to <strong>immediately</strong> (or the shortest time available)</li>
+                        <li>Optionally, set <strong>"Turn display off on battery when inactive"</strong> and <strong>"Turn display off on power adapter when inactive"</strong> to 10 minutes or less</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Tip:</strong> You can set up Hot Corners to lock your screen instantly. Go to <strong>Desktop & Dock</strong> → <strong>Hot Corners</strong> and set a corner to "Lock Screen".
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Set password requirement to "immediately" for best security</li>
+                        <li>You can manually lock your screen anytime by pressing <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Q</kbd></li>
+                        <li>If using FileVault, you'll need your encryption password when unlocking</li>
+                        <li>Make sure you know your login password before enabling this</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After configuring screen locking, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify screen lock is working:</h4>
+                    <ol>
+                        <li>Wait for the configured timeout period without touching your computer</li>
+                        <li>Your screen should go blank (screen saver activates)</li>
+                        <li>Move your mouse or press a key</li>
+                        <li>You should be prompted to enter your password to unlock</li>
+                    </ol>
+                    <p><strong>Quick test:</strong> Press <kbd>Windows</kbd> + <kbd>L</kbd> to lock immediately, then verify you need to enter your password to unlock.</p>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify screen lock is working:</h4>
+                    <ol>
+                        <li>Wait for your display to turn off or screen saver to start</li>
+                        <li>Move your mouse or press a key to wake the display</li>
+                        <li>You should be prompted to enter your password immediately</li>
+                    </ol>
+                    <p><strong>Quick test:</strong> Press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Q</kbd> to lock immediately, then verify you need to enter your password to unlock.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

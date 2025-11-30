@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BootOptions Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">BootOptions</span>
+        </div>
+        <h1>BootOptions Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The BootOptions control verifies that your computer's boot security features are
+            properly configured. On Windows, this checks that Secure Boot is enabled. On macOS,
+            this checks that System Integrity Protection and other boot security features are active.
+        </p>
+        <p>
+            <strong>Important:</strong> Boot security features protect your computer from the moment
+            it starts up, before your operating system even loads. They prevent malicious software
+            (including rootkits and bootkits) from loading during startup and tampering with your
+            system at a fundamental level. Disabling these features is typically only done by advanced
+            users for specific technical reasons, but it significantly weakens your computer's security.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Rootkit Prevention</h3>
+                <p>Boot security features prevent sophisticated malware from loading before your operating
+                    system starts, where they would be nearly impossible to detect and remove.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">✓</div>
+                <h3>System Integrity</h3>
+                <p>These features verify that only trusted, unmodified software runs during startup,
+                    ensuring your system hasn't been tampered with by attackers or malware.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔒</div>
+                <h3>Core OS Protection</h3>
+                <p>Boot security protects critical system files and processes from modification, even by
+                    users with administrator privileges, preventing accidental or malicious system damage.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Enabling Secure Boot on Windows</h3>
+
+                <div class="note">
+                    <strong>Note:</strong> Enabling Secure Boot requires accessing your computer's UEFI/BIOS firmware settings. The exact steps vary by manufacturer (Dell, HP, Lenovo, etc.).
+                </div>
+
+                <div class="method">
+                    <h4>Check if Secure Boot is supported:</h4>
+                    <ol>
+                        <li>Press <kbd>Windows</kbd> + <kbd>R</kbd> to open Run</li>
+                        <li>Type <kbd>msinfo32</kbd> and press <strong>Enter</strong></li>
+                        <li>Look for <strong>"Secure Boot State"</strong> in the System Summary</li>
+                        <li>If it says "Unsupported", your device doesn't support Secure Boot</li>
+                        <li>If it says "Off", you need to enable it in UEFI settings</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Enable Secure Boot (general steps):</h4>
+                    <ol>
+                        <li>Restart your computer</li>
+                        <li>During startup, press the BIOS/UEFI key (usually <kbd>F2</kbd>, <kbd>F10</kbd>, <kbd>F12</kbd>, <kbd>Del</kbd>, or <kbd>Esc</kbd>)</li>
+                        <li>Look for a <strong>Security</strong>, <strong>Boot</strong>, or <strong>Authentication</strong> menu</li>
+                        <li>Find the <strong>Secure Boot</strong> option</li>
+                        <li>Change it from <strong>Disabled</strong> to <strong>Enabled</strong></li>
+                        <li>Save changes and exit (usually <kbd>F10</kbd> to save and exit)</li>
+                        <li>Your computer will restart with Secure Boot enabled</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li><strong>This is a technical procedure</strong> - contact IT support if you're unsure</li>
+                        <li>The BIOS/UEFI key and menu layout varies by manufacturer</li>
+                        <li>Some older computers don't support Secure Boot</li>
+                        <li>If you dual-boot with Linux, enabling Secure Boot may cause issues</li>
+                        <li>Take a photo of current BIOS settings before making changes</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Restoring Boot Security on macOS</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ This requires IT support assistance:</strong>
+                    <ul>
+                        <li>Fixing boot security issues on macOS typically requires advanced technical knowledge</li>
+                        <li>The process involves booting into Recovery Mode and using Terminal commands</li>
+                        <li>Incorrect changes can make your Mac unbootable</li>
+                        <li><strong>Please contact your IT support team for assistance with this control</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Why boot security might be disabled:</h4>
+                    <p>
+                        System Integrity Protection (SIP) and secure boot settings are usually only disabled
+                        intentionally for specific development or troubleshooting purposes. Common reasons include:
+                    </p>
+                    <ul>
+                        <li>Installing certain developer tools or kernel extensions</li>
+                        <li>Running older software that's incompatible with security features</li>
+                        <li>Troubleshooting system issues under IT guidance</li>
+                    </ul>
+                    <p>
+                        In most cases, these features should be re-enabled after the specific task is complete.
+                    </p>
+                </div>
+
+                <div class="note">
+                    <strong>For IT Support:</strong> Boot security settings are controlled via Recovery Mode. Use
+                    <kbd>csrutil enable</kbd> to enable SIP and check nvram boot-args for any security-disabling flags
+                    (amfi parameters, etc.).
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After enabling boot security features, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify Secure Boot is enabled:</h4>
+                    <ol>
+                        <li>Press <kbd>Windows</kbd> + <kbd>R</kbd> to open Run</li>
+                        <li>Type <kbd>msinfo32</kbd> and press <strong>Enter</strong></li>
+                        <li>Look for <strong>"Secure Boot State"</strong> in the System Summary</li>
+                        <li>It should show <strong>"On"</strong></li>
+                        <li>Also check <strong>"BIOS Mode"</strong> - it should show <strong>"UEFI"</strong> (not "Legacy")</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify SIP is enabled:</h4>
+                    <ol>
+                        <li>Open <strong>Terminal</strong> (in Applications → Utilities)</li>
+                        <li>Type: <kbd>csrutil status</kbd></li>
+                        <li>Press <strong>Enter</strong></li>
+                        <li>It should show <strong>"System Integrity Protection status: enabled"</strong></li>
+                        <li>If it shows "disabled" or lists disabled features, contact IT support</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

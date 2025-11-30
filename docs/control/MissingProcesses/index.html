@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MissingProcesses Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">MissingProcesses</span>
+        </div>
+        <h1>MissingProcesses Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The MissingProcesses control verifies that all required programs and services are
+            currently running on your computer. A "process" is any program actively running,
+            whether visible or in the background. The specific list of required processes is
+            configured by your IT team based on security and business requirements.
+        </p>
+        <p>
+            <strong>Important:</strong> Citadel will tell you which specific process(es) need to be
+            running. Required processes are typically essential security services like antivirus protection,
+            VPN clients, backup agents, or endpoint security tools. If these processes aren't running,
+            your computer lacks critical protections even though the application might be installed.
+            For example, having antivirus software installed but not running provides no protection
+            against malware.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🛡️</div>
+                <h3>Active Protection</h3>
+                <p>Security tools only protect you when they're actually running. An installed but stopped
+                    antivirus, firewall service, or VPN provides zero protection against threats.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔍</div>
+                <h3>Continuous Monitoring</h3>
+                <p>Many security processes work by continuously monitoring your system for threats, suspicious
+                    activity, or policy violations. If they're not running, threats can go undetected.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚙️</div>
+                <h3>Service Availability</h3>
+                <p>Required processes often enable critical business functions like secure network access,
+                    data backup, or system management. Without them running, you may lose access to resources.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Starting Required Processes on Windows</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support First:</strong>
+                    <ul>
+                        <li>Missing processes often indicate a configuration problem or failed service</li>
+                        <li>Simply restarting a process may not fix the underlying issue</li>
+                        <li>IT support can diagnose why the process isn't running and fix it properly</li>
+                        <li><strong>Please contact your IT support team for assistance</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The name of the missing process (from Citadel notification)</li>
+                        <li>Your computer name and username</li>
+                        <li>When you last restarted your computer</li>
+                        <li>Whether you've recently uninstalled any applications</li>
+                        <li>Any error messages you've seen</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>If IT has asked you to restart the service:</h4>
+                    <ol>
+                        <li>Press <kbd>Windows</kbd> + <kbd>R</kbd> to open Run</li>
+                        <li>Type <kbd>services.msc</kbd> and press <strong>Enter</strong></li>
+                        <li>Find the service in the list (IT will tell you the name)</li>
+                        <li>Right-click the service and select <strong>Start</strong></li>
+                        <li>OR right-click and select <strong>Restart</strong> if it's already running</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Simple fix to try:</strong> Sometimes restarting your computer will start the required process. Try this first before contacting IT support.
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Starting Required Processes on macOS</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support First:</strong>
+                    <ul>
+                        <li>Missing processes often indicate a configuration problem or failed service</li>
+                        <li>Simply restarting a process may not fix the underlying issue</li>
+                        <li>IT support can diagnose why the process isn't running and fix it properly</li>
+                        <li><strong>Please contact your IT support team for assistance</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The name of the missing process (from Citadel notification)</li>
+                        <li>Your computer name, username, and macOS version</li>
+                        <li>When you last restarted your Mac</li>
+                        <li>Whether you've recently uninstalled any applications</li>
+                        <li>Any error messages or notifications you've seen</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>If IT has asked you to launch the application:</h4>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and click <strong>Applications</strong></li>
+                        <li>Find and launch the application that should be running the process</li>
+                        <li>Check if the application starts properly</li>
+                        <li>Look in the menu bar (top-right) for the application icon</li>
+                        <li>Some security tools run in the background without showing a window</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>Simple fix to try:</strong> Sometimes restarting your Mac will start the required process. Try this first before contacting IT support.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After starting the required process, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify the process is running:</h4>
+                    <ol>
+                        <li>Open <strong>Task Manager</strong> (<kbd>Ctrl</kbd> + <kbd>Shift</kbd> + <kbd>Esc</kbd>)</li>
+                        <li>Go to the <strong>Processes</strong> tab</li>
+                        <li>Search for the process name using the search box</li>
+                        <li>The required process should appear in the list</li>
+                        <li>It should show as "Running" in the Status column</li>
+                    </ol>
+                    <p class="note"><strong>Note:</strong> Some processes appear in the <strong>Details</strong> tab instead of the Processes tab.</p>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify the process is running:</h4>
+                    <ol>
+                        <li>Open <strong>Activity Monitor</strong></li>
+                        <li>Make sure you're viewing <strong>All Processes</strong> (from the View menu)</li>
+                        <li>Search for the process name in the search box</li>
+                        <li>The required process should appear in the results</li>
+                        <li>Check that it's not highlighted in red (which indicates a crashed process)</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>

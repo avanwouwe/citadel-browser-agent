@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SharingPreferences Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">SharingPreferences</span>
+        </div>
+        <h1>SharingPreferences Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The SharingPreferences control verifies that remote access and file sharing services
+            are disabled on your computer. These services allow other devices to connect to and
+            control your computer over the network.
+        </p>
+        <p>
+            <strong>Important:</strong> While sharing services can be convenient, they create security
+            risks by opening network ports and allowing remote connections to your device. If enabled,
+            attackers on the same network (or even the internet) can attempt to exploit these services
+            to gain unauthorized access to your computer, view your files, or control your system remotely.
+            Most users don't need these services enabled for their daily work.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🎯</div>
+                <h3>Reduced Attack Surface</h3>
+                <p>Every enabled sharing service is a potential entry point for attackers. Disabling
+                    unnecessary services reduces the number of ways an attacker can compromise your device.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🔓</div>
+                <h3>Prevents Unauthorized Access</h3>
+                <p>Sharing services can be exploited to gain remote access to your computer, allowing
+                    attackers to steal files, install malware, or monitor your activities.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">📡</div>
+                <h3>Network Security</h3>
+                <p>On public or untrusted networks, enabled sharing services advertise your device to
+                    everyone nearby, making you an easy target for network-based attacks.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Disabling Sharing Services on Windows</h3>
+
+                <div class="method">
+                    <h4>Disable Remote Desktop:</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
+                        <li>Click <strong>System</strong></li>
+                        <li>Click <strong>Remote Desktop</strong> (or search for "Remote Desktop settings")</li>
+                        <li>Toggle <strong>Remote Desktop</strong> to <strong>Off</strong></li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Disable File and Printer Sharing:</h4>
+                    <ol>
+                        <li>Click the <strong>Start</strong> button and type <strong>Control Panel</strong></li>
+                        <li>Click <strong>Network and Sharing Center</strong></li>
+                        <li>Click <strong>Change advanced sharing settings</strong> on the left</li>
+                        <li>Under each network profile (Private, Guest/Public), select <strong>Turn off file and printer sharing</strong></li>
+                        <li>Click <strong>Save changes</strong></li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>If you need to share files, use cloud services like OneDrive or SharePoint instead</li>
+                        <li>Contact IT support if you're unsure whether you need these services</li>
+                        <li>Some work applications may require specific sharing services - check with IT first</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Disabling Sharing Services on macOS</h3>
+
+                <div class="method">
+                    <ol>
+                        <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
+                        <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
+                        <li>Click <strong>General</strong> and then <strong>Sharing</strong> (or just <strong>Sharing</strong> on older versions)</li>
+                        <li>You'll see a list of sharing services on the left side</li>
+                        <li>Ensure all the following services are <strong>turned off</strong> (toggle switches should be in the off position):
+                            <ul>
+                                <li>Screen Sharing</li>
+                                <li>File Sharing</li>
+                                <li>Printer Sharing</li>
+                                <li>Remote Login</li>
+                                <li>Remote Management</li>
+                                <li>Remote Apple Events</li>
+                                <li>Internet Sharing</li>
+                                <li>Bluetooth Sharing</li>
+                                <li>Content Caching</li>
+                            </ul>
+                        </li>
+                        <li>Close System Settings when done</li>
+                    </ol>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>If you need to share files, use AirDrop or cloud services like iCloud Drive instead</li>
+                        <li>Contact IT support if you're unsure whether you need any of these services</li>
+                        <li>Some work applications may require specific sharing services - check with IT first</li>
+                        <li>All services should be off unless you have a specific, documented need for them</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After disabling sharing services, Citadel will automatically verify this control during its next check.</p>
+
+        <div class="platform-content">
+            <!-- Windows Verification -->
+            <div class="platform-panel" id="windows-verify">
+                <div class="method">
+                    <h4>To verify sharing services are disabled:</h4>
+                    <ol>
+                        <li>Open <strong>Settings</strong> → <strong>System</strong> → <strong>Remote Desktop</strong></li>
+                        <li>Verify Remote Desktop is <strong>Off</strong></li>
+                        <li>Open <strong>Control Panel</strong> → <strong>Network and Sharing Center</strong> → <strong>Change advanced sharing settings</strong></li>
+                        <li>Verify file and printer sharing is <strong>turned off</strong> for all network profiles</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
+                <div class="method">
+                    <h4>To verify sharing services are disabled:</h4>
+                    <ol>
+                        <li>Open <strong>System Settings</strong> → <strong>General</strong> → <strong>Sharing</strong></li>
+                        <li>Review the list of services on the left</li>
+                        <li>All services should show as <strong>Off</strong></li>
+                        <li>If any service shows as "On", click it and toggle it off</li>
+                    </ol>
+                    <p class="note"><strong>Tip:</strong> A quick way to check is to look for any services with a green dot or "On" indicator.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/controls">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="../../control/script.js"></script>
+</body>
+</html>
