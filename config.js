@@ -27,9 +27,10 @@ class Config {
                 }
             },
         },
-        warningProtocols: ['http:', 'ftp:', 'ws:'],
+        warningProtocols: ['http:', 'ftp:', 'ws:'],         // list of unencrypted protocols
         application: {
-            retentionDays: 365,
+            retentionDays: 180,
+            minDailyInteractions: 10
         },
         exceptions: [ ],
         domain: {

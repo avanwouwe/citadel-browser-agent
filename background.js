@@ -510,37 +510,38 @@ function reportInteractions() {
 		}
 
 		for (const [date, app] of Object.entries(usagePerDayPerApp)) {
-			Object.entries(app)
+			const reportDate = `${date}T23:59:59.999Z`
+			const reportedApps = Object.entries(app)
 				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
-				.slice(0, config.reporting.maxApplicationEntries)
+				.filter(app => app.interactions >= config.application.minDailyInteractions)
+
+			reportedApps.slice(0, config.reporting.maxApplicationEntries)
 				.forEach(it => {
-					logger.log(
-						`${date}T23:59:59.999Z`,
+					logger.log(reportDate,
 						'report',
 						'interaction report',
 						"https://" + it.appName,
 						Log.INFO,
-						it.interactions,
-						`'@@URL@@' received ${it.interactions} interactions on ${date}`
+						undefined,
+						`'@@URL@@' received interactions on ${date}`
 						, undefined
 						, undefined
 						, false
 					)
 				})
-		}
 
-		const unreportedApplications = Object.entries(usagePerDayPerApp).length - config.reporting.maxApplicationEntries
-		if (unreportedApplications > 0) {
-			logger.log(nowTimestamp(), "report", "unreported interactions", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`, undefined, undefined, false)
+			const unreportedApplications = reportedApps.length - config.reporting.maxApplicationEntries
+			if (unreportedApplications > 0) {
+				logger.log(reportDate, "report", "unreported interactions", undefined, Log.WARN, unreportedApplications, `${unreportedApplications} interaction reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`, undefined, undefined, false)
+			}
 		}
-
 	}
 
 	if (config.reporting.onlyAuthenticated) {
 		report(true)
 	} else {
-		// run twice to prevent non-authenticated sites from crowding out the authenticated ones
+		// run separately to prevent non-authenticated sites from crowding out the authenticated ones
 		report(true)
 		report(false)
 	}
@@ -566,7 +567,7 @@ function reportApplications() {
 					"https://" + appName,
 					Log.INFO,
 					unusedDays,
-					`'${appName}' was last used ${unusedDays} days ago, on ${app.lastUsed}`
+					`'@@URL@@ was last used ${unusedDays} days ago, on ${app.lastUsed}`
 					, undefined
 					, undefined
 					, false
@@ -601,20 +602,19 @@ function reportApplications() {
 			})
 
 		const unreportedApplications = appCnt - config.reporting.maxApplicationEntries
-		if (unreportedApplications > 0) {
-			logger.log(nowTimestamp(), "report", "unreported usage", undefined, Log.ERROR, unreportedApplications, `${unreportedApplications} application usage reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`)
+		if (unreportedApplications > 0 && isAuthenticated) {
+			logger.log(nowTimestamp(), "report", "unreported usage", undefined, Log.WARN, unreportedApplications, `${unreportedApplications} application usage reports were lost, exceeded maximum of ${config.reporting.maxApplicationEntries} applications`)
 		}
 
 		const unreportedIssues = topIssues.length - config.reporting.maxAccountEntries
 		if (unreportedIssues > 0) {
-			logger.log(nowTimestamp(), "report", "unreported account issues", undefined, Log.ERROR, unreportedIssues, `${unreportedIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`)}
-
+			logger.log(nowTimestamp(), "report", "unreported account issues", undefined, Log.WARN, unreportedIssues, `${unreportedIssues} account issues were lost, exceeded maximum of ${config.reporting.maxAccountEntries} accounts`)}
 	}
 
 	if (config.reporting.onlyAuthenticated) {
 		report(true)
 	} else {
-		// run twice to prevent non-authenticated sites from crowding out the authenticated ones
+		// run separately to prevent non-authenticated sites from crowding out the authenticated ones
 		report(true)
 		report(false)
 	}
