@@ -1,15 +1,59 @@
+z# ------------------------------------------------------------
 # Site settings
+# ------------------------------------------------------------
 title: Citadel
+description: Browser‑based endpoint security solution
 url: "https://citadelagent.org"
-description: Browser-based endpoint security solution
+
 author: Arno van Wouwe
 email: citadel@vanwouwe.nl
 
+# ------------------------------------------------------------
 # Build settings
-theme: hacker
-
-# Optional: Better URLs
+# ------------------------------------------------------------
+remote_theme: just-the-docs/just-the-docs
 permalink: pretty
 
-# GitHub metadata
+# Enables the built‑in search and navigation sidebar
+search_enabled: true
+color_scheme: light
+
+# ------------------------------------------------------------
+# Navigation structure
+# Just‑the‑Docs builds the sidebar from folders and front matter.
+# You can still define order or grouping using `nav_order` in each page.
+# ------------------------------------------------------------
+
+# Example: add explicit nav order for top‑level pages
+defaults:
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: default
+      nav_order: 10       # Default order if none is provided
+
+# ------------------------------------------------------------
+# GitHub metadata (for "Edit this page" links etc.)
+# ------------------------------------------------------------
 repository: avanwouwe/citadel-browser-agent
+github:
+  is_project_page: true
+  repository_url: https://github.com/avanwouwe/citadel-browser-agent
+
+# ------------------------------------------------------------
+# Social / project metadata
+# ------------------------------------------------------------
+social:
+  name: "Citadel Browser Agent"
+  links:
+    - https://github.com/avanwouwe/citadel-browser-agent
+    - https://x.com/vanwouwe
+
+# ------------------------------------------------------------
+# Plugins allowed on GitHub Pages
+# ------------------------------------------------------------
+plugins:
+  - jekyll-feed
+  - jekyll-seo-tag
+  - jekyll-sitemap
