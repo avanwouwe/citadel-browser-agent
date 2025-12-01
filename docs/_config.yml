@@ -6,39 +6,10 @@ author: Arno van Wouwe
 email: citadel@vanwouwe.nl
 
 # Build settings
-theme: jekyll-theme-just-the-docs
+theme: hacker
 
-# Just the Docs specific settings
-color_scheme: dark # or "light" - dark might feel more "security"
-search_enabled: true
-search:
-  heading_level: 2
-  previews: 3
-  preview_words_before: 5
-  preview_words_after: 10
+# Optional: Better URLs
+permalink: pretty
 
-# Logo/branding (add your logo)
-logo: "/assets/images/citadel-logo.png"
-
-# Footer
-footer_content: "Copyright &copy; 2024 Citadel. Open source under MIT License."
-
-# GitHub link in header
-gh_edit_link: true
-gh_edit_link_text: "Edit this page on GitHub"
-gh_edit_repository: "https://github.com/avanwouwe/citadel-browser-agent"
-gh_edit_branch: "main"
-gh_edit_view_mode: "edit"
-
-# Back to top link
-back_to_top: true
-back_to_top_text: "Back to top"
-
-# Aux links (top-right buttons)
-aux_links:
-  "View on GitHub":
-    - "https://github.com/avanwouwe/citadel-browser-agent"
-  "Download":
-    - "https://github.com/avanwouwe/citadel-browser-agent/releases"
-
-aux_links_new_tab: true
+# GitHub metadata
+repository: avanwouwe/citadel-browser-agent
