@@ -1,0 +1,22 @@
+# Site settings
+title: Citadel
+url: "https://citadelagent.org"
+description: Browser-based endpoint security solution
+author: Arno van Wouwe
+email: citadel@vanwouwe.nl
+
+# Build settings
+theme: jekyll-theme-cayman  # See theme options below
+
+# Optional: Better URLs (remove .html extension)
+permalink: pretty
+
+# Navigation (if theme supports it)
+navigation:
+  - title: Home
+    url: /
+  - title: Device Posture Controls
+    url: /control
+
+# GitHub metadata (optional but nice)
+repository: avanwouwe/citadel-browser-agent
