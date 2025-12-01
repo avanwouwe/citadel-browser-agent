@@ -3,7 +3,7 @@ Follow the following steps to ship the syslog events to your Wazuh instance.
 
 ## change ossec.conf
 ### macOS
-If you haven't already done so, install the [Native Messaging module](/installation/macos) that Citadel needs to communicate the events outside browser sandbox.
+If you haven't already done so, install the [Native Messaging module](/install/macos) that Citadel needs to communicate the events outside browser sandbox.
 
 In the `ossec.conf` file that is deployed on agents, edit the existing `<localfile>` entry to ensure that the syslog events are seen by Wazuh, by adding to the query: `or (process == "citadel-browser-agent" and message beginsWith "browser agent : ")`
 
@@ -18,7 +18,7 @@ In the `ossec.conf` file that is deployed on agents, edit the existing `<localfi
 
 
 ### Windows
-If you haven't already done so, install the [Native Messaging module](/installation/windows) that Citadel needs to communicate the events outside browser sandbox.
+If you haven't already done so, install the [Native Messaging module](/install/windows) that Citadel needs to communicate the events outside browser sandbox.
 
 In the `ossec.conf` file that is deployed on agents, add the following `<localfile>` entry to ensure that the syslog events are seen by Wazuh.
 ```
@@ -78,10 +78,10 @@ PUT _template/wazuh-browseragent
 > This template will only be applied when the **next** index is created, which is generally the next day. If events are injected in the current index, the fields will not be the correct type, and the same field will have different types in different indexes. This may cause strange behaviour elsewhere. You may want to wait with injecting new events until the next index is created, or delete the current index (though this means losing that day's worth of security events
 
 # add decoder
-In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` > `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [0590-browser-agent_decoder.xml](/installation/0590-browser-agent_decoder.xml).
+In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` > `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [0590-browser-agent_decoder.xml](/install/0590-browser-agent_decoder.xml).
 
 # add rules
-Events only generate alerts if they are matched by a rule. In Wazuh `Server Management` > `Rules` configuration create a new rules file `0019-browser-agent_rules.xml` and fill it with the contents of [0019-browser-agent_rules.xml](/installation/0019-browser-agent_rules.xml).
+Events only generate alerts if they are matched by a rule. In Wazuh `Server Management` > `Rules` configuration create a new rules file `0019-browser-agent_rules.xml` and fill it with the contents of [0019-browser-agent_rules.xml](/install/0019-browser-agent_rules.xml).
 
 Restart the server for the changes to take effect, for example using the `Restart cluster` > `Server Management` > `Status` menu.
 

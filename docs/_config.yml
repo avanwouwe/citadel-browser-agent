@@ -1,7 +1,9 @@
-z# ------------------------------------------------------------
+# ------------------------------------------------------------
 # Site settings
 # ------------------------------------------------------------
+source: docs
 title: Citadel
+logo: "/img/logo.png"
 description: Browser‑based endpoint security solution
 url: "https://citadelagent.org"
 

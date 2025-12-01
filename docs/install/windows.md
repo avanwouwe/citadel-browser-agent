@@ -7,11 +7,11 @@ You can use your MDM to distribute [the installer](https://github.com/avanwouwe/
 On top of the Citadel installer, you need to [install osquery](https://osquery.io/downloads) on the endpoint, so that the agent can query the device state.
 
 Alternatively, should you need for some reason to install Citadel manually: 
-1. copy the contents of [/bin/build/win](https://github.com/avanwouwe/citadel-browser-agent/blob/bin/build/win) to `C:\Program Files\Citadel\`
-2. copy the contents of [/bin/controls](https://github.com/avanwouwe/citadel-browser-agent/blob/bin/controls) to `C:\Program Files\Citadel\controls` (making sure they are not world-writable)
+1. copy the contents of [/bin/build/win](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/win) to `C:\Program Files\Citadel\`
+2. copy the contents of [/bin/controls](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/controls) to `C:\Program Files\Citadel\controls` (making sure they are not world-writable)
 3. set the following keys to `C:\Program Files\Citadel\citadel.browser.agent.json`:
    * `HKLM\SOFTWARE\Google\Chrome\NativeMessagingHosts\citadel.browser.agent`
-   * `HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser-firefox.agent` (note [Firefox specific manifest](https://github.com/avanwouwe/citadel-browser-agent/blob/bin/build/win/citadel.browser.agent-firefox.json))
+   * `HKLM\SOFTWARE\Mozilla\NativeMessagingHosts\citadel.browser-firefox.agent` (note [Firefox specific manifest](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/win/citadel.browser.agent-firefox.json))
    * `HKLM\SOFTWARE\Opera Software\NativeMessagingHosts\citadel.browser.agent`
    * `HKLM\SOFTWARE\Microsoft\Edge\NativeMessagingHosts\citadel.browser.agent`
    * `HKLM\SOFTWARE\BraveSoftware\Brave\NativeMessagingHosts\citadel.browser.agent`
