@@ -1,3 +1,10 @@
+---
+layout: default
+title: Privacy FAQ
+parent: Privacy
+nav_order: 3
+---
+
 # Citadel: What It Does and How Your Data Is Protected
 
 ---

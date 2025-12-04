@@ -1,3 +1,10 @@
+---
+layout: default
+title: macOS
+parent: Installation
+nav_order: 2
+---
+
 # macOS installation
 
 Browser extensions are sandboxed and cannot access the local operating system. To allow the Citadel extension to write to syslog it is necessary to set up Native Messaging. This involves placing a JSON manifest file in a specific place that gives the path to the program that will be started by Chrome, and then receive the events and log them to syslog.

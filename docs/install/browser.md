@@ -1,3 +1,10 @@
+---
+layout: default
+title: Browser
+parent: Installation
+nav_order: 3
+---
+
 # Browser plugin installation
 The extension is available on the web stores of Chrome, Firefox, Opera, Edge and Brave. This means it is updated automatically, and the installation consists of installing the plugin.
 

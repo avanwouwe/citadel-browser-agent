@@ -1,3 +1,10 @@
+---
+layout: default
+title: Wazuh integration
+parent: Installation
+nav_order: 4
+---
+
 # Wazuh integration
 Follow the following steps to ship the syslog events to your Wazuh instance.
 

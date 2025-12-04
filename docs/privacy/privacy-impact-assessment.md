@@ -1,3 +1,10 @@
+---
+layout: default
+title: Data Privacy Impact Assessment (DPIA)
+parent: Privacy
+nav_order: 2
+---
+
 # **Data Privacy Impact Assessment : Citadel**
 
 > [!NOTE]

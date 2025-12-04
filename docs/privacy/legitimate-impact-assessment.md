@@ -1,3 +1,10 @@
+---
+layout: default
+title: Legitimate Interests Assessment (LIA)
+parent: Privacy
+nav_order: 1
+---
+
 # Legitimate Interests Assessment (LIA)
 
 > [!NOTE] This is the Legitimate Impact Assessment performed by the developer of Citadel, as part of the development of Citadel. It can be used as a **template** to be used by a CISO / CIO during the Citadel deployment. The template should however be carefully analysed, verified for compliance, and adapted to the specifics of the organisation, for example with respect to data retention, local laws or use of external SIEM / SOAR solutions.
