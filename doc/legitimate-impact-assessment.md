@@ -19,6 +19,7 @@ Citadel processes personal and technical data in order to:
 - Enable CISOs and CIOs to protect sensitive endpoints and web applications from threats
 - Detect and prevent policy breaches, malware, and shadow IT
 - Facilitate rapid and effective Digital Forensics and Incident Response (DFIR)
+- Provide proof needed for potential legal proceedings
 - Satisfy legal, regulatory, and contractual cybersecurity obligations
 
 ### 1.2 Expected Benefits
@@ -97,7 +98,7 @@ To the best of our knowledge, Citadel complies (or facilitates the compliance of
 - **Délibération n° 2021-122 du 14 octobre 2021**  
   *Logging of security events (journalisation) — data minimization, proportionality*
 
-- **Draft “Web Filtering” Recommendations (July 2025\)**  
+- **Draft "Web Filtering" Recommendations (July 2025\)**  
   *Web filtering transparency, proportionality, and privacy controls*
 
 #### 6\. NIST SP 800-53 Rev. 5 (for US-based or multinational organizations)
@@ -108,13 +109,13 @@ To the best of our knowledge, Citadel complies (or facilitates the compliance of
 
 ### 1.7 Codes of Practice and Ethics
 
-We consider thatCitadel implements (or facilitates the implementation by organisations) of the following relevant industry guidelines and codes of practise.
+We consider that Citadel implements (or facilitates the implementation by organisations) of the following relevant industry guidelines and codes of practise.
 
 - **Privacy by design**: data minimisation and privacy-preserving defaults
 - **Transparency with users**; monitoring is justified, documented, and proportionate
 - No behavioural profiling or marketing data use
 
-Like all monitoring technology, Citadel poses an ethical dilemma: how to combine the need for information security with the right to privacy of the individual. At every step our design choices have been informed at every step by the GDPR key principles of purpose limitation, storage limitation, confidentiality, and transparency.
+Like all monitoring technology, Citadel poses an ethical dilemma: how to combine the need for information security with the right to privacy of the individual. At every step our design choices have been informed by the GDPR key principles of purpose limitation, storage limitation, confidentiality, and transparency.
 
 ---
 
@@ -143,7 +144,9 @@ The following alternatives have been evaluated, to establish their impact on the
 
 As a result the following privacy-preserving technical controls have been implemented:
 
-- Analyse only applications in the protected scope
+- URL masking: only events related to protected systems, or that have a direct and urgent security impact (e.g. virus detected, page blocked, possible phishing) are logged un-masked
+- Transparency dashboard: users can view which events are transmitted to the SIEM in real-time
+- Secret masking: passwords, API keys and credit cards that are masked when they appear by accident in the log events
 - Hashing URLs for non-critical / forensic events
 - Local-only storage for most non-incident data
 
@@ -151,13 +154,14 @@ As a result the following privacy-preserving technical controls have been implem
 
 Additionally, the following minimisations have been identified and implemented, so as to achieve the same goal with a minimum of data that is retained.
 
-| Data Type | Retained? | Minimisation Steps |
-| :---- | :---- | :---- |
-| Navigation URLs | Yes | Hashed and stored locally |
-| Download / upload metadata | Yes | Metadata (no file content); only significant |
-| App / account usage stats | Yes | Only for authenticated apps, and only as daily summary |
-| Passwords | No | Only local hashes and quality indicators |
-| Endpoint status | Yes | Only pass / fail or aggregated control state |
+| Data Type                                              | Retained?  | Minimisation Steps                                                                                                                                            |
+|:-------------------------------------------------------|:-----------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Navigation URLs                                        | Partial    | Hashed and stored locally; only logged to server for protected systems or urgent security events                                                              |
+| Browser errors / warnings                              | Partial    | Only logged for protected systems or urgent security events                                                                                                   |
+| Download / upload metadata                             | Partial    | Metadata only (no file content); logged only for protected systems or urgent security events; URLs hashed for non-protected systems                           |
+| App / account usage stats                              | Local only | Stored locally only to detect minimum usage threshold; never transmitted to server                                                                            |
+| Passwords or other secrets (credit card, API key, etc) | No         | Only local hashes and quality indicators retained regarding passwords entered in password fields, passwords entered elsewhere by mistake are masked from logs |
+| Endpoint status                                        | Yes        | Only pass / fail or aggregated control state                                                                                                                  |
 
 ---
 
@@ -167,16 +171,16 @@ Additionally, the following minimisations have been identified and implemented, 
 
 An evaluation was performed of the type of data that is processed.
 
-| Data Category | Description / Sensitivity | Special Category? |
-| :---- | :---- | :---- |
-| Identifiers | Username, application accounts | No, unless used for special (e.g. union) accounts |
-| Passwords | High sensitivity, but stored locally and hashed | No |
-| App usage | Number of app interactions and account, per day | No |
-| Security events | Download / upload / print, browser error events | Some could be sensitive |
-| Browser navigation | High sensitivity, but stored locally and hashed | No |
-| Endpoint compliance | Pass / fail state, app/extension status | No |
+| Data Category        | Description / Sensitivity                                                                                                | Special Category? |
+|:---------------------|:-------------------------------------------------------------------------------------------------------------------------| :---- |
+| Identifiers          | Username, application accounts                                                                                           | No, unless used for special (e.g. union) accounts |
+| Passwords  & secrets | High sensitivity, hashed when stored locally when entered in a password field, masked from logs if it appears by mistake | No |
+| App usage            | Local-only tracking to detect minimum usage threshold, but reports Yes / No indicator                                    | No |
+| Security events      | Download / upload / print, browser error events - only for protected systems or urgent security events                   | Some could be sensitive |
+| Browser navigation   | High sensitivity, stored locally and hashed                                                                              | No |
+| Endpoint compliance  | Pass / fail state, app/extension status                                                                                  | No |
 
-**The main remaining issue is the “Special Category”.** This data is never processed intentionally, and extensive efforts have been made to exclude this data where possible. There remains however a risk of accidental capture if the user visits sensitive (e.g. health, religious) sites.
+**The main remaining issue is the "Special Category".** This data is never processed intentionally, and extensive efforts have been made to exclude this data where possible. There remains however a residual risk of accidental capture if the user visits sensitive (e.g. health, religious) sites that are within the protected perimeter or trigger urgent security events, such as a virus, or a phishing attack.
 
 Further analysis and measures are required if Citadel is deployed in contexts where it will process on a regular basis the personal data of children or other vulnerable people.
 
@@ -184,22 +188,22 @@ Further analysis and measures are required if Citadel is deployed in contexts wh
 
 The expectations of data subjects have been evaluated as follows.
 
-| Factor | Comment |
-| :---- | :---- |
+| Factor | Comment                                                                                                                                                          |
+| :---- |:-----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Relationship | Users are employees / agents of the organisation that is deploying Citadel. Security-related monitoring is disclosed and expected in a professional environment. |
-| Transparency | End-users notified (“transparency statement”, deployment briefings) |
-| Usage context | Security / IT monitoring is standard in managed environments |
-| Collection | Data generated by device-user activity only; direct collection only |
-| Innovation / novelty | Aligned with best practice, SIEM / XDR standards, and privacy by design |
+| Transparency | End-users notified ("transparency statement", deployment briefings); real-time transparency dashboard allows users to view which events are transmitted to SIEM |
+| Usage context | Security / IT monitoring is standard in managed environments                                                                                                     |
+| Collection | Data generated by device-user activity only; direct collection only; masking limits collection to protected systems and urgent security events                   |
+| Innovation / novelty | Aligned with best practice, SIEM / XDR standards, and privacy by design                                                                                          |
 
 ### 3.3 Likely Impact on Individuals
 
-| Impact Area | Assessment | Safeguards |
-| :---- | :---- | :---- |
-| Privacy | Limited; only for security/forensic uses | Data minimisation, local hashing, SIEM access controls |
-| Objection / Control | Employee discomfort possible | Opt-out / configuration options, internal helpdesk process. |
-| Intrusiveness | Low: only application/security, not full browsing tracked | No content; usage only for authenticated apps |
-| Misuse | Strict RBAC for SIEM / forensic data | Role-based access, limited audit trail |
+| Impact Area | Assessment                                                                                                                     | Safeguards                                                                                                      |
+| :---- |:-------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|
+| Privacy | Minimal; URL masking ensures only security-relevant data for protected systems or critical security events is logged           | Data minimisation, transparency dashboard, local hashing, masking of URLs and secrets, SIEM access controls     |
+| Objection / Control | Employee discomfort possible                                                                                                   | Opt-out / configuration options, internal helpdesk process.                                                     |
+| Intrusiveness | Very low: URL masking prevents logging of non-protected systems; no content captured; masking of passwords and secrets in logs | Only protected systems monitored; usage is logged as Yes / No                                                   |
+| Misuse | Strict RBAC for SIEM / forensic data                                                                                           | Role-based access, limited audit trail                                                                          |
 
 **Opt-out available:**  
 Yes, via configuration or organisational process in special situations.
@@ -208,12 +212,12 @@ Yes, via configuration or organisational process in special situations.
 
 ## 4\. Decision and Action
 
-| Assessment Area | Result | Comment |
-| :---- | :---- | :---- |
-| Legitimate Interest | Yes | Organisation, user and public protection. Compliance, risk mitigation, and required investigation. |
-| Processing necessary | Yes | Less intrusive means would impair security, detection or compliance. |
-| Balancing outcome | Acceptable | Minimisation, hashing, transparency, and "need to know" controls address risks. |
-| Lawful basis | Art. 6(1)(f) GDPR – Legitimate Interest | Users are informed; DPIA / LIA documented and actively maintained. |
+| Assessment Area | Result | Comment                                                                                                                                              |
+| :---- | :---- |:-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| Legitimate Interest | Yes | Organisation, user and public protection. Compliance, risk mitigation, and required investigation.                                                   |
+| Processing necessary | Yes | Less intrusive means would impair security, detection or compliance.                                                                                 |
+| Balancing outcome | Acceptable | Secret and URL masking mechanism, no detailed usage stats, minimisation, hashing, transparency, and "need to know" controls address risks.           |
+| Lawful basis | Art. 6(1)(f) GDPR – Legitimate Interest | Users are informed; DPIA / LIA documented and actively maintained.                                                                                   |
 
 ---
 

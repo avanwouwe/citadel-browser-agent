@@ -52,11 +52,10 @@ nav_order: 2
 | Security configuration, installed / running apps, stored documents       | security team via SIEM / XDR                                                                                                                                                                             | Aggregated status / state only, as long as agent installed |
 | Camera, microphone                                                       | no processing                                                                                                                                                                                            | N/A |
 
-### 
 
 ### Description of Processes and Media
 
-![architecture.png](architecture.png)
+![architecture.png](/img/architecture.png)
 
 | Process | Detailed Description of the Process                                                                                                   | Relevant Data Supports |
 | :---- |:--------------------------------------------------------------------------------------------------------------------------------------| :---- |
