@@ -1,9 +1,15 @@
-injectPageScripts(['/utils/injected/bundle/citadel-bundle.js'])
+injectPageScripts(['/utils/injected/bundle/citadel-bundle-idle.js'])
 
-document.addEventListener("click", clickListener, true)
-document.shadowRoot?.addEventListener("click", clickListener, true)
+listeners.clickListener = function(event) {
+    sendMessage("user-interaction")
 
-document.addEventListener('keydown', function(event) {
+    const button = event.target.closest('button, input[type="button"], input[type="submit"]')
+    if (button && !button.disabled && button.offsetParent != null && ! button.isHidden()) {
+        checkLogin(event, button)
+    }
+}
+
+listeners.keyListener = function(event) {
     if (event.key === 'Enter') {
         sendMessage("user-interaction")
 
@@ -11,7 +17,7 @@ document.addEventListener('keydown', function(event) {
             checkLogin(event, event.target)
         }
     }
-}, true)
+}
 
 window.addEventListener('beforeprint', function() {
     sendMessage("print-dialog")
@@ -57,15 +63,6 @@ window.addEventListener("message", function(event) {
 const system = window.location.origin
 let sessionState
 new SessionState(system).load().then(obj => sessionState = obj)
-
-function clickListener(event) {
-    sendMessage("user-interaction")
-
-    const button = event.target.closest('button, input[type="button"], input[type="submit"]')
-    if (button && !button.disabled && button.offsetParent != null && ! button.isHidden()) {
-        checkLogin(event, button)
-    }
-}
 
 function cloneFile(file) {
     const clone = shallowClone(file)
@@ -204,7 +201,7 @@ function repeatEvent(event, target) {
     }
 }
 
-async function checkLogin(event, button) {
+checkLogin = async function(event, button) {
     if (event.syntheticCitadelEvent) return
 
     const fields = findFormElements(button)

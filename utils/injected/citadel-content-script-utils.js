@@ -98,14 +98,6 @@ async function sendMessage(type, message, handler) {
     chrome.runtime.sendMessage(message, handler)
 }
 
-function sendMessagePromise(type, message) {
-    return new Promise((resolve, reject) => {
-        sendMessage(type, message, result =>
-            result && result.error ? reject(result.error) : resolve(result)
-        )
-    })
-}
-
 async function callServiceWorker(type, message) {
     return new Promise((resolve, reject) => {
         sendMessage(type, message, (response) => {

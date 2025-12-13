@@ -20,9 +20,10 @@
         try {
             if (options?.password) {
                 if (credentials && credentials.type === "password" && credentials.id && credentials.password) {
+                    const PasswordCheck = typeof window.CitadelPasswordCheck !== 'undefined' ? window.CitadelPasswordCheck : undefined
                     const report = {
                         username: credentials.id,
-                        password: PasswordCheck.analyzeAccount(credentials.id, credentials.password),
+                        password: PasswordCheck?.analyzeAccount(credentials.id, credentials.password) ?? { },
                         mfa: false
                     }
 

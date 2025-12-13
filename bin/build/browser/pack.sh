@@ -1,18 +1,27 @@
 #!/bin/bash
 
 set -e
-
-OUTPUT_BUNDLE="./utils/injected/bundle/citadel-bundle.js"
-
-rm -f "$OUTPUT_BUNDLE"
-
-
 cd ../../..
 
-cat \
-    ./utils/context.js \
-    ./utils/encryption/pbkdf2.js \
-    ./utils/trust/passwords.js \
-    ./utils/trust/mfa.js \
-    ./utils/injected/citadel-page-script.js \
-    > "$OUTPUT_BUNDLE"
+BUNDLE_DIR="./utils/injected/bundle"
+
+bundle() {
+    local output="$1"
+    shift
+    rm -f "$output"
+    cat "$@" > "$output"
+}
+
+START_FILES=(
+    ./utils/injected/citadel-page-script.js
+)
+
+IDLE_FILES=(
+    ./utils/context.js
+    ./utils/encryption/pbkdf2.js
+    ./utils/trust/passwords.js
+    ./utils/trust/mfa.js
+)
+
+bundle "$BUNDLE_DIR/citadel-bundle-start.js" "${START_FILES[@]}"
+bundle "$BUNDLE_DIR/citadel-bundle-idle.js" "${IDLE_FILES[@]}"

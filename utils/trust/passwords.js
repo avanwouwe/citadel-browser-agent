@@ -287,3 +287,7 @@ class PasswordCheck {
         }
     }
 }
+
+if (Context.isPageScript()) {
+    window.CitadelPasswordCheck = PasswordCheck
+}

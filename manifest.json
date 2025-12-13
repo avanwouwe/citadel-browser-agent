@@ -32,7 +32,8 @@
         "/gui/modal.css",
         "/gui/modal.html",
         "/utils/i18n/*.json",
-        "/utils/injected/bundle/citadel-bundle.js"
+        "/utils/injected/bundle/citadel-bundle-start.js",
+        "/utils/injected/bundle/citadel-bundle-idle.js"
       ],
       "matches": ["*://*/*"]
     }
@@ -89,15 +90,24 @@
       "all_frames": true,
       "js": [
         "/utils/injected/citadel-content-script-utils.js",
+        "/utils/injected/citadel-content-script-start.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["<all_urls>"],
+      "all_frames": true,
+      "js": [
         "/utils/context.js",
         "/utils/session-state.js",
         "/utils/encryption/pbkdf2.js",
         "/utils/trust/passwords.js",
         "/utils/trust/mfa.js",
-        "/utils/injected/citadel-content-script.js"
+        "/utils/injected/citadel-content-script-idle.js"
       ],
-      "run_at": "document_start"
+      "run_at": "document_idle"
     }
+
   ],
   "action": {
     "default_title": "Click to see security report",
