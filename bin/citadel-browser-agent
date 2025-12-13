@@ -14,6 +14,7 @@ import time
 import subprocess
 import threading
 import urllib.request
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 match platform.system().lower():
@@ -28,6 +29,8 @@ PROTOCOL_VERSION = 2
 CONFIG_PATH = "citadel-config.json"
 PERIODIC_CHECK_FREQUENCY = 60 * 60 # every hour
 DEFAULT_OSQUERY_PATH = "C:\\Program Files\\osquery\\osqueryi.exe" if SYSTEM_OS == "windows" else "/usr/local/bin/osqueryi"
+MAX_REPORT_WORKERS = 10
+CONTROL_TIMEOUT = 20   # seconds
 REPORT_TIMEOUT = 60   # seconds
 FETCH_TIMEOUT = 20    # seconds
 
@@ -377,23 +380,33 @@ def generateAndSendReport():
 
 
 def generateReport():
-    results = { }
+    results = {}
     definitions = loadControlPacks()
-    for controlName, controlDefinition in definitions.items():
-        try:
-            queryStr = controlDefinition.get("query")
 
+    with ThreadPoolExecutor(max_workers = MAX_REPORT_WORKERS) as executor:
+        futures = {}
+
+        for controlName, controlDefinition in definitions.items():
+            queryStr = controlDefinition.get("query")
             if queryStr:
-                errors = getErrors(queryStr)
+                futures[executor.submit(getErrors, queryStr)] = controlName
+
+        for future in as_completed(futures):
+            controlName = futures[future]
+            try:
+                errors = future.result(timeout = CONTROL_TIMEOUT)
                 addReport(results, controlName, errors)
-        except Exception as e:
-            exception(f"query '{controlName}' failed", e)
+            except TimeoutError:
+                errMsg = f"control '{controlName}' timed out after '{CONTROL_TIMEOUT}' seconds"
+                exception(errMsg, TimeoutError(errMsg))
+            except Exception as e:
+                    exception(f"control '{controlName}' failed", e)
 
     results.update(checkApplications())
     results.update(checkProcesses())
     results.update(checkSystemUpdated())
 
-    return { "controls": { "definitions":  definitions, "results": results } }
+    return {"controls": {"definitions": definitions, "results": results}}
 
 def periodicChecksWorker():
     while True:
