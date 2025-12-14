@@ -1,4 +1,4 @@
-injectPageScripts(['/utils/injected/bundle/citadel-bundle-idle.js'])
+injectPageScript('/utils/injected/bundle/citadel-bundle-idle.js')
 
 listeners.clickListener = function(event) {
     sendMessage("user-interaction")
