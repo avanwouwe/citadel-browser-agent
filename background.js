@@ -692,7 +692,10 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 		const currUrl = url.toURL()
 		const prevUrl = await tabState?.getState("LastUrl", tabId)?.then(url => url?.toURL())
 
-		if (MFACheck.findAuthPattern(prevUrl?.href) && prevUrl.origin + prevUrl.pathname === currUrl.origin + currUrl.pathname) {
+	if (MFACheck.findAuthPattern(prevUrl?.href) &&
+			details.transitionType === "form_submit" &&
+			prevUrl.origin + prevUrl.pathname === currUrl.origin + currUrl.pathname
+		) {
 			new SessionState(details.url.toURL().origin).load().then(sessionState =>  {
 				if (! sessionState.auth?.username) return
 				const appName = getSitename(details.url)
