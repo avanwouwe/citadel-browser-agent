@@ -72,7 +72,7 @@ button:disabled {
     opacity: 0.6;
 }
 
-#exceptionSectionToggle #clickable {
+#exceptionSectionToggle #enableExceptionSection {
     color: #007bff;
     cursor: pointer;
 }

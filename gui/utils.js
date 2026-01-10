@@ -60,3 +60,113 @@ function containsSvg(element, dStr) {
     const paths = element?.querySelectorAll('svg path') ?? []
     return Array.from(paths).some(path => path.getAttribute('d') === dStr)
 }
+
+/**
+ * Parse safe markup and create DOM elements
+ * Supported tags: <b>, <i>, <u>, <strong>, <em>, <link>, <code>
+ * Links can have id attributes: <link id="mylink">click here</link>
+ *
+ * @param {string} text - Text with safe markup
+ * @param {Object} handlers - Click handlers keyed by id
+ * @returns {DocumentFragment} Safe DOM fragment
+ */
+function parseSafeMarkup(text, handlers = {}) {
+    const allowedTags = ['b', 'i', 'u', 'strong', 'em', 'code', 'link']
+    const container = document.createDocumentFragment()
+    const stack = [container]
+
+    let currentText = ''
+    let i = 0
+
+    while (i < text.length) {
+        if (text[i] === '<') {
+            // Match: <link id="name" href="url">text</link> or <link id="name">text</link>
+            const tagMatch = text.slice(i).match(/^<(\/?)([\w]+)(?:\s+id="([^"]*)")?(?:\s+href="([^"]*)")?>/);
+
+            if (tagMatch) {
+                const [fullMatch, isClosing, tagName, id, href] = tagMatch
+
+                if (allowedTags.includes(tagName)) {
+                    if (currentText) {
+                        stack[stack.length - 1].appendChild(document.createTextNode(currentText))
+                        currentText = ''
+                    }
+
+                    if (isClosing === '/') {
+                        if (stack.length > 1) {
+                            const el = stack.pop()
+                            stack[stack.length - 1].appendChild(el)
+                        }
+                    } else {
+                        let el
+                        if (tagName === 'link') {
+                            if (href) {
+                                // Real link with href - create <a> tag
+                                el = document.createElement('a')
+                                el.href = href
+                                el.target = '_blank'
+                                el.rel = 'noopener noreferrer'
+                            } else {
+                                // Clickable action - create <span>
+                                el = document.createElement('span')
+                                el.className = 'i18n-link'
+                                el.style.cursor = 'pointer'
+
+                                if (id && handlers[id]) {
+                                    el.addEventListener('click', handlers[id])
+                                }
+                            }
+                        } else {
+                            el = document.createElement(tagName)
+                        }
+
+                        if (id) {
+                            el.id = id
+                        }
+
+                        stack.push(el)
+                    }
+
+                    i += fullMatch.length
+                    continue
+                }
+            }
+        }
+
+        currentText += text[i]
+        i++
+    }
+
+    if (currentText) {
+        stack[stack.length - 1].appendChild(document.createTextNode(currentText))
+    }
+
+    while (stack.length > 1) {
+        const el = stack.pop()
+        stack[stack.length - 1].appendChild(el)
+    }
+
+    return container
+}
+
+async function getSecurityAnalysisUrl(input) {
+    if (IPv4Range.isIPV4(input)) {
+        return `https://www.virustotal.com/gui/ip-address/${input}`
+    }
+
+    if (input.isURL()) {
+        const hash = await sha256Hash(input);
+        return `https://www.virustotal.com/gui/url/${hash}`
+    }
+
+    return `https://www.virustotal.com/gui/domain/${input}`
+}
+
+async function sha256Hash(str) {
+    const encoder = new TextEncoder()
+    const data = encoder.encode(str)
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data)
+    const hashArray = Array.from(new Uint8Array(hashBuffer))
+    const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+    return hashHex
+}

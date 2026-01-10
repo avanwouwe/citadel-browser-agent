@@ -92,10 +92,12 @@
   "block-page": {
     "not-specified": "Non spécifié",
     "page-blocked-header": "Cette page a été bloquée",
+    "page-blocked-text": "Le site web que vous tentez de visiter est bloqué pour des raisons de sécurité.",
+    "security-analysis": "Pour comprendre pourquoi la page a été bloquée, vous pouvez consulter l'<link href=\"{{securityAnalysisUrl}}\">analyse de sécurité</link>.",
     "reason-label": "Raison:",
     "target-label": "Cible:",
     "contact-label": "Contact:",
-    "request-exception": "Si vous êtes <b><u>certain</u></b> qu’il n’y a aucun problème de sécurité, vous pouvez <span id=\"clickable\">demander une exception temporaire</span>",
+    "request-exception": "Si vous êtes <b><u>certain</u></b> qu’il n’y a aucun problème de sécurité, vous pouvez <link id=\"enableExceptionSection\">demander une exception temporaire</link>",
     "request-exception-header": "Demander une exception",
     "provide-reason": "Veuillez fournir la raison pour laquelle vous demandez une exception",
     "submit-request": "Envoyer la demande",
