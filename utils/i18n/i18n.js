@@ -50,15 +50,11 @@ class I18n {
         document.querySelectorAll('[data-i18n-rich]').forEach(el => {
             const key = el.getAttribute('data-i18n-rich')
             const handlerKey = el.getAttribute('data-handler')
-            const translated = this.t(key, values)
 
-            // Clear existing content
             el.textContent = ''
-
-            // Get handlers for this specific element
+            const translated = this.t(key, values)
             const elementHandlers = handlerKey && handlers[handlerKey] ? handlers[handlerKey] : {}
-            const node = parseSafeMarkup(translated, elementHandlers)
-            el.appendChild(node)
+            el.safeInnerHTML(translated, elementHandlers)
         })
     }
 

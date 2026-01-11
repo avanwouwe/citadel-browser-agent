@@ -5,6 +5,5 @@ window.onload = async function() {
     const message = params?.message ?? ''
 
     document.getElementById('title').textContent = title
-    const messageNode = parseSafeMarkup(message)
-    document.getElementById('message').appendChild(messageNode)
+    document.getElementById('message').safeInnerHTML(message)
 }
