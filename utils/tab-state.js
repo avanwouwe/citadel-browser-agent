@@ -7,7 +7,7 @@ class TabState {
             this.#handler = (message, sender) => {
                 const tabId = sender.tab.id
                 const state = this.#state[tabId]?.[message.key]
-                state.tabId = tabId
+                if (state) state.tabId = tabId
                 return state
             }
 

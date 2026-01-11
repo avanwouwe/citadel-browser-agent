@@ -1,18 +1,23 @@
-function showPopup(message, title = "Citadel browser agent"
+async function showPopup(message, title = "Citadel browser agent"
                    , width = 350, height = 200
                    , left = 200, top = 200)
 {
-    const url = chrome.runtime.getURL("/gui/popup.html")
-    const params = new URLSearchParams({ message: message, title: title })
-
-    chrome.windows.create({
-        url: `${url}?${params.toString()}`,
+    const window = await chrome.windows.create({
+        url: 'about:blank',
         type: 'popup',
         width: width,
         height: height,
         left: left,
         top: top
     })
+
+    const tabId = window.tabs[0].id
+    await tabState?.setState("Popup", tabId, {
+        title,
+        message
+    })
+
+    await chrome.tabs.update(tabId, { url: chrome.runtime.getURL("/gui/popup.html") })
 }
 
 function blockPage(tabId, reason, blockedPage) {
