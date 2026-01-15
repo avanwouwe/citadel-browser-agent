@@ -92,6 +92,6 @@ Events only generate alerts if they are matched by a rule. In Wazuh `Server Mana
 
 Restart the server for the changes to take effect, for example using the `Restart cluster` > `Server Management` > `Status` menu.
 
-You should start seeing new events show up in the `Threat hunting` module, for example if you visit [http://neverssl.com](http://neverssl.com) and filter in Wazuh for `data.browseragent.event: *`.
+You should start seeing new events show up in the `Threat hunting` module, for example if you visit [http://192.0.2.1](http://192.0.2.1) and filter in Wazuh for `data.browseragent.event: *`.
 
 ![screenshot of events in Wazuh](/img/screenshot-wazuh.png)
