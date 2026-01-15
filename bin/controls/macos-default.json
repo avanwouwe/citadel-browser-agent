@@ -4,11 +4,11 @@
       "text": {
         "en": {
           "label": "Browser is updated",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BrowserUpdated"
+          "explain": "https://www.citadelagent.org/control/BrowserUpdated"
         },
         "fr": {
           "label": "Navigateur est à jour",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BrowserUpdated"
+          "explain": "https://www.citadelagent.org/control/BrowserUpdated"
         }
       }
     },
@@ -16,11 +16,11 @@
       "text": {
         "en": {
           "label": "No forbidden applications installed",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ForbiddenApplications"
+          "explain": "https://www.citadelagent.org/control/ForbiddenApplications"
         },
         "fr": {
           "label": "Aucune application interdite installée",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ForbiddenApplications"
+          "explain": "https://www.citadelagent.org/control/ForbiddenApplications"
         }
       }
     },
@@ -28,11 +28,11 @@
       "text": {
         "en": {
           "label": "All required applications installed",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MissingApplications"
+          "explain": "https://www.citadelagent.org/control/MissingApplications"
         },
         "fr": {
           "label": "Toutes applications requises installées",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MissingApplications"
+          "explain": "https://www.citadelagent.org/control/MissingApplications"
         }
       }
     },
@@ -40,11 +40,11 @@
       "text": {
         "en": {
           "label": "No forbidden processes running",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ForbiddenProcesses"
+          "explain": "https://www.citadelagent.org/control/ForbiddenProcesses"
         },
         "fr": {
           "label": "Aucun processus interdit actif",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/ForbiddenProcesses"
+          "explain": "https://www.citadelagent.org/control/ForbiddenProcesses"
         }
       }
     },
@@ -52,11 +52,11 @@
       "text": {
         "en": {
           "label": "All required processes running",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MissingProcesses"
+          "explain": "https://www.citadelagent.org/control/MissingProcesses"
         },
         "fr": {
           "label": "Tous processus requis actifs",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MissingProcesses"
+          "explain": "https://www.citadelagent.org/control/MissingProcesses"
         }
       }
     },
@@ -65,11 +65,11 @@
       "text": {
         "en": {
           "label": "System was restarted recently",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MaxUptime"
+          "explain": "https://www.citadelagent.org/control/MaxUptime"
         },
         "fr": {
           "label": "Système a été redémarré récemment",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/MaxUptime"
+          "explain": "https://www.citadelagent.org/control/MaxUptime"
         }
       }
     },
@@ -77,11 +77,11 @@
       "text": {
         "en": {
           "label": "System is up to date",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SystemUpdated"
+          "explain": "https://www.citadelagent.org/control/SystemUpdated"
         },
         "fr": {
           "label": "Système à jour",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SystemUpdated"
+          "explain": "https://www.citadelagent.org/control/SystemUpdated"
         }
       }
     },
@@ -90,11 +90,11 @@
       "text": {
         "en": {
           "label": "Disk is encrypted",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/DriveEncryption"
+          "explain": "https://www.citadelagent.org/control/DriveEncryption"
         },
         "fr": {
           "label": "Disque est chiffré",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/DriveEncryption"
+          "explain": "https://www.citadelagent.org/control/DriveEncryption"
         }
       }
     },
@@ -103,11 +103,11 @@
       "text": {
         "en": {
           "label": "Screen locking is enabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/LockScreen"
+          "explain": "https://www.citadelagent.org/control/LockScreen"
         },
         "fr": {
           "label": "Verrouillage écran activé",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/LockScreen"
+          "explain": "https://www.citadelagent.org/control/LockScreen"
         }
       }
     },
@@ -116,11 +116,11 @@
       "text": {
         "en": {
           "label": "System Integrity Protection is enabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SystemIntegrityProtection"
+          "explain": "https://www.citadelagent.org/control/SystemIntegrityProtection"
         },
         "fr": {
           "label": "Protection Intégrité du Système (SIP) activée",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SystemIntegrityProtection"
+          "explain": "https://www.citadelagent.org/control/SystemIntegrityProtection"
         }
       }
     },
@@ -129,11 +129,11 @@
       "text": {
         "en": {
           "label": "Firewall is enabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Firewall"
+          "explain": "https://www.citadelagent.org/control/Firewall"
         },
         "fr": {
           "label": "Pare-feu activé",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/Firewall"
+          "explain": "https://www.citadelagent.org/control/Firewall"
         }
       }
     },
@@ -142,11 +142,11 @@
       "text": {
         "en": {
           "label": "Gatekeeper is enabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GatekeeperEnabled"
+          "explain": "https://www.citadelagent.org/control/GatekeeperEnabled"
         },
         "fr": {
           "label": "Gatekeeper activé",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GatekeeperEnabled"
+          "explain": "https://www.citadelagent.org/control/GatekeeperEnabled"
         }
       }
     },
@@ -155,11 +155,11 @@
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/AutoUpdates"
+          "explain": "https://www.citadelagent.org/control/AutoUpdates"
         },
         "fr": {
           "label": "Mises à jour automatiques activées",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/AutoUpdates"
+          "explain": "https://www.citadelagent.org/control/AutoUpdates"
         }
       }
     },
@@ -168,11 +168,11 @@
       "text": {
         "en": {
           "label": "Sharing services are disabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SharingPreferences"
+          "explain": "https://www.citadelagent.org/control/SharingPreferences"
         },
         "fr": {
           "label": "Services de partage sont désactivés",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SharingPreferences"
+          "explain": "https://www.citadelagent.org/control/SharingPreferences"
         }
       }
     },
@@ -181,11 +181,11 @@
       "text": {
         "en": {
           "label": "Guest login is disabled",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
+          "explain": "https://www.citadelagent.org/control/GuestLogin"
         },
         "fr": {
           "label": "Session Invité désactivée",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/GuestLogin"
+          "explain": "https://www.citadelagent.org/control/GuestLogin"
         }
       }
     },
@@ -194,11 +194,11 @@
       "text": {
         "en": {
           "label": "SSH private keys are secured",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SSHKeys"
+          "explain": "https://www.citadelagent.org/control/SSHKeys"
         },
         "fr": {
           "label": "Clés privées SSH sécurisées",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SSHKeys"
+          "explain": "https://www.citadelagent.org/control/SSHKeys"
         }
       }
     },
@@ -207,11 +207,11 @@
       "text": {
         "en": {
           "label": "Boot options are secure",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BootOptions"
+          "explain": "https://www.citadelagent.org/control/BootOptions"
         },
         "fr": {
           "label": "Options démarrage sécurisées",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/BootOptions"
+          "explain": "https://www.citadelagent.org/control/BootOptions"
         }
       }
     },
@@ -220,11 +220,11 @@
       "text": {
         "en": {
           "label": "No insecure wireless networks",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
+          "explain": "https://www.citadelagent.org/control/WirelessNetworking"
         },
         "fr": {
           "label": "Aucun réseau sans fil non sécurisé",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/WirelessNetworking"
+          "explain": "https://www.citadelagent.org/control/WirelessNetworking"
         }
       }
     },
@@ -233,11 +233,11 @@
       "text": {
         "en": {
           "label": "No USB storage devices connected",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
+          "explain": "https://www.citadelagent.org/control/RemovableStorage"
         },
         "fr": {
           "label": "Aucun périphérique de stockage USB",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/RemovableStorage"
+          "explain": "https://www.citadelagent.org/control/RemovableStorage"
         }
       }
     },
@@ -246,11 +246,11 @@
       "text": {
         "en": {
           "label": "Sensitive data is protected",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
         },
         "fr": {
           "label": "Données sensibles sont protégés",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
         }
       }
     },
@@ -259,11 +259,11 @@
       "text": {
         "en": {
           "label": "Exported files are purged",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
         },
         "fr": {
           "label": "Fichiers exportés sont supprimés",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
         }
       }
     },
@@ -272,11 +272,11 @@
       "text": {
         "en": {
           "label": "Unused files are purged",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
         },
         "fr": {
           "label": "Fichiers inutilisés sont supprimés",
-          "explain": "https://avanwouwe.github.io/citadel-browser-agent/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
         }
       }
     }
