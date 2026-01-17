@@ -33,7 +33,7 @@ class Bridge {
 
         Bridge.listenTo("DeleteAccount", ({username, system}) => AccountTrust.deleteAccount(username, system))
 
-        Bridge.listenTo("GetDeviceStatus", () => devicetrust.getStatus())
+        Bridge.listenTo("GetDeviceStatus", () => DeviceTrust.getStatus())
 
         Bridge.listenTo("RefreshDeviceStatus", () => {
             debug("dashboard requested update")

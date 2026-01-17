@@ -53,6 +53,8 @@ async function renderDeviceDashboard() {
     const tb = document.getElementById("devicetrust-issues")
     tb.innerHTML = ""
     const controls = Object.values(devicetrust.controls)
+        .sort((a, b) => a.name.localeCompare(b.name))
+
     for (const ctrl of controls) {
         const next = ctrl.nextState
         const ctrlText = I18n.fromObject(ctrl.definition?.text).getTranslator()

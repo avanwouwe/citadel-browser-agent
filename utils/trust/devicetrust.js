@@ -2,18 +2,22 @@ class DeviceTrust {
 
     static TYPE = "device"
 
-    #audit = new Audit()
+    static #audit = new Audit(DeviceTrust.TYPE)
 
-    addReport(report) {
+    static async init() {
+        await DeviceTrust.#audit.ready()
+    }
+
+    static addReport(report) {
         for (const controlReport of Object.values(report.controls.results)) {
-            const prevState = this.#audit.getFinding(controlReport.name)?.getState()
+            const prevState = DeviceTrust.#audit.getFinding(controlReport.name)?.getState()
 
-            const control = this.#audit.getFinding(controlReport.name) ?? this.#createControl(controlReport.name)
+            const control = DeviceTrust.#audit.getFinding(controlReport.name) ?? DeviceTrust.#createControl(controlReport.name)
             if (!control || control.action === Action.SKIP) continue
 
             control.addReport(controlReport)
             control.definition = report.controls.definitions[controlReport.name]
-            this.#audit.setFinding(control)
+            DeviceTrust.#audit.setFinding(control)
 
             const currState = control.getState()
             if (control.action === Action.BLOCK && currState === State.BLOCKING && prevState !== currState) {
@@ -21,10 +25,11 @@ class DeviceTrust {
             }
         }
 
-        this.#audit.notify(DeviceTrust.TYPE)
+        DeviceTrust.#audit.save()
+        DeviceTrust.#audit.notify()
     }
 
-    #createControl(name) {
+    static #createControl(name) {
         const warnTrigger = config.device.trigger.warn
         const blockTrigger = config.device.trigger.block
 
@@ -37,15 +42,15 @@ class DeviceTrust {
         return new Control(name, action, warnTrigger, blockTrigger)
     }
 
-    getStatus() {
-        return this.#audit.getStatus()
+    static getStatus() {
+        return DeviceTrust.#audit.getStatus()
     }
 
-    report() {
-        Object.values(this.#audit.getFindings()).forEach(control => {
+    static report() {
+        Object.values(DeviceTrust.#audit.getFindings()).forEach(control => {
             logger.log(nowTimestamp(), "report", "devicetrust control", undefined, Log.INFO, control.getState(), `control '${control.name}' = ${control.getState()}`, undefined, undefined, false)
         })
-        logger.log(nowTimestamp(), "report", "devicetrust compliance", undefined, Log.INFO, this.#audit.getCompliance(), `endpoint compliance rate = ${this.#audit.getCompliance()} %`, undefined, undefined, false)
+        logger.log(nowTimestamp(), "report", "devicetrust compliance", undefined, Log.INFO, DeviceTrust.#audit.getCompliance(), `endpoint compliance rate = ${DeviceTrust.#audit.getCompliance()} %`, undefined, undefined, false)
     }
 
 }

@@ -2,7 +2,11 @@ class AccountTrust {
 
     static TYPE = "account"
 
-    static #audit = new Audit()
+    static #audit = new Audit(AccountTrust.TYPE)
+
+    static async init() {
+        await AccountTrust.#audit.ready()
+    }
 
     static checkFor(username, sitename) {
         if (sitename.isURL()) sitename = getSitename(sitename)
@@ -22,7 +26,7 @@ class AccountTrust {
 
         for (const acct of failingAccounts) {
             const accountKey = AccountTrust.accountKey(acct.username, acct.system)
-            const finding = this.#audit.getFinding(accountKey)
+            const finding = AccountTrust.#audit.getFinding(accountKey)
             acct.report = {...acct.report}
             acct.report.state = finding?.getState() ?? State.FAILING
             acct.report.nextState = finding?.getNextState() ?? { state : State.FAILING }
@@ -44,8 +48,8 @@ class AccountTrust {
     }
 
     static #refresh() {
-        const prevAudit = this.#audit
-        this.#audit = new Audit()
+        const prevAudit = AccountTrust.#audit
+        AccountTrust.#audit = new Audit(AccountTrust.TYPE)
 
         for (const acct of AccountTrust.#failingAccounts()) {
             const accountKey = AccountTrust.accountKey(acct.username, acct.system)
@@ -59,10 +63,11 @@ class AccountTrust {
                 timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? nowTimestamp()
             }
             control.addReport(report)
-            this.#audit.setFinding(control)
+            AccountTrust.#audit.setFinding(control)
         }
 
-        this.#audit.notify(AccountTrust.TYPE)
+        AccountTrust.#audit.save()
+        AccountTrust.#audit.notify()
 
         Dashboard.sendMessage({type: "RefreshAccountStatus"})
     }

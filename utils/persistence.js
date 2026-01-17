@@ -1,33 +1,100 @@
-class PersistentObject {
+class HydratedObject {
 
-    #persistentObject
     #storageKey
-    #interval
-    #timer
+    #target
+    #hydrate
+    #dehydrate
     #readyPromise
     #readyResolve
 
-    #MAX_LIFETIME_SERVICE_WORKER = 20 * ONE_SECOND
-
-    constructor(storageKey, object = {}, interval = this.#MAX_LIFETIME_SERVICE_WORKER) {
-        this.#persistentObject = new ChangeTrackingObject(object)
-        this.#storageKey = 'persistent-object-' + storageKey
-        this.#interval = interval
+    constructor(storageKey, target, hydrate, dehydrate) {
+        this.#storageKey = storageKey
+        this.#target = target
+        this.#hydrate = hydrate
+        this.#dehydrate = dehydrate
 
         this.#readyPromise = new Promise(resolve => this.#readyResolve = resolve)
+        this.load()
+    }
+
+    async ready() {
+        return this.#readyPromise
+    }
+
+    async save() {
+        try {
+            const data = this.#dehydrate(this.#target)
+            await chrome.storage.local.set({ [this.#storageKey]: data })
+        } catch (error) {
+            console.error('Error saving to storage:', error)
+        }
+    }
+
+    async load() {
+        try {
+            const result = await chrome.storage.local.get(this.#storageKey)
+            const stored = result[this.#storageKey]
+
+            if (stored != null) {
+                this.#hydrate(stored, this.#target)
+            }
+        } catch (error) {
+            console.error('Error loading from storage:', error)
+        } finally {
+            this.#readyResolve?.(this)
+            this.#readyResolve = null
+        }
+    }
+
+    async clear() {
+        try {
+            await chrome.storage.local.remove(this.#storageKey)
+        } catch (error) {
+            console.error('Error clearing storage:', error)
+        }
+    }
+}
+
+
+class PersistentObject {
+
+    #value
+    #storage
+    #interval
+    #timer
+
+    #MAX_LIFETIME_SERVICE_WORKER = 20 * 1000
+
+    constructor(storageKey, initialValue = {}, interval = this.#MAX_LIFETIME_SERVICE_WORKER) {
+        this.#interval = interval
+        this.#value = new ChangeTrackingObject(initialValue)
+
+        this.#storage = new HydratedObject(
+            'persistent-object' + storageKey,
+            this.#value,
+            (data, target) => {
+                data.copyTo(target)
+                target.isDirty = false
+            },
+            (target) => {
+                const data = { ...target }
+                delete data.isDirty
+                return data
+            }
+        )
 
         this.start()
     }
 
-    value() { return this.#persistentObject }
+    value() {
+        return this.#value
+    }
 
     async start() {
         if (!this.#timer) {
-            this.#readFromStorage()
+            await this.#storage.ready()
             this.#timer = setInterval(() => this.flush(), this.#interval)
         }
-
-        return this.#readyPromise
     }
 
     stop() {
@@ -35,60 +102,26 @@ class PersistentObject {
             clearInterval(this.#timer)
             this.#timer = null
         }
-
-        this.#readyPromise = null
     }
 
     async ready() {
-        return this.#readyPromise
+        return this.#storage.ready().then(() => this)
     }
 
-    markDirty(bool = true) { this.#persistentObject.isDirty = bool }
+    markDirty(bool = true) {
+        this.#value.isDirty = bool
+    }
 
     async clear() {
-        await chrome.storage.local.remove(this.#storageKey, () => {
-            if (chrome.runtime.lastError) {
-                console.error(chrome.runtime.lastError)
-            }
-            this.#persistentObject.clear()
-        })
+        await this.#storage.clear()
+        this.#value.clear()
     }
 
     async flush() {
-        if (this.#persistentObject.isDirty) {
-            this.#persistentObject.isDirty = false
-            const object = { ...this.#persistentObject }
-            delete object.isDirty
+        if (!this.#value.isDirty) return
 
-            await chrome.storage.local.set({ [this.#storageKey]: object }, () => {
-                if (chrome.runtime.lastError) {
-                    console.error('Error setting item:', chrome.runtime.lastError)
-                }
-            })
-        }
-    }
-
-    #readFromStorage() {
-        chrome.storage.local.get([this.#storageKey], (result) => {
-            if (chrome.runtime.lastError) {
-                console.error('Error getting item:', chrome.runtime.lastError)
-            } else {
-                const storedData = result[this.#storageKey]
-                if (storedData) {
-                    storedData.copyTo(this.#persistentObject)
-                    this.#persistentObject.isDirty = false
-                }
-            }
-            if (this.#readyResolve) {
-                this.#readyResolve(this)
-                this.#readyResolve = null
-            }
-        })
-    }
-
-    static clearAll() {
-        chrome.storage.local.clear()
-        chrome.runtime.reload()
+        this.#value.isDirty = false
+        await this.#storage.save()
     }
 }
 

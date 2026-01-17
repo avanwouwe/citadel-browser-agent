@@ -15,18 +15,23 @@ let whitelistURL
 let exceptionList
 let ignorelist
 let tabState
-let devicetrust
 let events = new RingBuffer(200)
 let t = new I18n({}).getTranslator()
 
 I18n.fromFile('/utils/i18n').then(i18n => t = i18n.getTranslator())
 
-Port.onMessage("config",(newConfig) => {
+Port.onMessage("config", async (newConfig) => {
 	Config.load(newConfig)
 
-	new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist).then(blacklist => blacklistIP = blacklist)
-	new CombinedBlacklist().load(config.blacklist.url, URLBlacklist).then(blacklist => blacklistURL = blacklist)
+	await Promise.all([
+		AccountTrust.init(),
+		DeviceTrust.init()
+	])
 
+	;[blacklistIP, blacklistURL] = await Promise.all([
+		new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist),
+		new CombinedBlacklist().load(config.blacklist.url, URLBlacklist)
+	])
 	whitelistIP = new IPBlacklist().init()
 	whitelistURL = new URLBlacklist().init()
 	config.whitelist.ip.forEach(entry => whitelistIP.add(entry))
@@ -35,7 +40,6 @@ Port.onMessage("config",(newConfig) => {
 	ignorelist = new Ignorelist()
 
 	tabState = new TabState(true)
-	devicetrust = new DeviceTrust()
 
 	const version = chrome.runtime.getManifest().version
 	const configHash = config?.hashDJB2()
@@ -49,7 +53,7 @@ Port.onMessage("restart",() => {
 
 Port.onMessage("devicetrust",(report) => {
 	debug("received device trust report", report)
-	devicetrust.addReport(report)
+	DeviceTrust.addReport(report)
 	Dashboard.sendMessage({type: "RefreshDeviceStatus"})
 })
 
@@ -99,7 +103,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 		reportInteractions()
 
-		devicetrust.report()
+		DeviceTrust.report()
 	}
 
 	if (alarm.name === Alarm.BIWEEKLY) {

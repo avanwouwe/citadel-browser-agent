@@ -1,7 +1,24 @@
 class Notification {
-    static #alerts = { }
+    static #alerts = {}
     static #tabs = new Set()
     static showing
+    static #persistence
+
+    static async init() {
+        Notification.#persistence = Notification.#persistence ?? new HydratedObject(
+            'notifications',
+            Notification,
+            (data, target) => {
+                target.#alerts = data.alerts ?? {}
+                Notification.#updateState()
+            },
+            (target) => ({
+                alerts: target.#alerts
+            })
+        )
+
+        await Notification.#persistence.ready()
+    }
 
     static setAlert(type, level, title, message) {
         if (level === State.PASSING) {
@@ -46,20 +63,12 @@ class Notification {
     }
 
     static async showIfRequired(url, tabId) {
-        if (!url || ! tabId) return false
+        if (!url || !tabId) return false
 
-        // check if any of the acknowledgements of the alerts has expired, and de-acknowledge them if needed
-        let acknowledgeExpired = false
-        for (const alert of Object.values(Notification.#alerts)) {
-            if (alert.acknowledgeExpiry < Date.now()) {
-                Notification.#setAcknowledge(alert, false)
-                acknowledgeExpired = true
-            }
-        }
-        if (acknowledgeExpired) Notification.#updateState()
+        Notification.#checkExpiredAcknowledgements()
 
         const alert = Notification.#alerts[Notification.showing?.type]
-        if (! alert ) return false
+        if (!alert) return false
 
         const hostname = url.toURL()?.hostname
         const isProtected = matchDomain(hostname, config.company.applications) || matchDomain(hostname, config.company.domains)
@@ -80,7 +89,25 @@ class Notification {
         return true
     }
 
+    static #checkExpiredAcknowledgements() {
+        let acknowledgeExpired = false
+        const now = Date.now()
+
+        for (const alert of Object.values(Notification.#alerts)) {
+            if (alert.acknowledgeExpiry < now) {
+                Notification.#setAcknowledge(alert, false)
+                acknowledgeExpired = true
+            }
+        }
+
+        if (acknowledgeExpired) {
+            this.#updateState()
+        }
+    }
+
     static #updateState() {
+        Notification.#checkExpiredAcknowledgements()
+
         const prevAlert = Notification.showing
         Notification.showing = undefined
 
@@ -92,11 +119,24 @@ class Notification {
 
             if (alertLevel < worstAlertLevel) continue
             worstAlert = alert
-            if (! alert.acknowledged && (! prevAlert || alert.type === prevAlert.type || alertLevel > worstAlertLevel)) {
+            if (!alert.acknowledged && (!prevAlert || alert.type === prevAlert.type || alertLevel > worstAlertLevel)) {
                 Notification.showing = { type: alert.type, level: alert.level }
             }
         }
 
+        Notification.#updateBadge(worstAlert)
+
+        if (prevAlert?.type === Notification.showing?.type && prevAlert?.level === Notification.showing?.level) {
+            return
+        }
+
+        const clearModals = !Notification.showing || prevAlert?.type !== Notification.showing.type
+        Notification.#updateInterface(clearModals)
+
+        Notification.#persistence?.save()
+    }
+
+    static #updateBadge(worstAlert) {
         const warning = State.indexOf(State.WARNING)
         if (State.indexOf(worstAlert.level) >= warning) {
             chrome.action.setBadgeText({ text: "⚠️" })
@@ -105,12 +145,8 @@ class Notification {
             chrome.action.setBadgeText({ text: "" })
             chrome.action.setBadgeBackgroundColor({ color: "#808080" })
         }
-
-        if (prevAlert?.type === Notification.showing?.type && prevAlert?.level === Notification.showing?.level) return
-
-        const clearModals = ! Notification.showing || prevAlert?.type !== Notification.showing.type
-        Notification.#updateInterface(clearModals)
     }
+
 
     static #updateInterface(clearModals = false) {
         chrome.notifications.getAll()

@@ -5,7 +5,7 @@ class State {
     static WARNING = "WARNING"
     static BLOCKING = "BLOCKING"
 
-    static values= [this.PASSING, this.FAILING, this.WARNING, this.BLOCKING]
+    static values = [this.PASSING, this.FAILING, this.WARNING, this.BLOCKING]
     static indexOf(value) { return this.values.indexOf(value) }
 }
 
@@ -16,16 +16,57 @@ class Action {
     static WARN = "WARN"
     static BLOCK = "BLOCK"
 
-    static values= [this.NOTHING, this.NOTIFY, this.WARN, this.BLOCK]
+    static values = [this.NOTHING, this.NOTIFY, this.WARN, this.BLOCK]
     static indexOf(value) { return this.values.indexOf(value) }
 }
 
 class Audit {
 
-    #findings = { }
+    #findings = {}
     #conclusion
+    #persistence
+    #type
 
-    getFindings() { return this.#findings }
+    constructor(type) {
+        this.#type = type
+        this.#persistence = new HydratedObject(
+            `audit-${type}`,
+            this,
+            (data, audit) => {
+                audit.#conclusion = data.conclusion
+                audit.#findings = Object.fromEntries(
+                    Object.entries(data.findings ?? {}).map(
+                        ([name, ctrlData]) => [name, Control.hydrate(ctrlData)]
+                    )
+                )
+            },
+            (audit) => ({
+                conclusion: audit.#conclusion,
+                findings: Object.fromEntries(
+                    Object.entries(audit.#findings).map(
+                        ([name, control]) => [name, control.dehydrate()]
+                    )
+                )
+            })
+        )
+    }
+
+    async ready() {
+        await Promise.all([
+            Notification.init(),
+            this.#persistence.ready()
+        ])
+        return this
+    }
+
+    async save() {
+        this.notify()
+        return this.#persistence.save()
+    }
+
+    getFindings() {
+        return this.#findings
+    }
 
     getFinding(name) {
         return this.#findings[name]
@@ -42,10 +83,12 @@ class Audit {
         this.#conclusion = State.values[worstState]
     }
 
-    getState() { return this.#conclusion ?? State.UNKNOWN }
+    getState() {
+        return this.#conclusion ?? State.UNKNOWN
+    }
 
     getNextState() {
-        if (this.getState() === State.UNKNOWN) return  { state: State.UNKNOWN }
+        if (this.getState() === State.UNKNOWN) return { state: State.UNKNOWN }
 
         let worstState = { state: State.PASSING }
 
@@ -67,14 +110,16 @@ class Audit {
         const findings = Object.values(this.#findings)
         let compliant = 0
 
-        findings.forEach(finding => { if (finding.getState() === State.PASSING) compliant++ })
+        findings.forEach(finding => {
+            if (finding.getState() === State.PASSING) compliant++
+        })
         const rate = findings.length ? compliant / findings.length : 0
         return Math.round(rate * 100)
     }
 
     getStatus() {
         const status = {
-            controls: { },
+            controls: {},
             state: this.getState(),
             nextState: this.getNextState(),
             compliance: this.getCompliance()
@@ -94,18 +139,18 @@ class Audit {
         return status
     }
 
-    notify(type) {
-        const title = t(`${type}trust.notification.title`)
+    notify() {
+        const title = t(`${this.#type}trust.notification.title`)
 
         if (this.#conclusion === State.PASSING) {
-            Notification.setAlert(type, this.#conclusion)
+            Notification.setAlert(this.#type, this.#conclusion)
         } else if (this.#conclusion === State.FAILING) {
-            Notification.setAlert(type, this.#conclusion, title, t(`${type}trust.notification.failing`))
+            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.failing`))
         } else if (this.#conclusion === State.WARNING) {
-            const days = this.getNextState().days ?? t(`${type}trust.notification.a-few`)
-            Notification.setAlert(type, this.#conclusion, title, t(`${type}trust.notification.warning`, {days}))
+            const days = this.getNextState().days ?? t(`${this.#type}trust.notification.a-few`)
+            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.warning`, { days }))
         } else if (this.#conclusion === State.BLOCKING) {
-            Notification.setAlert(type, this.#conclusion, title, t(`${type}trust.notification.blocking`))
+            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.blocking`))
         }
     }
 }
@@ -140,8 +185,10 @@ class Control {
             return
         }
 
-        if (report.timestamp - this.#lastDayStart > ONE_DAY) {
-            this.#lastDayStart = report.timestamp
+        // days don't count if an endpoint is turned off
+        const newFailedDays = (report.timestamp - this.#lastDayStart) / ONE_DAY
+        if (newFailedDays > 1) {
+            this.#lastDayStart += Math.floor(newFailedDays * ONE_DAY)
             this.#failedDays++
         }
 
@@ -166,7 +213,7 @@ class Control {
 
     getNextState() {
         if (this.report.passed) {
-            return {state: State.PASSING}
+            return { state: State.PASSING }
         } else if (this.action === Action.BLOCK) {
             return { state: State.BLOCKING }
         } else if (this.action === Action.NOTHING || this.action === Action.NOTIFY) {
@@ -180,5 +227,30 @@ class Control {
         }
     }
 
-}
+    dehydrate() {
+        return {
+            name: this.name,
+            action: this.action,
+            definition: this.definition,
+            report: this.report,
+            warnTrigger: this.#warnTrigger,
+            blockTrigger: this.#blockTrigger,
+            lastDayStart: this.#lastDayStart,
+            failedDays: this.#failedDays
+        }
+    }
 
+    static hydrate(data) {
+        const control = new Control(
+            data.name,
+            data.action,
+            data.warnTrigger,
+            data.blockTrigger
+        )
+        control.definition = data.definition
+        control.report = data.report
+        control.#lastDayStart = data.lastDayStart
+        control.#failedDays = data.failedDays
+        return control
+    }
+}
