@@ -7,6 +7,7 @@ if (chrome.identity?.getProfileUserInfo) {
 	})
 }
 
+const lastExtensionRestart = Date.now()
 let blacklistIP
 let blacklistURL
 let whitelistIP
