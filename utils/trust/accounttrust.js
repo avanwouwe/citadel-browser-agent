@@ -83,7 +83,7 @@ class AccountTrust {
 
                 const issueCount = report.issues?.count ?? 0
                 for (const currAction of Action.values) {
-                    if (issueCount >= config.account.actions[currAction] && State.indexOf(currAction) > State.indexOf(report.action)) {
+                    if (issueCount >= config.account.actions[currAction] && Action.indexOf(currAction) > Action.indexOf(report.action)) {
                         report.action = currAction
                     }
                 }
