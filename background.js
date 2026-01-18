@@ -53,6 +53,16 @@ Port.onMessage("restart",() => {
 
 Port.onMessage("devicetrust",(report) => {
 	debug("received device trust report", report)
+
+	const browserUptime = (Date.now() - Browser.startTime) / ONE_DAY
+	const browserUptimePassing = browserUptime <= config.device.controls.browser.maxUptime
+	report.controls.results.BrowserUpdated = {
+		"name": "BrowserUpdated",
+		"passed": browserUptimePassing,
+		"timestamp": nowTimestamp(),
+		"errors": browserUptimePassing ? null : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
+	}
+
 	DeviceTrust.addReport(report)
 	Dashboard.sendMessage({type: "RefreshDeviceStatus"})
 })

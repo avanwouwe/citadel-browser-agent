@@ -309,6 +309,9 @@ class Config {
                     forbidden: [],
                     required: []
                 },
+                browser: {
+                    maxUptime: 14
+                },
                 packs: [
                     { "type": "windows", "path": "controls/windows-custom.json" },
                     { "type": "macos", "path": "controls/macos-custom.json" },

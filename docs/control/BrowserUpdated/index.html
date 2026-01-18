@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrowserUpdated Control - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">BrowserUpdated</span>
+        </div>
+        <h1>BrowserUpdated Control</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What does this control check?</h2>
+        <p>
+            The BrowserUpdated control verifies that your browser has been restarted
+            recently. Modern browsers download updates automatically in the background,
+            but they require a restart to actually apply these updates and protect you
+            from security vulnerabilities.
+        </p>
+        <p>
+            <strong>Important:</strong> Just because your browser downloads updates doesn't mean
+            you're protected. Updates only take effect after you restart your browser. Running
+            an outdated browser leaves you vulnerable to known security exploits that attackers
+            actively use to compromise systems.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this important?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🔒</div>
+                <h3>Security Patches</h3>
+                <p>Browser updates frequently contain critical security fixes for newly discovered
+                    vulnerabilities. Without restarting, these patches remain inactive, leaving you
+                    exposed to attacks that could steal your data or compromise your accounts.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🎯</div>
+                <h3>Active Exploitation</h3>
+                <p>Browser vulnerabilities are among the most actively exploited security issues.
+                    Attackers specifically target users running outdated browser versions because
+                    they know exactly what vulnerabilities exist.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⚡</div>
+                <h3>Performance & Stability</h3>
+                <p>Regular browser restarts clear memory leaks, improve performance, and ensure
+                    you have the latest features and compatibility improvements for modern websites.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to fix this</h2>
+
+        <div class="platform-tabs">
+            <button class="tab-button" data-platform="windows">
+                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows
+            </button>
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
+            </button>
+        </div>
+
+        <div class="platform-content">
+            <!-- Windows Instructions -->
+            <div class="platform-panel" id="windows">
+                <h3>Restarting Your Browser on Windows</h3>
+
+                <div class="method">
+                    <h4>Quick Method:</h4>
+                    <ol>
+                        <li>Close all browser windows completely</li>
+                        <li>Wait a few seconds to ensure the browser has fully closed</li>
+                        <li>Reopen your browser</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Ensure Complete Closure:</h4>
+                    <ol>
+                        <li>Right-click the taskbar and select <strong>Task Manager</strong></li>
+                        <li>Look for your browser in the list of running applications</li>
+                        <li>If you see it still running, right-click it and select <strong>End task</strong></li>
+                        <li>Reopen your browser normally</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Pro tip:</strong> Don't worry about losing your open tabs! Most browsers can be
+                    configured to automatically reopen your previous tabs when you restart. See the section
+                    below on "Automatically Restoring Your Tabs" to set this up.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Before restarting your browser:</strong>
+                    <ul>
+                        <li>Make sure you've saved any work in web applications (emails, documents, forms)</li>
+                        <li>Check for any active downloads that might be interrupted</li>
+                        <li>Consider bookmarking important pages if tab restore isn't configured</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Restarting Your Browser on macOS</h3>
+
+                <div class="method">
+                    <h4>Quick Method:</h4>
+                    <ol>
+                        <li>Press <strong>⌘ + Q</strong> to quit your browser completely</li>
+                        <li>Wait a few seconds to ensure the browser has fully closed</li>
+                        <li>Reopen your browser from the Dock or Applications folder</li>
+                    </ol>
+                </div>
+
+                <div class="method">
+                    <h4>Alternative Method:</h4>
+                    <ol>
+                        <li>Click your browser's name in the menu bar (top-left)</li>
+                        <li>Select <strong>Quit [Browser Name]</strong></li>
+                        <li>Reopen your browser normally</li>
+                    </ol>
+                </div>
+
+                <div class="note">
+                    <strong>💡 Pro tip:</strong> Don't worry about losing your open tabs! Most browsers can be
+                    configured to automatically reopen your previous tabs when you restart. See the section
+                    below on "Automatically Restoring Your Tabs" to set this up.
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Simply closing windows (⌘ + W) doesn't quit the browser - you must use ⌘ + Q</li>
+                        <li>Make sure you've saved any work in web applications before quitting</li>
+                        <li>Check for any active downloads that might be interrupted</li>
+                        <li>Consider bookmarking important pages if tab restore isn't configured</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="best-practices">
+        <h2>Automatically Restoring Your Tabs</h2>
+        <p>
+            One of the main reasons people avoid restarting their browser is the fear of losing
+            all their open tabs. Fortunately, all modern browsers can automatically restore your
+            previous session when you restart.
+        </p>
+
+        <div class="method">
+            <h4>Configure your browser to restore tabs:</h4>
+            <p>
+                Visit your <a href="#" id="startup-config-link">browser's startup configuration</a> page to enable this feature.
+            </p>
+        </div>
+
+        <div class="note">
+            <strong>Recommended practice:</strong> Enable automatic tab restoration and restart
+            your browser at least once a week. Many users restart daily (end of workday) to ensure
+            they always have the latest security updates and a fresh browser session.
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Verifying the fix</h2>
+        <p>After restarting your browser, Citadel will automatically verify this control and update
+            your security status.</p>
+
+        <div class="method">
+            <h4>To confirm your browser restarted correctly:</h4>
+            <ol>
+                <li>Check that your browser's version number hasn't changed (it may have updated)</li>
+                <li>Look for any "Welcome" or "What's New" messages that might indicate an update was applied</li>
+                <li>Verify that Citadel shows this control as passing</li>
+            </ol>
+        </div>
+
+        <div class="note">
+            <strong>Note:</strong> If you configured your browser to restore tabs, you should see your
+            previous tabs reopening automatically. This confirms the feature is working correctly.
+        </div>
+    </section>
+
+    <section class="faq">
+        <h2>Frequently Asked Questions</h2>
+
+        <div class="faq-item">
+            <h4>How often should I restart my browser?</h4>
+            <p>
+                We recommend restarting your browser at least once a week, preferably more often.
+                Many security-conscious users restart their browser daily. If you see an update
+                notification from your browser, restart it as soon as convenient.
+            </p>
+        </div>
+
+        <div class="faq-item">
+            <h4>Will I lose my browsing history or bookmarks?</h4>
+            <p>
+                No. Restarting your browser only closes the application temporarily. All your
+                bookmarks, history, passwords, and settings remain intact. With tab restoration
+                enabled, even your open tabs will return.
+            </p>
+        </div>
+
+        <div class="faq-item">
+            <h4>What if I'm in the middle of something important?</h4>
+            <p>
+                Save your work first, then restart when convenient. For web-based applications,
+                make sure anything you're working on is saved. Most modern web apps auto-save,
+                but it's always best to verify before closing.
+            </p>
+        </div>
+
+        <div class="faq-item">
+            <h4>My browser says it will update automatically. Why do I need to restart?</h4>
+            <p>
+                Your browser downloads updates in the background, but it cannot replace its own
+                running code. The new, secure version only loads when you restart the browser.
+                Until then, you're still running the old, potentially vulnerable version.
+            </p>
+        </div>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/control">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script src="script.js"></script>
+<script src="../script.js"></script>
+</body>
+</html>
