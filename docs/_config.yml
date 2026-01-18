@@ -20,9 +20,6 @@ permalink: pretty
 search_enabled: true
 color_scheme: light
 
-exclude:
-  - "*.xml"
-
 # ------------------------------------------------------------
 # Navigation structure
 # Just‑the‑Docs builds the sidebar from folders and front matter.
