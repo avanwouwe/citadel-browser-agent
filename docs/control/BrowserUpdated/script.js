@@ -27,7 +27,8 @@ const browserConfig = {
 };
 
 // Copy URL to clipboard
-function copyConfigUrl(url) {
+function copyConfigUrl(url, event) {
+    event.preventDefault();
     navigator.clipboard.writeText(url).then(() => {
         alert('URL copied! Paste it into your address bar and press Enter.');
     }).catch(() => {
@@ -79,11 +80,12 @@ document.addEventListener('DOMContentLoaded', function() {
     if (detectedBrowser && configUrl) {
         parent.innerHTML = `
             Visit ${detectedBrowser}'s startup configuration 
-            (<code style="background: #f4f4f4; padding: 2px 6px; border-radius: 3px; user-select: all;">${configUrl}</code>
-            <button onclick="copyConfigUrl('${configUrl}')" style="margin-left: 8px; padding: 4px 12px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 0.9em;">Copy URL</button>) 
+            (<a href="#" onclick="copyConfigUrl('${configUrl}', event)" style="text-decoration: none;">
+                <code style="background: #f4f4f4; padding: 2px 6px; border-radius: 3px; user-select: all; cursor: pointer; color: #0066cc;">${configUrl}</code>
+            </a>) 
             to enable this feature.
             <br><small style="color: #666; margin-top: 8px; display: inline-block;">
-                Copy the URL and paste it into your browser's address bar, then press Enter.
+                Click the URL to copy it, then paste it into your browser's address bar and press Enter.
             </small>
         `;
     } else if (detectedBrowser === 'Safari') {
