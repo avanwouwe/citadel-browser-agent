@@ -26,6 +26,22 @@ const browserConfig = {
     }
 };
 
+// Copy URL to clipboard
+function copyConfigUrl(url) {
+    navigator.clipboard.writeText(url).then(() => {
+        alert('URL copied! Paste it into your address bar and press Enter.');
+    }).catch(() => {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('URL copied! Paste it into your address bar and press Enter.');
+    });
+}
+
 // Detect browser and set startup config link
 document.addEventListener('DOMContentLoaded', function() {
     const configLink = document.getElementById('startup-config-link');
@@ -57,22 +73,24 @@ document.addEventListener('DOMContentLoaded', function() {
         configUrl = browserConfig.Safari.url;
     }
 
-    // Set the link if we detected a supported browser
+    const parent = configLink.parentElement;
+
+    // Set the content based on detected browser
     if (detectedBrowser && configUrl) {
-        configLink.href = configUrl;
-        configLink.textContent = detectedBrowser + "'s startup configuration";
+        parent.innerHTML = `
+            Visit ${detectedBrowser}'s startup configuration 
+            (<code style="background: #f4f4f4; padding: 2px 6px; border-radius: 3px; user-select: all;">${configUrl}</code>
+            <button onclick="copyConfigUrl('${configUrl}')" style="margin-left: 8px; padding: 4px 12px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 4px; font-size: 0.9em;">Copy URL</button>) 
+            to enable this feature.
+            <br><small style="color: #666; margin-top: 8px; display: inline-block;">
+                Copy the URL and paste it into your browser's address bar, then press Enter.
+            </small>
+        `;
     } else if (detectedBrowser === 'Safari') {
         // Special case for Safari
-        configLink.removeAttribute('href');
-        configLink.style.cursor = 'default';
-        configLink.style.textDecoration = 'none';
-        const parent = configLink.parentElement;
         parent.innerHTML = 'For Safari, open <strong>System Settings</strong> → <strong>General</strong> → <strong>Safari</strong> and check <strong>"Reopen windows from last session"</strong>.';
     } else {
-        // Unknown browser - make it non-clickable
-        configLink.removeAttribute('href');
-        configLink.style.cursor = 'default';
-        configLink.style.textDecoration = 'none';
-        configLink.textContent = "your browser's startup settings";
+        // Unknown browser - provide generic instructions
+        parent.innerHTML = 'Open your browser\'s settings and look for startup or session options to enable tab restoration.';
     }
 });
