@@ -245,7 +245,7 @@ def loadConfig():
 
         last_config_change = mtime
 
-        oqsueryPath = config.get("device", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
+        osqueryPath = config.get("device", {}).get("osqueryPath", {}).get(SYSTEM_OS, DEFAULT_OSQUERY_PATH)
 
 
 
@@ -336,16 +336,23 @@ def checkProcesses():
     return checkBlacklist("processes", "ForbiddenProcesses", "MissingProcesses", query)
 
 def addReport(report, control, errors):
-    passed = len(errors) == 0
-    report[control] = {
-        "name": control,
-        "passed" : passed,
-        "timestamp": datetime.now().isoformat()
-    }
+    if errors is None:
+        report[control] = {
+            "name": control,
+            "passed": None,
+            "timestamp": datetime.now().isoformat()
+        }
+    else:
+        passed = len(errors) == 0
+        report[control] = {
+            "name": control,
+            "passed": passed,
+            "timestamp": datetime.now().isoformat()
+        }
 
-    if not passed:
-        errors = { e for e in errors if e != "" }
-        report[control]["errors"] = list(errors)
+        if not passed:
+            errors = {e for e in errors if e != ""}
+            report[control]["errors"] = list(errors)
 
     return report
 
@@ -399,8 +406,10 @@ def generateReport():
             except TimeoutError:
                 errMsg = f"control '{controlName}' timed out after '{CONTROL_TIMEOUT}' seconds"
                 exception(errMsg, TimeoutError(errMsg))
+                addReport(results, controlName, None)
             except Exception as e:
-                    exception(f"control '{controlName}' failed", e)
+                exception(f"control '{controlName}' failed", e)
+                addReport(results, controlName, None)
 
     results.update(checkApplications())
     results.update(checkProcesses())

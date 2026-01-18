@@ -25,6 +25,14 @@ class DeviceTrust {
             }
         }
 
+        // Remove controls that are no longer in the report
+        const reportControlNames = new Set(Object.keys(report.controls.results))
+        for (const controlName of Object.keys(DeviceTrust.getStatus().controls)) {
+            if (!reportControlNames.has(controlName)) {
+                DeviceTrust.#audit.removeFinding(controlName)
+            }
+        }
+
         DeviceTrust.#audit.save()
         DeviceTrust.#audit.notify()
     }

@@ -36,7 +36,7 @@ body {font-family:sans-serif; margin:6px; min-width: 420px; max-width: 800px }
 .warning  { background:#ffa800; }
 .blocking { background:#e23a3a; }
 .failing  { background:#999; }
-.unknown  { background:#999; }
+.unknown  { background:#CCC; }
 .compliance { font-weight:bold; margin-bottom:11px; }
 table { width:100%; border-collapse:collapse; font-size:95%; }
 th { background:#f5f5f5; }

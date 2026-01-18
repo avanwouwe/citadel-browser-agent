@@ -72,6 +72,10 @@ class Audit {
         return this.#findings[name]
     }
 
+    removeFinding(name) {
+        delete this.#findings[name]
+    }
+
     setFinding(control) {
         this.#findings[control.name] = control
 
@@ -196,7 +200,9 @@ class Control {
     }
 
     getState() {
-        if (this.report.passed) {
+        if (this.report.passed == null) {
+            return State.UNKNOWN
+        } else if (this.report.passed) {
             return State.PASSING
         } else if (this.action === Action.BLOCK) {
             return State.BLOCKING
@@ -212,7 +218,9 @@ class Control {
     }
 
     getNextState() {
-        if (this.report.passed) {
+        if (this.report.passed == null) {
+            return { state: State.UNKNOWN }
+        } else if (this.report.passed) {
             return { state: State.PASSING }
         } else if (this.action === Action.BLOCK) {
             return { state: State.BLOCKING }
