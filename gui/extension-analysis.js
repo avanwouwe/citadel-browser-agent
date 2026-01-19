@@ -51,6 +51,11 @@ async function renderPage() {
     renderScore("likelihood", scores)
     renderScore("impact", scores)
 
+    // TODO temporarily turn off risk analysis since it is not yet implemented
+    scores.global = scores.global ?? 0
+    scores.impact = scores.impact ?? 0
+    scores.likelihood = scores.likelihood ?? 0
+
     let reason
     const allowId = evaluateBlacklist(storeInfo.id, config.id.allowed, config.id.forbidden, true)
     const allowCategory = evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), config.category.allowed, config.category.forbidden, true)
