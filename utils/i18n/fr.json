@@ -452,7 +452,7 @@
       },
       "tabs": {
         "description": "Donne accès aux champs privilégiés des objets Tab utilisés par plusieurs APIs, y compris chrome.tabs et chrome.windows. Vous n’avez généralement pas besoin de déclarer cette permission pour utiliser ces APIs.",
-        "analysis": "Les extensions disposant de la permission tabs peuvent consulter l’URL, pendingUrl, le titre et l’icône de n’importe quel onglet."
+        "analysis": "Peut voir l'URL et le titre de chaque onglet que vous ouvrez et peut rediriger, fermer ou créer des onglets. Combiné avec des permissions d'hôte étendues, cela permet une surveillance et un contrôle complets de votre navigation."
       },
       "topSites": {
         "description": "Donne accès à l’API chrome.topSites.",

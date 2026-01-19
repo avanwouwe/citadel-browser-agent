@@ -452,7 +452,7 @@
       },
       "tabs": {
         "description": "Gives access to privileged fields of the Tab objects used by several APIs, including chrome.tabs and chrome.windows. You usually don't need to declare this permission to use those APIs.",
-        "analysis": "Extensions with the tabs permission can query the url, pendingUrl, title, and favIconUrl of any tab."
+        "analysis": "Can see the URL and title of every tab you open and can redirect, close, or create tabs. Combined with broad host permissions, this enables full surveillance and control of your browsing."
       },
       "topSites": {
         "description": "Gives access to the chrome.topSites API.",
