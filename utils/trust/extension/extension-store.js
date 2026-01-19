@@ -49,9 +49,11 @@ class ExtensionStore {
         if (!manifestEntry) throw new Error("manifest.json not found")
 
         const manifest = await manifestEntry.json()
+        manifest.content_scripts = manifest.content_scripts ?? []
         manifest.permissions = manifest.permissions ?? []
         manifest.host_permissions = manifest.host_permissions ?? []
-        manifest.content_scripts = manifest.content_scripts ?? []
+        manifest.optional_permissions = manifest.optional_permissions ?? []
+        manifest.optional_host_permissions = manifest.optional_host_permissions ?? []
         return manifest
     }
 
@@ -628,7 +630,6 @@ class ExtensionStore {
             const installsNode = about[0]
             const numInstalls = parseInteger(installsNode?.textContent)
 
-            const isVerifiedPublisher = !!dom.querySelector('h2[itemprop="brand"] > img.verified')
             const categoriesNode = !!numInstalls ? about[1] : about[0]
             const catMatch = categoriesNode?.childNodes?.[0]?.getAttribute('href').match(/\/category\/([^/?]+)/)
 
@@ -651,7 +652,6 @@ class ExtensionStore {
                 rating,
                 numRatings,
                 categories,
-                isVerifiedPublisher,
                 downloadUrl
             }
         }

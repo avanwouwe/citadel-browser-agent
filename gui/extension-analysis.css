@@ -82,13 +82,24 @@ body {
     margin: 0 0 0.5em 1.5em;
     padding: 0;
 }
-#extension-logo,
+.extension-header {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    margin-bottom: 1em;
+}
+
+#extension-logo {
+    flex-shrink: 0;
+}
+
 .extension-name {
-    margin: 0.5em;
-    vertical-align: middle;
     font-weight: bold;
     font-size: 1.5em;
+    text-align: center;
+    flex: 1;
 }
+
 .risk-unknown { color: var(--color-risk-unknown); font-weight: bold;}
 .risk-low    { color: var(--color-risk-low); font-weight: bold;}
 .risk-medium { color: var(--color-risk-medium); font-weight: bold;}

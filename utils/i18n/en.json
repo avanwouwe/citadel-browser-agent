@@ -153,7 +153,12 @@
         "blacklist-category": "the category it belongs to has been blacklisted",
         "risk-global": "the overall risk level is too high or unknown",
         "risk-impact": "the risk of it's access to sensitive data is too high or unknown ",
-        "risk-likelihood": "the probability that it is malware or can be hacked is too high or unknown"
+        "risk-likelihood": "the probability that it is malware or can be hacked is too high or unknown",
+        "not-verified": "neither the extension nor it's publisher are verified by the extension store",
+        "installation-count": "it is not a well-known extension",
+        "poor-rating": "it was rated poorly or insufficiently",
+        "forbidden-permission": "it requests a forbidden permission '{{reason}}'",
+        "host-permissions": "it requests forbidden host permissions '{{reason}}'"
       },
       "details": {
         "header": "Extension Details",
@@ -363,8 +368,8 @@
         "analysis": "Use the offscreen API to create and manage offscreen documents."
       },
       "pageCapture": {
-        "description": "Gives access to the chrome.pageCapture API.",
-        "analysis": "No risk analysis available."
+        "description": "Gives access to the chrome.pageCapture API, allowing programmatic export of HTML",
+        "analysis": "Can be run without user interaction; extensions can silently copy everything that is visible on browsed pages."
       },
       "platformKeys": {
         "description": "Gives access to the chrome.platformKeys API.",
@@ -452,7 +457,7 @@
       },
       "tabs": {
         "description": "Gives access to privileged fields of the Tab objects used by several APIs, including chrome.tabs and chrome.windows. You usually don't need to declare this permission to use those APIs.",
-        "analysis": "Can see the URL and title of every tab you open and can redirect, close, or create tabs. Combined with broad host permissions, this enables full surveillance and control of your browsing."
+        "analysis": "Can see the URL and title of every tab you open and can redirect, close, or create tabs. Combined with broad host permissions, this enables full surveillance and control of your browsing. In MV2 this also gives 'scripting' permission."
       },
       "topSites": {
         "description": "Gives access to the chrome.topSites API.",
@@ -496,7 +501,7 @@
       },
       "<all_urls>": {
         "description": "Grants the extension permission to operate on all http:// and https:// URLs in the browser.",
-        "analysis": "Extensions with the <all_urls> host permission can utilize their granted permissions on every website visited, greatly increasing the possibility for broad data collection or injection attacks."
+        "analysis": "Extensions with the <all_urls> host permission (or equivalent patterns) can utilize their granted permissions on every website visited, greatly increasing the possibility for broad data collection or injection attacks."
       }
     },
     "risk-level" : {

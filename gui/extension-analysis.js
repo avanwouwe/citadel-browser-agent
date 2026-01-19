@@ -42,7 +42,8 @@ async function renderPage() {
         return
     }
 
-    renderManifestInfo(manifest)
+    const permissionCheck = await Extension.checkPermissions(manifest, config)
+    renderManifestInfo(manifest, permissionCheck.isBroad)
 
     setStatus(t('extension-analysis.block-page.status.analyze-code'), true)
 
@@ -56,30 +57,49 @@ async function renderPage() {
     scores.impact = scores.impact ?? 0
     scores.likelihood = scores.likelihood ?? 0
 
-    let reason
+    const rejection = {}
+
     const allowId = evaluateBlacklist(storeInfo.id, config.id.allowed, config.id.forbidden, true)
     const allowCategory = evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), config.category.allowed, config.category.forbidden, true)
+    const allowVerified = !config.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
+    const allowInstallationCnt = storeInfo.numInstalls >= config.installations.required ?? 0
+    const allowRating = storeInfo.rating >= (config.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (config.ratings.minRatingCnt ?? 0)
 
     if (!allowId) {
-        reason = 'blacklist-extension'
+        rejection.reason = 'blacklist-extension'
     } else if (!allowCategory) {
-        reason = 'blacklist-category'
+        rejection.reason = 'blacklist-category'
     } else if (scores.global == null || scores.global > config.risk.maxGlobal) {
-        reason = 'risk-global'
+        rejection.reason = 'risk-global'
     } else if (scores.impact == null || scores.impact > config.risk.maxImpact) {
-        reason = 'risk-impact'
+        rejection.reason = 'risk-impact'
     } else if (scores.likelihood == null || scores.likelihood > config.risk.maxLikelihood) {
-        reason = 'risk-likelihood'
+        rejection.reason = 'risk-likelihood'
+    } else if (!allowVerified) {
+        rejection.reason = 'not-verified'
+    } else if (!allowInstallationCnt) {
+        rejection.reason = 'installation-count'
+    } else if (!allowRating) {
+        rejection.reason = 'poor-rating'
+    } else if (!permissionCheck.allowPermissions) {
+        rejection.reason = 'forbidden-permission'
+        rejection.example = permissionCheck.blockingPermissions[0]
+    } else if (!permissionCheck.allowHostPermissions) {
+        rejection.reason = 'host-permissions'
+        rejection.example = permissionCheck.broadHostPermissions[0]
     }
 
-    const allowed = !reason
+    const bypassVerified = config.verified.allowed && (storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension)
+    const bypassInstallationCnt = storeInfo.numInstalls >= config.installations.allowed
+
+    const allowed = !rejection.reason || bypassVerified || bypassInstallationCnt
 
     const installButton = document.getElementById("installButton")
     installButton.onclick = () => callServiceWorker('ApproveExtension', { tabId: tabState.tabId, storePage })
     installButton.disabled = !allowed
     showAnalysis()
 
-    if (!allowed) blockInstall(reason)
+    if (!allowed) blockInstall(rejection)
 }
 
 async function fetchStoreInfo(storeUrl) {
@@ -111,10 +131,15 @@ const riskClassMap = {
     4: 'risk-critical'
 }
 
-function renderManifestInfo(manifestInfo) {
+function renderManifestInfo(manifestInfo, isBroad) {
     renderManifestVersion('risk-value-manifest', manifestInfo.manifest_version)
 
-    const risks = manifestInfo.permissions.map(permission => Extension.Risk.ofPermission(permission))
+    const permissions = [...manifestInfo.permissions]
+    if (isBroad && !permissions.includes("<all_urls>")) {
+        permissions.push("<all_urls>")
+    }
+
+    const risks = permissions.map(permission => Extension.Risk.ofPermission(permission))
         .filter(Boolean)
         .sort((a, b) => b.risk - a.risk)
 
@@ -244,8 +269,8 @@ function showError(error) {
     backButton.hidden = false
 }
 
-function blockInstall(reason) {
-    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + reason)}.`
+function blockInstall(rejection) {
+    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reason, rejection)}.`
     if (config.exceptions.allowed) proposeException()
 }
 

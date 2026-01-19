@@ -332,12 +332,35 @@ class Config {
                 allowed: true,
             },
             id: {
-                allowed: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi"],
+                allowed: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh"],
                 forbidden: [],
             },
             category: {
                 allowed: [],
-                forbidden: [],
+                forbidden: ["lifestyle"],
+            },
+            verified: {
+                required: true,
+                allowed: false,
+            },
+            installations: {
+                required: 200000,
+                allowed: 5000000
+            },
+            ratings: {
+                minRatingLevel: 4.0,
+                minRatingCnt: 500,
+            },
+            permissions: {
+                permissions: {
+                    forbidden: ["proxy","cookies","debugger","clipboardRead"],
+                    requireSpecific: ["scripting", "webRequest", "pageCapture"],
+                    analyzeOptional: true
+                },
+                hostPermissions: {
+                    requireSpecific: true,
+                    analyzeOptional: true
+                }
             },
             allowSideloading: false,
             allowExisting: true,

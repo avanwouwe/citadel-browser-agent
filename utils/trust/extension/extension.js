@@ -44,7 +44,7 @@ class Extension {
                 risk: undefined
             },
             "clipboardRead": {
-                risk: 3
+                risk: 4
             },
             "clipboardWrite": {
                 risk: 2
@@ -137,7 +137,7 @@ class Extension {
                 risk: undefined
             },
             "management": {
-                risk: 4
+                risk: 2
             },
             "nativeMessaging": {
                 risk: 2
@@ -149,7 +149,7 @@ class Extension {
                 risk: 2
             },
             "pageCapture": {
-                risk: undefined
+                risk: 4
             },
             "platformKeys": {
                 risk: undefined
@@ -173,7 +173,7 @@ class Extension {
                 risk: undefined
             },
             "proxy": {
-                risk: 3
+                risk: 4
             },
             "readingList": {
                 risk: undefined
@@ -267,7 +267,46 @@ class Extension {
             return Extension.Risk.CRITICAL
         }
 
-        static ofPermission (permission) { return Extension.Risk.#catalog[permission]}
+        static ofPermission(permission) { return Extension.Risk.#catalog[permission]}
+    }
+
+    static #broadPatterns = ['<all_urls>', '*://*/*', 'http://*/*', 'https://*/*']
+
+    static async checkPermissions(manifest, config) {
+        config = config.permissions
+
+        const permissions = [
+            ...manifest.permissions,
+            ...(config.permissions.analyzeOptional ? manifest.optional_permissions : [])
+        ]
+
+        const host_permissions = [
+            ...manifest.host_permissions,
+            ...manifest.manifest_version === 2 ? manifest.permissions : [],
+            ...(config.hostPermissions.analyzeOptional ? manifest.optional_host_permissions : [])
+        ]
+
+        const broadHostPermissions = [...permissions, ...host_permissions].filter(permission => Extension.#broadPatterns.includes(permission))
+        const isBroad = broadHostPermissions.length > 0
+
+        if (isBroad && !permissions.includes("<all_urls>")) {
+            permissions.push("<all_urls>")
+        }
+
+        if (manifest.manifest_version === 2 && manifest.permissions.includes("tabs")) {
+            permissions.push("scripting")
+        }
+
+        const blockingPermissions = permissions.filter(permission =>
+            config.permissions.forbidden.includes(permission) ||
+            (config.permissions.requireSpecific.includes(permission) && isBroad)
+        )
+
+        const allowPermissions = blockingPermissions.length === 0
+        const allowHostPermissions = !config.hostPermissions.requireSpecific || !isBroad
+        const allowed = allowPermissions && allowHostPermissions
+
+        return { allowed, allowPermissions, allowHostPermissions, blockingPermissions, broadHostPermissions, isBroad }
     }
 
     static async isInstalled(extensionId) {
