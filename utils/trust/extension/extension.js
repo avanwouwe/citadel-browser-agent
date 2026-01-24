@@ -272,6 +272,47 @@ class Extension {
 
     static #broadPatterns = ['<all_urls>', '*://*/*', 'http://*/*', 'https://*/*']
 
+    // static #validatePatternScope(pattern, config, maxMatches = 5) {
+    //     const protectedDomains = this.#getProtectedDomains(config);
+    //     const matches = [];
+    //
+    //     // Convert pattern to regex for testing
+    //     const patternRegex = this.#patternToRegex(pattern);
+    //
+    //     // Test protocols that could be used
+    //     const protocols = ['https:', 'http:', 'ftp:', 'file:', 'ws:', 'wss:'];
+    //
+    //     for (const domain of protectedDomains) {
+    //         let matched = false;
+    //
+    //         // Test various URL formats
+    //         const testUrls = [
+    //             domain,
+    //             ...protocols.map(proto => `${proto}//${domain}`),
+    //             ...protocols.map(proto => `${proto}//${domain}/`),
+    //             ...protocols.map(proto => `${proto}//${domain}/path`),
+    //             ...protocols.map(proto => `${proto}//subdomain.${domain}`),
+    //             `subdomain.${domain}`
+    //         ];
+    //
+    //         if (testUrls.some(url => patternRegex.test(url))) {
+    //             matched = true;
+    //             matches.push(domain);
+    //
+    //             // Early exit if threshold exceeded
+    //             if (matches.length > maxMatches) {
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //
+    //     return {
+    //         coversProtected: matches.length > maxMatches,
+    //         examples: matches.slice(0, 10), // Return up to 10 examples
+    //         totalMatches: matches.length > maxMatches ? `${maxMatches}+` : matches.length
+    //     };
+    // }
+
     static async checkPermissions(manifest, config) {
         config = config.permissions
 

@@ -115,7 +115,7 @@ class Log {
         if (! urlObj) return url    // if we can't parse the URL, we can't mask it
         url = urlObj
 
-        if (! isProtected(url.hostname) && Log.#levelValue[level] < config.logging.maskUrlLevel) {
+        if (! Config.isProtected(url.hostname) && Log.#levelValue[level] < config.logging.maskUrlLevel) {
             url.username ? url.username = url.username.hashDJB2() : undefined
             url.hostname ? url.hostname = url.hostname.hashDJB2() : undefined
             url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashDJB2() : undefined

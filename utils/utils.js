@@ -147,12 +147,6 @@ function getSitename(url) {
     return url?.toURL()?.hostname
 }
 
-function isProtected(sitename) {
-    return matchDomain(sitename, config.domain.isApplication)  === true ||
-        matchDomain(sitename, config.company.applications) === true ||
-        matchDomain(sitename, config.company.domains) === true
-}
-
 function getRandomInt(min = Number.MIN_SAFE_INTEGER, max = Number.MAX_SAFE_INTEGER) {
     min = Math.ceil(min);
     max = Math.floor(max);

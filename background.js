@@ -142,7 +142,7 @@ function evaluateRequest(details) {
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
-	if (isProtected(url.hostname)) {
+	if (Config.isProtected(url.hostname)) {
 		if (
 			! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
 			Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
@@ -329,7 +329,7 @@ function handleError(hook, eventType, filter) {
 				if (details.url.startsWith('chrome://network-error/')) level = Log.INFO
 				else if (exception) level = exception
 				else if (details.error.match(BROWSER_ERROR_ERROR)) level = Log.ERROR
-				else if (details.error.match(BROWSER_ERROR_WARNING) && isProtected(getSitename(details.url))) level = Log.WARN
+				else if (details.error.match(BROWSER_ERROR_WARNING) && Config.isProtected(getSitename(details.url))) level = Log.WARN
 				else level = undefined
 
 				if (level) {

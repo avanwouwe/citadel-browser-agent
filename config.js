@@ -426,6 +426,12 @@ class Config {
 
         Config.#init(Config.config)
 
+        const scope = [config.domain.isApplication, config.company.applications, config.company.domains]
+        Config.#protectedScope = scope.reduce((result, obj) => {
+            Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
+            return result
+        }, {})
+
         // for every defined exception, copy the global config and override with the fields defined in the exception
         const exceptions = Config.config.exceptions
         Config.config.exceptions = {}
@@ -487,6 +493,13 @@ class Config {
 
     static forURL(url) {
         return Config.forHostname(url?.toURL()?.hostname)
+    }
+
+    static #protectedScope = {}
+
+    static isProtected(sitename) {
+        Config.assertIsLoaded()
+        return matchDomain(sitename, Config.#protectedScope === true)
     }
 
 }
