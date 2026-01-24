@@ -45,6 +45,8 @@ async function renderPage() {
     const permissionCheck = await Extension.checkPermissions(manifest, config)
     renderManifestInfo(manifest, permissionCheck.isBroad)
 
+    config = config.extensions
+
     setStatus(t('extension-analysis.block-page.status.analyze-code'), true)
 
     scores = ExtensionAnalysis.calculateRisk(storeInfo, manifest)
@@ -65,6 +67,10 @@ async function renderPage() {
     const allowInstallationCnt = storeInfo.numInstalls >= config.installations.required ?? 0
     const allowRating = storeInfo.rating >= (config.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (config.ratings.minRatingCnt ?? 0)
 
+console.log("permissionCheck", permissionCheck)
+    console.log("config", config)
+    console.log("manifest", manifest)
+
     if (!allowId) {
         rejection.reason = 'blacklist-extension'
     } else if (!allowCategory) {
@@ -84,9 +90,12 @@ async function renderPage() {
     } else if (!permissionCheck.allowPermissions) {
         rejection.reason = 'forbidden-permission'
         rejection.example = permissionCheck.blockingPermissions[0]
-    } else if (!permissionCheck.allowHostPermissions) {
-        rejection.reason = 'host-permissions'
+    } else if (!permissionCheck.allowAllDomains) {
+        rejection.reason = 'all-domains'
         rejection.example = permissionCheck.broadHostPermissions[0]
+    } else if (!permissionCheck.allowProtectedDomains) {
+        rejection.reason = 'protected-domain'
+        rejection.example = permissionCheck.protectedDomains[0]
     }
 
     const bypassVerified = config.verified.allowed && (storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension)
@@ -141,7 +150,7 @@ function renderManifestInfo(manifestInfo, isBroad) {
 
     const risks = permissions.map(permission => Extension.Risk.ofPermission(permission))
         .filter(Boolean)
-        .sort((a, b) => b.risk - a.risk)
+        .sort((a, b) => (b.risk ?? 0) - (a.risk ?? 0))
 
     const tbody = document.getElementById('permissions')
     tbody.innerHTML = ''

@@ -353,12 +353,13 @@ class Config {
             },
             permissions: {
                 permissions: {
-                    forbidden: ["proxy","cookies","debugger","clipboardRead"],
-                    requireSpecific: ["scripting", "webRequest", "pageCapture"],
+                    forbidden: ["proxy","debugger","clipboardRead"],
+                    requireSpecific: ["scripting", "webRequest", "pageCapture", "cookies"],
                     analyzeOptional: true
                 },
                 hostPermissions: {
                     requireSpecific: true,
+                    allowProtected: false,
                     analyzeOptional: true
                 }
             },
@@ -427,7 +428,7 @@ class Config {
         Config.#init(Config.config)
 
         const scope = [config.domain.isApplication, config.company.applications, config.company.domains]
-        Config.#protectedScope = scope.reduce((result, obj) => {
+        config.protectedDomains = scope.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})
@@ -495,11 +496,9 @@ class Config {
         return Config.forHostname(url?.toURL()?.hostname)
     }
 
-    static #protectedScope = {}
-
     static isProtected(sitename) {
         Config.assertIsLoaded()
-        return matchDomain(sitename, Config.#protectedScope === true)
+        return matchDomain(sitename, config.protectedDomains)
     }
 
 }

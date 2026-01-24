@@ -5,6 +5,250 @@ class Extension {
     static #exceptionsStorage = new PersistentObject("extension-exceptions")
     static exceptions
 
+    static #permissions = {
+        "accessibilityFeatures.modify": {
+            risk: undefined
+        },
+        "accessibilityFeatures.read": {
+            risk: undefined
+        },
+        "activeTab": {
+            risk: 1
+        },
+        "alarms": {
+            risk: 2
+        },
+        "audio": {
+            risk: undefined
+        },
+        "background": {
+            risk: 1
+        },
+        "bookmarks": {
+            risk: 2
+        },
+        "browsingData": {
+            risk: 3
+        },
+        "certificateProvider": {
+            risk: undefined
+        },
+        "clipboardRead": {
+            risk: 4
+        },
+        "clipboardWrite": {
+            risk: 2
+        },
+        "contentSettings": {
+            risk: undefined
+        },
+        "contextMenus": {
+            risk: 2
+        },
+        "cookies": {
+            risk: 4
+        },
+        "debugger": {
+            risk: 4
+        },
+        "declarativeContent": {
+            risk: 3
+        },
+        "declarativeNetRequest": {
+            risk: 3
+        },
+        "declarativeNetRequestWithHostAccess": {
+            risk: undefined
+        },
+        "declarativeNetRequestFeedback": {
+            risk: undefined
+        },
+        "desktopCapture": {
+            risk: 3
+        },
+        "dns": {
+            risk: undefined
+        },
+        "documentScan": {
+            risk: undefined
+        },
+        "downloads": {
+            risk: 2
+        },
+        "downloads.open": {
+            risk: undefined
+        },
+        "downloads.ui": {
+            risk: undefined
+        },
+        "enterprise.deviceAttributes": {
+            risk: undefined
+        },
+        "enterprise.hardwarePlatform": {
+            risk: undefined
+        },
+        "enterprise.networkingAttributes": {
+            risk: undefined
+        },
+        "enterprise.platformKeys": {
+            risk: undefined
+        },
+        "favicon": {
+            risk: undefined
+        },
+        "fileBrowserHandler": {
+            risk: undefined
+        },
+        "fileSystemProvider": {
+            risk: 3
+        },
+        "fontSettings": {
+            risk: undefined
+        },
+        "gcm": {
+            risk: undefined
+        },
+        "geolocation": {
+            risk: undefined
+        },
+        "history": {
+            risk: 3
+        },
+        "identity": {
+            risk: 1
+        },
+        "identity.email": {
+            risk: undefined
+        },
+        "idle": {
+            risk: 2
+        },
+        "loginState": {
+            risk: undefined
+        },
+        "management": {
+            risk: 2
+        },
+        "nativeMessaging": {
+            risk: 2
+        },
+        "notifications": {
+            risk: 1
+        },
+        "offscreen": {
+            risk: 2
+        },
+        "pageCapture": {
+            risk: 4
+        },
+        "platformKeys": {
+            risk: undefined
+        },
+        "power": {
+            risk: 3
+        },
+        "printerProvider": {
+            risk: undefined
+        },
+        "printing": {
+            risk: undefined
+        },
+        "printingMetrics": {
+            risk: undefined
+        },
+        "privacy": {
+            risk: 3
+        },
+        "processes": {
+            risk: undefined
+        },
+        "proxy": {
+            risk: 4
+        },
+        "readingList": {
+            risk: undefined
+        },
+        "runtime": {
+            risk: undefined
+        },
+        "scripting": {
+            risk: 4
+        },
+        "search": {
+            risk: undefined
+        },
+        "sessions": {
+            risk: undefined
+        },
+        "sidePanel": {
+            risk: 2
+        },
+        "storage": {
+            risk: 2
+        },
+        "system.cpu": {
+            risk: undefined
+        },
+        "system.display": {
+            risk: undefined
+        },
+        "system.memory": {
+            risk: undefined
+        },
+        "system.storage": {
+            risk: undefined
+        },
+        "tabCapture": {
+            risk: 3
+        },
+        "tabGroups": {
+            risk: undefined
+        },
+        "tabs": {
+            risk: 3
+        },
+        "topSites": {
+            risk: undefined
+        },
+        "tts": {
+            risk: undefined
+        },
+        "ttsEngine": {
+            risk: undefined
+        },
+        "unlimitedStorage": {
+            risk: 3
+        },
+        "userScripts": {
+            risk: undefined
+        },
+        "vpnProvider": {
+            risk: undefined
+        },
+        "wallpaper": {
+            risk: undefined
+        },
+        "webAuthenticationProxy": {
+            risk: undefined
+        },
+        "webNavigation": {
+            risk: 3
+        },
+        "webRequest": {
+            risk: 4
+        },
+        "webRequestBlocking": {
+            risk: 1
+        },
+        "<all_urls>": {
+            risk: 4
+        }
+    }
+
+    static {
+        Object.entries(this.#permissions).forEach(([key, value]) => value.name = key)
+    }
+
     static Risk = class {
         static UNKNOWN = "UNKNOWN"
         static LOW = "LOW"
@@ -15,249 +259,6 @@ class Extension {
         static values= [this.LOW, this.MEDIUM, this.HIGH, this.CRITICAL]
         static indexOf(value) { return this.values.indexOf(value) }
 
-        static #catalog = {
-            "accessibilityFeatures.modify": {
-                risk: undefined
-            },
-            "accessibilityFeatures.read": {
-                risk: undefined
-            },
-            "activeTab": {
-                risk: 1
-            },
-            "alarms": {
-                risk: 2
-            },
-            "audio": {
-                risk: undefined
-            },
-            "background": {
-                risk: 1
-            },
-            "bookmarks": {
-                risk: 2
-            },
-            "browsingData": {
-                risk: 3
-            },
-            "certificateProvider": {
-                risk: undefined
-            },
-            "clipboardRead": {
-                risk: 4
-            },
-            "clipboardWrite": {
-                risk: 2
-            },
-            "contentSettings": {
-                risk: undefined
-            },
-            "contextMenus": {
-                risk: 2
-            },
-            "cookies": {
-                risk: 4
-            },
-            "debugger": {
-                risk: 4
-            },
-            "declarativeContent": {
-                risk: 3
-            },
-            "declarativeNetRequest": {
-                risk: 3
-            },
-            "declarativeNetRequestWithHostAccess": {
-                risk: undefined
-            },
-            "declarativeNetRequestFeedback": {
-                risk: undefined
-            },
-            "desktopCapture": {
-                risk: 3
-            },
-            "dns": {
-                risk: undefined
-            },
-            "documentScan": {
-                risk: undefined
-            },
-            "downloads": {
-                risk: 2
-            },
-            "downloads.open": {
-                risk: undefined
-            },
-            "downloads.ui": {
-                risk: undefined
-            },
-            "enterprise.deviceAttributes": {
-                risk: undefined
-            },
-            "enterprise.hardwarePlatform": {
-                risk: undefined
-            },
-            "enterprise.networkingAttributes": {
-                risk: undefined
-            },
-            "enterprise.platformKeys": {
-                risk: undefined
-            },
-            "favicon": {
-                risk: undefined
-            },
-            "fileBrowserHandler": {
-                risk: undefined
-            },
-            "fileSystemProvider": {
-                risk: 3
-            },
-            "fontSettings": {
-                risk: undefined
-            },
-            "gcm": {
-                risk: undefined
-            },
-            "geolocation": {
-                risk: undefined
-            },
-            "history": {
-                risk: 3
-            },
-            "identity": {
-                risk: 1
-            },
-            "identity.email": {
-                risk: undefined
-            },
-            "idle": {
-                risk: 2
-            },
-            "loginState": {
-                risk: undefined
-            },
-            "management": {
-                risk: 2
-            },
-            "nativeMessaging": {
-                risk: 2
-            },
-            "notifications": {
-                risk: 1
-            },
-            "offscreen": {
-                risk: 2
-            },
-            "pageCapture": {
-                risk: 4
-            },
-            "platformKeys": {
-                risk: undefined
-            },
-            "power": {
-                risk: 3
-            },
-            "printerProvider": {
-                risk: undefined
-            },
-            "printing": {
-                risk: undefined
-            },
-            "printingMetrics": {
-                risk: undefined
-            },
-            "privacy": {
-                risk: 3
-            },
-            "processes": {
-                risk: undefined
-            },
-            "proxy": {
-                risk: 4
-            },
-            "readingList": {
-                risk: undefined
-            },
-            "runtime": {
-                risk: undefined
-            },
-            "scripting": {
-                risk: 4
-            },
-            "search": {
-                risk: undefined
-            },
-            "sessions": {
-                risk: undefined
-            },
-            "sidePanel": {
-                risk: 2
-            },
-            "storage": {
-                risk: 2
-            },
-            "system.cpu": {
-                risk: undefined
-            },
-            "system.display": {
-                risk: undefined
-            },
-            "system.memory": {
-                risk: undefined
-            },
-            "system.storage": {
-                risk: undefined
-            },
-            "tabCapture": {
-                risk: 3
-            },
-            "tabGroups": {
-                risk: undefined
-            },
-            "tabs": {
-                risk: 3
-            },
-            "topSites": {
-                risk: undefined
-            },
-            "tts": {
-                risk: undefined
-            },
-            "ttsEngine": {
-                risk: undefined
-            },
-            "unlimitedStorage": {
-                risk: 3
-            },
-            "userScripts": {
-                risk: undefined
-            },
-            "vpnProvider": {
-                risk: undefined
-            },
-            "wallpaper": {
-                risk: undefined
-            },
-            "webAuthenticationProxy": {
-                risk: undefined
-            },
-            "webNavigation": {
-                risk: 3
-            },
-            "webRequest": {
-                risk: 4
-            },
-            "webRequestBlocking": {
-                risk: 1
-            },
-            "<all_urls>": {
-                risk: 4
-            }
-        }
-
-        static {
-            Object.entries(this.#catalog).forEach(([key, value]) => value.name = key)
-        }
 
         static ofScore(score) {
             if (score == null) return Extension.Risk.UNKNOWN
@@ -267,54 +268,59 @@ class Extension {
             return Extension.Risk.CRITICAL
         }
 
-        static ofPermission(permission) { return Extension.Risk.#catalog[permission]}
+        static ofPermission(permission) { return Extension.#permissions[permission] }
     }
 
-    static #broadPatterns = ['<all_urls>', '*://*/*', 'http://*/*', 'https://*/*']
+    static #canAccessProtected(manifest, config, maxMatches = 5) {
+        const permissions = Object.keys(Extension.#permissions)
+        const patterns = [
+            ...manifest.permissions.filter(permission => ! permissions.includes(permission)),
+            ...manifest.host_permissions
+            ].map(pattern => this.#patternToRegex(pattern))
 
-    // static #validatePatternScope(pattern, config, maxMatches = 5) {
-    //     const protectedDomains = this.#getProtectedDomains(config);
-    //     const matches = [];
-    //
-    //     // Convert pattern to regex for testing
-    //     const patternRegex = this.#patternToRegex(pattern);
-    //
-    //     // Test protocols that could be used
-    //     const protocols = ['https:', 'http:', 'ftp:', 'file:', 'ws:', 'wss:'];
-    //
-    //     for (const domain of protectedDomains) {
-    //         let matched = false;
-    //
-    //         // Test various URL formats
-    //         const testUrls = [
-    //             domain,
-    //             ...protocols.map(proto => `${proto}//${domain}`),
-    //             ...protocols.map(proto => `${proto}//${domain}/`),
-    //             ...protocols.map(proto => `${proto}//${domain}/path`),
-    //             ...protocols.map(proto => `${proto}//subdomain.${domain}`),
-    //             `subdomain.${domain}`
-    //         ];
-    //
-    //         if (testUrls.some(url => patternRegex.test(url))) {
-    //             matched = true;
-    //             matches.push(domain);
-    //
-    //             // Early exit if threshold exceeded
-    //             if (matches.length > maxMatches) {
-    //                 break;
-    //             }
-    //         }
-    //     }
-    //
-    //     return {
-    //         coversProtected: matches.length > maxMatches,
-    //         examples: matches.slice(0, 10), // Return up to 10 examples
-    //         totalMatches: matches.length > maxMatches ? `${maxMatches}+` : matches.length
-    //     };
-    // }
+        const domains = []
+        const protocols = ['https:', 'http:', 'ftp:', 'file:', 'ws:', 'wss:']
+
+        for (const domain of Object.keys(config.protectedDomains)) {
+            const testUrls = [
+                domain,
+                ...protocols.map(proto => `${proto}//${domain}`),
+                ...protocols.map(proto => `${proto}//${domain}/`),
+                ...protocols.map(proto => `${proto}//${domain}/path`),
+                ...protocols.map(proto => `${proto}//subdomain.${domain}`),
+                `subdomain.${domain}`
+            ]
+
+            const matched = patterns.some(regex => testUrls.some(url => regex.test(url)))
+            if (matched) {
+                domains.push(domain)
+
+                if (domains.length > maxMatches) {
+                    break
+                }
+            }
+        }
+
+        return domains
+    }
+
+    static #patternToRegex(pattern) {
+        if (pattern === '<all_urls>') {
+            return /.*/
+        }
+
+        const escaped = RegExp.escape(pattern)
+        const regexStr = escaped.replace(/\\\*/g, '.*')
+
+        return new RegExp(regexStr, 'i')
+    }
+
+    static #broadPatterns = ['<all_urls>', '*://*/*', 'http://*/*', 'https://*/*', 'ws://*/*', 'wss://*/*', 'file://*/*']
 
     static async checkPermissions(manifest, config) {
-        config = config.permissions
+        const protectedDomains = Extension.#canAccessProtected(manifest, config, 1)
+
+        config = config.extensions.permissions
 
         const permissions = [
             ...manifest.permissions,
@@ -344,10 +350,11 @@ class Extension {
         )
 
         const allowPermissions = blockingPermissions.length === 0
-        const allowHostPermissions = !config.hostPermissions.requireSpecific || !isBroad
-        const allowed = allowPermissions && allowHostPermissions
+        const allowAllDomains = !config.hostPermissions.requireSpecific || !isBroad
+        const allowProtectedDomains = config.hostPermissions.allowProtected || protectedDomains.length === 0
+        const allowed = allowPermissions && allowAllDomains
 
-        return { allowed, allowPermissions, allowHostPermissions, blockingPermissions, broadHostPermissions, isBroad }
+        return { allowed, allowPermissions, allowAllDomains, allowProtectedDomains, blockingPermissions, broadHostPermissions, protectedDomains, isBroad }
     }
 
     static async isInstalled(extensionId) {

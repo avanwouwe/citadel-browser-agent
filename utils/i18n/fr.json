@@ -157,8 +157,9 @@
         "not-verified": "ni l'extension ni son éditeur ne sont vérifiés par le magasin d'extensions",
         "installation-count": "ce n'est pas une extension bien connue",
         "poor-rating": "elle a été mal notée ou insuffisamment notée",
-        "forbidden-permission": "elle demande la permission interdite '{{reason}}",
-        "host-permissions": "elle demande un périmètre d'accès '{{reason}}'"
+        "forbidden-permission": "elle demande la permission interdite '{{example}}",
+        "all-domains": "elle demande l'accès à tout le trafic en utilisant '{{example}}'",
+        "protected-domain": "elle demande l'accès au domaine protégé '{{example}}'"
       },
       "details": {
         "header": "Détails de l’extension",
@@ -413,7 +414,7 @@
       },
       "scripting": {
         "description": "Donne accès à l’API chrome.scripting.",
-        "analysis": "Les extensions disposant de la permission scripting peuvent injecter et exécuter du code dans les pages web, pouvant être utilisé pour l’exfiltration de données ou la prise de contrôle de session (nécessite des permissions d’hôte, disponible depuis Manifest V3)."
+        "analysis": "Les extensions disposant de la permission scripting peuvent injecter et exécuter du code dans les pages web, pouvant être utilisé pour l’exfiltration de données ou la prise de contrôle de session (nécessite des permissions d’hôte)."
       },
       "search": {
         "description": "Donne accès à l’API chrome.search.",
@@ -425,7 +426,7 @@
       },
       "sidePanel": {
         "description": "Donne accès à l’API chrome.sidePanel.",
-        "analysis": "Les extensions disposant de la permission sidePanel peuvent afficher du contenu dans le panneau latéral du navigateur, offrant une interface persistante qui complète la navigation de l’utilisateur (disponible depuis Manifest V3)."
+        "analysis": "Les extensions disposant de la permission sidePanel peuvent afficher du contenu dans le panneau latéral du navigateur, offrant une interface persistante qui complète la navigation de l’utilisateur."
       },
       "storage": {
         "description": "Donne accès à l’API chrome.storage.",
@@ -497,7 +498,7 @@
       },
       "webRequest": {
         "description": "Donne accès à l’API chrome.webRequest.",
-        "analysis": "Accès au trafic réseau"
+        "analysis" : "Accès aux HTTP headers, y compris les cookies, permettant le vol de secrets de session."
       },
       "<all_urls>": {
         "description": "Autorise l’extension à opérer sur toutes les URLs http:// et https:// dans le navigateur.",

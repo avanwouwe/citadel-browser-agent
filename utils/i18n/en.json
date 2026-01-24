@@ -157,8 +157,9 @@
         "not-verified": "neither the extension nor it's publisher are verified by the extension store",
         "installation-count": "it is not a well-known extension",
         "poor-rating": "it was rated poorly or insufficiently",
-        "forbidden-permission": "it requests a forbidden permission '{{reason}}'",
-        "host-permissions": "it requests forbidden host permissions '{{reason}}'"
+        "forbidden-permission": "it requests a forbidden permission '{{example}}'",
+        "all-domains": "it requests access to all traffic using '{{example}}'",
+        "protected-domain": "it requests access to protected domain '{{example}}'"
       },
       "details": {
         "header": "Extension Details",
@@ -413,7 +414,7 @@
       },
       "scripting": {
         "description": "Gives access to the chrome.scripting API.",
-        "analysis": "Extensions with the scripting permission can inject and execute code in web pages, which can potentially be used for data exfiltration or session hijacking (requires host permissions, available since Manifest V3)."
+        "analysis": "Extensions with the scripting permission can inject and execute code in web pages, which can potentially be used for data exfiltration or session hijacking (requires host permissions)."
       },
       "search": {
         "description": "Gives access to the chrome.search API.",
@@ -425,7 +426,7 @@
       },
       "sidePanel": {
         "description": "Gives access to the chrome.sidePanel API.",
-        "analysis": "Extensions with the sidePanel permission can display content in the browser's side panel alongside the main content of a webpage, enabling a persistent interface that complement the user's browsing journey (available since Manifest V3)."
+        "analysis": "Extensions with the sidePanel permission can display content in the browser's side panel alongside the main content of a webpage, enabling a persistent interface that complement the user's browsing journey."
       },
       "storage": {
         "description": "Gives access to the chrome.storage API.",
@@ -497,7 +498,7 @@
       },
       "webRequest": {
         "description": "Gives access to the chrome.webRequest API.",
-        "analysis": "Access to network traffic"
+        "analysis": "Access to HTTP headers, including cookies, allowing the theft of session secrets."
       },
       "<all_urls>": {
         "description": "Grants the extension permission to operate on all http:// and https:// URLs in the browser.",

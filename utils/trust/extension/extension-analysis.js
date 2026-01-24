@@ -5,6 +5,8 @@ class ExtensionAnalysis {
     static approved = []
 
     static async start(tabId, url) {
+        Config.assertIsLoaded()
+
         const extensionId = ExtensionStore.extensionIdOf(url)
 
         if (
@@ -35,7 +37,7 @@ class ExtensionAnalysis {
         tabState?.setState("ExtensionAnalysis", tabId, {
             url,
             logo: Logo.getLogo(),
-            config: config.extensions,
+            config,
         })
 
         chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/extension-analysis.html") })
