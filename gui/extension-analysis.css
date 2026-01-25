@@ -61,7 +61,7 @@ body {
 
 .risk-details-label {
     display: inline-block;
-    min-width: 100px;
+    width: 150px;  /* Changed from min-width to width, and increased value */
     font-weight: 500;
     color: #365675;
     letter-spacing: 0.1px;
@@ -297,4 +297,33 @@ button:disabled {
 }
 @keyframes spin {
     to { transform: rotate(360deg); }
+}
+
+/* Table styles for Risk Impact section */
+table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin-top: 10px;
+}
+
+table th,
+table td {
+    padding: 12px 20px;
+    text-align: justify;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+table th {
+    font-weight: 600;
+    color: #26507a;
+}
+
+table tbody tr {
+    line-height: 1.4;
+}
+
+table tbody td {
+    padding-top: 5px;
+    padding-bottom: 5px;
 }
