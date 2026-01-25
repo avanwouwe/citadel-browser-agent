@@ -1,6 +1,9 @@
 class Context {
     static isServiceWorker() {
-        return (typeof window === 'undefined' && typeof importScripts === 'function')
+        return typeof chrome !== 'undefined' &&
+            chrome.runtime &&
+            chrome.tabs &&
+            (typeof window === 'undefined'  || window.location.protocol === 'moz-extension:')
     }
 
     static isContentScript() {
