@@ -22,7 +22,7 @@ async function renderPage() {
 
     document.getElementById("logo").src = tabState.logo
 
-    storeInfo = await fetchStoreInfo(storePage)
+    storeIenfo = await ExtensionStore.fetchStoreInfo(storePage)
     if (!storeInfo) {
         showError(t('extension-analysis.block-page.status.error-store'))
         return
@@ -108,23 +108,6 @@ async function renderPage() {
     showAnalysis()
 
     if (!allowed) blockInstall(rejection)
-}
-
-async function fetchStoreInfo(storeUrl) {
-    const html = await callServiceWorker('FetchExtensionPage', { url: storeUrl })
-    const dom = html2dom(html.content)
-    dom.url = storeUrl
-
-    const storeInfo = ExtensionStore.of(storeUrl).parsePage(dom)
-
-    const uniqueCategories = new Map()
-    storeInfo.categories.forEach(category => {
-        const key = `${category.primary}|${category.secondary}`
-        uniqueCategories.set(key, category)
-    })
-    storeInfo.categories = Array.from(uniqueCategories.values())
-
-    return storeInfo
 }
 
 function renderStoreInfo(extensionInfo) {

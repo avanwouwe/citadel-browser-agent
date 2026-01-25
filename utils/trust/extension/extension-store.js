@@ -20,6 +20,23 @@ class ExtensionStore {
 
     static pageOf = async (id, store = ExtensionStore.Chrome) => await store.pageOf(id)
 
+    static async fetchStoreInfo(storeUrl) {
+        const html = Context.isServiceWorker() ? await ExtensionStore.fetchPage(storeUrl) : await callServiceWorker('FetchExtensionPage', { url: storeUrl })
+        const dom = html2dom(html.content)
+        dom.url = storeUrl
+
+        const storeInfo = ExtensionStore.of(storeUrl).parsePage(dom)
+
+        const uniqueCategories = new Map()
+        storeInfo.categories.forEach(category => {
+            const key = `${category.primary}|${category.secondary}`
+            uniqueCategories.set(key, category)
+        })
+        storeInfo.categories = Array.from(uniqueCategories.values())
+
+        return storeInfo
+    }
+
     static async fetchPage(url) {
         const store = ExtensionStore.of(url)
         if (!store) return
