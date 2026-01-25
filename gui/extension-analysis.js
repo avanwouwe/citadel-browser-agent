@@ -22,7 +22,7 @@ async function renderPage() {
 
     document.getElementById("logo").src = tabState.logo
 
-    storeIenfo = await ExtensionStore.fetchStoreInfo(storePage)
+    storeInfo = await ExtensionStore.fetchStoreInfo(storePage)
     if (!storeInfo) {
         showError(t('extension-analysis.block-page.status.error-store'))
         return
@@ -35,15 +35,6 @@ async function renderPage() {
     const buffer = await response.arrayBuffer()
     const entries = await ExtensionStore.parsePackage(buffer)
     const manifest = await ExtensionStore.getManifest(entries)
-
-    // Firefox extensionId cannot be determined from the storeUrl, only from the manifest. Now that we have it: was the extension already installed?
-    if (Browser.version.brand === Browser.Firefox && ExtensionStore.of(storePage) === ExtensionStore.Firefox) {
-        const extensionId = manifest?.browser_specific_settings?.gecko?.id ?? manifest?.applications?.gecko?.id
-        if (await Extension.isInstalled(extensionId)) {
-            await callServiceWorker('ApproveExtension', {tabId: tabState.tabId, storePage})
-            return
-        }
-    }
 
     const permissionCheck = await Extension.checkPermissions(manifest, config)
     renderManifestInfo(manifest, permissionCheck.isBroad)

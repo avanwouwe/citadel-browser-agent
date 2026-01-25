@@ -7,14 +7,14 @@ class ExtensionAnalysis {
     static async start(tabId, url) {
         Config.assertIsLoaded()
 
-        const extensionId = ExtensionStore.extensionIdOf(url)
+        const extensionId = await ExtensionStore.extensionIdOf(url)
 
         if (
             !extensionId ||
             evaluateBlacklist(extensionId, config.extensions.id.allowed, config.extensions.id.forbidden, false) ||
             Extension.exceptions[extensionId] ||
             ExtensionAnalysis.approved.includes(extensionId) ||
-            Browser.version.brand !== Browser.Firefox && await Extension.isInstalled(extensionId)
+            await Extension.isInstalled(extensionId)
         ) {
             return
         }
@@ -26,8 +26,8 @@ class ExtensionAnalysis {
         return { likelihood: null, impact: null , global: null }
     }
 
-    static approve(tabId, url) {
-        const extensionId = ExtensionStore.extensionIdOf(url)
+    static async approve(tabId, url) {
+        const extensionId = await ExtensionStore.extensionIdOf(url)
         ExtensionAnalysis.approved.push(extensionId)
         ExtensionAnalysis.approved.length = ExtensionAnalysis.#APPROVED_CACHE_SIZE
         navigateTo(tabId, url)

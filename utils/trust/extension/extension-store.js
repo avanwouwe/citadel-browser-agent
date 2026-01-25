@@ -12,10 +12,20 @@ class ExtensionStore {
         }
     }
 
-    static extensionIdOf(url) {
+    static async extensionIdOf(url) {
         const store = ExtensionStore.of(url)
         const match = url?.match(store?.pattern)
-        return match?.[1] ?? null
+        const id = match?.[1] ?? null
+
+        if (!id) return null
+
+        // For Firefox, convert slug to actual extension ID using API
+        if (store === ExtensionStore.Firefox) {
+            const data = await ExtensionStore.Firefox.getMetadata(id)
+            return data?.guid ?? null
+        }
+
+        return id
     }
 
     static pageOf = async (id, store = ExtensionStore.Chrome) => await store.pageOf(id)
@@ -25,7 +35,7 @@ class ExtensionStore {
         const dom = html2dom(html.content)
         dom.url = storeUrl
 
-        const storeInfo = ExtensionStore.of(storeUrl).parsePage(dom)
+        const storeInfo = await ExtensionStore.of(storeUrl).parsePage(dom)
 
         const uniqueCategories = new Map()
         storeInfo.categories.forEach(category => {
@@ -343,7 +353,7 @@ class ExtensionStore {
 
         static pageOf = async (id) => `https://chromewebstore.google.com/detail/${id}/${id}`
 
-        static parsePage(dom) {
+        static async parsePage(dom) {
             function parseRatingsNumber(str) {
                 str = str?.trim()
                 const match = str?.match(/^(\d+(?:[.,]\d+)?)/)
@@ -371,7 +381,7 @@ class ExtensionStore {
                 return parseInt(numberStr)
             }
 
-            const extensionId = ExtensionStore.extensionIdOf(dom.url)
+            const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId || dom?.url?.toURL()?.pathname?.endsWith("/error")) return
 
             // extensionName
@@ -470,8 +480,8 @@ class ExtensionStore {
             return metadata?.slug ? `https://addons.mozilla.org/en-US/firefox/addon/${metadata.slug}/` : null
         }
 
-        static parsePage(dom) {
-            const extensionId = ExtensionStore.extensionIdOf(dom.url)
+        static async parsePage(dom) {
+            const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
             // extensionName
@@ -575,7 +585,7 @@ class ExtensionStore {
 
         static pageOf = async (id) => `https://microsoftedge.microsoft.com/addons/detail/${id}/${id}`
 
-        static parsePage(dom) {
+        static async parsePage(dom) {
             function parseInstalledNumber(str) {
                 const match = str.match(/([0-9.,'\s]+)/)
                 if (!match) return null
@@ -584,7 +594,7 @@ class ExtensionStore {
                 return Number(numeric).valueOf()
             }
 
-            const extensionId = ExtensionStore.extensionIdOf(dom.url)
+            const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
             const extensionName = dom.querySelector('title')?.textContent?.replace(' - Microsoft Edge Addons', '')
@@ -652,7 +662,7 @@ class ExtensionStore {
 
         static pageOf = async (id) => `https://addons.opera.com/en/extensions/details/${id}/`
 
-        static parsePage(dom) {
+        static async parsePage(dom) {
             function parseInteger(str) {
                 if(!str) return null
                 str = str.replace(/[\s,.']/g, '')
@@ -660,7 +670,7 @@ class ExtensionStore {
                 return isNaN(num) ? null : num
             }
 
-            const extensionId = ExtensionStore.extensionIdOf(dom.url)
+            const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
             const extensionName = dom.querySelector('h1[itemprop="name"]')?.textContent.trim()

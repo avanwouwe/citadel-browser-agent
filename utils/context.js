@@ -3,7 +3,7 @@ class Context {
         return typeof chrome !== 'undefined' &&
             chrome.runtime &&
             chrome.tabs &&
-            (typeof window === 'undefined'  || window.location.protocol === 'moz-extension:')
+            (typeof window === 'undefined'  || typeof browser !== 'undefined' && window === browser.extension?.getBackgroundPage())
     }
 
     static isContentScript() {
