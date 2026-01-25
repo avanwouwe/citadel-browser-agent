@@ -369,7 +369,7 @@ class Extension {
     static #SIDELOAD_TYPES = ["development", "sideload"]
 
     static async #scanInstalledExtensions() {
-        const config = await Config.waitIsLoaded()
+        const config = await Config.ready()
 
         for (const ext of await chrome.management.getAll()) {
             if (

@@ -475,7 +475,7 @@ class Config {
     static #loadPromise = null
     static #loadResolve = null
 
-    static waitIsLoaded() {
+    static ready() {
         if (Config.#isLoaded) return Promise.resolve(Config.config)
 
         if (!Config.#loadPromise) {
