@@ -109,7 +109,7 @@ function getDomain(hostname) {
     const sld = parts[parts.length - 2]
 
     if (parts.length < 2) {
-        throw new Error(`Cannot retrieve TLD from ${hostname}`);
+        return hostname
     }
 
     if (CCTLD_WITH_SLD.includes(tld) && sld.length <= 3) {
