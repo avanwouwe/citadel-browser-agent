@@ -37,7 +37,7 @@ async function renderPage() {
     const manifest = await ExtensionStore.getManifest(entries)
 
     // Firefox extensionId cannot be determined from the storeUrl, only from the manifest. Now that we have it: was the extension already installed?
-    if (Browser.version.brand === Browser.Firefox) {
+    if (Browser.version.brand === Browser.Firefox && ExtensionStore.of(storePage) === ExtensionStore.Firefox) {
         const extensionId = manifest?.browser_specific_settings?.gecko?.id ?? manifest?.applications?.gecko?.id
         if (await Extension.isInstalled(extensionId)) {
             await callServiceWorker('ApproveExtension', {tabId: tabState.tabId, storePage})
