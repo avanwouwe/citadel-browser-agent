@@ -18,6 +18,8 @@ class ExtensionStore {
         return match?.[1] ?? null
     }
 
+    static pageOf = async (id, store = ExtensionStore.Chrome) => await store.pageOf(id)
+
     static async fetchPage(url) {
         const store = ExtensionStore.of(url)
         if (!store) return
@@ -322,6 +324,8 @@ class ExtensionStore {
     static Chrome = class {
         static pattern = new RegExp('^https://chromewebstore.google.com/detail/[^/]+/([^/?#]+)')
 
+        static pageOf = async (id) => `https://chromewebstore.google.com/detail/${id}/${id}`
+
         static parsePage(dom) {
             function parseRatingsNumber(str) {
                 str = str?.trim()
@@ -444,6 +448,11 @@ class ExtensionStore {
             'other': null,
         }
 
+        static async pageOf(id) {
+            const metadata = await ExtensionStore.Firefox.getMetadata(id)
+            return metadata?.slug ? `https://addons.mozilla.org/en-US/firefox/addon/${metadata.slug}/` : null
+        }
+
         static parsePage(dom) {
             const extensionId = ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
@@ -459,7 +468,7 @@ class ExtensionStore {
             const extensionLogo = dom.querySelector('img.Addon-icon-image')?.getAttribute('src')
 
             // isVerifiedExtension
-            const isVerifiedExtension = !!header.querySelector('div.Badge[data-testid="badge-recommended"]')
+            const isVerifiedExtension = !!header.querySelector('div.Badge[data-testid="badge-recommended"], div.Badge[data-testid="badge-line"]')
 
             // rating & numRatings
             let rating = null
@@ -514,6 +523,18 @@ class ExtensionStore {
                 downloadUrl,
             }
         }
+
+        static async getMetadata(extensionId) {
+            try {
+                const response = await fetch(`https://addons.mozilla.org/api/v5/addons/addon/${extensionId}/`)
+                if (!response.ok) throw new Error(`HTTP ${response.status}`)
+
+                return await response.json()
+            } catch (error) {
+                console.trace(`Cannot find store URL for ${extensionId}:`, error)
+                return null
+            }
+        }
     }
 
     static Edge = class {
@@ -534,6 +555,8 @@ class ExtensionStore {
             'social': { primary: 'lifestyle', secondary: 'social' },
             'sports': { primary: 'lifestyle', secondary: 'entertainment' }
         }
+
+        static pageOf = async (id) => `https://microsoftedge.microsoft.com/addons/detail/${id}/${id}`
 
         static parsePage(dom) {
             function parseInstalledNumber(str) {
@@ -609,6 +632,8 @@ class ExtensionStore {
             'social': { primary: 'lifestyle', secondary: 'social' },
             'translation': { primary: 'productivity', secondary: 'translation' },
         }
+
+        static pageOf = async (id) => `https://addons.opera.com/en/extensions/details/${id}/`
 
         static parsePage(dom) {
             function parseInteger(str) {
