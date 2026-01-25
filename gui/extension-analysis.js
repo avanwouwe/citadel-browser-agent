@@ -11,7 +11,7 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
     try {
         await renderPage()
     } catch (error) {
-        console.error(error)
+        console.trace(error)
         showError(t('extension-analysis.block-page.status.error') + ' : ' + (error?.message || String(error)))
         if (config.exceptions.allowed) proposeException()
     }
@@ -37,9 +37,12 @@ async function renderPage() {
     const manifest = await ExtensionStore.getManifest(entries)
 
     // Firefox extensionId cannot be determined from the storeUrl, only from the manifest. Now that we have it: was the extension already installed?
-    if (Browser.version.brand === Browser.Firefox && await Extension.isInstalled(manifest?.browser_specific_settings?.gecko?.id)) {
-        await callServiceWorker('ApproveExtension', { tabId: tabState.tabId, storePage })
-        return
+    if (Browser.version.brand === Browser.Firefox) {
+        const extensionId = manifest?.browser_specific_settings?.gecko?.id ?? manifest?.applications?.gecko?.id
+        if (await Extension.isInstalled(extensionId)) {
+            await callServiceWorker('ApproveExtension', {tabId: tabState.tabId, storePage})
+            return
+        }
     }
 
     const permissionCheck = await Extension.checkPermissions(manifest, config)
@@ -66,10 +69,6 @@ async function renderPage() {
     const allowVerified = !config.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
     const allowInstallationCnt = storeInfo.numInstalls >= config.installations.required ?? 0
     const allowRating = storeInfo.rating >= (config.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (config.ratings.minRatingCnt ?? 0)
-
-console.log("permissionCheck", permissionCheck)
-    console.log("config", config)
-    console.log("manifest", manifest)
 
     if (!allowId) {
         rejection.reason = 'blacklist-extension'
@@ -116,7 +115,16 @@ async function fetchStoreInfo(storeUrl) {
     const dom = html2dom(html.content)
     dom.url = storeUrl
 
-    return ExtensionStore.of(storeUrl).parsePage(dom)
+    const storeInfo = ExtensionStore.of(storeUrl).parsePage(dom)
+
+    const uniqueCategories = new Map()
+    storeInfo.categories.forEach(category => {
+        const key = `${category.primary}|${category.secondary}`
+        uniqueCategories.set(key, category)
+    })
+    storeInfo.categories = Array.from(uniqueCategories.values())
+
+    return storeInfo
 }
 
 function renderStoreInfo(extensionInfo) {
