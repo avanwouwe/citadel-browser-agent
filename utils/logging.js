@@ -45,7 +45,7 @@ class Log {
         initiator = this.maskUrl(initiator, level, config)
 
         url = url?.truncate(config.logging.maxUrlLength)
-        initiator = url?.truncate(config.logging.maxUrlLength)
+        initiator = initiator?.truncate(config.logging.maxUrlLength)
 
         description = description.replace("@@URL@@", url)
 
