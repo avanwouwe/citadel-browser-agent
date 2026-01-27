@@ -267,7 +267,7 @@ function logDownload(event, timestamp, result, level, description) {
 	if (event.exists) download.exists = event.exists
 	if (event.incognito) download.incognito = event.incognito
 
-	logger.log(timestamp, "download", result, event.url, level, { download }, description, event.referrer, uniqueId)
+	logger.log(timestamp, "download", result, event.url, level, { type: "download", value: download }, description, event.referrer, uniqueId)
 }
 
 chrome.downloads.onChanged.addListener((delta) => {
@@ -781,7 +781,7 @@ onMessage((request, sender) => {
 	if (request.type === "file-select") {
 		registerInteraction(siteUrl, sender)
 
-		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { "file select": request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
+		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
 	}
 
 	if (request.type === "account-usage") {
@@ -838,11 +838,10 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "allow-extension") {
-		const storePage = request.url
 		const ext = request.extension
 		Extension.exceptions[ext.id] = true
-		ExtensionAnalysis.approve(sender.tab.id, storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, storePage, Log.ERROR, request.reason, `user used exception to install extension '${ext.name}' (${ext.id}) with risk score ${ext.score}`)
+		ExtensionAnalysis.approve(sender.tab.id, ext.storePage)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, ext.storePage, Log.ERROR, { type: "extension", value: ext }, `user used exception to install extension '${ext.name}' (${ext.id}) for reason ${ext.rejectionReason}`)
 	}
 
 	if (request.type === "warn-reuse") {

@@ -71,11 +71,11 @@ class Log {
         }
 
         // if the value is an object, move it to the "details" node
-        if (typeof value === 'object') {
-            const details = value[event]
+        if (typeof value === 'object' && value.type) {
+            const details = value.value
             if (details && typeof details === 'object'  ) {
                 logEntry['browseragent']['detail'] = {};
-                logEntry['browseragent']['detail'][event.replaceAll(' ','_')] = details
+                logEntry['browseragent']['detail'][value.type.replaceAll(' ','_')] = details
             }
 
             delete logEntry['browseragent']['value']
