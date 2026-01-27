@@ -34,6 +34,7 @@ class Config {
         },
         exceptions: [ ],
         domain: {
+            unhash: [],
             isApplication: [
                 "apple.com",
                 "google.com",
@@ -380,6 +381,7 @@ class Config {
     ]
 
     static #domainPatterns = [
+        "domain.unhash",
         "company.domains",
         "company.applications",
         "session.domains",
