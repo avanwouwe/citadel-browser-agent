@@ -23,7 +23,7 @@ class Action {
 class Audit {
 
     #findings = {}
-    #conclusion
+    #conclusion = State.PASSING
     #persistence
     #type
 
