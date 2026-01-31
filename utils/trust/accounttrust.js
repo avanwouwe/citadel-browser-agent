@@ -44,12 +44,12 @@ class AccountTrust {
 
         AccountTrust.#refresh()
 
-        logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, undefined, `user deleted account of '${username}' for ${appName}`)
+        logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, username, `user deleted account of '${username}' for ${appName}`)
     }
 
     static #refresh() {
         const prevAudit = AccountTrust.#audit
-        AccountTrust.#audit = new Audit(AccountTrust.TYPE)
+        const newAudit = new Audit(AccountTrust.TYPE)
 
         for (const acct of AccountTrust.#failingAccounts()) {
             const accountKey = AccountTrust.accountKey(acct.username, acct.system)
@@ -63,9 +63,10 @@ class AccountTrust {
                 timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? nowTimestamp()
             }
             control.addReport(report)
-            AccountTrust.#audit.setFinding(control)
+            newAudit.setFinding(control)
         }
 
+        AccountTrust.#audit = newAudit
         AccountTrust.#audit.save()
         AccountTrust.#audit.notify()
 
