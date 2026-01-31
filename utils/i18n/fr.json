@@ -143,8 +143,10 @@
         "analyze-store": "Analyse de la page d'extension",
         "analyze-manifest": "Analyse du manifeste",
         "analyze-code": "Analyse du code",
-        "error-store": "La page de l'extension ne pouvait pas être analysé",
-        "error": "Une erreur est survenue"
+        "error": "Une erreur est survenue",
+        "error-store": "Impossible d’analyser la page de l'extension dans le store",
+        "error-manifest": "Impossible d’analyser le manifeste",
+        "error-evaluation": "Impossible d'évaluer l'extension"
       },
       "page-blocked-header": "Analyse de l’extension",
       "install-blocked": {

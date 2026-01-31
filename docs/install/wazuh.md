@@ -68,7 +68,12 @@ PUT _template/wazuh-browseragent
                       "size":         { "type": "long" },
                       "lastModified": { "type": "date" }
                     }
-                  }
+                  },
+                  "extension": {
+                    "properties": {
+                      "score":         { "type": "long" }
+                    }
+                  n}
                 }
               },
               "numvalue": { "type": "double" }

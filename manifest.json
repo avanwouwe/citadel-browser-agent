@@ -16,7 +16,8 @@
     "scripting",
     "tabs",
     "notifications",
-    "management"
+    "management",
+    "offscreen"
   ],
   "host_permissions": [
     "<all_urls>"

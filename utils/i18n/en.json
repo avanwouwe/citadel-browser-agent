@@ -143,8 +143,10 @@
         "analyze-store": "Analyzing store page",
         "analyze-manifest": "Analyzing manifest",
         "analyze-code": "Analyzing code",
-        "error-store": "Unable to analyze the store page",
-        "error": "An error occurred"
+        "error": "An error occurred",
+        "error-store": "Unable to analyze the extension store page",
+        "error-manifest": "Unable to analyze the manifest",
+        "error-evaluation": "Unable to evaluate the extensions"
       },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {
@@ -340,7 +342,7 @@
         "description": "Gives access to the chrome.identity API.",
         "analysis": "Extensions with the identity permission can prompt users to authenticate with their Google accounts using OAuth 2.0, but the user must approve the request for the extension to obtain an access token."
       },
-      "identity.email": {
+      "identity_email": {
         "description": "Gives access to the user's email address through the chrome.identity API.",
         "analysis": "No risk analysis available."
       },

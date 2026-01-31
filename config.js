@@ -365,7 +365,7 @@ class Config {
                 }
             },
             allowSideloading: false,
-            allowExisting: true,
+            allowExisting: false,
             onlyDisable: true,
         }
     }

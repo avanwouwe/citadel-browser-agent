@@ -1,118 +1,100 @@
-let config, tabState, storePage, storeInfo, scores
+let t, config, tabState, storePage, storeInfo, manifest, evaluation
 
 I18n.loadPage('/utils/i18n', async (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
 
-    tabState = await new TabState().getState("ExtensionAnalysis")
-    storePage = tabState.url
-    config = tabState.config
+    if (Context.isExtensionPage()) {
+        tabState = await new TabState().getState("ExtensionAnalysis")
+        storePage = tabState.url
+        config = tabState.config
 
-    try {
-        await renderPage()
-    } catch (error) {
-        console.trace(error)
-        showError(t('extension-analysis.block-page.status.error') + ' : ' + (error?.message || String(error)))
-        if (config.exceptions.allowed) proposeException()
+        try {
+            await renderPage()
+        } catch (error) {
+            console.trace(error)
+            let errorType = 'error'
+            if (!evaluation) errorType = 'error-evaluation'
+            if (!manifest) errorType = 'error-manifest'
+            if (!storeInfo) errorType = 'error-store'
+
+            setError(errorType, error?.message || String(error))
+
+            if (config.exceptions.allowed) proposeException()
+        }
+    } else {
+        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.type !== 'ANALYZE_EXTENSION') return
+
+            (async () => {
+                try {
+                    config = request.config
+                    const analysis = ExtensionAnalysis.fetch(request.storePage, config)
+                    storeInfo = await analysis.storeInfo
+                    manifest = await analysis.manifest
+                    evaluation = await analysis.evaluation
+                } catch (error) {
+                    console.trace(error)
+                    setError('error', error?.message || String(error))
+                }
+
+                sendResponse({ storeInfo, manifest, evaluation })
+            })()
+
+            return true
+        })
     }
 })()
+
 
 async function renderPage() {
     setStatus(t('extension-analysis.block-page.status.analyze-store'), true)
 
-    document.getElementById("logo").src = tabState.logo
+    document.getElementById("logo").src = tabState?.logo
 
-    storeInfo = await ExtensionStore.fetchStoreInfo(storePage)
-    if (!storeInfo) {
-        showError(t('extension-analysis.block-page.status.error-store'))
-        return
-    }
-    renderStoreInfo(storeInfo)
+    const analysis = ExtensionAnalysis.fetch(storePage, config)
+
+    storeInfo = await analysis.storeInfo
+    renderStoreInfo()
 
     setStatus(t('extension-analysis.block-page.status.analyze-manifest'), true)
-    const response = await fetch(storeInfo.downloadUrl)
-    if (!response.ok) throw new Error("unable to download extension: " + response.status)
-    const buffer = await response.arrayBuffer()
-    const entries = await ExtensionStore.parsePackage(buffer)
-    const manifest = await ExtensionStore.getManifest(entries)
-
-    const permissionCheck = await Extension.checkPermissions(manifest, config)
-    renderManifestInfo(manifest, permissionCheck.isBroad)
-
-    config = config.extensions
+    manifest = await analysis.manifest
+    evaluation = await analysis.evaluation
+    renderManifestInfo()
 
     setStatus(t('extension-analysis.block-page.status.analyze-code'), true)
 
-    scores = ExtensionAnalysis.calculateRisk(storeInfo, manifest)
-    renderScore("global", scores)
-    renderScore("likelihood", scores)
-    renderScore("impact", scores)
-
     // TODO temporarily turn off risk analysis since it is not yet implemented
-    scores.global = scores.global ?? 0
-    scores.impact = scores.impact ?? 0
-    scores.likelihood = scores.likelihood ?? 0
+    const scores = evaluation.scores
+    scores.global = null
+    scores.impact = null
+    scores.likelihood = null
 
-    const rejection = {}
-
-    const allowId = evaluateBlacklist(storeInfo.id, config.id.allowed, config.id.forbidden, true)
-    const allowCategory = evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), config.category.allowed, config.category.forbidden, true)
-    const allowVerified = !config.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
-    const allowInstallationCnt = storeInfo.numInstalls >= config.installations.required ?? 0
-    const allowRating = storeInfo.rating >= (config.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (config.ratings.minRatingCnt ?? 0)
-
-    if (!allowId) {
-        rejection.reason = 'blacklist-extension'
-    } else if (!allowCategory) {
-        rejection.reason = 'blacklist-category'
-    } else if (scores.global == null || scores.global > config.risk.maxGlobal) {
-        rejection.reason = 'risk-global'
-    } else if (scores.impact == null || scores.impact > config.risk.maxImpact) {
-        rejection.reason = 'risk-impact'
-    } else if (scores.likelihood == null || scores.likelihood > config.risk.maxLikelihood) {
-        rejection.reason = 'risk-likelihood'
-    } else if (!allowVerified) {
-        rejection.reason = 'not-verified'
-    } else if (!allowInstallationCnt) {
-        rejection.reason = 'installation-count'
-    } else if (!allowRating) {
-        rejection.reason = 'poor-rating'
-    } else if (!permissionCheck.allowPermissions) {
-        rejection.reason = 'forbidden-permission'
-        rejection.example = permissionCheck.blockingPermissions[0]
-    } else if (!permissionCheck.allowAllDomains) {
-        rejection.reason = 'all-domains'
-        rejection.example = permissionCheck.broadHostPermissions[0]
-    } else if (!permissionCheck.allowProtectedDomains) {
-        rejection.reason = 'protected-domain'
-        rejection.example = permissionCheck.protectedDomains[0]
-    }
-
-    const bypassVerified = config.verified.allowed && (storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension)
-    const bypassInstallationCnt = storeInfo.numInstalls >= config.installations.allowed
-
-    const allowed = !rejection.reason || bypassVerified || bypassInstallationCnt
+    renderScore("global")
+    renderScore("likelihood")
+    renderScore("impact")
 
     const installButton = document.getElementById("installButton")
     installButton.onclick = () => callServiceWorker('ApproveExtension', { tabId: tabState.tabId, storePage })
-    installButton.disabled = !allowed
+    installButton.disabled = !evaluation.allowed
     showAnalysis()
 
-    if (!allowed) blockInstall(rejection)
+    if (!evaluation.allowed) blockInstall()
+    if (config.exceptions.allowed) proposeException()
 }
 
-function renderStoreInfo(extensionInfo) {
-    renderLogo(extensionInfo.extensionLogo)
-    document.getElementById('extension-name').textContent = extensionInfo.name
-    document.getElementById('extension-id').textContent = extensionInfo.id
-    document.getElementById('extension-category').textContent = extensionInfo.categories.map(c => c.secondary).join(", ")
+function renderStoreInfo() {
+    renderLogo(storeInfo.extensionLogo)
+    document.getElementById('extension-name').textContent = storeInfo.name
+    document.getElementById('extension-id').textContent = storeInfo.id
+    document.getElementById('extension-category').textContent = storeInfo.categories.map(c => c.secondary).join(", ")
 
-    renderVerified('risk-value-verified-extension', extensionInfo.isVerifiedExtension)
-    renderVerified('risk-value-verified-publisher', extensionInfo.isVerifiedPublisher)
+    renderVerified('risk-value-verified-extension', storeInfo.isVerifiedExtension)
+    renderVerified('risk-value-verified-publisher', storeInfo.isVerifiedPublisher)
 
-    document.getElementById('risk-value-downloads').textContent = renderNumber(extensionInfo.numInstalls)
-    document.getElementById('risk-value-rating').textContent = renderNumber(extensionInfo.rating)
-    document.getElementById('risk-value-ratings').textContent = renderNumber(extensionInfo.numRatings, true)
+    document.getElementById('risk-value-downloads').textContent = renderNumber(storeInfo.numInstalls)
+    document.getElementById('risk-value-rating').textContent = renderNumber(storeInfo.rating, false, true)
+    document.getElementById('risk-value-ratings').textContent = renderNumber(storeInfo.numRatings, true, false)
 }
 
 const riskClassMap = {
@@ -122,15 +104,10 @@ const riskClassMap = {
     4: 'risk-critical'
 }
 
-function renderManifestInfo(manifestInfo, isBroad) {
-    renderManifestVersion('risk-value-manifest', manifestInfo.manifest_version)
+function renderManifestInfo() {
+    renderManifestVersion('risk-value-manifest', manifest.manifest_version)
 
-    const permissions = [...manifestInfo.permissions]
-    if (isBroad && !permissions.includes("<all_urls>")) {
-        permissions.push("<all_urls>")
-    }
-
-    const risks = permissions.map(permission => Extension.Risk.ofPermission(permission))
+    const risks = evaluation.permissionCheck.effectivePermissions.map(permission => Extension.Permissions.riskOf(permission))
         .filter(Boolean)
         .sort((a, b) => (b.risk ?? 0) - (a.risk ?? 0))
 
@@ -145,22 +122,23 @@ function renderManifestInfo(manifestInfo, isBroad) {
         tr.appendChild(nameTd)
 
         const descTd = document.createElement('td')
-        descTd.textContent =  t(`extension-analysis.permissions.${permission.name}.analysis`)
+        descTd.textContent =  t(`extension-analysis.permissions.${permission.name.replace('.','_')}.analysis`)
         tr.appendChild(descTd)
 
+        const riskTd = document.createElement('td')
         if (permission.risk) {
-            const riskTd = document.createElement('td')
             riskTd.textContent = t(`extension-analysis.risk-level.${permission.risk}`)
             const riskClass = riskClassMap[permission.risk]
             if (riskClass) riskTd.classList.add(riskClass)
             tr.appendChild(riskTd)
         }
+        tr.appendChild(riskTd)
 
         tbody.appendChild(tr)
     })
 }
 
-function renderNumber(value, shorten) {
+function renderNumber(value, shorten = false, decimal = false) {
     if (typeof value !== 'number' || isNaN(value)) return ''
 
     if (shorten && Math.abs(value) >= 1000) {
@@ -182,7 +160,9 @@ function renderNumber(value, shorten) {
         }
     }
 
-    return value.toLocaleString()
+    return decimal ?
+        value.toLocaleString(undefined, {minimumFractionDigits: 1}) :
+        value.toLocaleString()
 }
 
 function renderLogo(url) {
@@ -208,9 +188,9 @@ function renderVerified(id, isVerified) {
     return element
 }
 
-function renderScore(type, scores) {
+function renderScore(type) {
     const id = `risk-${type}`
-    const score = formatScore(scores[type])
+    const score = formatScore(evaluation.scores[type])
     const risk = Extension.Risk.ofScore(score).toLowerCase()
     const riskClass = `risk-${risk}`
     const riskLabel = t(`extension-analysis.levels.${risk}`)
@@ -253,16 +233,21 @@ function setStatus(text, showSpinner = true) {
     document.getElementById('status-spinner').hidden = !showSpinner
 }
 
-function showError(error) {
+function setError(type, message) {
+    const error = t(`extension-analysis.block-page.status.${type}`) + (message ? ' : ' + message : '')
+    evaluation = evaluation ?? {}
+    evaluation.rejection = { reason: type }
+    evaluation.allowed = false
+
     setStatus(error, false)
     const backButton = document.getElementById("backButton")
     backButton.onclick = () => { window.history.go(-2) }
     backButton.hidden = false
 }
 
-function blockInstall(rejection) {
+function blockInstall() {
+    const rejection = evaluation?.rejection
     document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reason, rejection)}.`
-    if (config.exceptions.allowed) proposeException()
 }
 
 function proposeException() {
@@ -288,12 +273,14 @@ function proposeException() {
         const exceptionReason = exceptionReasonInput.value.trim()
 
         sendMessage('allow-extension', {
-            url: storePage,
-            reason: exceptionReason,
             extension: {
-                name: storeInfo.name,
-                id: storeInfo.id,
-                score: formatScore(scores.global)
+                name: storeInfo?.name,
+                id: storeInfo?.id,
+                storePage,
+                score: formatScore(evaluation?.scores?.global),
+                rejectionReason: evaluation.rejection.reason,
+                exceptionReason,
+                scan: JSON.stringify({ storeInfo, manifest, evaluation }, null, 2)
             }
         })
     })

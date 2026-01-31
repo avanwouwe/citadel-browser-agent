@@ -82,13 +82,15 @@ chrome.runtime.onUpdateAvailable.addListener(() => {
 chrome.runtime.onInstalled.addListener((details) => {
 	Alarm.start()
 
-	setTimeout(() => {
+	setTimeout(async () => {
 		const version = chrome.runtime.getManifest().version
 		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`, undefined, undefined, false)
-	}, 5000)
+
+		await ExtensionAnalysis.analyzeInstalled()
+	}, 1 * ONE_MINUTE)
 })
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+chrome.alarms.onAlarm.addListener(async (alarm) => {
 	if (alarm.name === Alarm.DAILY) {
 		// daily cleaning up of application statistics to prevent infinite build-up of irrelevant data
 		for (const [appName, app] of AppStats.allApps()) {
@@ -108,8 +110,8 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 			}
 		}
 
-		SessionState.purge()
-		PasswordVault.purge()
+		await SessionState.purge()
+		await PasswordVault.purge()
 
 		reportInteractions()
 
@@ -118,6 +120,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 	if (alarm.name === Alarm.BIWEEKLY) {
 		reportApplications()
+		await ExtensionAnalysis.analyzeInstalled()
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {
@@ -729,7 +732,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
 	Notification.showIfRequired(tab.url, tabId)
 
 	if (ExtensionStore.of(tab.url)) {
-		ExtensionAnalysis.start(tab.id, tab.url)
+		ExtensionAnalysis.startWeb(tab.id, tab.url)
 	}
 })
 
