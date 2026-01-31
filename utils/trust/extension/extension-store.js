@@ -1,13 +1,13 @@
 class ExtensionStore {
 
     static of(url) {
-        if (url.startsWith("https://chromewebstore.google.com/detail")) {
+        if (url.startsWith("https://chromewebstore.google.com/detail") || url.startsWith("https://clients2.google.com/service/update")) {
             return ExtensionStore.Chrome
         } else if (url.startsWith("https://addons.mozilla.org/")) {
             return ExtensionStore.Firefox
-        } else if (url.startsWith("https://microsoftedge.microsoft.com/addons/detail/")) {
+        } else if (url.startsWith("https://microsoftedge.microsoft.com/addons/detail/") || url.startsWith("https://edge.microsoft.com/extensionwebstorebase/")) {
             return ExtensionStore.Edge
-        } else if (url.startsWith("https://addons.opera.com/")) {
+        } else if (url.startsWith("https://addons.opera.com/") || url.startsWith("https://extension-updates.opera.com/api/")) {
             return ExtensionStore.Opera
         }
     }
