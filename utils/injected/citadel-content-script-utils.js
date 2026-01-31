@@ -72,7 +72,7 @@ function domReady() {
     })
 }
 
-async function sendMessage(type, message, handler) {
+function sendMessage(type, message, handler) {
     if (type && typeof type !== 'string') {
         handler = message
         message = type
@@ -91,6 +91,21 @@ async function sendMessage(type, message, handler) {
 
     chrome.runtime.sendMessage(message, handler)
 }
+
+function sendMessagePromise(type, message) {
+    return new Promise((resolve, reject) => {
+        sendMessage(type, message, result => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError)
+            } else if (result && result.error) {
+                reject(result.error)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
+
 
 async function callServiceWorker(type, message) {
     return new Promise((resolve, reject) => {
