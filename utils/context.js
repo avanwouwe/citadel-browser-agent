@@ -6,17 +6,20 @@ class Context {
             (typeof window === 'undefined'  || typeof browser !== 'undefined' && window === browser.extension?.getBackgroundPage())
     }
 
+    static isExtensionPage() {
+        return typeof location !== 'undefined' &&
+            (location.protocol === 'chrome-extension:' || location.protocol === 'moz-extension:') &&
+            chrome.windows
+    }
+
     static isContentScript() {
         if (this.isServiceWorker()) return false
 
-        const isExtensionPage =
-            typeof location !== 'undefined' &&
-            (location.protocol === 'chrome-extension:' || location.protocol === 'moz-extension:')
         const hasExtensionId =
             (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) ||
             (typeof browser !== 'undefined' && browser.runtime && browser.runtime.id);
 
-        return hasExtensionId && !isExtensionPage
+        return hasExtensionId && !Context.isExtensionPage()
     }
 
     static isPageScript() {
