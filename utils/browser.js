@@ -83,16 +83,18 @@ class Browser {
     static startTime
 
     static {
-        (async () => {
-            const result = await chrome.storage.session.get(['browserStartTime'])
+        if (Context.isServiceWorker()) {
+            (async () => {
+                const result = await chrome.storage.session.get(['browserStartTime'])
 
-            if (result.browserStartTime) {
-                Browser.startTime = result.browserStartTime
-            } else {
-                Browser.startTime = Date.now()
-                await chrome.storage.session.set({ browserStartTime: Browser.startTime })
-            }
-        })()
+                if (result.browserStartTime) {
+                    Browser.startTime = result.browserStartTime
+                } else {
+                    Browser.startTime = Date.now()
+                    await chrome.storage.session.set({ browserStartTime: Browser.startTime })
+                }
+            })()
+        }
     }
 
 }
