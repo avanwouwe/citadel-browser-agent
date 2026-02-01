@@ -4,110 +4,124 @@ class ExtensionAnalysis {
 
     static approved = []
 
-    static async startWeb(tabId, url) {
-        Config.assertIsLoaded()
-
-        const extensionId = await ExtensionStore.extensionIdOf(url)
-
-        if (
-            !extensionId ||
-            evaluateBlacklist(extensionId, config.extensions.id.allowed, config.extensions.id.forbidden, false) ||
-            Extension.exceptions[extensionId] ||
-            ExtensionAnalysis.approved.includes(extensionId) ||
-            await Extension.isInstalled(extensionId)
-        ) {
-            return
-        }
-
-        ExtensionAnalysis.#blockPage(tabId, url)
-    }
-
-    static async startOffscreen(url) {
-        if (!await chrome.offscreen.hasDocument()) {
-            await chrome.offscreen.createDocument({
-                url: '/gui/extension-analysis.html',
-                reasons: ['DOM_PARSER'],
-                justification: 'retrieve extension store information'
-            })
-        }
-
-        const analysis = await sendMessagePromise('ANALYZE_EXTENSION', {
-            storePage: url,
-            logo: Logo.getLogo(),
-            config
-        })
-
-        await chrome.offscreen.closeDocument()
-
-        return analysis
-    }
-
-    static async approve(tabId, url) {
+    static async showStorePage(tabId, url) {
         const extensionId = await ExtensionStore.extensionIdOf(url)
         ExtensionAnalysis.approved.push(extensionId)
         ExtensionAnalysis.approved.length = ExtensionAnalysis.#APPROVED_CACHE_SIZE
         navigateTo(tabId, url)
     }
 
-    static async analyzeInstalled() {
-        const config = await Config.ready()
+    static Interactive = class {
 
-        for (const ext of await chrome.management.getAll()) {
-            if (await ExtensionAnalysis.isAllowed(ext)) continue
+        static async start(tabId, url) {
+            Config.assertIsLoaded()
 
-            if (config.extensions.allowExisting) {
-                logger.log(Date.now(), "extension", `extension kept`, ext.storePage, Log.WARN, ext.id, `forbidden pre-existing extension '${ext.name}' (${ext.id}) was kept`)
-                continue
+            const extensionId = await ExtensionStore.extensionIdOf(url)
+
+            if (
+                !extensionId ||
+                evaluateBlacklist(extensionId, config.extensions.id.allowed, config.extensions.id.forbidden, false) ||
+                Extension.exceptions[extensionId] ||
+                ExtensionAnalysis.approved.includes(extensionId) ||
+                await Extension.isInstalled(extensionId)
+            ) {
+                return
             }
 
-            await Extension.disable(ext, config)
+            ExtensionAnalysis.Interactive.#blockPage(tabId, url)
         }
+
+        static #blockPage(tabId, url) {
+            tabState?.setState("ExtensionAnalysis", tabId, {
+                url,
+                logo: Logo.getLogo(),
+                config,
+            })
+
+            chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/extension-analysis.html") })
+        }
+
     }
 
-    static async analyze(extensionInfo) {
-        const config = await Config.ready()
+    static Headless = class {
 
-        if (await ExtensionAnalysis.isAllowed(extensionInfo)) return
+        static async fetch(storePage) {
+            if (!await chrome.offscreen.hasDocument()) {
+                await chrome.offscreen.createDocument({
+                    url: '/gui/extension-analysis.html',
+                    reasons: ['DOM_PARSER'],
+                    justification: 'retrieve extension store information'
+                })
+            }
 
-        await Extension.disable(extensionInfo, config)
+            const analysis = await sendMessagePromise('ANALYZE_EXTENSION', {
+                storePage,
+                logo: Logo.getLogo(),
+                config
+            })
+
+            await chrome.offscreen.closeDocument()
+
+            return analysis
+        }
+
+        static async ofAllInstalled() {
+            for (const ext of await chrome.management.getAll()) {
+                await ExtensionAnalysis.Headless.ofExtension(ext)
+            }
+        }
+
+        static async ofExtension(extensionInfo) {
+            if (await ExtensionAnalysis.Headless.#isAllowed(extensionInfo)) return
+
+            const config = await Config.ready()
+
+            if (config.extensions.allowExisting) {
+                logger.log(Date.now(), "extension", `extension not removed`, extensionInfo.storePage, Log.WARN, extensionInfo.id, `insecure extension '${extensionInfo.name}' (${extensionInfo.id}) was not removed`)
+                return
+            }
+
+            await Extension.disable(extensionInfo)
+        }
+
+        static #SIDELOAD_TYPES = ["development", "sideload"]
+
+        static async #isAllowed(extensionInfo) {
+            const config = await Config.ready()
+
+            try {
+                if (
+                    extensionInfo.id === chrome.runtime.id ||
+                    ! extensionInfo.enabled ||
+                    ! extensionInfo.mayDisable ||
+                    extensionInfo.type !== "extension" ||
+                    config.extensions.id.allowed.includes(extensionInfo.id) ||
+                    Extension.exceptions[extensionInfo.id] ||
+                    extensionInfo.installType === "admin" ||
+                    (config.extensions.allowSideloading || ! ExtensionAnalysis.Headless.#SIDELOAD_TYPES.includes(extensionInfo.installType)) && config.extensions.id.allowed.includes("*")
+                ) return true
+
+                const store = ExtensionStore.of(extensionInfo.updateUrl) ?? (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
+                if (!store) return config.extensions.allowPrivateUpdateServer
+
+                const storeUrl = await ExtensionStore.pageOf(extensionInfo.id, store)
+                const analysis = await ExtensionAnalysis.Headless.fetch(storeUrl)
+
+                return analysis.evaluation.allowed
+            } catch (e) {
+                logger.log(Date.now(), "extension", `extension unchecked`, extensionInfo.storePage, Log.WARN, extensionInfo.id, `unable to check installed extension '${extensionInfo.name}' (${extensionInfo.id})`)
+                return true
+            }
+
+        }
+
     }
 
-    static #SIDELOAD_TYPES = ["development", "sideload"]
+    static promiseOf(storeUrl, config) {
+        const analysis = {}
+        analysis.storeInfo = ExtensionStore.fetchStoreInfo(storeUrl)
 
-    static async isAllowed(extensionInfo) {
-        if (
-            extensionInfo.id === chrome.runtime.id ||
-            ! extensionInfo.enabled && config.extensions.onlyDisable ||
-            ! extensionInfo.mayDisable ||
-            extensionInfo.type !== "extension" ||
-            config.extensions.id.allowed.includes(extensionInfo.id) ||
-            Extension.exceptions[extensionInfo.id] ||
-            extensionInfo.installType === "admin" ||
-            (config.extensions.allowSideloading || ! ExtensionAnalysis.#SIDELOAD_TYPES.includes(extensionInfo.installType)) && config.extensions.id.allowed.includes("*")
-        ) return true
-
-        const store = ExtensionStore.of(extensionInfo.updateUrl) ?? (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
-        const storeUrl = await ExtensionStore.pageOf(extensionInfo.id, store)
-        const analysis = await ExtensionAnalysis.startOffscreen(storeUrl)
-
-        return analysis.evaluation.allowed
-    }
-
-    static #blockPage(tabId, url) {
-        tabState?.setState("ExtensionAnalysis", tabId, {
-            url,
-            logo: Logo.getLogo(),
-            config,
-        })
-
-        chrome.tabs.update(tabId, { url: chrome.runtime.getURL("gui/extension-analysis.html") })
-    }
-
-    static fetch(storeUrl, config) {
-        const scan = {}
-        scan.storeInfo = ExtensionStore.fetchStoreInfo(storeUrl)
-
-        scan.manifest = scan.storeInfo.then(storeInfo => fetch(storeInfo.downloadUrl))
+        analysis.manifest = analysis.storeInfo.then(storeInfo => fetch(storeInfo.downloadUrl))
             .then(async response => {
             if (!response.ok) throw new Error("unable to download extension: " + response.status)
 
@@ -116,9 +130,9 @@ class ExtensionAnalysis {
             return await ExtensionStore.getManifest(entries)
         })
 
-        scan.evaluation = ExtensionAnalysis.#evaluateExtension(scan.storeInfo, scan.manifest, config)
+        analysis.evaluation = ExtensionAnalysis.#evaluateExtension(analysis.storeInfo, analysis.manifest, config)
 
-        return scan
+        return analysis
     }
 
     static async #evaluateExtension(storeInfo, manifest, config) {
@@ -217,7 +231,7 @@ class ExtensionAnalysis {
         const allowPermissions = blockingPermissions.length === 0
         const allowAllDomains = !extConfig.hostPermissions.requireSpecific || !isBroad
         const allowProtectedDomains = extConfig.hostPermissions.allowProtected || protectedDomains.length === 0
-        const allowed = allowPermissions && allowAllDomains
+        const allowed = allowPermissions && allowAllDomains && allowProtectedDomains
 
         return { allowed, allowPermissions, allowAllDomains, allowProtectedDomains, blockingPermissions, broadHostPermissions, protectedDomains, isBroad, effectivePermissions: permissions }
     }

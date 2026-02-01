@@ -86,7 +86,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 		const version = chrome.runtime.getManifest().version
 		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`, undefined, undefined, false)
 
-		await ExtensionAnalysis.analyzeInstalled()
+		await ExtensionAnalysis.Headless.ofAllInstalled()
 	}, 1 * ONE_MINUTE)
 })
 
@@ -120,7 +120,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
 	if (alarm.name === Alarm.BIWEEKLY) {
 		reportApplications()
-		await ExtensionAnalysis.analyzeInstalled()
+		await ExtensionAnalysis.Headless.ofAllInstalled()
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {
@@ -726,13 +726,13 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 	tabState?.setState("LastUrl", tabId, url)
 })
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+chrome.tabs.onUpdated.addListener(async(tabId, changeInfo, tab) => {
 	if (changeInfo.status !== "complete") return
 
 	Notification.showIfRequired(tab.url, tabId)
 
 	if (ExtensionStore.of(tab.url)) {
-		ExtensionAnalysis.startWeb(tab.id, tab.url)
+		await ExtensionAnalysis.Interactive.start(tab.id, tab.url)
 	}
 })
 
@@ -843,7 +843,7 @@ onMessage((request, sender) => {
 	if (request.type === "allow-extension") {
 		const ext = request.extension
 		Extension.exceptions[ext.id] = true
-		ExtensionAnalysis.approve(sender.tab.id, ext.storePage)
+		ExtensionAnalysis.showStorePage(sender.tab.id, ext.storePage)
 		logger.log(nowTimestamp(), "exception", `extension exception used`, ext.storePage, Log.ERROR, { type: "extension", value: ext }, `user used exception to install extension '${ext.name}' (${ext.id}) for reason ${ext.rejectionReason}`)
 	}
 

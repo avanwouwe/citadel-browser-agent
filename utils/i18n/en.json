@@ -132,9 +132,9 @@
       "high": "High Risk",
       "critical": "Critical Risk"
     },
-    "remove-modal": {
-      "title": "Non-compliant Extension",
-      "message": "An extension that does not comply with the IT policy was found and has been deactivated."
+    "disable-modal": {
+      "title": "Dangerous Extension",
+      "message": "A potentially dangerous extension was found and has been deactivated."
     },
     "block-page": {
       "install": "Install",

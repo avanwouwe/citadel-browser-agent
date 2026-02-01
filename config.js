@@ -365,8 +365,8 @@ class Config {
                 }
             },
             allowSideloading: false,
-            allowExisting: false,
-            onlyDisable: true,
+            allowPrivateUpdateServer: false,
+            allowExisting: false
         }
     }
 

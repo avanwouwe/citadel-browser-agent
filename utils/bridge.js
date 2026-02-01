@@ -42,7 +42,7 @@ class Bridge {
 
         Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))
 
-        Bridge.listenTo("ApproveExtension", ({tabId, storePage}) => ExtensionAnalysis.approve(tabId, storePage))
+        Bridge.listenTo("ShowExtensionPage", ({tabId, storePage}) => ExtensionAnalysis.showStorePage(tabId, storePage))
 
         Bridge.listenTo("GetEvents", () => events.get())
     }

@@ -284,20 +284,16 @@ class Extension {
         return chrome.management.get(extensionId).then(() => true, () => false)
     }
 
-    static async disable(ext, config) {
-        Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.remove-modal.title'), t('extension-analysis.remove-modal.message'))
+    static async disable(ext) {
+        const config = await Config.ready()
 
-        const action = config.extensions.onlyDisable ? "disabled" : "removed"
+        Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
 
         try {
-            if (config.extensions.onlyDisable) {
-                await chrome.management.setEnabled(ext.id, false)
-            } else {
-                await chrome.management.uninstall(ext.id, { showConfirmDialog: false })
-            }
-            logger.log(Date.now(), "extension", `extension ${action}`, ext.storePage, Log.ERROR, ext.id, `extension '${ext.name}' (${ext.id}) was ${action}`)
+            await chrome.management.setEnabled(ext.id, false)
+            logger.log(Date.now(), "extension", `dangerous extension disabled`, ext.storePage, Log.ERROR, ext.id, `extension '${ext.name}' (${ext.id}) was disabled`)
         } catch (err) {
-            logger.log(Date.now(), "extension", `extension not ${action}`, ext.storePage, Log.ALERT, ext.id, `extension '${ext.name}' (${ext.id}) was unable to be ${action}`)
+            logger.log(Date.now(), "extension", `dangerous extension not disabled`, ext.storePage, Log.ALERT, ext.id, `extension '${ext.name}' (${ext.id}) was unable to be disabled`)
         }
     }
 
@@ -307,8 +303,8 @@ class Extension {
 
             Extension.#exceptionsStorage.ready().then(exceptions => {
                 Extension.exceptions = exceptions
-                chrome.management.onInstalled.addListener(ExtensionAnalysis.analyze)
-                chrome.management.onEnabled.addListener(ExtensionAnalysis.analyze)
+                chrome.management.onInstalled.addListener(ExtensionAnalysis.Headless.ofExtension)
+                chrome.management.onEnabled.addListener(ExtensionAnalysis.Headless.ofExtension)
             })
         }
     }

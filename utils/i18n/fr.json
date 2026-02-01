@@ -132,9 +132,9 @@
       "high": "Risque Élevé",
       "critical": "Risque Critique"
     },
-    "remove-modal": {
-      "title": "Extension non conforme",
-      "message": "Une extension non conforme à la politique informatique a été détectée et désactivée."
+    "disable-modal": {
+      "title": "Extension Dangereuse",
+      "message": "Une extension potentiellement dangereuse a été détectée et désactivée."
     },
     "block-page": {
       "install": "Installer",

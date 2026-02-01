@@ -29,7 +29,7 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
             (async () => {
                 try {
                     config = request.config
-                    const analysis = ExtensionAnalysis.fetch(request.storePage, config)
+                    const analysis = ExtensionAnalysis.promiseOf(request.storePage, config)
                     storeInfo = await analysis.storeInfo
                     manifest = await analysis.manifest
                     evaluation = await analysis.evaluation
@@ -52,7 +52,7 @@ async function renderPage() {
 
     document.getElementById("logo").src = tabState?.logo
 
-    const analysis = ExtensionAnalysis.fetch(storePage, config)
+    const analysis = ExtensionAnalysis.promiseOf(storePage, config)
 
     storeInfo = await analysis.storeInfo
     renderStoreInfo()
@@ -75,7 +75,7 @@ async function renderPage() {
     renderScore("impact")
 
     const installButton = document.getElementById("installButton")
-    installButton.onclick = () => callServiceWorker('ApproveExtension', { tabId: tabState.tabId, storePage })
+    installButton.onclick = () => callServiceWorker('ShowExtensionPage', { tabId: tabState.tabId, storePage })
     installButton.disabled = !evaluation.allowed
     showAnalysis()
 
@@ -280,7 +280,7 @@ function proposeException() {
                 score: formatScore(evaluation?.scores?.global),
                 rejectionReason: evaluation.rejection.reason,
                 exceptionReason,
-                scan: JSON.stringify({ storeInfo, manifest, evaluation }, null, 2)
+                analysis: JSON.stringify({ storeInfo, manifest, evaluation }, null, 2)
             }
         })
     })
