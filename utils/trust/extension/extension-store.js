@@ -30,12 +30,12 @@ class ExtensionStore {
 
     static pageOf = async (id, store = ExtensionStore.Chrome) => await store.pageOf(id)
 
-    static async fetchStoreInfo(storeUrl) {
-        const html = Context.isServiceWorker() ? await ExtensionStore.fetchPage(storeUrl) : await callServiceWorker('FetchExtensionPage', { url: storeUrl })
+    static async fetchStoreInfo(storePage) {
+        const html = Context.isServiceWorker() ? await ExtensionStore.fetchPage(storePage) : await callServiceWorker('FetchExtensionPage', { url: storePage })
         const dom = html2dom(html.content)
-        dom.url = storeUrl
+        dom.url = storePage
 
-        const storeInfo = await ExtensionStore.of(storeUrl).parsePage(dom)
+        const storeInfo = await ExtensionStore.of(storePage).parsePage(dom)
 
         const uniqueCategories = new Map()
         storeInfo.categories.forEach(category => {
@@ -43,7 +43,7 @@ class ExtensionStore {
             uniqueCategories.set(key, category)
         })
         storeInfo.categories = Array.from(uniqueCategories.values())
-
+        storeInfo.storePage = storePage
         return storeInfo
     }
 

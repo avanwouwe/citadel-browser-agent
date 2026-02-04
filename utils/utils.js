@@ -427,7 +427,7 @@ async function clearStorage() {
     chrome.storage.local.clear()
 
     await AppStats.flush()
-    await Extension.flush()
+    await ExtensionTrust.flush()
 
     chrome.runtime.reload()
 }

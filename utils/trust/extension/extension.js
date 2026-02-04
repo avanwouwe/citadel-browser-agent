@@ -2,9 +2,6 @@ class Extension {
 
     static TYPE = "extension"
 
-    static #exceptionsStorage
-    static exceptions
-
     static Permissions = class {
         static #permissions = {
             "accessibilityFeatures.modify": {
@@ -275,37 +272,21 @@ class Extension {
         }
     }
 
-    static async flush() {
-        Extension.#exceptionsStorage.markDirty()
-        await Extension.#exceptionsStorage.flush()
-    }
+    static #SIDELOAD_TYPES = ["development", "sideload"]
+
+    static isSideloaded = extensionInfo => Extension.#SIDELOAD_TYPES.includes(extensionInfo.installType)
 
     static async isInstalled(extensionId) {
         return chrome.management.get(extensionId).then(() => true, () => false)
     }
 
-    static async disable(ext) {
-        const config = await Config.ready()
-
+    static async disable(extensionInfo) {
         Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
 
         try {
-            await chrome.management.setEnabled(ext.id, false)
-            logger.log(Date.now(), "extension", `dangerous extension disabled`, ext.storePage, Log.ERROR, ext.id, `extension '${ext.name}' (${ext.id}) was disabled`)
+            await chrome.management.setEnabled(extensionInfo.id, false)
         } catch (err) {
-            logger.log(Date.now(), "extension", `dangerous extension not disabled`, ext.storePage, Log.ALERT, ext.id, `extension '${ext.name}' (${ext.id}) was unable to be disabled`)
-        }
-    }
-
-    static {
-        if (Context.isServiceWorker()) {
-            Extension.#exceptionsStorage = new PersistentObject("extension-exceptions")
-
-            Extension.#exceptionsStorage.ready().then(exceptions => {
-                Extension.exceptions = exceptions
-                chrome.management.onInstalled.addListener(ExtensionAnalysis.Headless.ofExtension)
-                chrome.management.onEnabled.addListener(ExtensionAnalysis.Headless.ofExtension)
-            })
+            logger.log(Date.now(), "extension", `extension not disabled`, undefined, Log.WARN, extensionInfo.id, `extension '${extensionInfo.name}' (${extensionInfo.id}) was unable to be disabled`)
         }
     }
 

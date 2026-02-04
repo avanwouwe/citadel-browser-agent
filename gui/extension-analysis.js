@@ -122,7 +122,9 @@ function renderManifestInfo() {
         tr.appendChild(nameTd)
 
         const descTd = document.createElement('td')
-        descTd.textContent =  t(`extension-analysis.permissions.${permission.name.replace('.','_')}.analysis`)
+        const key = `extension-analysis.permissions.${permission.name.replace('.','_')}.analysis`
+        const trad = t(key)
+        descTd.textContent = trad === key ? '' : trad
         tr.appendChild(descTd)
 
         const riskTd = document.createElement('td')
@@ -236,7 +238,7 @@ function setStatus(text, showSpinner = true) {
 function setError(type, message) {
     const error = t(`extension-analysis.block-page.status.${type}`) + (message ? ' : ' + message : '')
     evaluation = evaluation ?? {}
-    evaluation.rejection = { reason: type }
+    evaluation.rejection = { reasons: [type] }
     evaluation.allowed = false
 
     setStatus(error, false)
@@ -247,7 +249,7 @@ function setError(type, message) {
 
 function blockInstall() {
     const rejection = evaluation?.rejection
-    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reason, rejection)}.`
+    document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
 }
 
 function proposeException() {
@@ -270,18 +272,11 @@ function proposeException() {
 
     // Handle exception request submission
     exceptionButton.addEventListener('click', function() {
-        const exceptionReason = exceptionReasonInput.value.trim()
+        const exception = {
+            analysis: { storeInfo, manifest, evaluation },
+            exceptionReason: exceptionReasonInput.value.trim()
+        }
 
-        sendMessage('allow-extension', {
-            extension: {
-                name: storeInfo?.name,
-                id: storeInfo?.id,
-                storePage,
-                score: formatScore(evaluation?.scores?.global),
-                rejectionReason: evaluation.rejection.reason,
-                exceptionReason,
-                analysis: JSON.stringify({ storeInfo, manifest, evaluation }, null, 2)
-            }
-        })
+        sendMessage('allow-extension', exception)
     })
 }

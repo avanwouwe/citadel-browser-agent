@@ -38,4 +38,5 @@ importScripts('utils/blacklist/ipv4range.js');
 importScripts('utils/trust/extension/extension.js');
 importScripts('utils/trust/extension/extension-store.js');
 importScripts('utils/trust/extension/extension-analysis.js');
+importScripts('utils/trust/extension/extension-trust.js');
 importScripts('background.js');

@@ -335,6 +335,7 @@ class Config {
             id: {
                 allowed: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh"],
                 forbidden: [],
+                periodicScan: true
             },
             category: {
                 allowed: [],

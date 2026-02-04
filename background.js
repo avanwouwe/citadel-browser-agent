@@ -26,9 +26,9 @@ Port.onMessage("config", async (newConfig) => {
 	await Promise.all([
 		AccountTrust.init(),
 		DeviceTrust.init()
-	])
+	]);
 
-	;[blacklistIP, blacklistURL] = await Promise.all([
+	[blacklistIP, blacklistURL] = await Promise.all([
 		new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist),
 		new CombinedBlacklist().load(config.blacklist.url, URLBlacklist)
 	])
@@ -84,9 +84,9 @@ chrome.runtime.onInstalled.addListener((details) => {
 
 	setTimeout(async () => {
 		const version = chrome.runtime.getManifest().version
-		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `browser agent version ${version} was installed`, undefined, undefined, false)
+		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `${details.reason} of browser agent version ${version}`, undefined, undefined, false)
 
-		await ExtensionAnalysis.Headless.ofAllInstalled()
+		await ExtensionAnalysis.Headless.ofAllInstalled(details.reason === "install")
 	}, 1 * ONE_MINUTE)
 })
 
@@ -841,10 +841,12 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "allow-extension") {
-		const ext = request.extension
-		Extension.exceptions[ext.id] = true
-		ExtensionAnalysis.showStorePage(sender.tab.id, ext.storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, ext.storePage, Log.ERROR, { type: "extension", value: ext }, `user used exception to install extension '${ext.name}' (${ext.id}) for reason ${ext.rejectionReason}`)
+		const logObj = ExtensionAnalysis.toLogObject(request.analysis,  ExtensionAnalysis.ScanType.INTERACTIVE)
+		const exception = logObj.value
+		exception.exceptionReason = request.exceptionReason
+		ExtensionTrust.allow(request.analysis)
+		ExtensionAnalysis.showStorePage(sender.tab.id, exception.storePage)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, exception.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason ${exception.exceptionReason}`)
 	}
 
 	if (request.type === "warn-reuse") {

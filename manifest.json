@@ -82,6 +82,7 @@
       "/utils/trust/extension/extension.js",
       "/utils/trust/extension/extension-store.js",
       "/utils/trust/extension/extension-analysis.js",
+      "/utils/trust/extension/extension-trust.js",
       "/background.js"
     ]
   },
