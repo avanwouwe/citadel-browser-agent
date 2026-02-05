@@ -4,8 +4,8 @@ class ExtensionTrust {
 
     static {
         ExtensionTrust.#analysisStorage.ready().then(() => {
-            chrome.management.onInstalled.addListener((extensionInfo) => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.INSTALL))
-            chrome.management.onEnabled.addListener((extensionInfo) => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.ENABLE))
+            chrome.management.onInstalled.addListener(async extensionInfo => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.INSTALL))
+            chrome.management.onEnabled.addListener(async extensionInfo => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.ENABLE))
         })
     }
 

@@ -20,14 +20,19 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
 
             setError(errorType, error?.message || String(error))
 
-            if (config.exceptions.allowed) proposeException()
+            if (config.extensions.exceptions.allowed) proposeException()
         }
     } else {
         chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+            if (request.type === 'PING') {
+                sendResponse({ready: true})
+                return
+            }
+
             if (request.type !== 'ANALYZE_EXTENSION') return
 
             (async () => {
-                try {
+                    try {
                     config = request.config
                     const analysis = ExtensionAnalysis.promiseOf(request.storePage, config)
                     storeInfo = await analysis.storeInfo
@@ -80,7 +85,7 @@ async function renderPage() {
     showAnalysis()
 
     if (!evaluation.allowed) blockInstall()
-    if (config.exceptions.allowed) proposeException()
+    if (config.extensions.exceptions.allowed) proposeException()
 }
 
 function renderStoreInfo() {

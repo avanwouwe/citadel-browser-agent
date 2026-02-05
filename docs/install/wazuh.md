@@ -71,9 +71,12 @@ PUT _template/wazuh-browseragent
                   },
                   "extension": {
                     "properties": {
-                      "score":         { "type": "long" }
+                      "score":      { "type": "long" },
+                      "storeInfo":  { "type": "text" },
+                      "evaluation": { "type": "text" },
+                      "manifest":   { "type": "text" }
                     }
-                  n}
+                  }
                 }
               },
               "numvalue": { "type": "double" }

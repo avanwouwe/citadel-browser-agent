@@ -54,29 +54,76 @@ class ExtensionAnalysis {
 
     static Headless = class {
 
-        static async fetch(extensionInfo) {
+        static queue = Promise.resolve()
+        static isReady = false
+        static debouncer = new Debouncer(200, (existing, incoming) => {
+            // Merge function: INSTALL takes priority over ENABLE
+            const scanType = (existing.scanType === ExtensionAnalysis.ScanType.INSTALL ||
+                incoming.scanType === ExtensionAnalysis.ScanType.INSTALL)
+                ? ExtensionAnalysis.ScanType.INSTALL
+                : incoming.scanType
+
+            return { extensionInfo: incoming.extensionInfo, scanType }
+        })
+
+        static async #ensureOffscreen() {
+            if (this.isReady) return
+
             if (!await chrome.offscreen.hasDocument()) {
                 await chrome.offscreen.createDocument({
                     url: '/gui/extension-analysis.html',
                     reasons: ['DOM_PARSER'],
                     justification: 'retrieve extension store information'
                 })
+
+                // Wait for offscreen page to be ready
+                for (let i = 0; i < 10; i++) {
+                    try {
+                        await sendMessagePromise('PING', {})
+                        this.isReady = true
+                        return
+                    } catch {
+                        await new Promise(resolve => setTimeout(resolve, 100))
+                    }
+                }
+                throw new Error('Offscreen document failed to initialize')
             }
 
-            const store = ExtensionStore.of(extensionInfo.updateUrl) ?? (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
-            if (!store) return null
+            this.isReady = true
+        }
 
-            const storePage = await ExtensionStore.pageOf(extensionInfo.id, store)
+        static async fetch(extensionInfo) {
+            this.queue = this.queue.then(async () => {
+                try {
+                    await this.#ensureOffscreen()
 
-            const analysis = await sendMessagePromise('ANALYZE_EXTENSION', {
-                storePage,
-                logo: Logo.getLogo(),
-                config
+                    const store = ExtensionStore.of(extensionInfo.updateUrl) ??
+                        (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
+                    if (!store) return null
+
+                    const storePage = await ExtensionStore.pageOf(extensionInfo.id, store)
+
+                    const analysis = await sendMessagePromise('ANALYZE_EXTENSION', {
+                        storePage,
+                        logo: Logo.getLogo(),
+                        config
+                    })
+
+                    await chrome.offscreen.closeDocument()
+
+                    return analysis
+                } catch (error) {
+                    console.error('Extension analysis failed:', error)
+                    return null
+                } finally {
+                    this.isReady = false
+                    try {
+                        await chrome.offscreen.closeDocument()
+                    } catch {}
+                }
             })
 
-            await chrome.offscreen.closeDocument()
-
-            return analysis
+            return this.queue
         }
 
         static async ofAllInstalled(isfirstAnalysis = false) {
@@ -87,13 +134,23 @@ class ExtensionAnalysis {
         }
 
         static async ofExtension(extensionInfo, scanType) {
+            this.debouncer.debounce(
+                extensionInfo.id,
+                { extensionInfo, scanType },
+                async data => this.#performAnalysis(data.extensionInfo, data.scanType)
+            )
+        }
+
+        static async #performAnalysis(extensionInfo, scanType) {
             if (extensionInfo.type !== "extension" || extensionInfo.id === chrome.runtime.id) return
             const config = await Config.ready()
+
+            debug("analyzing extension", scanType, extensionInfo)
 
             const prevAnalysis = await ExtensionTrust.analysisOf(extensionInfo.id)
 
             if (prevAnalysis?.pending) scanType = ExtensionAnalysis.ScanType.INIT
-            else if (scanType === ExtensionAnalysis.ScanType.INSTALL && !prevAnalysis) scanType = ExtensionAnalysis.ScanType.UPDATE
+            if (scanType === ExtensionAnalysis.ScanType.INSTALL && !prevAnalysis) scanType = ExtensionAnalysis.ScanType.UPDATE
 
             if (Extension.isSideloaded(extensionInfo)) {
                 if (config.extensions.allowSideloading) {
@@ -109,74 +166,94 @@ class ExtensionAnalysis {
 
             const currAnalysis = await ExtensionAnalysis.Headless.fetch(extensionInfo)
 
-            if (scanType === ExtensionAnalysis.ScanType.INIT) {
-                if (!currAnalysis) {
-                    await ExtensionTrust.allow({ pending: true })
-                } else if (config.extensions.allowExisting) {
-                    await ExtensionTrust.allow(currAnalysis)
-                    ExtensionAnalysis.#log('extension kept', 'grandfathered', Log.INFO, extensionInfo, currAnalysis, scanType)
-                } else if (config.extensions.id.allowed.includes(extensionInfo.id)) {
-                    await ExtensionTrust.allow(currAnalysis)
-                    ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
-                } else if (currAnalysis.evaluation.allowed) {
-                    await ExtensionTrust.allow(currAnalysis)
-                    ExtensionAnalysis.#log('extension kept', 'validated', Log.INFO, extensionInfo, currAnalysis, scanType)
-                } else {
-                    await Extension.disable(extensionInfo)
-                    ExtensionAnalysis.#log('extension disabled', 'refused', Log.INFO, extensionInfo, currAnalysis, scanType)
-                }
+            if (!extensionInfo.enabled) {
+                ExtensionAnalysis.#log('extension left disabled', `already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
+            // if we were unable to recover the analysis (network issues, site down, etc)
+            // - raise a warning
+            // - plan for a new initial scan (if it is for the installation of the extension or other extensions)
             if (!currAnalysis) {
+                if (scanType === ExtensionAnalysis.ScanType.INIT || scanType === ExtensionAnalysis.ScanType.INSTALL) {
+                    await ExtensionTrust.allow({
+                        storeInfo: { id: extensionInfo.id },
+                        pending: true
+                    })
+                }
+
                 ExtensionAnalysis.#log('extension unchecked', 'unable to be checked', Log.WARN, extensionInfo, prevAnalysis, scanType)
                 return
             }
 
-            const riskIncrease = prevAnalysis ? ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis) : currAnalysis.evaluation
-            if (! riskIncrease.allowed) {
-                let bypassReason
-                if (! extensionInfo.mayDisable) bypassReason = 'cannot disable'
-                else if (config.extensions.id.allowed.includes(extensionInfo.id) && !config.extensions.id.periodicScan) bypassReason = 'whitelisted'
-                else if (! extensionInfo.installType === "admin") bypassReason = 'admin installed'
-                else bypassReason = undefined
+            const riskIncrease = prevAnalysis && ! prevAnalysis.pending  ? ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis) : currAnalysis.evaluation
 
-                if (! extensionInfo.enabled) {
-                    ExtensionAnalysis.#log('extension left disabled', `already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
-                } else if (bypassReason) {
-                    ExtensionAnalysis.#log('extension kept', `bypassed as it was ${bypassReason}`, Log.INFO, extensionInfo, currAnalysis, scanType)
-                }
-            } else {
-                if (riskIncrease.allowed) {
-                    const action = scanType === ExtensionAnalysis.ScanType.INSTALL ? "installed" : "kept"
+            // if the extension is currently validated, all is well
+            if (riskIncrease.allowed) {
+                const action = scanType === ExtensionAnalysis.ScanType.INSTALL ? "installed" : "kept"
 
-                    await ExtensionTrust.allow(currAnalysis)
-                    ExtensionAnalysis.#log(`extension ${action}`, `validated`, Log.INFO, extensionInfo, currAnalysis, scanType)
-                } else {
-                    await Extension.disable(extensionInfo)
-                    ExtensionAnalysis.#log('extension disabled', 'refused', Log.INFO, extensionInfo, currAnalysis, scanType)
-                }
+                await ExtensionTrust.allow(currAnalysis)
+                ExtensionAnalysis.#log(`extension ${action}`, `validated`, Log.WARN, extensionInfo, currAnalysis, scanType)
+                return
             }
 
+            // if it is refused, it can still be allowed in specific cases
+            // 1) grandfathering of pre-existing extensions
+            if (scanType === ExtensionAnalysis.ScanType.INIT && config.extensions.allowExisting) {
+                await ExtensionTrust.allow(currAnalysis)
+                ExtensionAnalysis.#log('extension kept', 'grandfathered', Log.INFO, extensionInfo, currAnalysis, scanType)
+                return
+            }
+
+            // 2) whitelisting can be allowed as long as it is not an update
+            if (config.extensions.id.allowed.includes(extensionInfo.id)) {
+                if (scanType === ExtensionAnalysis.ScanType.INIT ||
+                    scanType === ExtensionAnalysis.ScanType.INSTALL ||
+                    scanType === ExtensionAnalysis.ScanType.PERIODIC && !config.extensions.id.periodicScan
+                ) {
+                    await ExtensionTrust.allow(currAnalysis)
+                    ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
+                }
+                return
+            }
+
+            // if we arrive here, the extension presence, installation or update was too high risk should be disabled
+            let unableReason
+            if (!extensionInfo.mayDisable) unableReason = 'cannot disable'
+            else if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
+
+            if (unableReason) {
+                ExtensionAnalysis.#log('extension kept', `unable to disable because '${unableReason}'`, Log.ERROR, extensionInfo, currAnalysis, scanType)
+                return
+            }
+
+            if (extensionInfo.enabled) {
+                await Extension.disable(extensionInfo)
+                ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.INFO, extensionInfo, currAnalysis, scanType)
+            } else {
+                ExtensionAnalysis.#log('extension left disabled', `high risk but already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
+            }
         }
     }
 
     static riskIncrease(prevAnalysis, currAnalysis) {
         const diff = ExtensionAnalysis.#evaluationDiff(prevAnalysis.evaluation, currAnalysis.evaluation)
 
-        if (!diff.allowed) {
+        if (diff.rejection) {
             const reasons = diff.rejection.reasons
-            if (diff.permissionCheck.protectedDomains.length > 0) reasons.push("protected-domain")
-            if (diff.permissionCheck.blockingPermissions.length > 0) reasons.push("forbidden-permission")
-            if (diff.rejection.reasons.length > 0) reasons.push("more-issues")
+            if (diff.rejection.reasons.length > 0) reasons.unshift("more-issues")
+            if (diff.permissionCheck.protectedDomains.length > 0 && !reasons.includes("protected-domain")) reasons.push("protected-domain")
+            if (diff.permissionCheck.blockingPermissions.length > 0 && !reasons.includes("forbidden-permission")) reasons.push("forbidden-permission")
         }
+
+        diff.allowed = diff.rejection?.reasons?.length ?? 0 === 0
 
         return diff
     }
 
     static #evaluationDiff(prevEvaluation, currEvaluation) {
         const boolDiff = ((prev,curr) => !prev || curr)
-        const arrDiff = ((prev, curr) => curr.filter(elem => prev.includes(elem)))
+        const arrDiff = ((prev, curr) => curr ? curr.filter(elem => ! prev?.includes(elem)) : [])
 
         const diff = cloneDeep(currEvaluation)
         diff.permissionCheck.allowed = boolDiff(prevEvaluation.permissionCheck.allowed, currEvaluation.permissionCheck.allowed)
@@ -190,10 +267,8 @@ class ExtensionAnalysis {
         diff.permissionCheck.isBroad = boolDiff(prevEvaluation.permissionCheck.isBroad, currEvaluation.permissionCheck.isBroad)
 
         if (currEvaluation.rejection) {
-            diff.permissionCheck.rejection.reasons = arrDiff(prevEvaluation.permissionCheck.rejection.reasons, currEvaluation.permissionCheck.rejection.reasons)
+            diff.rejection.reasons = arrDiff(prevEvaluation?.rejection?.reasons, currEvaluation.rejection.reasons)
         }
-
-        diff.allowed = prevEvaluation.allowed && currEvaluation.allowed
 
         return diff
     }
@@ -407,11 +482,12 @@ class ExtensionAnalysis {
                 name: analysis.storeInfo?.name,
                 id: analysis.storeInfo?.id,
                 version: analysis.manifest?.version,
-                storePage: analysis.storeInfo?.storePage,
                 scanType,
                 score: score != null ? Number(score).toFixed(1) : score,
                 rejectionReason: analysis.evaluation?.rejection?.reasons?.length > 0 ? analysis.evaluation.rejection.reasons[0] : undefined,
-                analysis: JSON.stringify({ storeInfo: analysis.storeInfo, manifest: analysis.manifest, evaluation: analysis.evaluation }, null, 2)
+                storeInfo: JSON.stringify(analysis.storeInfo),
+                evaluation: JSON.stringify(analysis.evaluation),
+                manifest: JSON.stringify(analysis.manifest),
             }
         }
     }

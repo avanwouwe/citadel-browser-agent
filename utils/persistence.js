@@ -70,7 +70,7 @@ class PersistentObject {
         this.#value = new ChangeTrackingObject(initialValue)
 
         this.#storage = new HydratedObject(
-            'persistent-object' + storageKey,
+            `persistent-object-${storageKey}`,
             this.#value,
             (data, target) => {
                 data.copyTo(target)

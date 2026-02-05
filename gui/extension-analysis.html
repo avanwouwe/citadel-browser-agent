@@ -100,7 +100,7 @@
 
 <div class="centered" id="exceptionSection" hidden>
     <label for="exceptionReason" data-i18n="extension-analysis.block-page.request-exception-header" class="exception-request-header">Request an Exception</label>
-    <textarea id="exceptionReason" data-i18n="extension-analysis.block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
+    <textarea id="exceptionReason" rows="3" data-i18n="extension-analysis.block-page.provide-reason" placeholder="Please provide your reason for requesting an exception"></textarea>
     <button id="submitException" data-i18n="extension-analysis.block-page.submit-request">Submit Request</button>
 </div>
 
@@ -108,6 +108,7 @@
 <script src="/utils/utils.js"></script>
 <script src="/utils/definitions.js"></script>
 <script src="/utils/context.js"></script>
+<script src="/utils/debouncer.js"></script>
 <script src="/utils/browser.js"></script>
 <script src="/utils/unzipit.js"></script>
 <script src="/utils/injected/citadel-content-script-utils.js"></script>

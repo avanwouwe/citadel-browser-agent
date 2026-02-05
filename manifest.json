@@ -50,6 +50,7 @@
       "/utils/bridge.js",
       "/utils/dashboard.js",
       "/utils/persistence.js",
+      "/utils/debouncer.js",
       "/utils/encryption/bcrypt.js",
       "/utils/encryption/pbkdf2.js",
       "/utils/trust/password-vault.js",
