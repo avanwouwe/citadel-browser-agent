@@ -41,6 +41,7 @@ logger = None
 
 def log(event):
     event['id'] = str(event['id'])
+    event['user'] = username
     level = event.get('browseragent', { }).get('level') or "ERROR"
     message = MESSAGE_PREFIX + json.dumps(event)
 
