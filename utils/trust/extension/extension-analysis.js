@@ -6,7 +6,7 @@ class ExtensionAnalysis {
 
     static async showStorePage(tabId, url) {
         const extensionId = await ExtensionStore.extensionIdOf(url)
-        ExtensionAnalysis.approved.push(extensionId)
+        ExtensionAnalysis.approved.unshift(extensionId)
         ExtensionAnalysis.approved.length = ExtensionAnalysis.#APPROVED_CACHE_SIZE
         navigateTo(tabId, url)
     }
