@@ -157,7 +157,7 @@
         "risk-impact": "le risque lié à son accès à des données sensibles est trop élevé ou inconnu",
         "risk-likelihood": "la probabilité qu’il s’agisse d’un logiciel malveillant ou qu’il puisse être piraté est trop élevée ou inconnue",
         "not-verified": "ni l'extension ni son éditeur ne sont vérifiés par le magasin d'extensions",
-        "installation-count": "ce n'est pas une extension bien connue",
+        "installation-count": "elle n'est pas bien connue",
         "poor-rating": "elle a été mal notée ou insuffisamment notée",
         "forbidden-permission": "elle demande la permission interdite '{{example}}",
         "all-domains": "elle demande l'accès à tout le trafic en utilisant '{{example}}'",
