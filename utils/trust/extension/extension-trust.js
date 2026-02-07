@@ -1,6 +1,6 @@
 class ExtensionTrust {
 
-    static #analysisStorage = new PersistentObject("extension-exceptions")
+    static #analysisStorage = new PersistentObject("extensions-accepted")
 
     static {
         ExtensionTrust.#analysisStorage.ready().then(() => {

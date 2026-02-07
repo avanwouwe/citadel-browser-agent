@@ -286,7 +286,11 @@ class Extension {
         try {
             await chrome.management.setEnabled(extensionInfo.id, false)
         } catch (err) {
-            logger.log(Date.now(), "extension", `extension not disabled`, undefined, Log.WARN, extensionInfo.id, `extension '${extensionInfo.name}' (${extensionInfo.id}) was unable to be disabled`)
+            const reason =
+                err?.message ??
+                chrome.runtime.lastError?.message ??
+                "unknown error"
+            logger.log(Date.now(), "extension", `extension disable failed`, undefined, Log.ERROR, extensionInfo.id, `extension '${extensionInfo.name}' (${extensionInfo.id}) could not be disabled due to '${reason}'`)
         }
     }
 
