@@ -332,6 +332,12 @@ class Config {
             exceptions: {
                 allowed: true,
             },
+            whitelist: {
+                bundled: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh"],
+                allowInstall: [],
+                allowAlways: [],
+            },
+            blacklist: [],
             id: {
                 allowed: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh"],
                 forbidden: [],
@@ -430,11 +436,19 @@ class Config {
 
         Config.#init(Config.config)
 
+        // calculate the list of protected domains
         const scope = [config.company.domains, config.company.applications, config.domain.isApplication]
         config.protectedDomains = scope.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})
+
+        // any extension that should *always* be whitelisted, or that is bundled, should definitely be whitelisted for installation
+        config.extensions.whitelist.allowInstall = mergeArrays(
+            config.extensions.whitelist.allowInstall,
+            config.extensions.whitelist.allowAlways,
+            config.extensions.whitelist.bundled
+        )
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
         const exceptions = Config.config.exceptions

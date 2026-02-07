@@ -29,7 +29,7 @@ class ExtensionAnalysis {
 
             if (
                 !extensionId ||
-                evaluateBlacklist(extensionId, config.extensions.id.allowed, config.extensions.id.forbidden, false) ||
+                evaluateBlacklist(extensionId, config.extensions.whitelist.allowInstall, config.extensions.blacklist, false) ||
                 await ExtensionTrust.isAllowed(extensionId) ||
                 ExtensionAnalysis.approved.includes(extensionId) ||
                 await Extension.isInstalled(extensionId)
@@ -137,11 +137,11 @@ class ExtensionAnalysis {
             this.debouncer.debounce(
                 extensionInfo.id,
                 { extensionInfo, scanType },
-                async data => this.#performAnalysis(data.extensionInfo, data.scanType)
+                async data => this.#ofExtension(data.extensionInfo, data.scanType)
             )
         }
 
-        static async #performAnalysis(extensionInfo, scanType) {
+        static async #ofExtension(extensionInfo, scanType) {
             if (extensionInfo.type !== "extension" || extensionInfo.id === chrome.runtime.id) return
             const config = await Config.ready()
 
@@ -205,15 +205,12 @@ class ExtensionAnalysis {
                 return
             }
 
-            // 2) whitelisting can be allowed as long as it is not an update
-            if (config.extensions.id.allowed.includes(extensionInfo.id)) {
-                if (scanType === ExtensionAnalysis.ScanType.INIT ||
-                    scanType === ExtensionAnalysis.ScanType.INSTALL ||
-                    scanType === ExtensionAnalysis.ScanType.PERIODIC && !config.extensions.id.periodicScan
-                ) {
-                    await ExtensionTrust.allow(currAnalysis)
-                    ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
-                }
+            // 2) whitelisting
+            if (scanType === ExtensionAnalysis.ScanType.UPDATE && config.extensions.whitelist.allowAlways.includes(extensionInfo.id) ||
+                config.extensions.whitelist.allowInstall.includes(extensionInfo.id)
+            ) {
+                await ExtensionTrust.allow(currAnalysis)
+                ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -223,7 +220,7 @@ class ExtensionAnalysis {
             else if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
 
             if (unableReason) {
-                ExtensionAnalysis.#log('extension disable failed', `unable to be disabled because '${unableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension disable failed', `could not be disabled because '${unableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -297,15 +294,15 @@ class ExtensionAnalysis {
         const extConfig = config.extensions
         const rejection = { reasons: []}
 
-        const allowId = this.#evaluateBlacklist(storeInfo.id, extConfig.id.allowed, extConfig.id.forbidden, true)
-        const allowCategory = this.#evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), extConfig.category.allowed, extConfig.category.forbidden, true)
+        const blacklistExtension = !evaluateBlacklist(storeInfo.id, extConfig.whitelist.allowInstall, extConfig.blacklist, true)
+        const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), extConfig.category.allowed, extConfig.category.forbidden, true)
         const allowVerified = !extConfig.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
         const allowInstallationCnt = storeInfo.numInstalls >= extConfig.installations.required ?? 0
         const allowRating = storeInfo.rating >= (extConfig.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (extConfig.ratings.minRatingCnt ?? 0)
 
-        if (!allowId) rejection.reasons.push('blacklist-extension')
+        if (blacklistExtension) rejection.reasons.push('blacklist-extension')
 
-        if (!allowCategory) rejection.reasons.push('blacklist-category')
+        if (blacklistCategory) rejection.reasons.push('blacklist-category')
 
         if (evaluation.scores.global == null || evaluation.scores.global > extConfig.risk.maxGlobal) rejection.reasons.push('risk-global')
 
@@ -424,19 +421,6 @@ class ExtensionAnalysis {
     }
 
     static #broadHostPatterns = ['<all_urls>', '*://*/*', 'http://*/*', 'https://*/*', 'ws://*/*', 'wss://*/*', 'file://*/*']
-
-    static #evaluateBlacklist(entry, whitelist, blacklist, defaultValue) {
-        if (Array.isArray(entry)) return entry.every(item => evaluateBlacklist(item, whitelist, blacklist, defaultValue))
-
-        assert(isString(entry), "entry must be a string")
-        assert(Array.isArray(whitelist), "whitelist must be an array")
-        assert(Array.isArray(blacklist), "blacklist must be an array")
-
-        if (blacklist.includes(entry)) return false
-        if (whitelist.includes(entry) || whitelist.includes("*")) return true
-        if (blacklist.includes("*")) return false
-        return defaultValue
-    }
 
     static #evaluateRisk(storeInfo, manifest, staticAnalysis) {
         return { likelihood: null, impact: null , global: null }

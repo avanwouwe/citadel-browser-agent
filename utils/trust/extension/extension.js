@@ -290,7 +290,7 @@ class Extension {
                 err?.message ??
                 chrome.runtime.lastError?.message ??
                 "unknown error"
-            logger.log(Date.now(), "extension", `extension disable failed`, undefined, Log.ERROR, extensionInfo.id, `extension '${extensionInfo.name}' (${extensionInfo.id}) could not be disabled due to '${reason}'`)
+            logger.log(Date.now(), "extension", `extension disable failed`, undefined, Log.ERROR, extensionInfo.id, `extension '${extensionInfo.name}' (${extensionInfo.id}) could not be disabled because '${reason}'`)
         }
     }
 

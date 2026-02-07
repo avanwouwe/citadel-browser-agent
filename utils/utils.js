@@ -525,3 +525,7 @@ function serializeToText(obj, indent = 0) {
 
     return text
 }
+
+function mergeArrays(...arrays) {
+    return [...new Set(arrays.flat())]
+}
