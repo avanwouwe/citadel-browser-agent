@@ -92,7 +92,7 @@ function sendMessage(type, message, handler) {
     chrome.runtime.sendMessage(message, handler)
 }
 
-function sendMessagePromise(type, message) {
+async function sendMessagePromise(type, message) {
     return new Promise((resolve, reject) => {
         sendMessage(type, message, result => {
             if (chrome.runtime.lastError) {
@@ -106,15 +106,4 @@ function sendMessagePromise(type, message) {
     })
 }
 
-
-async function callServiceWorker(type, message) {
-    return new Promise((resolve, reject) => {
-        sendMessage(type, message, (response) => {
-            if (response.error) {
-                reject(response.error)
-            } else {
-                resolve(response.data)
-            }
-        })
-    })
-}
+const callServiceWorker = (type, message) => sendMessagePromise(type, message).then(result => result?.data)
