@@ -111,6 +111,7 @@ body {
     margin-right: 5px;
     color: #8e2c5a;
 }
+#blockedSection { font-weight: bold; font-size: 1.2em}
 #exceptionSection {
     margin: 30px auto 0 auto;
     max-width: 600px;    /* matches #content - adjust as you wish */
@@ -151,7 +152,7 @@ button:disabled {
 #installSection,#exceptionSection {
     text-align: center;
 }
-
+#installSection button { margin: 0 10px; }
 .risk-score {
     display: inline-block;
     background: #18392d;
