@@ -53,8 +53,9 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
 
 
 async function renderPage() {
-    setStatus(t('extension-analysis.block-page.status.analyze-store'), true)
+    document.getElementById("backButton").onclick = () => { window.history.go(-2) }
 
+    setStatus(t('extension-analysis.block-page.status.analyze-store'), true)
     document.getElementById("logo").src = tabState?.logo
 
     const analysis = ExtensionAnalysis.promiseOf(storePage, config)
@@ -79,31 +80,20 @@ async function renderPage() {
     renderScore("likelihood")
     renderScore("impact")
 
-    allowInstall(evaluation.allowed)
     showAnalysis()
-
+    showInstall(evaluation.allowed)
 }
 
-function allowInstall(allowed) {
-    const installButton = document.getElementById("installButton")
-
+function showInstall(allowed) {
     if (allowed) {
+        const installButton = document.getElementById("installButton")
         installButton.onclick = () => callServiceWorker('ShowExtensionPage', { tabId: tabState.tabId, storePage })
         installButton.disabled = false
     } else {
-        installButton.hidden = true
-        showBack()
-
         const rejection = evaluation?.rejection
         document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
         if (config.extensions.exceptions.allowed) proposeException()
     }
-}
-
-function showBack() {
-    const backButton = document.getElementById("backButton")
-    backButton.onclick = () => { window.history.go(-2) }
-    backButton.hidden = false
 }
 
 function renderStoreInfo() {
@@ -265,7 +255,6 @@ function setError(type, message) {
     evaluation.allowed = false
 
     setStatus(error, false)
-    showBack()
 }
 
 function proposeException() {
