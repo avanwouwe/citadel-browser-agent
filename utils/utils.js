@@ -496,3 +496,32 @@ function serializeError(error) {
 
     return { message: String(error), name: typeof error }
 }
+
+function serializeToText(obj, indent = 0) {
+    const indentStr = '  '.repeat(indent)
+    let text = ''
+
+    if (Array.isArray(obj)) {
+        obj.forEach((item) => {
+            if (typeof item === 'object' && item !== null) {
+                text += serializeToText(item, indent)
+            } else {
+                text += `${indentStr}- ${item}\n`
+            }
+        });
+    } else if (typeof obj === 'object' && obj !== null) {
+        Object.entries(obj).forEach(([key, value]) => {
+            if (Array.isArray(value)) {
+                text += `${indentStr}${key}:\n`
+                text += serializeToText(value, indent + 1)
+            } else if (typeof value === 'object' && value !== null) {
+                text += `${indentStr}${key}:\n`;
+                text += serializeToText(value, indent + 1)
+            } else {
+                text += `${indentStr}${key}: ${value}\n`
+            }
+        })
+    }
+
+    return text
+}

@@ -186,14 +186,14 @@ class ExtensionAnalysis {
                 return
             }
 
-            const riskIncrease = prevAnalysis && ! prevAnalysis.pending  ? ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis) : currAnalysis.evaluation
+            const riskIncrease = ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis)
 
-            // if the extension is currently validated, all is well
-            if (riskIncrease.allowed) {
+            // if there is no increase in risk, all is well
+            if (riskIncrease.length === 0) {
                 const action = scanType === ExtensionAnalysis.ScanType.INSTALL ? "installed" : "kept"
 
                 await ExtensionTrust.allow(currAnalysis)
-                ExtensionAnalysis.#log(`extension ${action}`, `validated`, Log.WARN, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log(`extension ${action}`, `validated`, Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -201,7 +201,7 @@ class ExtensionAnalysis {
             // 1) grandfathering of pre-existing extensions
             if (scanType === ExtensionAnalysis.ScanType.INIT && config.extensions.allowExisting) {
                 await ExtensionTrust.allow(currAnalysis)
-                ExtensionAnalysis.#log('extension kept', 'grandfathered', Log.INFO, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension kept', 'grandfathered', Log.WARN, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -223,7 +223,7 @@ class ExtensionAnalysis {
             else if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
 
             if (unableReason) {
-                ExtensionAnalysis.#log('extension kept', `unable to disable because '${unableReason}'`, Log.ERROR, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension disable failed', `unable to be disabled because '${unableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -237,40 +237,29 @@ class ExtensionAnalysis {
     }
 
     static riskIncrease(prevAnalysis, currAnalysis) {
-        const diff = ExtensionAnalysis.#evaluationDiff(prevAnalysis.evaluation, currAnalysis.evaluation)
+        assert(currAnalysis?.evaluation, "cannot analyse risk increase without current evaluation")
+        const reasons = []
 
-        if (diff.rejection) {
-            const reasons = diff.rejection.reasons
-            if (diff.rejection.reasons.length > 0) reasons.unshift("more-issues")
-            if (diff.permissionCheck.protectedDomains.length > 0 && !reasons.includes("protected-domain")) reasons.push("protected-domain")
-            if (diff.permissionCheck.blockingPermissions.length > 0 && !reasons.includes("forbidden-permission")) reasons.push("forbidden-permission")
-        }
+        if (!prevAnalysis || prevAnalysis.pending) return currAnalysis.evaluation.rejection?.reasons ?? reasons
 
-        diff.allowed = diff.rejection?.reasons?.length ?? 0 === 0
-
-        return diff
-    }
-
-    static #evaluationDiff(prevEvaluation, currEvaluation) {
-        const boolDiff = ((prev,curr) => !prev || curr)
-        const arrDiff = ((prev, curr) => curr ? curr.filter(elem => ! prev?.includes(elem)) : [])
-
-        const diff = cloneDeep(currEvaluation)
-        diff.permissionCheck.allowed = boolDiff(prevEvaluation.permissionCheck.allowed, currEvaluation.permissionCheck.allowed)
-        diff.permissionCheck.allowPermissions = boolDiff(prevEvaluation.permissionCheck.allowPermissions, currEvaluation.permissionCheck.allowPermissions)
-        diff.permissionCheck.allowAllDomains = boolDiff(prevEvaluation.permissionCheck.allowAllDomains, currEvaluation.permissionCheck.allowAllDomains)
-        diff.permissionCheck.allowProtectedDomains = boolDiff(prevEvaluation.permissionCheck.allowProtectedDomains, currEvaluation.permissionCheck.allowProtectedDomains)
-        diff.permissionCheck.effectivePermissions = arrDiff(prevEvaluation.permissionCheck.effectivePermissions, currEvaluation.permissionCheck.effectivePermissions)
-        diff.permissionCheck.blockingPermissions = arrDiff(prevEvaluation.permissionCheck.blockingPermissions, currEvaluation.permissionCheck.blockingPermissions)
-        diff.permissionCheck.broadHostPermissions = arrDiff(prevEvaluation.permissionCheck.broadHostPermissions, currEvaluation.permissionCheck.broadHostPermissions)
-        diff.permissionCheck.protectedDomains = arrDiff(prevEvaluation.permissionCheck.protectedDomains, currEvaluation.permissionCheck.protectedDomains)
-        diff.permissionCheck.isBroad = boolDiff(prevEvaluation.permissionCheck.isBroad, currEvaluation.permissionCheck.isBroad)
+        const prevEvaluation = prevAnalysis.evaluation
+        const currEvaluation = currAnalysis.evaluation
 
         if (currEvaluation.rejection) {
-            diff.rejection.reasons = arrDiff(prevEvaluation?.rejection?.reasons, currEvaluation.rejection.reasons)
+            // diff of two arrays, only keep items that were added in the current set
+            const arrayDiff = ((prev, curr) => curr ? curr.filter(elem => ! prev?.includes(elem)) : [])
+
+            const newReasons = arrayDiff(prevEvaluation?.rejection?.reasons, currEvaluation.rejection.reasons)
+            reasons.push([...newReasons])
+
+            const newProtectedDomains= arrayDiff(prevEvaluation.permissionCheck.protectedDomains, currEvaluation.permissionCheck.protectedDomains)
+            const newBlockingPermissions= arrayDiff(prevEvaluation.permissionCheck.blockingPermissions, currEvaluation.permissionCheck.blockingPermissions)
+
+            if (newProtectedDomains.length > 0 && ! currAnalysis.evaluation.isBroad && !reasons.includes("protected-domain")) reasons.push("protected-domain")
+            if (newBlockingPermissions.length > 0 && !reasons.includes("forbidden-permission")) reasons.push("forbidden-permission")
         }
 
-        return diff
+        return reasons
     }
 
     static promiseOf(storeUrl, config) {
@@ -352,7 +341,7 @@ class ExtensionAnalysis {
     }
 
     static #evaluatePermissions(manifest, config) {
-        const protectedDomains = ExtensionAnalysis.#canAccessProtected(manifest, config, 1)
+        const protectedDomains = ExtensionAnalysis.#canAccessProtected(manifest, config, 5)
         const extConfig = config.extensions.permissions
 
         const permissions = [
@@ -414,7 +403,7 @@ class ExtensionAnalysis {
             if (matched) {
                 domains.push(domain)
 
-                if (domains.length > maxMatches) {
+                if (domains.length >= maxMatches) {
                     break
                 }
             }
@@ -456,7 +445,7 @@ class ExtensionAnalysis {
     static #log(result, action, level, extensionInfo, analysis, scanType) {
         const storePage = analysis?.storeInfo?.storePage
         const logObj = ExtensionAnalysis.toLogObject(analysis ?? extensionInfo, scanType)
-        logger.log(Date.now(), "extension", result, storePage, level, logObj, `extension '${extensionInfo.name}' (${extensionInfo.id}) was ${action} during ${scanType} scan`)
+        logger.log(Date.now(), "extension", result, storePage, level, logObj, `extension '${extensionInfo.id}' was ${action} during ${scanType} scan`)
     }
 
     static toLogObject(input, scanType) {
@@ -475,7 +464,17 @@ class ExtensionAnalysis {
         }
 
         const analysis = input
-        const score = analysis.evaluation?.scores?.global
+        const evaluation = analysis.evaluation
+        const rejection = evaluation?.rejection
+
+        const score = evaluation?.scores?.global
+        const rejectionReason = rejection ? rejection.reasons[0] : undefined
+        const permissions = {
+            isBroad: evaluation?.permissionCheck?.isBroad,
+            blockingPermissions: evaluation?.permissionCheck?.blockingPermissions,
+            protectedDomains: evaluation?.permissionCheck?.protectedDomains,
+        }
+
         return {
             type: "extension",
             value: {
@@ -484,10 +483,8 @@ class ExtensionAnalysis {
                 version: analysis.manifest?.version,
                 scanType,
                 score: score != null ? Number(score).toFixed(1) : score,
-                rejectionReason: analysis.evaluation?.rejection?.reasons?.length > 0 ? analysis.evaluation.rejection.reasons[0] : undefined,
-                storeInfo: JSON.stringify(analysis.storeInfo),
-                evaluation: JSON.stringify(analysis.evaluation),
-                manifest: JSON.stringify(analysis.manifest),
+                rejectionReason,
+                permissions: serializeToText(permissions),
             }
         }
     }
