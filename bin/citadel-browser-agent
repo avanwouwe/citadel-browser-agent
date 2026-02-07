@@ -33,7 +33,7 @@ MAX_REPORT_WORKERS = 10
 CONTROL_TIMEOUT = 20   # seconds
 REPORT_TIMEOUT = 60   # seconds
 FETCH_TIMEOUT = 20    # seconds
-
+MESSAGE_PREFIX = 'browser agent : '
 osqueryPath = DEFAULT_OSQUERY_PATH
 config = {}
 username = getpass.getuser()
@@ -41,9 +41,8 @@ logger = None
 
 def log(event):
     event['id'] = str(event['id'])
-    event['user'] = username
     level = event.get('browseragent', { }).get('level') or "ERROR"
-    message = 'browser agent : ' + json.dumps(event)
+    message = MESSAGE_PREFIX + json.dumps(event)
 
     if level == "DEBUG" or level == "TRACE":
         logger.debug(message)
@@ -62,6 +61,7 @@ def createEvent(event, result, level, description):
     return {
         "timestamp" : datetime.now().isoformat(),
         "id" : random.randint(-sys.maxsize, sys.maxsize),
+        "user" : username,
         "browseragent" : {
             "event" : event,
             "level": level,
@@ -69,6 +69,27 @@ def createEvent(event, result, level, description):
             "description": description
         }
     }
+
+def createTruncationEvent(message, max_length):
+    original_message = message.removeprefix(MESSAGE_PREFIX)
+    notice = f"entry too long ({len(original_message)} > {max_length}) : "
+
+    snippet_length = max_length
+
+    while snippet_length > 0:
+        truncated_msg = f"{notice}{original_message[:snippet_length]} ..."
+        event = createEvent("logging error", "entry truncated", "WARN", truncated_msg)
+        result = MESSAGE_PREFIX + json.dumps(event)
+
+        excess = len(result) - max_length
+
+        if excess <= 0:
+            return result
+
+        snippet_length -= excess
+    else:
+        event = createEvent("logging error", "entry truncated", "WARN", notice)
+        return MESSAGE_PREFIX + json.dumps(event)
 
 def warning(msg):
     event = createEvent("messaging warning", "messaging warning", "WARN", msg)
@@ -91,6 +112,7 @@ if SYSTEM_OS == 'macos':
     import syslog
 
     class SyslogHandler(logging.Handler):
+        MAX_LENGTH = 1000
 
         LEVEL_MAP = {
             logging.DEBUG: syslog.LOG_DEBUG,
@@ -104,7 +126,13 @@ if SYSTEM_OS == 'macos':
             try:
                 message = self.format(record)
                 level = self.LEVEL_MAP.get(record.levelno, syslog.LOG_INFO)
+
+                if len(message) > self.MAX_LENGTH:
+                    message = createTruncationEvent(message, self.MAX_LENGTH)
+                    level = syslog.LOG_WARNING
+
                 syslog.syslog(level, message)
+
             except Exception:
                 self.handleError(record)
 
@@ -119,6 +147,8 @@ elif SYSTEM_OS == 'windows':
     from logging.handlers import NTEventLogHandler
 
     class CustomWindowsHandler(NTEventLogHandler):
+        MAX_LENGTH = 31 * 1024  # Stay under Windows 32KB limit
+
         LEVEL_MAP = {
             logging.DEBUG: logging.DEBUG,
             logging.INFO: logging.INFO,
@@ -128,10 +158,29 @@ elif SYSTEM_OS == 'windows':
         }
 
         def emit(self, record):
-            record.levelno = self.LEVEL_MAP.get(record.levelno, logging.INFO)
-            record.levelname = logging.getLevelName(record.levelno)
+            try:
+                message_str = self.format(record)
 
-            super().emit(record)
+                if len(message_str) > self.MAX_LENGTH:
+                    error_message = createTruncationEvent(message_str, self.MAX_LENGTH)
+
+                    error_record = logging.LogRecord(
+                        name=record.name,
+                        level=logging.ERROR,
+                        pathname=record.pathname,
+                        lineno=record.lineno,
+                        msg=error_message,
+                        args=(),
+                        exc_info=None
+                    )
+                    record = error_record
+
+                record.levelno = self.LEVEL_MAP.get(record.levelno, logging.INFO)
+                record.levelname = logging.getLevelName(record.levelno)
+
+                super().emit(record)
+            except Exception:
+                self.handleError(record)
 
     logger = logging.getLogger('BrowserAgentLogger')
     logger.setLevel(logging.DEBUG)
@@ -446,7 +495,7 @@ def fetchError(url, message):
         "ok": False,
         "url": url,
         "error": message
-})
+    })
 
 def fetch(url):
     if not url:
