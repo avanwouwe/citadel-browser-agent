@@ -430,7 +430,7 @@ class Config {
 
         Config.#init(Config.config)
 
-        const scope = [config.domain.isApplication, config.company.applications, config.company.domains]
+        const scope = [config.company.domains, config.company.applications, config.domain.isApplication]
         config.protectedDomains = scope.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
