@@ -253,7 +253,7 @@ function analyzeForm(formElements, eventElement) {
         }
 
         if (elem.type === 'password' || isPasswordField(elem.name) || isPasswordField(elem.id)) {
-            if (! MFACheck.isTOTP(elem.value)) {
+            if (! MFACheck.isTOTP(elem.value) && !PasswordCheck.isMasked(elem.value)) {
                 debug("found password")
 
                 password = elem.value

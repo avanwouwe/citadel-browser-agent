@@ -50,6 +50,10 @@ class PasswordCheck {
         return passwordAnalysis
     }
 
+    #PASSWORD_MASK_REGEX = /^([*•●·×○⋅◦∙⬤⚫▪■\-_#])\1{3,}$/;
+
+    static isMasked = str => PasswordCheck.#PASSWORD_MASK_REGEX.test(str)
+
     static #HEX_FORMAT_REGEX = /^[0-9a-fA-F\s-]+$/
 
     static isSecret(str) {
