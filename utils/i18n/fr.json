@@ -69,6 +69,14 @@
       "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre accès a été bloqué. Cliquez pour corriger le compte."
     }
   },
+  "extensiontrust": {
+    "dashboard": {
+      "title": "Extensions",
+      "name": "Nom",
+      "id": "Id",
+      "state": "État"
+    }
+  },
   "events": {
     "dashboard": {
       "title": "Evénements",

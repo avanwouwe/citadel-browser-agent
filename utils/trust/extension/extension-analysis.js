@@ -252,7 +252,7 @@ class ExtensionAnalysis {
             const newProtectedDomains= arrayDiff(prevEvaluation.permissionCheck.protectedDomains, currEvaluation.permissionCheck.protectedDomains)
             const newBlockingPermissions= arrayDiff(prevEvaluation.permissionCheck.blockingPermissions, currEvaluation.permissionCheck.blockingPermissions)
 
-            if (newProtectedDomains.length > 0 && ! currAnalysis.evaluation.isBroad && !reasons.includes("protected-domain")) reasons.push("protected-domain")
+            if (newProtectedDomains.length > 0 && !currAnalysis.evaluation.isBroad && !reasons.includes("protected-domain")) reasons.push("protected-domain")
             if (newBlockingPermissions.length > 0 && !reasons.includes("forbidden-permission")) reasons.push("forbidden-permission")
         }
 

@@ -10,6 +10,7 @@
 <div class="tabs">
     <button class="tab active" id="device" data-i18n="devicetrust.dashboard.title">Device Trust</button>
     <button class="tab" id="account" data-i18n="accounttrust.dashboard.title">Account Issues</button>
+    <button class="tab" id="extension" data-i18n="extensiontrust.dashboard.title">Account Issues</button>
     <button class="tab" id="events" data-i18n="events.dashboard.title">Security Events</button>
 </div>
 <div id="devicetrust-tab" class="tab-content active">
@@ -59,6 +60,22 @@
             </tr>
             </thead>
             <tbody id="accounttrust-issues"></tbody>
+        </table>
+    </div>
+</div>
+<div id="extensiontrust-tab" class="tab-content">
+    <div id="extensions">
+        <table>
+            <thead>
+            <tr>
+                <th data-i18n="extensiontrust.dashboard.name">Name</th>
+                <th data-i18n="extensiontrust.dashboard.id">Id</th>
+                <th></th>
+                <th data-i18n="extensiontrust.dashboard.state">State</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="extension-details"></tbody>
         </table>
     </div>
 </div>

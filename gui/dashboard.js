@@ -14,6 +14,7 @@ I18n.loadPage('/utils/i18n', (i18n) => {
 
     renderDeviceDashboard()
     renderAccountDashboard()
+    renderExtensionDashboard()
 
     const params = new URLSearchParams(window.location.search)
     const tabName = params.get('tab') ?? 'device'
@@ -36,6 +37,7 @@ function selectTab(tabId) {
 
     renderDeviceDashboard()
     renderAccountDashboard()
+    renderExtensionDashboard()
     if (tabId === "events") startEventRefreshing(); else stopEventRefreshing()
 }
 
@@ -109,6 +111,33 @@ async function renderAccountDashboard() {
             `<td class="days">${next.days ?? ""}</td>` +
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
             `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
+
+        tb.appendChild(tr)
+    }
+}
+
+async function renderExtensionDashboard() {
+    const extensiontrust = await callServiceWorker("GetExtensionStatus")
+    const tb = document.getElementById("extension-details")
+    tb.innerHTML = ""
+
+    tb.removeEventListener('click', handleDeleteClick)
+    tb.addEventListener('click', handleDeleteClick)
+
+    for (const [_, extension] of extensiontrust.extensions) {
+        let risks
+        console.log("ext", extension)
+      //  if (acct.report.issues?.count > 0) {
+      //      errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
+       // }
+
+        const tr = document.createElement("tr")
+        tr.innerHTML =
+            `<td><span class="ellipsis" title="${extension.storeInfo.name}">${extension.storeInfo.name}</span></td>` +
+            `<td><span class="ellipsis" title="${extension.id}">${extension.storeInfo.id}</span></td>` +
+            `<td>${risks}</td>` +
+            `<td class="state ${extension.state.toLowerCase()}">${t("control.state." + extension.state)}</td>` +
+            `<td><span class="delete-btn" data-extension="${extension.id}">🗑</span></td>`
 
         tb.appendChild(tr)
     }

@@ -40,6 +40,8 @@ class Bridge {
             Port.postMessage("devicetrust", { request: "update" })
         })
 
+        Bridge.listenTo("GetExtensionStatus", async() => ({ extensions: await ExtensionTrust.getStatus() }))
+
         Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))
 
         Bridge.listenTo("ShowExtensionPage", ({tabId, storePage}) => ExtensionAnalysis.showStorePage(tabId, storePage))

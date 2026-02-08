@@ -23,7 +23,7 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
             if (config.extensions.exceptions.allowed) proposeException()
         }
     } else {
-        chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+        chrome.runtime.onMessage.addListener((request, _, sendResponse) => {
             if (request.type === 'PING') {
                 sendResponse({ready: true})
                 return
