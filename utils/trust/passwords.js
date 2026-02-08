@@ -50,7 +50,7 @@ class PasswordCheck {
         return passwordAnalysis
     }
 
-    #PASSWORD_MASK_REGEX = /^([*•●·×○⋅◦∙⬤⚫▪■\-_#])\1{3,}$/;
+    static #PASSWORD_MASK_REGEX = /^([*•●·×○⋅◦∙⬤⚫▪■\-_#])\1{3,}$/
 
     static isMasked = str => PasswordCheck.#PASSWORD_MASK_REGEX.test(str)
 

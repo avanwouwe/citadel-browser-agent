@@ -132,7 +132,7 @@ async function renderExtensionDashboard() {
 
         const tr = document.createElement("tr")
         tr.innerHTML =
-            `<td><span class="ellipsis" title="${analysis.storeInfo.name}">${analysis.storeInfo.name}</span></td>` +
+            `<td><span class="label ellipsis" title="${analysis.storeInfo.name}">${analysis.storeInfo.name}</span></td>` +
             `<td><span class="ellipsis" title="${analysis.id}">${analysis.storeInfo.id}</span></td>` +
             `<td>${issues}</td>` +
             `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
@@ -187,12 +187,14 @@ let port
 function connect() {
     port = chrome.runtime.connect({name: "SecurityDashboard"})
     port.onDisconnect.addListener(reconnect)
-    port.onMessage.addListener((msg) => {
+    port.onMessage.addListener(async(msg) => {
         if (msg.type === 'RefreshDeviceStatus') {
             updateBtn.classList.remove('refreshing')
-            renderDeviceDashboard()
+            await renderDeviceDashboard()
         } else if (msg.type === 'RefreshAccountStatus') {
-            renderAccountDashboard()
+            await renderAccountDashboard()
+        } else if (msg.type === 'RefreshExtensionStatus') {
+            await renderExtensionDashboard()
         }
     })
 }

@@ -61,7 +61,7 @@ body {
 
 .risk-details-label {
     display: inline-block;
-    width: 150px;  /* Changed from min-width to width, and increased value */
+    width: 150px;
     font-weight: 500;
     color: #365675;
     letter-spacing: 0.1px;

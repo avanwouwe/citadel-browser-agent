@@ -61,6 +61,8 @@ class ExtensionTrust {
     }
 
     static async flush() {
+        Dashboard.sendMessage({type: "RefreshExtensionStatus"})
+
         ExtensionTrust.#storage.markDirty()
         await ExtensionTrust.#storage.flush()
     }

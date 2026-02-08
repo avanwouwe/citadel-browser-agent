@@ -23,7 +23,6 @@
     transition: opacity 0.11s;
 }
 .ellipsis {
-    max-width: 150px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -137,5 +136,6 @@ td:has(.delete-btn) {
     text-align: center;
     vertical-align: middle;
 }
+#eventlog td:nth-child(4) .ellipsis { max-width: 150px; }
 #eventlog th:nth-child(5) { min-width: 220px; max-width: 400px; }
 #eventlog td:nth-child(5) .ellipsis { max-width: 370px; }
