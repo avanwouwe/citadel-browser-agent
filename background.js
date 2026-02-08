@@ -64,7 +64,7 @@ Port.onMessage("devicetrust",(report) => {
 	}
 
 	DeviceTrust.addReport(report)
-	Dashboard.sendMessage({type: "RefreshDeviceStatus"})
+	Dashboard.refreshDevice()
 })
 
 chrome.runtime.onUpdateAvailable.addListener(() => {

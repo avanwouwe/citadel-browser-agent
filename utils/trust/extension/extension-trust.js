@@ -38,7 +38,7 @@ class ExtensionTrust {
 
         storage.value()[analysis.storeInfo.id] = analysis
 
-        await ExtensionTrust.flush()
+        Dashboard.refreshExtension()
     }
 
     static async disallow(extensionId) {
@@ -57,6 +57,7 @@ class ExtensionTrust {
         if (analysis) {
             analysis.state = State.BLOCKING
             await ExtensionTrust.flush()
+            Dashboard.refreshExtension()
         }
     }
 

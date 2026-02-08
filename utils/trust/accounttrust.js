@@ -70,7 +70,7 @@ class AccountTrust {
         AccountTrust.#audit.save()
         AccountTrust.#audit.notify()
 
-        Dashboard.sendMessage({type: "RefreshAccountStatus"})
+        Dashboard.refreshAccount()
     }
 
     static #failingAccounts(appName = null) {

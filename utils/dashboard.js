@@ -2,7 +2,7 @@ class Dashboard {
 
     static #dashboards = []
 
-    static sendMessage(msg) {
+    static #sendMessage(msg) {
         Dashboard.#dashboards.forEach((port) => {
             try {
                 port.postMessage(msg)
@@ -11,6 +11,10 @@ class Dashboard {
             }
         })
     }
+
+    static refreshDevice = () => Dashboard.#sendMessage({type: "RefreshDeviceStatus"})
+    static refreshAccount = () => Dashboard.#sendMessage({type: "RefreshAccountStatus"})
+    static refreshExtension = () => Dashboard.#sendMessage({type: "RefreshExtensionStatus"})
 
     static {
         chrome.runtime.onConnect.addListener((port) => {
