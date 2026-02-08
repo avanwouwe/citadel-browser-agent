@@ -139,3 +139,28 @@ td:has(.delete-btn) {
 #eventlog td:nth-child(4) .ellipsis { max-width: 150px; }
 #eventlog th:nth-child(5) { min-width: 220px; max-width: 400px; }
 #eventlog td:nth-child(5) .ellipsis { max-width: 370px; }
+
+.extension-logo {
+    width: 28px;
+    height: 28px;
+    object-fit: contain;
+    vertical-align: middle;
+    border-radius: 4px;
+}
+
+.extension-logo-placeholder {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    font-size: 18px;
+    vertical-align: middle;
+    opacity: 0.6;
+}
+
+td:has(.extension-logo), td:has(.extension-logo-placeholder) {
+    text-align: center;
+    width: 40px;
+    padding: 4px;
+}

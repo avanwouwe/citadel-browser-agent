@@ -130,8 +130,13 @@ async function renderExtensionDashboard() {
             issues = `<span class="has-errors" data-tooltip="${analysis.issues.escapeHtmlEntities()}">&#128269;</span>`
         }
 
+        const logo = analysis.storeInfo.extensionLogo
+            ? `<img src="${analysis.storeInfo.extensionLogo}" alt="${analysis.storeInfo.name} logo" class="extension-logo" onerror="this.style.display='none'">`
+            : `<span class="extension-logo-placeholder">📦</span>`
+
         const tr = document.createElement("tr")
         tr.innerHTML =
+            `<td>${logo}</td>` +
             `<td><span class="label ellipsis" title="${analysis.storeInfo.name}">${analysis.storeInfo.name}</span></td>` +
             `<td><span class="ellipsis" title="${analysis.id}">${analysis.storeInfo.id}</span></td>` +
             `<td>${issues}</td>` +
