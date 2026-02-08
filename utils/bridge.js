@@ -42,6 +42,8 @@ class Bridge {
 
         Bridge.listenTo("GetExtensionStatus", async() => ({ extensions: await ExtensionTrust.getStatus() }))
 
+        Bridge.listenTo("DisallowExtension", async ({extensionId}) => await ExtensionTrust.disallow(extensionId))
+
         Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))
 
         Bridge.listenTo("ShowExtensionPage", ({tabId, storePage}) => ExtensionAnalysis.showStorePage(tabId, storePage))

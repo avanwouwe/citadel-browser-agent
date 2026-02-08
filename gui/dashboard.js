@@ -92,8 +92,8 @@ async function renderAccountDashboard() {
     const tb = document.getElementById("accounttrust-issues")
     tb.innerHTML = ""
 
-    tb.removeEventListener('click', handleDeleteClick)
-    tb.addEventListener('click', handleDeleteClick)
+    tb.removeEventListener('click', handleDeleteAccount)
+    tb.addEventListener('click', handleDeleteAccount)
 
     for (const acct of accounttrust.accounts) {
         const next = acct.report.nextState
@@ -121,23 +121,23 @@ async function renderExtensionDashboard() {
     const tb = document.getElementById("extension-details")
     tb.innerHTML = ""
 
-    tb.removeEventListener('click', handleDeleteClick)
-    tb.addEventListener('click', handleDeleteClick)
+    tb.removeEventListener('click', handleDisallowExtension)
+    tb.addEventListener('click', handleDisallowExtension)
 
-    for (const [_, extension] of extensiontrust.extensions) {
-        let risks
-        console.log("ext", extension)
-      //  if (acct.report.issues?.count > 0) {
-      //      errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
-       // }
+    for (const [_, analysis] of extensiontrust.extensions) {
+        let issues = ''
+        if (analysis.state === State.BLOCKING) {
+            issues = ExtensionAnalysis.issuesOf(analysis)
+            issues = `<span class="has-errors" data-tooltip="${issues.escapeHtmlEntities()}">&#128269;</span>`
+        }
 
         const tr = document.createElement("tr")
         tr.innerHTML =
-            `<td><span class="ellipsis" title="${extension.storeInfo.name}">${extension.storeInfo.name}</span></td>` +
-            `<td><span class="ellipsis" title="${extension.id}">${extension.storeInfo.id}</span></td>` +
-            `<td>${risks}</td>` +
-            `<td class="state ${extension.state.toLowerCase()}">${t("control.state." + extension.state)}</td>` +
-            `<td><span class="delete-btn" data-extension="${extension.id}">🗑</span></td>`
+            `<td><span class="ellipsis" title="${analysis.storeInfo.name}">${analysis.storeInfo.name}</span></td>` +
+            `<td><span class="ellipsis" title="${analysis.id}">${analysis.storeInfo.id}</span></td>` +
+            `<td>${issues}</td>` +
+            `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
+            `<td><span class="delete-btn" data-extension="${analysis.storeInfo.id}">🗑</span></td>`
 
         tb.appendChild(tr)
     }
@@ -166,12 +166,20 @@ async function renderEventsDashboard() {
     }
 }
 
-async function handleDeleteClick(event) {
+async function handleDeleteAccount(event) {
     if (event.target.classList.contains('delete-btn')) {
         const username = event.target.dataset.username
         const system = event.target.dataset.system
         await callServiceWorker("DeleteAccount", { username, system })
-        renderAccountDashboard()
+        await renderAccountDashboard()
+    }
+}
+
+async function handleDisallowExtension(event) {
+    if (event.target.classList.contains('delete-btn')) {
+        const extensionId = event.target.dataset.extension
+        await callServiceWorker("DisallowExtension", { extensionId })
+        await renderExtensionDashboard()
     }
 }
 

@@ -159,7 +159,7 @@ class ExtensionAnalysis {
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but whitelisted', Log.INFO, extensionInfo, undefined, scanType)
                 } else {
                     ExtensionAnalysis.#log('extension disabled', 'side-loaded and therefore disabled', Log.INFO, extensionInfo, undefined, scanType)
-                    await Extension.disable(extensionInfo)
+                    await ExtensionTrust.disable(extensionInfo.id)
                 }
                 return
             }
@@ -225,11 +225,23 @@ class ExtensionAnalysis {
             }
 
             if (extensionInfo.enabled) {
-                await Extension.disable(extensionInfo)
+                await ExtensionTrust.disable(extensionInfo.id)
                 ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.INFO, extensionInfo, currAnalysis, scanType)
             } else {
                 ExtensionAnalysis.#log('extension left disabled', `high risk but already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
             }
+        }
+    }
+
+    static issuesOf(analysis) {
+        const evaluation = analysis?.evaluation
+        const rejection = evaluation?.rejection
+
+        return {
+            isBroad: evaluation?.permissionCheck?.isBroad,
+            blockingPermissions: evaluation?.permissionCheck?.blockingPermissions,
+            protectedDomains: evaluation?.permissionCheck?.protectedDomains,
+            reasons: rejection?.reasons
         }
     }
 
@@ -453,11 +465,7 @@ class ExtensionAnalysis {
 
         const score = evaluation?.scores?.global
         const rejectionReason = rejection ? rejection.reasons[0] : undefined
-        const permissions = {
-            isBroad: evaluation?.permissionCheck?.isBroad,
-            blockingPermissions: evaluation?.permissionCheck?.blockingPermissions,
-            protectedDomains: evaluation?.permissionCheck?.protectedDomains,
-        }
+        const issues = serializeToText(ExtensionAnalysis.issuesOf(analysis))
 
         return {
             type: "extension",
@@ -468,7 +476,7 @@ class ExtensionAnalysis {
                 scanType,
                 score: score != null ? Number(score).toFixed(1) : score,
                 rejectionReason,
-                permissions: serializeToText(permissions),
+                issues,
             }
         }
     }

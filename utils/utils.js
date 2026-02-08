@@ -511,6 +511,10 @@ function serializeToText(obj, indent = 0) {
         });
     } else if (typeof obj === 'object' && obj !== null) {
         Object.entries(obj).forEach(([key, value]) => {
+            if (value === undefined) {
+                return
+            }
+
             if (Array.isArray(value)) {
                 text += `${indentStr}${key}:\n`
                 text += serializeToText(value, indent + 1)
@@ -525,7 +529,6 @@ function serializeToText(obj, indent = 0) {
 
     return text
 }
-
 function mergeArrays(...arrays) {
     return [...new Set(arrays.flat())]
 }

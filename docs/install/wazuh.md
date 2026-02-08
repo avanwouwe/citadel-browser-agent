@@ -72,7 +72,7 @@ PUT _template/wazuh-browseragent
                   "extension": {
                     "properties": {
                       "score":      { "type": "long" },
-                      "permissions":  { "type": "text" }
+                      "issues":  { "type": "text" }
                     }
                   }
                 }

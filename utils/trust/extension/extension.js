@@ -280,17 +280,20 @@ class Extension {
         return chrome.management.get(extensionId).then(() => true, () => false)
     }
 
-    static async disable(extensionInfo) {
-        Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
-
+    static async disable(extensionId) {
         try {
-            await chrome.management.setEnabled(extensionInfo.id, false)
+            await chrome.management.setEnabled(extensionId, false)
         } catch (err) {
+            const logObj = {
+                type: "extension",
+                value: { id: extensionId }
+            }
+
             const reason =
                 err?.message ??
                 chrome.runtime.lastError?.message ??
                 "unknown error"
-            logger.log(Date.now(), "extension", `extension disable failed`, undefined, Log.ERROR, extensionInfo.id, `extension '${extensionInfo.name}' (${extensionInfo.id}) could not be disabled because '${reason}'`)
+            logger.log(Date.now(), "extension", `extension disable failed`, undefined, Log.ERROR, logObj, `extension '${extensionId}' could not be disabled because '${reason}'`)
         }
     }
 
