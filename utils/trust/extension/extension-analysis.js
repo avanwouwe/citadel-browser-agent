@@ -142,6 +142,7 @@ class ExtensionAnalysis {
         }
 
         static async #ofExtension(extensionInfo, scanType) {
+            assert(scanType !== ExtensionAnalysis.ScanType.INTERACTIVE, "this method is not meant for interactive scans")
             if (extensionInfo.type !== "extension" || extensionInfo.id === chrome.runtime.id) return
             const config = await Config.ready()
 
@@ -150,7 +151,7 @@ class ExtensionAnalysis {
             const prevAnalysis = await ExtensionTrust.analysisOf(extensionInfo.id)
 
             if (prevAnalysis?.pending) scanType = ExtensionAnalysis.ScanType.INIT
-            if (scanType === ExtensionAnalysis.ScanType.INSTALL && !prevAnalysis) scanType = ExtensionAnalysis.ScanType.UPDATE
+            if (scanType === ExtensionAnalysis.ScanType.INSTALL && prevAnalysis) scanType = ExtensionAnalysis.ScanType.UPDATE
 
             if (Extension.isSideloaded(extensionInfo)) {
                 if (config.extensions.allowSideloading) {
@@ -158,7 +159,7 @@ class ExtensionAnalysis {
                 } else if (config.extensions.id.allowed.includes(extensionInfo.id)) {
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but whitelisted', Log.INFO, extensionInfo, undefined, scanType)
                 } else {
-                    ExtensionAnalysis.#log('extension disabled', 'side-loaded and therefore disabled', Log.INFO, extensionInfo, undefined, scanType)
+                    ExtensionAnalysis.#log('extension disabled', 'side-loaded and therefore disabled', Log.WARN, extensionInfo, undefined, scanType)
                     await ExtensionTrust.disable(extensionInfo.id)
                 }
                 return
@@ -186,10 +187,11 @@ class ExtensionAnalysis {
                 return
             }
 
+            // if the extension was allowed, or was previously allowed and the risk did not increase, fine
             const riskIncrease = ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis)
-
-            // if there is no increase in risk, all is well
-            if (riskIncrease.length === 0) {
+            if (currAnalysis?.evaluation?.allowed ||
+                prevAnalysis?.evaluation?.allowed && riskIncrease.length === 0
+            ) {
                 const action = scanType === ExtensionAnalysis.ScanType.INSTALL ? "installed" : "kept"
 
                 await ExtensionTrust.allow(currAnalysis)
@@ -226,7 +228,7 @@ class ExtensionAnalysis {
 
             if (extensionInfo.enabled) {
                 await ExtensionTrust.disable(extensionInfo.id)
-                ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.INFO, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
             } else {
                 ExtensionAnalysis.#log('extension left disabled', `high risk but already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
             }
@@ -254,19 +256,17 @@ class ExtensionAnalysis {
         const prevEvaluation = prevAnalysis.evaluation
         const currEvaluation = currAnalysis.evaluation
 
-        if (currEvaluation.rejection) {
-            // diff of two arrays, only keep items that were added in the current set
-            const arrayDiff = ((prev, curr) => curr ? curr.filter(elem => ! prev?.includes(elem)) : [])
+        // diff of two arrays, only keep items that were added in the current set
+        const arrayDiff = ((prev, curr) => curr ? curr.filter(elem => ! prev?.includes(elem)) : [])
 
-            const newReasons = arrayDiff(prevEvaluation?.rejection?.reasons, currEvaluation.rejection.reasons)
-            reasons.push([...newReasons])
+        const newReasons = arrayDiff(prevEvaluation?.rejection?.reasons, currEvaluation?.rejection?.reasons)
+        reasons.push([...newReasons])
 
-            const newProtectedDomains= arrayDiff(prevEvaluation.permissionCheck.protectedDomains, currEvaluation.permissionCheck.protectedDomains)
-            const newBlockingPermissions= arrayDiff(prevEvaluation.permissionCheck.blockingPermissions, currEvaluation.permissionCheck.blockingPermissions)
+        const newProtectedDomains= arrayDiff(prevEvaluation?.permissionCheck?.protectedDomains, currEvaluation.permissionCheck.protectedDomains)
+        const newBlockingPermissions= arrayDiff(prevEvaluation?.permissionCheck?.blockingPermissions, currEvaluation.permissionCheck.blockingPermissions)
 
-            if (newProtectedDomains.length > 0 && !currAnalysis.evaluation.isBroad && !reasons.includes("protected-domain")) reasons.push("protected-domain")
-            if (newBlockingPermissions.length > 0 && !reasons.includes("forbidden-permission")) reasons.push("forbidden-permission")
-        }
+        if (newProtectedDomains.length > 0 && !currAnalysis.evaluation.isBroad && !reasons.includes("protected-domain")) reasons.push("protected-domain")
+        if (newBlockingPermissions.length > 0 && !reasons.includes("forbidden-permission")) reasons.push("forbidden-permission")
 
         return reasons
     }
@@ -293,9 +293,13 @@ class ExtensionAnalysis {
         storeInfo = await storeInfo
         manifest = await manifest
 
-        const evaluation = {}
-        evaluation.permissionCheck = ExtensionAnalysis.#evaluatePermissions(manifest, config)
-        evaluation.scores = this.#evaluateRisk(storeInfo, manifest)
+        const evaluation = {
+            permissionCheck: ExtensionAnalysis.#evaluatePermissions(manifest, config),
+            scores: this.#evaluateRisk(storeInfo, manifest),
+            rejection: {
+                reasons: []
+            }
+        }
 
         // TODO temporarily turn off risk analysis since it is not yet implemented
         const scores = evaluation.scores
@@ -304,7 +308,7 @@ class ExtensionAnalysis {
         scores.likelihood = scores.likelihood ?? 0
 
         const extConfig = config.extensions
-        const rejection = { reasons: []}
+        const rejection = evaluation.rejection
 
         const blacklistExtension = !evaluateBlacklist(storeInfo.id, extConfig.whitelist.allowInstall, extConfig.blacklist, true)
         const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), extConfig.category.allowed, extConfig.category.forbidden, true)
@@ -341,10 +345,6 @@ class ExtensionAnalysis {
         const bypassInstallationCnt = storeInfo.numInstalls >= extConfig.installations.allowed
 
         evaluation.allowed = rejection.reasons.length === 0 || bypassVerified || bypassInstallationCnt
-
-        if(!evaluation.allowed) {
-            evaluation.rejection = rejection
-        }
 
         return evaluation
     }

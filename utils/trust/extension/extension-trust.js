@@ -9,9 +9,13 @@ class ExtensionTrust {
         })
     }
 
-    static async analysisOf(extensionId) {
+    static async #analysisOf(extensionId) {
         const storage = await ExtensionTrust.#storage.ready()
-        const analysis = storage.value()[extensionId]
+        return storage.value()[extensionId]
+    }
+
+    static async analysisOf(extensionId) {
+        const analysis = ExtensionTrust.#analysisOf(extensionId)
         return cloneDeep(analysis)
     }
 
@@ -25,7 +29,7 @@ class ExtensionTrust {
     }
 
     static async isAllowed(extensionId) {
-        const analysis = await ExtensionTrust.analysisOf(extensionId)
+        const analysis = await ExtensionTrust.#analysisOf(extensionId)
 
         return analysis || false
     }
@@ -45,26 +49,23 @@ class ExtensionTrust {
         const storage = await ExtensionTrust.#storage.ready()
 
         delete storage.value()[extensionId]
-
-        await ExtensionTrust.flush()
     }
 
     static async disable(extensionId) {
         await Extension.disable(extensionId)
         Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
 
-        const analysis = await ExtensionTrust.analysisOf(extensionId)
+        const analysis = await ExtensionTrust.#analysisOf(extensionId)
         if (analysis) {
             analysis.state = State.BLOCKING
-            await ExtensionTrust.flush()
+
+            ExtensionTrust.#storage.markDirty()
+
             Dashboard.refreshExtension()
         }
     }
 
     static async flush() {
-        Dashboard.sendMessage({type: "RefreshExtensionStatus"})
-
-        ExtensionTrust.#storage.markDirty()
         await ExtensionTrust.#storage.flush()
     }
 

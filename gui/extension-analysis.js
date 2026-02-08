@@ -277,6 +277,8 @@ function proposeException() {
 
     // Handle exception request submission
     exceptionButton.addEventListener('click', function() {
+        evaluation.allowed = true
+
         const exception = {
             analysis: { storeInfo, manifest, evaluation },
             exceptionReason: exceptionReasonInput.value.trim()
