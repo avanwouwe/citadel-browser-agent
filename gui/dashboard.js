@@ -117,18 +117,17 @@ async function renderAccountDashboard() {
 }
 
 async function renderExtensionDashboard() {
-    const extensiontrust = await callServiceWorker("GetExtensionStatus")
+    const extensionTrust = await callServiceWorker("GetExtensionStatus")
     const tb = document.getElementById("extension-details")
     tb.innerHTML = ""
 
     tb.removeEventListener('click', handleDisallowExtension)
     tb.addEventListener('click', handleDisallowExtension)
 
-    for (const [_, analysis] of extensiontrust.extensions) {
+    for (const analysis of Object.values(extensionTrust)) {
         let issues = ''
-        if (analysis.state === State.BLOCKING) {
-            issues = ExtensionAnalysis.issuesOf(analysis)
-            issues = `<span class="has-errors" data-tooltip="${issues.escapeHtmlEntities()}">&#128269;</span>`
+        if (analysis.issues) {
+            issues = `<span class="has-errors" data-tooltip="${analysis.issues.escapeHtmlEntities()}">&#128269;</span>`
         }
 
         const tr = document.createElement("tr")

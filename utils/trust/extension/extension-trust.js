@@ -11,14 +11,17 @@ class ExtensionTrust {
 
     static async analysisOf(extensionId) {
         const storage = await ExtensionTrust.#storage.ready()
-        return storage.value()[extensionId]
+        const analysis = storage.value()[extensionId]
+        return cloneDeep(analysis)
     }
 
     static async getStatus() {
         const storage = await ExtensionTrust.#storage.ready()
+        const analyses = cloneDeep(await storage.value())
+        delete analyses.isDirty
+        Object.values(analyses).forEach(analysis => analysis.issues = serializeToText(ExtensionAnalysis.issuesOf(analysis)))
 
-        return Object.entries(storage.value())
-            .filter(([id, _]) => id !== "isDirty")
+        return analyses
     }
 
     static async isAllowed(extensionId) {

@@ -40,7 +40,7 @@ class Bridge {
             Port.postMessage("devicetrust", { request: "update" })
         })
 
-        Bridge.listenTo("GetExtensionStatus", async() => ({ extensions: await ExtensionTrust.getStatus() }))
+        Bridge.listenTo("GetExtensionStatus", async() => await ExtensionTrust.getStatus())
 
         Bridge.listenTo("DisallowExtension", async ({extensionId}) => await ExtensionTrust.disallow(extensionId))
 
