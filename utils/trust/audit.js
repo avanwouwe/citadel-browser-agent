@@ -190,6 +190,7 @@ class Control {
         }
 
         // days don't count if an endpoint is turned off
+        this.#lastDayStart = this.#lastDayStart ?? report.timestamp
         const newFailedDays = (report.timestamp - this.#lastDayStart) / ONE_DAY
         if (newFailedDays > 1) {
             this.#lastDayStart += Math.floor(newFailedDays * ONE_DAY)
