@@ -167,11 +167,6 @@ class ExtensionAnalysis {
 
             const currAnalysis = await ExtensionAnalysis.Headless.fetch(extensionInfo)
 
-            if (!extensionInfo.enabled) {
-                ExtensionAnalysis.#log('extension left disabled', `already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
-                return
-            }
-
             // if we were unable to recover the analysis (network issues, site down, etc)
             // - raise a warning
             // - plan for a new initial scan (if it is for the installation of the extension or other extensions)
@@ -213,6 +208,12 @@ class ExtensionAnalysis {
             ) {
                 await ExtensionTrust.allow(currAnalysis)
                 ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
+                return
+            }
+
+            // if it was refused, but it was disabled anyway, leave it disabled
+            if (!extensionInfo.enabled) {
+                ExtensionAnalysis.#log('extension left disabled', `already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -260,7 +261,7 @@ class ExtensionAnalysis {
         const arrayDiff = ((prev, curr) => curr ? curr.filter(elem => ! prev?.includes(elem)) : [])
 
         const newReasons = arrayDiff(prevEvaluation?.rejection?.reasons, currEvaluation?.rejection?.reasons)
-        reasons.push([...newReasons])
+        reasons.push(...newReasons)
 
         const newProtectedDomains= arrayDiff(prevEvaluation?.permissionCheck?.protectedDomains, currEvaluation.permissionCheck.protectedDomains)
         const newBlockingPermissions= arrayDiff(prevEvaluation?.permissionCheck?.blockingPermissions, currEvaluation.permissionCheck.blockingPermissions)
