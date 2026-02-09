@@ -338,11 +338,6 @@ class Config {
                 allowAlways: [],
             },
             blacklist: [],
-            id: {
-                allowed: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh"],
-                forbidden: [],
-                periodicScan: true
-            },
             category: {
                 allowed: [],
                 forbidden: ["lifestyle"],
@@ -372,7 +367,6 @@ class Config {
                 }
             },
             allowSideloading: false,
-            allowPrivateUpdateServer: false,
             allowExisting: false
         }
     }
