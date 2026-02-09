@@ -438,10 +438,14 @@ class Config {
         }, {})
 
         // any extension that should *always* be whitelisted, or that is bundled, should definitely be whitelisted for installation
+        config.extensions.whitelist.allowAlways = mergeArrays(
+            config.extensions.whitelist.allowAlways,
+            config.extensions.whitelist.bundled
+        )
+
         config.extensions.whitelist.allowInstall = mergeArrays(
             config.extensions.whitelist.allowInstall,
             config.extensions.whitelist.allowAlways,
-            config.extensions.whitelist.bundled
         )
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
