@@ -15,7 +15,7 @@ class ExtensionTrust {
     }
 
     static async analysisOf(extensionId) {
-        const analysis = ExtensionTrust.#analysisOf(extensionId)
+        const analysis = await ExtensionTrust.#analysisOf(extensionId)
         return cloneDeep(analysis)
     }
 
