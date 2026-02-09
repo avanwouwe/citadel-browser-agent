@@ -62,6 +62,7 @@ class Modal {
         const exceptionSection = shadow.getElementById('exceptionSection')
         exceptionEnabler.onclick = () => {
             acknowledge.hidden = true
+            exceptionEnabler.hidden = true
             exceptionSection.style.display = 'flex'
             shadow.getElementById('exceptionTextarea').focus()
         }
