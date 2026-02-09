@@ -3,7 +3,7 @@ class CombinedBlacklist {
 	#downloadStatus = { }
 
 	static #BLACKLIST_DOWNLOAD_ERRORS = 'blacklist-download-statistics-'
-	static #ERROR_REPORTING_FREQ = 20		// perform error reporting only once we're had N downloads
+	static #ERROR_REPORTING_FREQ = 20		// perform error reporting only once we've had N downloads
 
 
 	static TEST_BLACKLIST = '192.0.2.1'
@@ -115,11 +115,11 @@ class IPBlacklist {
     	while (low <= high) {
 	    	const mid = Math.floor((low + high) / 2);
 	    	const cidr = this.#sortedCidrList[mid];
-   	     
+
    	     	if (cidr.contains(ipNumber)) {
    	     		return cidr;
    	     	}
-   	     
+
    	     	if (ipNumber < cidr.start) {
    	     		high = mid - 1;
    	     	} else {

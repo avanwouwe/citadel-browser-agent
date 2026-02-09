@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PACKAGE_ID="nl.vanwouwe.citadel"
+PACKAGE_ID="org.citadelagent"
 
 rm -rf binaries
 

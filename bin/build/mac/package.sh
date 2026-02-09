@@ -2,8 +2,8 @@
 
 set -eu
 
-PACKAGE_ID="nl.vanwouwe.citadel"
-VERSION="1.4"
+PACKAGE_ID="org.citadelagent"
+VERSION="1.4.1"
 BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 OUTPUT_PKG="citadel-browser-agent-$VERSION.pkg"
 
