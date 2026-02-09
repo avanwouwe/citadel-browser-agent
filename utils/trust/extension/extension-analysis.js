@@ -156,7 +156,7 @@ class ExtensionAnalysis {
             if (Extension.isSideloaded(extensionInfo)) {
                 if (config.extensions.allowSideloading) {
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but allowed', Log.INFO, extensionInfo, undefined, scanType)
-                } else if (config.extensions.id.allowed.includes(extensionInfo.id)) {
+                } else if (config.extensions.whitelist.allowAlways.includes(extensionInfo.id)) {
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but whitelisted', Log.INFO, extensionInfo, undefined, scanType)
                 } else {
                     ExtensionAnalysis.#log('extension disabled', 'side-loaded and therefore disabled', Log.WARN, extensionInfo, undefined, scanType)
