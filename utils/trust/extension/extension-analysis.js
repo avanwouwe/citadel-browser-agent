@@ -219,8 +219,8 @@ class ExtensionAnalysis {
 
             // if we arrive here, the extension presence, installation or update was too high risk should be disabled
             let unableReason
-            if (!extensionInfo.mayDisable) unableReason = 'cannot disable'
-            else if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
+            if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
+            else if (!extensionInfo.mayDisable) unableReason = 'cannot disable'
 
             if (unableReason) {
                 ExtensionAnalysis.#log('extension disable failed', `could not be disabled because '${unableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
