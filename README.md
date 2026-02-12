@@ -95,7 +95,7 @@ Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) 
 * events lower than `INFO` log level are masked or hashed (meaning only sensitive events such as downloads and alerts are logged with details)
 * log levels allow you to log events locally but not send them to your EDR, thus allowing post-incident analysis without having everything centrally logged
 
-A [Data Protection Transparency statement](/doc/transparency.md) is available that can be used to perform Data Privacy Impact Analysis (DPIA)
+A [Data Protection Transparency statement](/docs/privacy/transparency.md) is available that can be used to perform Data Privacy Impact Analysis (DPIA)
 
 ### which browsers are supported?
 Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
@@ -111,7 +111,7 @@ In fact, other solutions that address the same problem generally shunt all the t
 ### how much security does this provide?
 Citadel is mainly intended for policy enforcement, licence management and DFIR. It uses heuristics to analyze the traffic it observes, which may produce false positives or false negatives. Whilst it does offer a basic blacklisting functionality, it does not (yet) use heuristic behavioural analysis to detect unknown threat types. It reports when the browser detects malware (thus making you more aware), but it does not itself analyze the content of uploads or downloads.
 
-For more detail see the complete [list of limitations](/doc/limitations.md).
+For more detail see the complete [list of limitations](/docs/config/limitations.md).
 
 ### does Citadel help me with my ISO 27001 certification?
-Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of I  SO 27001 controls. For more information, see the [overview of controls](/doc/ISO27001.md).
+Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of I  SO 27001 controls. For more information, see the [overview of controls](/docs/privacy/ISO27001.md).

@@ -1,3 +1,10 @@
+---
+layout: default
+title: Transparency
+parent: Privacy
+nav_order: 4
+---
+
 # Data Protection Transparency
 Citadel aims to strike a fair balance between security and privacy, and to maintain a posture of transparency towards end-users, in order to gain and maintain their confidence. This page gives an overview of the data processed by Citadel, and is designed to be able to be used as a Data Protection Impact Assessment.
 

@@ -10,7 +10,7 @@ Citadel has privacy-preserving and secure [default settings](https://github.com/
 
 At the very minimum you should consider overriding:
 * your company name and logo (to lend more credibility to the alerts)
-* the e-mail address of your own IT department (so that warnings show the contact details of your IT team)
+* the e-mail address of your own IT department (so warnings show the support team address)
 * the list of domains and netmasks that are part of your **protected scope**
 * the applications authorized by your IT team
 

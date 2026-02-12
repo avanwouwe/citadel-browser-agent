@@ -1,11 +1,11 @@
 ---
 layout: default
-title: Quick Start
+title: General Configuration
 parent: Configuration
 nav_order: 1
 ---
 
-# General configuration behavior
+# General configuration
 Citadel checks for changes in the configuration every hour, and will automatically detect if you have modified the configuration file.
 
 For security reasons, Citadel wll refuse to load configuration that is not owned by `root/wheel` (macOS) or `Administrator` / `SYSTEM` (Windows), or that is world-writable.
