@@ -19,6 +19,7 @@ permalink: pretty
 # Enables the built‑in search and navigation sidebar
 search_enabled: true
 color_scheme: light
+footer_content: ""
 
 # ------------------------------------------------------------
 # Navigation structure

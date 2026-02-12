@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Privacy
-nav_order: 5
+title: Dashboard
+nav_order: 4
 has_children: true
 ---

@@ -81,14 +81,7 @@ The shadow IT detection only reports on interaction with (authenticated) applica
 The data is logged on the local machine and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 
 ## Installation
-There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM.
-
-* [macOS](/doc/macos.md)
-* [Windows](/doc/windows.md)
-* [browser plugin](/doc/browser.md)
-* [configuration](/doc/configuration.md)
-* [integration into Wazuh](/doc/wazuh.md)
-
+There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM. Everything is explained in the [installation guide](https://www.citadelagent.org/install).
 
 ## Frequently Asked Questions
 
@@ -121,4 +114,4 @@ Citadel is mainly intended for policy enforcement, licence management and DFIR. 
 For more detail see the complete [list of limitations](/doc/limitations.md).
 
 ### does Citadel help me with my ISO 27001 certification?
-Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of ISO 27001 controls. For more information, see the [overview of controls](/doc/ISO27001.md).
+Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of I  SO 27001 controls. For more information, see the [overview of controls](/doc/ISO27001.md).
