@@ -118,7 +118,10 @@ class Log {
         const hashedHostname = url.hostname?.hashDJB2()
         const isUnhash = hashedHostname && config.domain.unhash.hasOwnProperty(hashedHostname)
 
-        if (! Config.isProtected(url.hostname) && ! isUnhash && Log.#levelValue[level] < config.logging.maskUrlLevel) {
+        if (! Config.isProtected(url.hostname) &&
+            ! isUnhash &&
+            Log.#levelValue[level] < config.logging.maskUrlLevel
+        ) {
             url.hostname ? url.hostname = hashedHostname : undefined
             url.username ? url.username = url.username.hashDJB2() : undefined
             url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashDJB2() : undefined

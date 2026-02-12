@@ -193,7 +193,7 @@ class Control {
         this.#lastDayStart = this.#lastDayStart ?? report.timestamp
         const newFailedDays = (report.timestamp - this.#lastDayStart) / ONE_DAY
         if (newFailedDays > 1) {
-            this.#lastDayStart += Math.floor(newFailedDays * ONE_DAY)
+            this.#lastDayStart = addDays(this.#lastDayStart, newFailedDays)
             this.#failedDays++
         }
 
@@ -244,7 +244,7 @@ class Control {
             report: this.report,
             warnTrigger: this.#warnTrigger,
             blockTrigger: this.#blockTrigger,
-            lastDayStart: this.#lastDayStart,
+            lastDayStart: this.#lastDayStart.toISOString(),
             failedDays: this.#failedDays
         }
     }
@@ -258,7 +258,7 @@ class Control {
         )
         control.definition = data.definition
         control.report = data.report
-        control.#lastDayStart = data.lastDayStart
+        control.#lastDayStart = parseTimestamp(data.lastDayStart)
         control.#failedDays = data.failedDays
         return control
     }

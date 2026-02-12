@@ -174,7 +174,7 @@ class Config {
             },
             exceptions: {
                 duration: 60,
-                domains: [ ]
+                domains: ["*"]
             },
             passwordReuse: {
                 action: "WARN",
@@ -299,7 +299,7 @@ class Config {
             },
             exceptions: {
                 duration: 60,
-                domains: [ ]
+                domains: ["*"]
             },
             controls: {
                 applications: {

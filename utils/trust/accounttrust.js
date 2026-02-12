@@ -60,7 +60,7 @@ class AccountTrust {
             const report = {
                 name: accountKey,
                 passed: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
-                timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? nowTimestamp()
+                timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? new Date()
             }
             control.addReport(report)
             newAudit.setFinding(control)
