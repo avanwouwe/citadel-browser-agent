@@ -5,7 +5,7 @@ parent: Configuration
 nav_order: 3
 ---
 
-Citadel performs web filtering out of the box. This means that Citadel periodically downloads OSINT lists of IP addresses, domains and URLs with a malicious reputation. This can be because they are used for Command & Control by botnets, for exfiltration by malware, or simply for phishing. When the browser tries to navigate to, or retrieve from, an address, domain or URL on this list, the page is blocked. The event is logged as a time-critical event that requires immediate analysis by your SOC (`ERROR`).
+Citadel performs web filtering out of the box. This means that Citadel periodically downloads OSINT lists of IP addresses, domains and URLs that have a malicious reputation. This can be because they are used for Command & Control by botnets, for exfiltration by malware, or simply for phishing. When the browser tries to navigate to, or retrieve from, an address, domain or URL on this list, the page is blocked. The event is logged as a time-critical event that requires immediate analysis by your SOC (`ERROR`).
 
 The user is explained why the page was blocked, and is proposed to analyze the reputation issue further by clicking on a [VirusTotal](https://www.virustotal.com) link. Citadel is configured to allow users to request exceptions, so as not, in case of a false positive, unduly block users that may urgently require access. This means that the option to request an exception is displayed. Users can then access the blocked page after having given a reason for doing so. In this case the event, with the reason, is then logged as a time-critical security event.
 

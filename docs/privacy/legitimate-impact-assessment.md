@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Legitimate Interests Assessment (LIA)
-parent: Privacy
+parent: Privacy & Compliance
 nav_order: 2
 ---
 

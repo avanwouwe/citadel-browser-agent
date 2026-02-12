@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Transparency
-parent: Privacy
+parent: Privacy & Compliance
 nav_order: 4
 ---
 

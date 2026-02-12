@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Privacy FAQ
-parent: Privacy
+parent: Privacy & Compliance
 nav_order: 1
 ---
 

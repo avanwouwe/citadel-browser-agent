@@ -1,6 +1,6 @@
 ---
 layout: default
 title: Extension Dashboard
-parent: Configuration
+parent: Dashboard
 nav_order: 3
 ---

@@ -1,7 +1,7 @@
 ---
 layout: default
 title: Data Privacy Impact Assessment (DPIA)
-parent: Privacy
+parent: Privacy & Compliance
 nav_order: 3
 ---
 
