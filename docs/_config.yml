@@ -8,7 +8,7 @@ description: Browser‑based endpoint security solution
 url: "https://citadelagent.org"
 
 author: Arno van Wouwe
-email: citadel@vanwouwe.nl
+email: contact@citadelagent.org
 
 # ------------------------------------------------------------
 # Build settings
@@ -51,7 +51,6 @@ social:
   name: "Citadel Browser Agent"
   links:
     - https://github.com/avanwouwe/citadel-browser-agent
-    - https://x.com/vanwouwe
 
 # ------------------------------------------------------------
 # Plugins allowed on GitHub Pages
