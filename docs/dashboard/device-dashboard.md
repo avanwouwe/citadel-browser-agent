@@ -1,6 +1,6 @@
 ---
 layout: default
 title: Device Dashboard
-parent: Configuration
+parent: Dashboard
 nav_order: 1
 ---

@@ -1,6 +1,6 @@
 ---
 layout: default
 title: Account Dashboard
-parent: Configuration
+parent: Dashboard
 nav_order: 2
 ---

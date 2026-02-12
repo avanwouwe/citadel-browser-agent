@@ -1,8 +1,11 @@
-.site-logo {
-  height: 60px;
-  width: auto;
+.site-header {
+  min-height: 70px !important;
+  padding: 0.75rem 0;
 }
 
-$link-color: #007bff;
-$btn-primary-color: #007bff;
-$base-button-color: #007bff;
+.site-logo {
+  max-height: 55px;
+  width: auto;
+  vertical-align: middle;
+}
+

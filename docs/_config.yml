@@ -18,7 +18,7 @@ permalink: pretty
 
 # Enables the built‑in search and navigation sidebar
 search_enabled: true
-color_scheme: light
+color_scheme: custom
 footer_content: ""
 
 # ------------------------------------------------------------

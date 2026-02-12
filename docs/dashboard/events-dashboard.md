@@ -1,6 +1,6 @@
 ---
 layout: default
 title: Event Dashboard
-parent: Configuration
+parent: Dashboard
 nav_order: 4
 ---

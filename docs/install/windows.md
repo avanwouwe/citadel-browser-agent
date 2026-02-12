@@ -7,7 +7,7 @@ nav_order: 1
 
 # Windows installation
 
-Browser extensions are sandboxed and cannot access the local operating system. To allow Citadel to write to the system log it is necessary to set up Native Messaging. This involves placing a JSON manifest file that gives the path to the program that will be started by Chrome, and then receive the events and log them to the Windows Event log. The Citadel service receives those events and writes them to a syslog-formatted log file.
+Browser extensions are sandboxed and cannot access the local operating system. To allow Citadel to write to the system log it is necessary to use *Native Messaging*. This involves placing a JSON manifest file that gives the path to the program that will be started by Chrome, and then receive the events and log them to the Windows Event log. The Citadel service receives those events and writes them to a syslog-formatted log file.
 
 You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest), which takes care of all of that.
 
@@ -33,4 +33,4 @@ The commands accepted by the service are:
 You can verify that events are being created by checking `C:\Program Files\Citadel\logs\CitadelSvc.out.log`.
 
 ## configuration
-Citadel has sensible defaults, but you can change the configuration of Citadel, for example to change the logging and masking levels or to declare your own blacklist or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the [correct format](/configuration) in the Citadel directory. See the [configuration reference](/configuration) for more information.
+Citadel has sensible defaults, but you can change the configuration of Citadel, for example to change the logging and masking levels or to declare your own blacklist or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the correct format in the `C:\Program Files\Citadel` directory. See the [configuration manual](/config/) for more information.

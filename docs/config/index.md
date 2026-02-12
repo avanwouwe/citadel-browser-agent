@@ -6,7 +6,7 @@ has_children: true
 ---
 
 # Getting started
-Citadel has privacy-preserving and secure [default settings](/config.js), and needs very little configuration to get started. However, many of its features are highly configurable.
+Citadel has privacy-preserving and secure [default settings](https://github.com/avanwouwe/citadel-browser-agent/blob/main/config.js), and needs very little configuration to get started. However, many of its features are highly configurable.
 
 At the very minimum you should consider overriding:
 * your company name and logo (to lend more credibility to the alerts)
@@ -26,7 +26,7 @@ The following controls and monitoring are required to protect the security of th
 * browser alerts that indicate imminent security threats (e.g. `ERR_FILE_VIRUS_INFECTED` or `ERR_BLOCKED_BY_ADMINISTRATOR`)
 * web filtering is triggered
 
-You can override the configurations by placing a file `citadel-config.json` containing a JSON object in the directory where the `citadel-browser-agent` binary lives.
+You can override the configurations by placing a file called `citadel-config.json` containing a JSON object in the directory where the `citadel-browser-agent` binary lives.
 
 Example:
 
