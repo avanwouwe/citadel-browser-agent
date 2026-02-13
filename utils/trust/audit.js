@@ -170,11 +170,12 @@ class Control {
     #lastDayStart
     #failedDays = 0
 
-    constructor(controlName, action, warnTrigger, blockTrigger) {
+    constructor(controlName, action, warnTrigger, blockTrigger, definition = undefined) {
         assert(action !== Action.SKIP, `tried to create skipped control ${controlName}`)
 
         this.name = controlName
         this.action = action
+        this.definition = definition
         this.#warnTrigger = warnTrigger
         this.#blockTrigger = blockTrigger
     }

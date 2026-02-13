@@ -10,16 +10,20 @@ class DeviceTrust {
 
     static addReport(report) {
         for (const controlReport of Object.values(report.controls.results)) {
-            const prevState = DeviceTrust.#audit.getFinding(controlReport.name)?.getState()
+            const prevControl = DeviceTrust.#audit.getFinding(controlReport.name)
+            const currControl = DeviceTrust.#createControl(controlReport.name)
 
-            const control = DeviceTrust.#audit.getFinding(controlReport.name) ?? DeviceTrust.#createControl(controlReport.name)
-            if (!control || control.action === Action.SKIP) continue
-
-            control.addReport(controlReport)
+            const control = prevControl ?? currControl
             control.definition = report.controls.definitions[controlReport.name]
-            DeviceTrust.#audit.setFinding(control)
+            control.action = currControl.action
 
+            if (control.action === Action.SKIP) continue
+
+            const prevState = prevControl?.getState()
+            control.addReport(controlReport)
+            DeviceTrust.#audit.setFinding(control)
             const currState = control.getState()
+
             if (control.action === Action.BLOCK && currState === State.BLOCKING && prevState !== currState) {
                 logger.log(nowTimestamp(), "devicetrust", "immediate block", undefined, Log.ERROR, control.name, `control '${control.name}' triggered an immediate blocking`, undefined, undefined, false)
             }
