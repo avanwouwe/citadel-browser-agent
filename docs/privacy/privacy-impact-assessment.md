@@ -7,8 +7,9 @@ nav_order: 3
 
 # **Data Privacy Impact Assessment : Citadel**
 
-> [!NOTE]
+> **Note**
 > This is the Data Privacy Impact Assessment performed by the developer of Citadel, as part of the development of Citadel. It can be used as a **template** to be used by a CISO / CIO during the Citadel deployment. The template should however be carefully analysed, verified for compliance, and adapted to the specifics of the organisation, for example with respect to data retention, local laws or use of external SIEM / SOAR solutions.
+{: .note }
 
 ## **1.1 Overview**
 

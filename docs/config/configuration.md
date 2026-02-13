@@ -17,6 +17,12 @@ When overriding default settings the following rules are used:
 * existing array attribute : array is replaced
 * existing object attribute : merged hierarchically, using the above rules
 
+> **Note**
+> This means that:
+> * adding an attribute means just stating it
+> * adding a value to a list / array means restating the entire list
+{: .note }
+
 ## specifying domains
 The following attributes specify domains:
 * `domain.unhash`
