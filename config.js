@@ -203,65 +203,55 @@ class Config {
                 exceptions: []
             }
         },
-        blacklist: {
-            exceptions: {
-                duration: 60
+        webfilter: {
+            blacklist: {
+                exceptions: {
+                    duration: 60
+                },
+                ip: {
+                    "FireHOL (level 1)": {
+                        urls: ["https://iplists.firehol.org/files/firehol_level1.netset"],
+                        freq: 60
+                    },
+                    "https://github.com/romainmarcoux/malicious-outgoing-ip-domains": {
+                        urls: ["https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt"],
+                        freq: 60
+                    },
+                    "IPsum (level 2+)": {
+                        urls: ["https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt"],
+                        freq: 60 * 12
+                    }
+                },
+                url: {
+                    "URLhaus": {
+                        urls: ["https://urlhaus.abuse.ch/downloads/text_online/"],
+                        freq: 60
+                    },
+                    "https://github.com/romainmarcoux/malicious-domains": {
+                        urls: [
+                            "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-aa.txt",
+                            "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ab.txt",
+                            "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ac.txt"
+                        ],
+                        freq: 60
+                    },
+                    "Known Torrent Sites": {
+                        urls: ["https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackers.txt"],
+                        freq: 60 * 12
+                    }
+                }
             },
-            ip: [
-                {
-                    name: "FireHOL (level 1)",
-                    url: "https://iplists.firehol.org/files/firehol_level1.netset",
-                    freq: 60
-                },
-                {
-                    name: "https://github.com/romainmarcoux/malicious-outgoing-ip-domains",
-                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt",
-                    freq: 60
-                },
-                {
-                    name: "IPsum (level 2+)",
-                    url: "https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt",
-                    freq: 60 * 12
-                }
-            ],
-            url: [
-                {
-                    name: "URLhaus",
-                    url: "https://urlhaus.abuse.ch/downloads/text_online/",
-                    freq: 60
-                },
-                {
-                    name: "https://github.com/romainmarcoux/malicious-domains (AA)",
-                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-aa.txt",
-                    freq: 60
-                },
-                {
-                    name: "https://github.com/romainmarcoux/malicious-domains (AB)",
-                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ab.txt",
-                    freq: 60
-                },
-                {
-                    name: "https://github.com/romainmarcoux/malicious-domains (AC)",
-                    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ac.txt",
-                    freq: 60
-                },
-                {
-                    name: "Known Torrent Sites",
-                    url: "https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackers.txt",
-                    freq: 60 * 12
-                }
-            ],
-        },
-        whitelist: {
-            ip: [
-                "10.0.0.0/8",
-                "127.0.0.0/8",
-                "0.0.0.0/32",
-                "169.254.0.0/16",
-                "172.16.0.0/12",
-                "192.168.0.0/16"
-            ],
-            url: [ ],
+            whitelist: {
+                ip: [
+                    "10.0.0.0/8",
+                    "127.0.0.0/8",
+                    "0.0.0.0/32",
+                    "169.254.0.0/16",
+                    "172.16.0.0/12",
+                    "192.168.0.0/16"
+                ],
+                url: [ ],
+            }
         },
         ignorelist: [
             'about:home',

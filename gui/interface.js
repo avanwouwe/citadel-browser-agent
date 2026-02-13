@@ -26,7 +26,7 @@ function blockPage(tabId, reason, blockedPage) {
         url: blockedPage,
         contact: config.company.contact,
         logo: Logo.getLogo(),
-        allowException: config.blacklist.exceptions.duration !== undefined
+        allowException: config.webfilter.blacklist.exceptions.duration !== undefined
     })
 
     navigateTo(tabId, chrome.runtime.getURL("/gui/blocked.html"))

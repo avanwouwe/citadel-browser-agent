@@ -32,10 +32,12 @@ By default, users can request an exception if they are blocked by a blacklist. T
 
 ```
     ...
-    'blacklist": {
-        "exceptions": {
-            "duration": 0
-        },
+    "webfilter": {
+        "blacklist": {
+            "exceptions": {
+                "duration": 0
+            },
+        }
     }        
     ...
 ```
@@ -46,16 +48,18 @@ In some cases your blacklist may accidentally include IPs or URLs that are false
 This is for example the default configuration:
 ```
     ...
-    whitelist: {
-        ip: [
-            "10.0.0.0/8",
-            "127.0.0.0/8",
-            "0.0.0.0/32",
-            "169.254.0.0/16",
-            "172.16.0.0/12",
-            "192.168.0.0/16"
-        ],
-        url: [ ],
+    "webfilter": {
+        "whitelist": {
+            "ip": [
+                "10.0.0.0/8",
+                "127.0.0.0/8",
+                "0.0.0.0/32",
+                "169.254.0.0/16",
+                "172.16.0.0/12",
+                "192.168.0.0/16"
+            ],
+            "url": [ ],
+        }
     }
     ...
 ```

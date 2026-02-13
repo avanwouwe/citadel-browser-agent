@@ -10,7 +10,7 @@ class Exceptionlist extends URLBlacklist {
 
         setTimeout(() => {
             super.remove(entry)
-        }, config.blacklist.exceptions.duration * ONE_MINUTE)
+        }, config.webfilter.blacklist.exceptions.duration * ONE_MINUTE)
     }
 
 }

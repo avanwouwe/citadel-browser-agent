@@ -29,13 +29,13 @@ Port.onMessage("config", async (newConfig) => {
 	]);
 
 	[blacklistIP, blacklistURL] = await Promise.all([
-		new CombinedBlacklist().load(config.blacklist.ip, IPBlacklist),
-		new CombinedBlacklist().load(config.blacklist.url, URLBlacklist)
+		new CombinedBlacklist().load(config.webfilter.blacklist.ip, IPBlacklist),
+		new CombinedBlacklist().load(config.webfilter.blacklist.url, URLBlacklist)
 	])
 	whitelistIP = new IPBlacklist().init()
 	whitelistURL = new URLBlacklist().init()
-	config.whitelist.ip.forEach(entry => whitelistIP.add(entry))
-	config.whitelist.url.forEach(entry => whitelistURL.add(entry))
+	config.webfilter.whitelist.ip.forEach(entry => whitelistIP.add(entry))
+	config.webfilter.whitelist.url.forEach(entry => whitelistURL.add(entry))
 	exceptionList = new Exceptionlist()
 	ignorelist = new Ignorelist()
 
