@@ -207,12 +207,12 @@ The expectations of data subjects have been evaluated as follows.
 
 ### 3.3 Likely Impact on Individuals
 
-| Impact Area | Assessment                                                                                                                     | Safeguards                                                                                                      |
-| :---- |:-------------------------------------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------|
-| Privacy | Minimal; URL masking ensures only security-relevant data for protected systems or critical security events is logged           | Data minimisation, transparency dashboard, local hashing, masking of URLs and secrets, SIEM access controls     |
-| Objection / Control | Employee discomfort possible                                                                                                   | Opt-out / configuration options, internal helpdesk process.                                                     |
-| Intrusiveness | Very low: URL masking prevents logging of non-protected systems; no content captured; masking of passwords and secrets in logs | Only protected systems monitored; usage is logged as Yes / No                                                   |
-| Misuse | Strict RBAC for SIEM / forensic data                                                                                           | Role-based access, limited audit trail                                                                          |
+| Impact Area | Assessment                                                                                                                     | Safeguards                                                                                                  |
+| :---- |:-------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------|
+| Privacy | Minimal; URL masking ensures only security-relevant data for protected systems or critical security events is logged           | Data minimisation, transparency dashboard, local hashing, masking of URLs and secrets, SIEM access controls |
+| Objection / Control | Employee discomfort possible                                                                                                   | Opt-out / configuration options, internal helpdesk process, training / transparency.                        |
+| Intrusiveness | Very low: URL masking prevents logging of non-protected systems; no content captured; masking of passwords and secrets in logs | Only protected systems monitored; usage is logged as Yes / No                                               |
+| Misuse | Strict RBAC for SIEM / forensic data                                                                                           | Role-based access, limited audit trail                                                                      |
 
 **Opt-out available:**  
 Yes, via configuration or organisational process in special situations.
@@ -233,6 +233,6 @@ Yes, via configuration or organisational process in special situations.
 ## 5\. Next Steps
 
 - **Filing:** Store this LIA and review annually, or on major technical or legal change.
-- **Transparency:** Summarise processing and legal basis in user privacy notices (see [statement](http:///doc/transparency.md)).
-- **DPIA:** Complete full DPIA where required by law, risk, or scale. (see [template](http:///doc/privacy-impact-assessment.md))
+- **Transparency:** Summarise processing and legal basis in user privacy notices (see [statement](http:///doc/priavacy/transparency.md)).
+- **DPIA:** Complete full DPIA where required by law, risk, or scale. (see [template](/doc/privacy/privacy-impact-assessment.md))
 - **Review:** Monitor for regulatory/technical updates; revise document as needed.

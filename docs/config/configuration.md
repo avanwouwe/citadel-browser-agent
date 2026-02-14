@@ -24,7 +24,7 @@ When overriding default settings the following rules are used:
 {: .note }
 
 ## specifying domains
-The following attributes specify domains:
+The following attributes specify lists of domains:
 * `domain.unhash`
 * `company.domains`
 * `company.applications`
@@ -37,7 +37,7 @@ The following attributes specify domains:
 * `account.mfa.required`
 * `account.mfa.exceptions`
 
-These configurations take a list of domains, where specifying `domain.com` matches:
+Where specifying `domain.com` matches:
 * domain.com
 * host.domain.com
 * host.subdomain.com

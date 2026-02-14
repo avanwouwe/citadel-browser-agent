@@ -15,12 +15,12 @@ nav_order: 3
 
 ### Description of the Processing Considered
 
-| Description of the processing |  |
-| :---- | :---- |
+| Description of the processing |                                                                                                                                                                                                                                 |
+| :---- |:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Purposes of the processing | Enable CISOs and CIOs to protect sensitive web applications from cybersecurity threats and comply with legal, contractual, and regulatory obligations across the Security Incident Lifecycle (prevention, detection, response). |
-| Stakes of the processing | Protection of personal and business data; prevention and detection of malware, policy breaches, shadow IT; compliance with cybersecurity policies and relevant data protection laws. |
-| Data controller | Deployed organization (implementing Citadel within its IT estate); typically the IT or cybersecurity department. |
-| Processor(s) | None by default (Citadel backendless by design). SIEM/XDR may act as a data processor for security events. |
+| Stakes of the processing | Protection of personal and business data; prevention and detection of malware, policy breaches, shadow IT; compliance with cybersecurity policies and relevant data protection laws.                                            |
+| Data controller | Deployed organization (implementing Citadel within its IT estate); typically the IT or cybersecurity department.                                                                                                                |
+| Processor(s) | None by default (Citadel is backendless by design). SIEM/XDR may act as a data processor for security events.                                                                                                                   |
 
 ### Inventory of Applicable Frameworks for the Processing
 
@@ -48,7 +48,7 @@ nav_order: 3
 | Web navigations (hashed)                                                 | security team, via local logfiles on endpoint (like [regular browser forensics](https://www.foxtonforensics.com/browser-history-examiner/chrome-history-location), but in a more privacy-respecting way) | As long as the agent is installed and as per local log retention policy. |
 | Web requests                                                             | local processing only                                                                                                                                                                                    | N/A |
 | Passwords entered in password fields (hashed)                            | strictly local processing and storage within browser storage                                                                                                                                             | As long as the agent is installed |
-| Secrets misentered by accident (passwords, credit cards, API keys, etc.) | masked from logs if detected                                                                                                                                                                             | N/A |
+| Secrets misentered by accident (passwords, credit cards, API keys, etc.) | masked from logs when detected                                                                                                                                                                           | N/A |
 | Endpoint compliance status                                               | security team via SIEM / XDR                                                                                                                                                                             | As long as the agent is installed and as per SIEM / XDR retention policy. |
 | Security configuration, installed / running apps, stored documents       | security team via SIEM / XDR                                                                                                                                                                             | Aggregated status / state only, as long as agent installed |
 | Camera, microphone                                                       | no processing                                                                                                                                                                                            | N/A |
