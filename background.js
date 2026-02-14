@@ -846,8 +846,8 @@ onMessage((request, sender) => {
 		const exception = logObj.value
 		exception.exceptionReason = request.exceptionReason
 		ExtensionTrust.allow(request.analysis)
-		ExtensionAnalysis.showStorePage(sender.tab.id, exception.storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, exception.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason ${exception.exceptionReason}`)
+		ExtensionAnalysis.showStorePage(sender.tab.id, request.storePage)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason ${exception.exceptionReason}`)
 	}
 
 	if (request.type === "warn-reuse") {

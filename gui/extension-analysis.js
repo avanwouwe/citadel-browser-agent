@@ -280,6 +280,7 @@ function proposeException() {
         evaluation.allowed = true
 
         const exception = {
+            storePage,
             analysis: { storeInfo, manifest, evaluation },
             exceptionReason: exceptionReasonInput.value.trim()
         }
