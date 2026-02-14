@@ -145,16 +145,17 @@ class Audit {
 
     notify() {
         const title = t(`${this.#type}trust.notification.title`)
+        const contact = config.company.contact
 
         if (this.#conclusion === State.PASSING) {
             Notification.setAlert(this.#type, this.#conclusion)
         } else if (this.#conclusion === State.FAILING) {
-            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.failing`))
+            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.failing`, { contact }))
         } else if (this.#conclusion === State.WARNING) {
             const days = this.getNextState().days ?? t(`${this.#type}trust.notification.a-few`)
-            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.warning`, { days }))
+            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.warning`,  { days, contact }))
         } else if (this.#conclusion === State.BLOCKING) {
-            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.blocking`))
+            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.blocking`, { contact }))
         }
     }
 }

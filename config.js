@@ -2,7 +2,7 @@ class Config {
     static config = {
         company: {
             name: 'Your Organisation',          // name of your organisation
-            contact: 'your IT support',         // replace with the email address of your support
+            contact: undefined,                 // replace with the email address of your support
             logo: undefined,                    // replace with the URL of your logo (128 x 128 pixel, transparent)
             domains: [ ],                       // replace with your domains, e.g. ["yourdomain.com","yourdomain.io"]
             applications: [ ]                   // list your applications, e.g. ["your-crm.com", "your-mdm.com"]
@@ -437,6 +437,8 @@ class Config {
             config.extensions.whitelist.allowInstall,
             config.extensions.whitelist.allowAlways,
         )
+
+        config.company.contact = config.company.contact ?? t('global.contact')
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
         const exceptions = Config.config.exceptions

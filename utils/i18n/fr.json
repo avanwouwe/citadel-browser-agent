@@ -1,7 +1,8 @@
 {
   "global": {
     "yes": "Oui",
-    "no": "Non"
+    "no": "Non",
+    "it-support": "votre support IT"
   },
   "control": {
     "state": {
@@ -26,9 +27,9 @@
     },
     "notification": {
       "title": "Problèmes de sécurité",
-      "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger.",
-      "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée. Dans {{days}} jours, votre accès sera bloqué. Cliquez pour corriger les problèmes.",
-      "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et votre accès a été bloqué. Cliquez pour corriger les problèmes.",
+      "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
+      "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée. Dans {{days}} jours, votre accès sera bloqué. Cliquez pour corriger les problèmes ou contactez {{contact}}.",
+      "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et votre accès a été bloqué. Cliquez pour corriger les problèmes ou contactez {{contact}}.",
       "a-few": "quelques"
     }
   },
@@ -64,9 +65,9 @@
     },
     "notification": {
       "title": "Problèmes de sécurité",
-      "failing": "Un de vos comptes présente des problèmes de sécurité. Cliquez pour les corriger.",
-      "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Dans {{days}} jours, votre appareil sera bloqué. Cliquez pour corriger le compte..",
-      "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre accès a été bloqué. Cliquez pour corriger le compte."
+      "failing": "Un de vos comptes présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
+      "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Dans {{days}} jours, votre accès sera bloqué. Cliquez pour corriger le compte ou contactez {{contact}}.",
+      "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre accès a été bloqué. Cliquez pour corriger le compte ou contactez {{contact}}."
     }
   },
   "extensiontrust": {

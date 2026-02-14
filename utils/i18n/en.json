@@ -1,7 +1,8 @@
 {
   "global": {
     "yes": "Yes",
-    "no": "No"
+    "no": "No",
+    "contact": "your IT support"
   },
   "control": {
     "state": {
@@ -26,9 +27,9 @@
     },
     "notification": {
       "title": "Device security issues",
-      "failing": "Your device has security issues. Click to fix them.",
-      "warning": "⚠\uFE0F Your device is not securely configured. In {{days}} days your access will be blocked. Click to fix issues.",
-      "blocking": "⚠\uFE0F Your device is insecure and your access has been blocked. Click to fix issues.",
+      "failing": "Your device has security issues. Click to fix them or contact {{contact}}.",
+      "warning": "⚠\uFE0F Your device is not securely configured. In {{days}} days your access will be blocked. Click to fix issues or contact {{contact}}.",
+      "blocking": "⚠\uFE0F Your device is insecure and your access has been blocked. Click to fix issues or contact {{contact}}.",
       "a-few": "a few"
     }
   },
@@ -64,9 +65,9 @@
     },
     "notification": {
       "title": "Account security issues",
-      "failing": "One of your accounts has security issues. Click to fix them.",
-      "warning": "⚠\uFE0F One of your accounts is not securely configured. In {{days}} days your access will be blocked. Click to fix issues.",
-      "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your access has been blocked. Click to fix issues."
+      "failing": "One of your accounts has security issues. Click to fix them or contact {{contact}}.",
+      "warning": "⚠\uFE0F One of your accounts is not securely configured. In {{days}} days your access will be blocked. Click to fix issues or contact {{contact}}.",
+      "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your access has been blocked. Click to fix issues or contact {{contact}}."
     }
   },
   "extensiontrust": {
