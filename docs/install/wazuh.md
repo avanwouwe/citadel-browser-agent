@@ -101,4 +101,4 @@ Restart the server for the changes to take effect, for example using the `Restar
 
 You should start seeing new events show up in the `Threat hunting` module, for example if you visit [http://192.0.2.1](http://192.0.2.1) and filter in Wazuh for `data.browseragent.event: *`.
 
-![screenshot of events in Wazuh](/img/screenshot-wazuh.png)
+![screenshot of events in Wazuh](/img/screenshot/screenshot-wazuh.png)
