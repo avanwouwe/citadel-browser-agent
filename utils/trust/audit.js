@@ -134,7 +134,7 @@ class Audit {
                 name: control.name,
                 definition: control.definition,
                 report: control.report,
-                passing: control.report.passed,
+                passing: control.report.passing,
                 state: control.getState(),
                 nextState: control.getNextState(),
             }
@@ -203,9 +203,9 @@ class Control {
     }
 
     getState() {
-        if (this.report.passed == null) {
+        if (this.report.passing == null) {
             return State.UNKNOWN
-        } else if (this.report.passed) {
+        } else if (this.report.passing) {
             return State.PASSING
         } else if (this.action === Action.BLOCK) {
             return State.BLOCKING
@@ -221,9 +221,9 @@ class Control {
     }
 
     getNextState() {
-        if (this.report.passed == null) {
+        if (this.report.passing == null) {
             return { state: State.UNKNOWN }
-        } else if (this.report.passed) {
+        } else if (this.report.passing) {
             return { state: State.PASSING }
         } else if (this.action === Action.BLOCK) {
             return { state: State.BLOCKING }
@@ -239,14 +239,19 @@ class Control {
     }
 
     dehydrate() {
+        const report = cloneDeep(this.report)
+        if (report?.timestamp) {
+            report.timestamp = report.timestamp.toISOString()
+        }
+
         return {
             name: this.name,
             action: this.action,
             definition: this.definition,
-            report: this.report,
+            report: report,
             warnTrigger: this.#warnTrigger,
             blockTrigger: this.#blockTrigger,
-            lastDayStart: this.#lastDayStart.toISOString(),
+            lastDayStart: this.#lastDayStart?.toISOString(),
             failedDays: this.#failedDays
         }
     }
@@ -256,12 +261,17 @@ class Control {
             data.name,
             data.action,
             data.warnTrigger,
-            data.blockTrigger
+            data.blockTrigger,
+            data.definition
         )
-        control.definition = data.definition
-        control.report = data.report
         control.#lastDayStart = parseTimestamp(data.lastDayStart)
         control.#failedDays = data.failedDays
+
+        control.report = data.report
+        if (control?.report?.timestamp) {
+            control.report.timestamp = parseTimestamp(control.report.timestamp)
+        }
+
         return control
     }
 }
