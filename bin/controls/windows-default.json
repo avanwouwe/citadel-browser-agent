@@ -216,7 +216,8 @@
       }
     },
     "SensitiveFiles": {
-      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE (path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%password%emergency%kit.pdf' OR path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%backup%code%' OR path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%recovery%code%' OR path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%password%');",      "text": {
+      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE directory = 'C:\\\\Users\\\\{{username}}\\\\Downloads' AND (filename LIKE '%backup%code%' OR filename LIKE '%recovery%code%' OR filename LIKE '%password%') AND btime <= (strftime('%s','now') - (7 * 24 * 60 * 60));",
+      "text": {
         "en": {
           "label": "Sensitive data is protected",
           "explain": "https://www.citadelagent.org/control/SensitiveFiles"
@@ -228,7 +229,8 @@
       }
     },
     "ExportedFiles": {
-      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE (path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%export%.csv' OR path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%export%.json' OR path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%export%.txt') AND atime <= (strftime('%s','now') - (30 * 24 * 60 * 60));",      "text": {
+      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE directory = 'C:\\\\Users\\\\{{username}}\\\\Downloads' AND (filename LIKE '%export%.csv' OR filename LIKE '%export%.json' OR filename LIKE '%export%.txt' OR filename LIKE '%export%.xls' OR filename LIKE '%export%.xlsx') AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60));",
+      "text": {
         "en": {
           "label": "Exported files are purged",
           "explain": "https://www.citadelagent.org/control/SensitiveFiles"
@@ -240,7 +242,8 @@
       }
     },
     "UnusedFiles": {
-      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE path LIKE 'C:\\\\Users\\\\{{username}}\\\\Downloads\\\\%' AND atime <= (strftime('%s','now') - (90 * 24 * 60 * 60));",      "text": {
+      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE directory = 'C:\\\\Users\\\\{{username}}\\\\Downloads' AND btime <= (strftime('%s','now') - (90 * 24 * 60 * 60));",
+      "text": {
         "en": {
           "label": "Unused files are purged",
           "explain": "https://www.citadelagent.org/control/SensitiveFiles"

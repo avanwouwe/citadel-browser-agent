@@ -242,7 +242,7 @@
       }
     },
     "SensitiveFiles": {
-      "query": "SELECT\n  replace(path, '/Users/{{username}}/', '') AS error\nFROM file\nWHERE (\n    path LIKE '/Users/{{username}}/Downloads/%password%emergency%kit.pdf'\n    OR path LIKE '/Users/{{username}}/Downloads/%backup%code%'\n    OR path LIKE '/Users/{{username}}/Downloads/%recovery%code%'\n    OR path LIKE '/Users/{{username}}/Downloads/%password%'\n);",
+      "query": "SELECT replace(path, '/Users/{{username}}/', '') AS error FROM file WHERE directory = '/Users/{{username}}/Downloads' AND (filename LIKE '%password%emergency%kit.pdf' OR filename LIKE '%backup%code%' OR filename LIKE '%recovery%code%' OR filename LIKE '%password%') AND btime <= (strftime('%s','now') - (7 * 24 * 60 * 60));",
       "text": {
         "en": {
           "label": "Sensitive data is protected",
@@ -255,28 +255,28 @@
       }
     },
     "ExportedFiles": {
-      "query": "SELECT \n  replace(path, '/Users/{{username}}/', '') AS error \nFROM file \nWHERE (\n    path LIKE '/Users/{{username}}/Downloads/%export%.csv' \n    OR path LIKE '/Users/{{username}}/Downloads/%export%.json' \n    OR path LIKE '/Users/{{username}}/Downloads/%export%.txt'\n  )\n  AND atime <= (strftime('%s','now') - (30 * 24 * 60 * 60));",
+      "query": "SELECT replace(path, '/Users/{{username}}/', '') AS error FROM file WHERE directory = '/Users/{{username}}/Downloads' AND (filename LIKE '%export%.csv' OR filename LIKE '%export%.json' OR filename LIKE '%export%.txt' OR filename LIKE '%export%.xls' OR filename LIKE '%export%.xlsx') AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60));",
       "text": {
         "en": {
           "label": "Exported files are purged",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/ExportedFiles"
         },
         "fr": {
           "label": "Fichiers exportés sont supprimés",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/ExportedFiles"
         }
       }
     },
     "UnusedFiles": {
-      "query": "SELECT \n  replace(path, '/Users/{{username}}/', '') AS error \nFROM file \nWHERE path LIKE '/Users/{{username}}/Downloads/%' \n  AND atime <= (strftime('%s','now') - (90 * 24 * 60 * 60));",
+      "query": "SELECT \n  replace(path, '/Users/{{username}}/', '') AS error \nFROM file \nWHERE path LIKE '/Users/{{username}}/Downloads/%' \n  AND btime <= (strftime('%s','now') - (90 * 24 * 60 * 60));",
       "text": {
         "en": {
           "label": "Unused files are purged",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/UnusedFiles"
         },
         "fr": {
           "label": "Fichiers inutilisés sont supprimés",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/UnusedFiles"
         }
       }
     }
