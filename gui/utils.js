@@ -30,7 +30,7 @@ class Logo {
     static DEFAULT = chrome.runtime.getURL('/gui/images/icon128.png')
 
     static getLogo() {
-        if (config.company.logo.startsWith("data:")) {
+        if (config.company.logo?.startsWith("data:")) {
             return config.company.logo
         }
 
