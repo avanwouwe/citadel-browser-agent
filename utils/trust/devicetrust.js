@@ -8,19 +8,19 @@ class DeviceTrust {
         await DeviceTrust.#audit.ready()
     }
 
-    static addReport(report) {
-        for (const controlReport of Object.values(report.controls.results)) {
-            const prevControl = DeviceTrust.#audit.getFinding(controlReport.name)
-            const currControl = DeviceTrust.#createControl(controlReport.name)
+    static addAudit(audit) {
+        for (const report of Object.values(audit.reports)) {
+            const prevControl = DeviceTrust.#audit.getFinding(report.name)
+            const currControl = DeviceTrust.#createControl(report.name)
 
             const control = prevControl ?? currControl
-            control.definition = report.controls.definitions[controlReport.name]
+            control.definition = audit.definitions[report.name]
             control.action = currControl.action
 
             if (control.action === Action.SKIP) continue
 
             const prevState = prevControl?.getState()
-            control.addReport(controlReport)
+            control.addReport(report)
             DeviceTrust.#audit.setFinding(control)
             const currState = control.getState()
 
@@ -30,9 +30,9 @@ class DeviceTrust {
         }
 
         // Remove controls that are no longer in the report
-        const reportControlNames = new Set(Object.keys(report.controls.results))
+        const controlNames = new Set(Object.keys(audit.reports))
         for (const controlName of Object.keys(DeviceTrust.getStatus().controls)) {
-            if (!reportControlNames.has(controlName)) {
+            if (!controlNames.has(controlName)) {
                 DeviceTrust.#audit.removeFinding(controlName)
             }
         }

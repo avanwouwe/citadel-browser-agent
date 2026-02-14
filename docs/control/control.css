@@ -164,47 +164,6 @@ strong {
     margin-bottom: var(--spacing-md);
 }
 
-.status-badge {
-    display: inline-block;
-    padding: var(--spacing-xs) var(--spacing-md);
-    border-radius: 9999px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.status-badge.failed {
-    background-color: var(--status-failed);
-    color: white;
-}
-
-.status-badge.passed {
-    background-color: var(--status-passed);
-    color: white;
-}
-
-.status-badge.warning {
-    background-color: var(--status-warning);
-    color: white;
-}
-
-.status-inline {
-    font-weight: 600;
-    padding: 0.125rem 0.5rem;
-    border-radius: var(--radius-sm);
-}
-
-.status-inline.passed {
-    background-color: var(--status-passed-bg);
-    color: var(--status-passed);
-}
-
-.status-inline.failed {
-    background-color: var(--status-failed-bg);
-    color: var(--status-failed);
-}
-
 /* ============================================
    Sections
    ============================================ */

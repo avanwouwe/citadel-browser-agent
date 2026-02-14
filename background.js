@@ -51,23 +51,23 @@ Port.onMessage("restart",() => {
 	chrome.runtime.reload()
 })
 
-Port.onMessage("devicetrust",(report) => {
-	debug("received device trust report", report)
+Port.onMessage("devicetrust",(audit) => {
+	debug("received device trust audit", audit)
 
-	for (const control of Object.values(report.controls.results)) {
-		control.timestamp = parseTimestamp(control.timestamp)
+	for (const report of Object.values(audit.reports)) {
+		report.timestamp = parseTimestamp(report.timestamp)
 	}
 
 	const browserUptime = (Date.now() - Browser.startTime) / ONE_DAY
 	const browserUptimePassing = browserUptime <= config.device.controls.browser.maxUptime
-	report.controls.results.BrowserUpdated = {
+	audit.reports.BrowserUpdated = {
 		"name": "BrowserUpdated",
-		"passed": browserUptimePassing,
+		"passing": browserUptimePassing,
 		"timestamp": new Date(),
 		"errors": browserUptimePassing ? null : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
 	}
 
-	DeviceTrust.addReport(report)
+	DeviceTrust.addAudit(audit)
 	Dashboard.refreshDevice()
 })
 
@@ -695,6 +695,7 @@ function registerAccountUsage(url, report) {
 	issues.count = Object.values(issues).length
 	account.issues = issues.count > 0 ? issues : null
 
+	AccountTrust.refresh()
 	AppStats.markDirty()
 }
 
@@ -722,6 +723,7 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 				if (! sessionState.auth?.username) return
 				const appName = getSitename(details.url)
 				AppStats.deleteAccount(appName, sessionState.auth.username)
+				AccountTrust.refresh()
 				debug("detected failed login, not storing account")
 			})
 		}

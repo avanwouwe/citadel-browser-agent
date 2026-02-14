@@ -42,12 +42,12 @@ class AccountTrust {
         await logOffDomain(appName)
         await injectFuncIntoDomain(appName, () => location.reload())
 
-        AccountTrust.#refresh()
+        AccountTrust.refresh()
 
         logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, username, `user deleted account of '${username}' for ${appName}`)
     }
 
-    static #refresh() {
+    static refresh() {
         const prevAudit = AccountTrust.#audit
         const newAudit = new Audit(AccountTrust.TYPE)
 
@@ -59,7 +59,7 @@ class AccountTrust {
             const control = new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
             const report = {
                 name: accountKey,
-                passed: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
+                passing: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
                 timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? new Date()
             }
             control.addReport(report)
@@ -68,8 +68,6 @@ class AccountTrust {
 
         AccountTrust.#audit = newAudit
         AccountTrust.#audit.save()
-        AccountTrust.#audit.notify()
-
         Dashboard.refreshAccount()
     }
 
@@ -122,7 +120,7 @@ class AccountTrust {
     }
 
     static {
-        setTimeout(() => AccountTrust.#refresh(), 1 * ONE_MINUTE)
-        setInterval(() => AccountTrust.#refresh(), 7 * ONE_DAY)
+        setTimeout(() => AccountTrust.refresh(), 1 * ONE_MINUTE)
+        setInterval(() => AccountTrust.refresh(), 1 * ONE_DAY)
     }
 }

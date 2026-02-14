@@ -389,18 +389,18 @@ def addReport(report, control, errors):
     if errors is None:
         report[control] = {
             "name": control,
-            "passed": None,
+            "passing": None,
             "timestamp": datetime.now().isoformat()
         }
     else:
-        passed = len(errors) == 0
+        passing = len(errors) == 0
         report[control] = {
             "name": control,
-            "passed": passed,
+            "passing": passing,
             "timestamp": datetime.now().isoformat()
         }
 
-        if not passed:
+        if not passing:
             errors = {e for e in errors if e != ""}
             report[control]["errors"] = list(errors)
 
@@ -428,16 +428,16 @@ def generateAndSendReport():
     try:
         devicereport_running = True
         last_devicereport = now
-        report = generateReport()
-        sendMessage("devicetrust", report)
+        audit = generateAudit()
+        sendMessage("devicetrust", audit)
     except Exception as e:
         exception("failed to generate report", e)
     finally:
         devicereport_running = False
 
 
-def generateReport():
-    results = {}
+def generateAudit():
+    reports = {}
     definitions = loadControlPacks()
 
     with ThreadPoolExecutor(max_workers = MAX_REPORT_WORKERS) as executor:
@@ -452,20 +452,20 @@ def generateReport():
             controlName = futures[future]
             try:
                 errors = future.result(timeout = CONTROL_TIMEOUT)
-                addReport(results, controlName, errors)
+                addReport(reports, controlName, errors)
             except TimeoutError:
                 errMsg = f"control '{controlName}' timed out after '{CONTROL_TIMEOUT}' seconds"
                 exception(errMsg, TimeoutError(errMsg))
-                addReport(results, controlName, None)
+                addReport(reports, controlName, None)
             except Exception as e:
                 exception(f"control '{controlName}' failed", e)
-                addReport(results, controlName, None)
+                addReport(reports, controlName, None)
 
-    results.update(checkApplications())
-    results.update(checkProcesses())
-    results.update(checkSystemUpdated())
+    reports.update(checkApplications())
+    reports.update(checkProcesses())
+    reports.update(checkSystemUpdated())
 
-    return {"controls": {"definitions": definitions, "results": results}}
+    return {"definitions": definitions, "reports": reports}
 
 def periodicChecksWorker():
     while True:
