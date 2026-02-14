@@ -180,6 +180,54 @@
                 grid-template-columns: 1fr;
             }
         }
+        .screenshots-section {
+            background: #f9fafb;
+            margin-top: 2rem;
+        }
+
+        .screenshots-carousel {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .screenshot-img {
+            position: absolute;
+            max-height: 500px;
+            max-width: 90%;
+            width: auto;
+            height: auto;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-md);
+            object-fit: contain;
+            opacity: 0;
+            animation: fadeInOut 40s infinite;
+        }
+
+        .screenshot-img:nth-child(1) { animation-delay: 0s; }
+        .screenshot-img:nth-child(2) { animation-delay: 4s; }
+        .screenshot-img:nth-child(3) { animation-delay: 8s; }
+        .screenshot-img:nth-child(4) { animation-delay: 12s; }
+        .screenshot-img:nth-child(5) { animation-delay: 16s; }
+        .screenshot-img:nth-child(6) { animation-delay: 20s; }
+        .screenshot-img:nth-child(7) { animation-delay: 24s; }
+        .screenshot-img:nth-child(8) { animation-delay: 28s; }
+        .screenshot-img:nth-child(9) { animation-delay: 32s; }
+        .screenshot-img:nth-child(10) { animation-delay: 36s; }
+        .screenshot-img:nth-child(10) { animation-delay: 40s; }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            2.5% { opacity: 1; }
+            10% { opacity: 1; }
+            12.5% { opacity: 0; }
+            100% { opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -202,6 +250,24 @@
             In today's landscape, the browser is the operating system. Traditional remote management solutions don't manage browsers effectively, require expensive per-seat licenses, and often can't handle BYOD or contractor devices. Citadel changes this.
         </p>
     </div>
+
+    <section class="screenshots-section">
+        <div class="screenshots-carousel">
+            <img src="/img/screenshot/screenshot-issue-account.png" alt="Account Issue" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-issue-device.png" alt="Device Issue" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-issue-mfa.png" alt="MFA Issue" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-issue-phishing.png" alt="Phishing Alert" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-issue-webfilter.png" alt="Webfilter Alert" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-extension-analysis.png" alt="Analysis Extension" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-extension-disabled.png" alt="Disabled Extension" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-dashboard-accounts.png" alt="Accounts Dashboard" class="screenshot-img">
+            <img src="/img/screenshot/screenshot-dashboard-device.png" alt="Device Dashboard " class="screenshot-img">
+            <img src="/img/screenshot/screenshot-dashboard-extensions.png" alt="Extensions Dashboard" class="screenshot-img">
+            <img src="/ img/screenshot/screenshot-dashboard-events.png" alt="Events Dashboard" class="screenshot-img">
+        </div>
+    </section>
+
+    <p>
 
     <div class="features">
         <div class="feature">
