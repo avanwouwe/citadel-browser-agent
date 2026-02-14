@@ -669,10 +669,6 @@ function registerAccountUsage(url, report) {
 	const account = AppStats.getAccount(app, report.username)
 	account.lastConnected = nowDatestamp()
 
-	if (! AccountTrust.checkFor(report.username, appName)) {
-		return
-	}
-
 	const issues = {
 		length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
 		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
@@ -693,7 +689,7 @@ function registerAccountUsage(url, report) {
 	})
 
 	issues.count = Object.values(issues).length
-	account.issues = issues.count > 0 ? issues : null
+	account.issues = AccountTrust.checkFor(report.username, appName) && issues.count > 0 ? issues : null
 
 	AccountTrust.refresh()
 	AppStats.markDirty()
