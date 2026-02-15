@@ -10,7 +10,6 @@ Your organisation maintains a Security Operations Centre (SOC), that analyzes in
 
 The Event Dashboard shows the most recent events that have been logged and sent to the Security Operations Centre of your organisation. 
 
-
-If an account no longer exists, or if Citadel is incorrectly raising it as unsafe, you can remove it using the 🗑 icon.
+If information is truncated you can make it appear by hovering your mouse over it.
 
 ![Device Dashboard Screenshot](/img/screenshot/screenshot-dashboard-events.png)

@@ -6,3 +6,21 @@
   margin-left: auto;
   margin-right: auto;
 }
+
+.passing, .warning, .blocking, .failing, .unknown {
+  padding: 2px 6px;
+  border-radius: 3px;
+  color: white;
+  font-weight: 500;
+
+  code {
+    background: transparent;
+    color: inherit;
+  }
+}
+
+.passing  { background: #43d25e; }
+.warning  { background: #ffa800; }
+.blocking { background: #e23a3a; }
+.failing  { background: #999; }
+.unknown  { background: #ccc; color: #333; }
