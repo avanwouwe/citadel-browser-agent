@@ -1,3 +1,12 @@
+.site-header {
+  justify-content: center;
+}
+
+.site-title {
+  margin-left: auto;
+  margin-right: auto;
+}
+
 @media (min-width: 50rem) {
   .side-bar {
     width: 180px;
@@ -6,15 +15,6 @@
   .main {
     margin-left: 180px;
   }
-}
-
-.site-header {
-  justify-content: center;
-}
-
-.site-title {
-  margin-left: auto;
-  margin-right: auto;
 }
 
 .passing, .warning, .blocking, .failing, .unknown {
@@ -37,4 +37,3 @@
 .blocking { background: #e23a3a; }
 .failing  { background: #999; }
 .unknown  { background: #ccc; }
-
