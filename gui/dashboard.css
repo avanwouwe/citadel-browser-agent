@@ -164,3 +164,25 @@ td:has(.extension-logo), td:has(.extension-logo-placeholder) {
     width: 40px;
     padding: 4px;
 }
+
+.manual-link {
+    margin-left: auto;
+    padding: 9px 12px;
+    display: flex;
+    align-items: center;
+    color: #444;
+    text-decoration: none;
+    border-radius: 7px 7px 0 0;
+    transition: color 0.2s, background 0.14s;
+    cursor: pointer;
+}
+
+.manual-link:hover {
+    color: #0056b3;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.help-icon {
+    display: block;
+    pointer-events: none;
+}

@@ -39,6 +39,11 @@ function selectTab(tabId) {
     renderAccountDashboard()
     renderExtensionDashboard()
     if (tabId === "events") startEventRefreshing(); else stopEventRefreshing()
+
+    const manualLink = document.getElementById('manual-link')
+    if (manualLink) {
+        manualLink.href = `https://citadelagent.org/dashboard/${tabId}-dashboard`
+    }
 }
 
 async function renderDeviceDashboard() {
