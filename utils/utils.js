@@ -162,12 +162,6 @@ function parseTimestamp(str) {
     return str ? new Date(str) : str
 }
 
-function addDays(date, days) {
-    const result = new Date(date)
-    result.setDate(result.getDate() + days)
-    return result
-}
-
 function nowDatestamp() {
     const date = new Date();
     const year = date.getFullYear();

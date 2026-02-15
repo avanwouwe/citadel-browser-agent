@@ -184,19 +184,18 @@ class Control {
     addReport(report) {
         assert(report.name === this.name, `sent report for "${report.name}" to control "${this.name}"`)
 
+        this.#lastDayStart = this.#lastDayStart ?? report.timestamp
+
         if (report.passing) {
-            this.report = report
             this.#lastDayStart = report.timestamp
             this.#failedDays = 0
-            return
-        }
-
-        // days don't count if an endpoint is turned off
-        this.#lastDayStart = this.#lastDayStart ?? report.timestamp
-        const newFailedDays = (report.timestamp - this.#lastDayStart) / ONE_DAY
-        if (newFailedDays > 1) {
-            this.#lastDayStart = addDays(this.#lastDayStart, newFailedDays)
-            this.#failedDays++
+        } else {
+            // days don't count if an endpoint is turned off
+            const newFailedDays = (report.timestamp - this.#lastDayStart) / ONE_DAY
+            if (newFailedDays >= 1) {
+                this.#lastDayStart = report.timestamp
+                this.#failedDays++
+            }
         }
 
         this.report = report
