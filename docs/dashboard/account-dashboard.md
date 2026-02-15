@@ -17,4 +17,4 @@ For detailed information about why Citadel considers an account unsafe, click on
 
 If an account no longer exists, or if Citadel is incorrectly raising it as unsafe, you can remove it using the 🗑 icon.
 
-![Device Dashboard Screenshot](/img/screenshot/screenshot-dashboard-account.png)
+![Device Dashboard Screenshot](/img/screenshot/screenshot-dashboard-accounts.png)
