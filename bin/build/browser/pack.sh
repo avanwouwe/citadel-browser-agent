@@ -23,5 +23,7 @@ IDLE_FILES=(
     ./utils/trust/mfa.js
 )
 
+rm -rf $BUNDLE_DIR
+mkdir -p $BUNDLE_DIR
 bundle "$BUNDLE_DIR/citadel-bundle-start.js" "${START_FILES[@]}"
 bundle "$BUNDLE_DIR/citadel-bundle-idle.js" "${IDLE_FILES[@]}"

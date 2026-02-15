@@ -87,7 +87,7 @@ Or you can enable password policy enforcement, irrespective of the username used
     ...
 ```
 
-Any exceptions you defined are applied "on top of" the [default configuration](/config.js), in the order that they are defined. 
+Any exceptions you defined are applied "on top of" the [default configuration](/https://github.com/avanwouwe/citadel-browser-agent/blob/main/config.js), in the order that they are defined. 
 
 For example, if you define a `logging.logLevel` in two exceptions :
 * default : `logging.logLevel` = `DEBUG`

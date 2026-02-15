@@ -12,14 +12,36 @@ The user is explained why the page was blocked, and is proposed to analyze the r
 Bittorrent tracker sites are also filtered by default, to help you comply with Intellectual Property legislation.
 
 ## blacklists
-The configuration you provide will be overridden with the attributes of the existing configuration. Note that the blacklist configurations are not merged when they are overridden; you must re-state the blacklist configuration if you want to add your own blacklists to it.
+You can add your own blacklists or disable the existing one by overriding the `webfilter.ip` and `webfilter.url` configurations. Each blacklist is specified by one or more URLs, and the refresh frequency (in minutes).
+```
+    "webfilter": {
+        "blacklist": {
+            "ip": {
+                "FireHOL (level 1)": {
+                    "urls": ["https://iplists.firehol.org/files/firehol_level1.netset"],
+                    "freq": 60
+                },
+                "IPsum (level 2+)": {
+                    "urls": ["https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt"],
+                    freq: 60 * 12
+                }
+            },
+            "url": {
+                "URLhaus": {
+                    "urls": ["https://urlhaus.abuse.ch/downloads/text_online/"],
+                    "freq": 60
+                },
+            }
+        }
+    }
+```
 
-The URL blacklists are expected to contain one domain or URL per line. The blacklists configured by default are:
+The blacklists configured by default are:
 * [URLhaus](https://urlhaus.abuse.ch/)
 * [Romain Marcoux - malicious domains](https://github.com/romainmarcoux/malicious-domains)
 * [Pi-hole Torrent Blacklist](https://github.com/sakib-m/Pi-hole-Torrent-Blocklist)
 
-Blacklists containing domains block all URLs in that domain. Blacklists containing URLs block only that URL, whilst ignoring the query parameters and URI fragment (i.e. the "hash part"). In both cases the matching is done in a case-insensitive manner.
+The `webfilter.url` blacklist accepts lists of URLs and lists of domains. Blacklists containing domains block all URLs in that domain, blacklists containing URLs block only that URL, whilst ignoring the query parameters and URI fragment (i.e. the "hash part"). In both cases the matching is done in a case-insensitive manner.
 
 The IP blacklist is expected to contain one IPv4 address or one CIDR formatted subnet per line. The blacklists configured by default are:   
 * [FireHOL (level 1)](https://iplists.firehol.org/?ipset=firehol_level1)
