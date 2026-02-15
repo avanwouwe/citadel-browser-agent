@@ -17,6 +17,8 @@ For this reason, Citadel checks extensions before they are installed or updated,
 
 Your organisation has defined acceptable levels for all of these aspects. When you install an extension, Citadel verifies and allow or disallows as a result. 
 
-Every time when an extension is updated, or it's information changes otherwise, the extension is re-evaluated. The extension is blocked if at any time the extension exceeds the risk level defined by your organisation. These extensions are shown as `BLOCKING` in the dashboard.  For detailed information about why Citadel considers an extension unsafe, click on the 🔍 icon.
+Every time when an extension is updated, or it's information changes otherwise, the extension is re-evaluated. The extension is blocked if at any time the extension exceeds the risk level defined by your organisation. 
+
+Blocked extensions are shown as `BLOCKING` in the dashboard.  For detailed information about why Citadel considers an extension unsafe, click on the 🔍 icon.
 
 ![Device Dashboard Screenshot](/img/screenshot/screenshot-dashboard-extensions.png)
