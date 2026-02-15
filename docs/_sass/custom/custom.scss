@@ -9,11 +9,12 @@
 
 @media (min-width: 50rem) {
   .side-bar {
-    width: 180px;
+    width: 200px;
   }
 
   .main {
-    margin-left: 180px !important;
+    margin-left: 300px !important;
+    max-width: 900px;
   }
 }
 
