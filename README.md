@@ -9,8 +9,8 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
 
 <table>
   <tr>
-    <td><img src="/doc/screenshot wazuh.png" alt="screenshot Wazuh"></td>
-    <td><img src="/doc/screenshot-mfa-blocked.png" alt="screenshot MFA blocking"></td>
+    <td><img src="/img/screenshot/screenshot-wazuh.png" alt="screenshot Wazuh"></td>
+    <td><img src="/img/screenshot/screenshot-issue-mfa.png" alt="screenshot MFA blocking"></td>
   </tr>
 </table>
 

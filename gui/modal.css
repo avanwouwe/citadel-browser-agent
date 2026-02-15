@@ -25,9 +25,12 @@ button {
     font-family: Arial, sans-serif;
     font-size: 16px;
 }
-.icon {
-    width:80px;
-    margin-right:1em;
+.logo {
+    max-width: 80px;
+    max-height: 128px;
+    width: auto;
+    height: auto;
+    margin-right: 1em;
 }
 .column {
     display: flex;
