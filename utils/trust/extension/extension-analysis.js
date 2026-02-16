@@ -203,15 +203,11 @@ class ExtensionAnalysis {
             }
 
             // 2) whitelisting
-            let whitelistReason
-            const isInstall = scanType === ExtensionAnalysis.ScanType.INSTALL || scanType === ExtensionAnalysis.ScanType.INIT
-            if (config.extensions.whitelist.allowAlways.includes(extensionInfo.id)) whitelistReason = 'allowAlways'
-            else if (isInstall && config.extensions.whitelist.allowInstall.includes(extensionInfo.id)) whitelistReason = 'allowInstall'
-            else if (isInstall && currAnalysis.storeInfo.categories.flatMap(c => [c.primary, c.secondary]).some(c => config.extensions.category.allowed.includes(c))) whitelistReason = 'category'
-
-            if (whitelistReason) {
+            if (scanType === ExtensionAnalysis.ScanType.UPDATE && config.extensions.whitelist.allowAlways.includes(extensionInfo.id) ||
+                config.extensions.whitelist.allowInstall.includes(extensionInfo.id)
+            ) {
                 await ExtensionTrust.allow(currAnalysis)
-                ExtensionAnalysis.#log('extension kept', `whitelisted because '${whitelistReason}'`, Log.INFO, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -231,8 +227,12 @@ class ExtensionAnalysis {
                 return
             }
 
-            await ExtensionTrust.disable(extensionInfo.id)
-            ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
+            if (extensionInfo.enabled) {
+                await ExtensionTrust.disable(extensionInfo.id)
+                ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
+            } else {
+                ExtensionAnalysis.#log('extension left disabled', `high risk but already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
+            }
         }
     }
 
@@ -278,12 +278,12 @@ class ExtensionAnalysis {
 
         analysis.manifest = analysis.storeInfo.then(storeInfo => fetch(storeInfo.downloadUrl))
             .then(async response => {
-            if (!response.ok) throw new Error("unable to download extension: " + response.status)
+                if (!response.ok) throw new Error("unable to download extension: " + response.status)
 
-            const buffer = await response.arrayBuffer()
-            const entries = await ExtensionStore.parsePackage(buffer)
-            return await ExtensionStore.getManifest(entries)
-        })
+                const buffer = await response.arrayBuffer()
+                const entries = await ExtensionStore.parsePackage(buffer)
+                return await ExtensionStore.getManifest(entries)
+            })
 
         analysis.evaluation = ExtensionAnalysis.#evaluateExtension(analysis.storeInfo, analysis.manifest, config)
 
@@ -344,10 +344,8 @@ class ExtensionAnalysis {
 
         const bypassVerified = extConfig.verified.allowed && (storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension)
         const bypassInstallationCnt = storeInfo.numInstalls >= extConfig.installations.allowed
-        const bypassCategory = categories.some(c => extConfig.category.allowed.includes(c))
 
-        evaluation.allowed = rejection.reasons.length === 0 ||
-            ((bypassVerified || bypassInstallationCnt) && !blacklistExtension)
+        evaluation.allowed = rejection.reasons.length === 0 || bypassVerified || bypassInstallationCnt
 
         return evaluation
     }
