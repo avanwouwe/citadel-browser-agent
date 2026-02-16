@@ -8,10 +8,28 @@ nav_order: 5
 # Account Trust
 You can use Citadel to enforce your IAM policies, such as:
 * your password complexity rules
-* the use of Multi-Factor Authentication
 * the re-use of passwords
+* the use of Multi-Factor Authentication
 
 Of course, these policies will only be enforced on endpoints that are running Citadel.
+
+![Account Trust alert](/img/screenshot/screenshot-issue-mfa.png)
+
+## general configuration
+By default, Citadel:
+* purges accounts after 90 days of not being used
+* excludes clearly personal accounts, i.e. `username` or `username@your-company.com` but not `username@gmail.com`
+* applies the password policy only to your protected scope
+
+```
+    ...
+    "accounts": {
+        retentionDays: 90,
+        checkOnlyInternal: true,
+        checkOnlyProtected: true
+    }
+    ...
+```
 
 ## passwords complexity
 You can configure your own password policy:
@@ -19,13 +37,6 @@ You can configure your own password policy:
 ```
     ...
     "account": {
-        "checkOnlyInternal": true,
-        "checkOnlyProtected": true,
-        "actions": {
-            "NOTIFY": 2,
-            "WARN": 4,
-            "BLOCK": 6
-        },
         "passwordPolicy": {
             "minLength": 15,
             "minNumberOfDigits": 1,
@@ -43,6 +54,36 @@ You can configure your own password policy:
 Note that:
 * the `minEntropy` setting refers to the [Shannon Entropy](https://en.wikipedia.org/wiki/Entropy_(information_theory))
 * the `minSequence` setting measures the number of consecutive characters or numbers in the password, relative to the password length
+
+## password reuse
+The re-use of passwords creates the risk of [credential stuffing](https://en.wikipedia.org/wiki/Credential_stuffing). Citadel allows you to detect and prohibit the re-use of passwords.
+
+Every time when users enter a password into a side that is part of your protected scope, their password is stored. This allows Citadel to compare the password to other passwords that are entered in other sites. If Citadel detects that a user is using a username / password combination for one site, to connect to another site, this is raised to the user as a potential phishing attack. 
+
+> **Note**
+> * passwords are stored inside the private storage of Citadel
+> * passwords are security hashed before storing them
+> * only passwords of sites in the protected scope are hashed
+> * passwords on other sites are hashed and compared, but never stored
+{: .note }
+
+```
+    ...
+    "account": {
+        "passwordReuse": {
+            "action": "WARN",
+            "exceptions": {
+                "allowed": false,
+                "groups": [ ["domain-a.com", "domain-b.com"] ]
+            }
+        }
+    }
+    ...
+```
+
+* `account.passwordReuse.action` the escalation step to take when a login is performed with a re-used password
+* `account.passwordReuse.exceptions.allowed` are users allowed to bypass tne "phishing warning"
+* `account.passwordReuse.exceptions.groups` list **containing lists** of domains that you allow to share passwords between them
 
 ## Multi-Factor Authentication
 You can ensure that whenever users send a password, they *also* use another factor (e.g. TOTP, WebAuthn). If they do not provide one within `waitMinutes` they are logged off. Once connected their session will remain valid for `maxSessionDays`.
@@ -86,33 +127,31 @@ The default settings is `14` days. You can list the domains to apply the rule to
 ```
 
 ## enforcement
-Citadel ensures enforcement of your policy by blocking access to the protected scope in case of non-compliance with the policy. In order to give users due warning, an escalation path is followed, depending on the type of action defined for the issue at hand.
-* `NOTIFY` : users are notified once a week that they are in non-compliance
-* `WARN` : users are warned before their access to the protected scope is removed
-* `BLOCK` : users are immediately blocked (i.e. only used for situations that represent a clear and present danger)
+Citadel enforces your policy by blocking access to the protected scope in case of non-compliance. In order to give users due warning, an escalation schema is followed, depending on the type of action defined for the issue at hand. For more information, see the [page on audits](/config/audits).
 
-These notifications and Warnings are given to the user via modal windows that are injected in the pages, and OS-level notifications. When the user clicks on the notification, the user is shown the [dashboard](/dashboard) to show them the accounts that are non-compliant. 
-
-If the defined action is `WARN`, the following escalation schema is used:
-* 0 > 2 days : user is notified
-* 2 > 7 days : user is warned that access will soon be blocked
-* 7+ : user is blocked
-
-When determining the number of days elapsed since the non-compliance started, Citadel only counts the number of days that the endpoint was operating. This ensures that users that have been away for several days don't suddenly return to find their access blocked without any advance warning.
-
-Once the access has been blocked, users can still request a temporary exception. 
-
+You can adapt the way that Citadel reacts to different levels of non-compliance, depending on your context and risk factors.
 ```
     ...
     "account": {
+        "actions": {
+            "NOTIFY": 2,
+            "WARN": 4,
+            "BLOCK": 6
+        },
         "trigger": {
             "warn": 2,
             "block": 7
         },
         "exceptions": {
             "duration": 60,
-            "domains": [ ]
+            "domains": ["*"]
         }
     }
-    ....
+    ...
 ```
+
+The `account.actions` entries set how many password complexity rules must be broken to trigger each level. 
+
+If an account triggers `WARN`, then the `account.trigger.warn` and `account.trigger.block` settings specify the number of working days between each escalation step.
+
+The `account.exceptions.domains` lists for which domains users can request temporary exceptions, and `account.exceptions.duration` sets how many minutes the exception will last. When set to `0` exceptions are not allowed. 

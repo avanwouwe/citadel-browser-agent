@@ -6,7 +6,7 @@ nav_order: 1
 ---
 
 # General configuration
-Citadel checks for changes in the configuration every hour, and will automatically detect if you have modified the configuration file.
+Citadel checks for changes in the configuration every hour, and will automatically detect if you have modified the configuration file, and reload it.
 
 For security reasons, Citadel wll refuse to load configuration that is not owned by `root/wheel` (macOS) or `Administrator` / `SYSTEM` (Windows), or that is world-writable.
 
@@ -38,14 +38,16 @@ The following attributes specify lists of domains:
 * `account.mfa.exceptions`
 
 Where specifying `domain.com` matches:
-* domain.com
-* host.domain.com
-* host.subdomain.com
+* `domain.com`
+* `host.domain.com`
+* `host.subdomain.com`
 
 It is also possible to specify netmasks, for example:
 * `192.168.x.x`
 * `10.x.x.x`
-Note that netmasks can only be classful CIDR masks of type A,B or C. So `134.x.50.x` is not allowed.
+Netmasks can only be classful CIDR masks of type A,B or C. So `134.x.50.x` is not allowed.
+
+You can use `*` to specify "any domain", but not anywhere else, like `app-*.domain.com` or even `*.domain.com`.
 
 ## exceptions
 You can override the global configuration for specific domains or netmasks. This is possible for the following configuration elements:

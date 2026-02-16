@@ -9,4 +9,4 @@ The installation of Citadel consists of a number of moving parts: Citadel needs 
 
 Also check out the [configuration manual](/config/) to understand how you can adapt Citadel to your organisation, for example by configuring your logo, name and support e-mail address.
 
-Citadel takes great care to respect the privacy of your users. Nevertheless, the deployment of Citadel will undoubtedly raise various questions related to privacy compliance and internal communication. You will find in the [privacy section](/privacy/) some documents that will help you deal with those.
+And finally. Citadel takes great care to respect the privacy of your users. Nevertheless, the deployment of Citadel will undoubtedly raise various questions related to privacy compliance and internal communication. You will find in the [privacy section](/privacy/) some documents that will help you deal with those.

@@ -11,6 +11,8 @@ The user is explained why the page was blocked, and is proposed to analyze the r
 
 Bittorrent tracker sites are also filtered by default, to help you comply with Intellectual Property legislation.
 
+![Webfilter alert](/img/screenshot/screenshot-issue-webfilter.png)
+
 ## blacklists
 You can add your own blacklists or disable the existing one by overriding the `webfilter.ip` and `webfilter.url` configurations. Each blacklist is specified by one or more URLs, and the refresh frequency (in minutes).
 ```

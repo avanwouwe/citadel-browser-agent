@@ -9,10 +9,12 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
 
 <table>
   <tr>
-    <td><img src="/img/screenshot/screenshot-wazuh.png" alt="screenshot Wazuh"></td>
-    <td><img src="/img/screenshot/screenshot-issue-mfa.png" alt="screenshot MFA blocking"></td>
+    <td><img src="/docs/img/screenshot/screenshot-wazuh.png" alt="screenshot Wazuh"></td>
+    <td><img src="/docs/img/screenshot/screenshot-issue-mfa.png" alt="screenshot MFA blocking"></td>
   </tr>
 </table>
+
+Full documentation on the public site : [https://citadelagent.org](https://citadelagent.org)
 
 ## Overview
 In today's cybersecurity landscape it is difficult to have good control over your endpoints and their use. You need a solution to ensure endpoint compliance, but most of those do not manage the browser. And it is difficult to get a full-blown MDM installed on endpoints that are not provided by your organisation, such as in the case of employee BYOD, or of external staff. Many applications do not allow you to configure a password policy, and if they do provide security controls such as "MFA must be enabled", it is only as part of an "Enterprise" licence. So you have to select, integrate and maintain several solutions, each one costing a couple of dollars per endpoint.
@@ -38,7 +40,7 @@ Citadel also reports on usage statistics of applications, allowing for detection
 
 Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
 
-## Blacklists
+## Web-filtering
 Can blacklist URLs, IP ranges or domains, using lists periodically downloaded from the internet. By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can then temporarily bypass the blacklist for that hostname. The exception request is logged, as are the navigation and web requests that use the exception.
 
 It is possible to define a whitelist that will override the blacklist.

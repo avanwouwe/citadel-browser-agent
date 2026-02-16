@@ -21,7 +21,7 @@ Citadel can report on various aspects, such as application use and password poli
 The bi-weekly frequency of some reports has been chosen so that in your SIEM you can select "show last two weeks" and you will generally have exactly one event for every endpoint (actually, every browser / profile combination). Two weeks is long enough to (almost) still cover endpoints that are turned off during holidays, but short enough for the information to remain relevant. Any endpoints that have never been turned on during that period will not appear in the reporting.
 
 # errors
-Citadel reports when certain security-sensitive errors are raised by the browser (see [chrome://network-errors](chrome://network-errors) for a list of all browser errors). This can be for example a user ignoring a virus warning, or issues with certificates. You can override the default event level of each error type, should the default levels not work out for your specific environment.
+Citadel reports when certain security-sensitive errors are raised by the browser (see `chrome://network-errors` for a list of all browser errors). This can be for example a user ignoring a virus warning, or issues with certificates. You can override the default event level of each error type, should the default levels not work out for your specific environment.
 
 For example, you can lower the level of certificate issues to `DEBUG`, so that they are still logged locally but not shipped to the SIEM. Or you can manually configure an extreme logging level for an error that is not detected by default, such as `ERR_ACCESS_DENIED`. To disable logging completely use the `NEVER` level:
 
@@ -69,7 +69,7 @@ When specifying the logging level you can use the following log levels:
 The special log level `NEVER` is used to disable logging.
 
 # URL masking
-In order to minimize the amount of personal data, Citadel masks URLs of events unless the information is strictly necessary:
+In order to minimize the amount of personal data, Citadel masks URLs of events unless the information is strictly necessary, such as:
 * if the host is part of the protected scope
 * if the event is of `maskUrlevel` or higher (by default set to `WARN`)
 * if the host has been explicitly been exempted from masking (by placing it in the `domain.unhash` list)
