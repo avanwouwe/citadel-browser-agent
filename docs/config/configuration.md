@@ -6,12 +6,12 @@ nav_order: 1
 ---
 
 # General configuration
-Citadel checks for changes in the configuration every hour, and will automatically detect if you have modified the configuration file, and reload it.
+Citadel can be configured by placing a file called `citadel-config.json` containing a JSON object, in the directory where the `citadel-browser-agent` binary lives. The system checks for changes in the configuration every hour, and will automatically detect if you have modified the configuration file, and reload it.
 
 For security reasons, Citadel wll refuse to load configuration that is not owned by `root/wheel` (macOS) or `Administrator` / `SYSTEM` (Windows), or that is world-writable.
 
 ## overriding attributes
-When overriding default settings the following rules are used:
+When overriding default settings in the JSON configuration file, the following rules are used:
 * any new attribute : attribute is added
 * existing value attribute : value is replaced
 * existing array attribute : array is replaced

@@ -16,23 +16,23 @@ Of course, these policies will only be enforced on endpoints that are running Ci
 ![Account Trust alert](/img/screenshot/screenshot-issue-mfa.png)
 
 ## general configuration
-By default, Citadel:
+By default, Citadel protects the privacy of your end-users and:
 * purges accounts after 90 days of not being used
-* excludes clearly personal accounts, i.e. `username` or `username@your-company.com` but not `username@gmail.com`
+* excludes clearly personal accounts, i.e. includes `username` or `username@your-company.com` but not `username@gmail.com`
 * applies the password policy only to your protected scope
 
 ```
     ...
     "accounts": {
-        retentionDays: 90,
-        checkOnlyInternal: true,
-        checkOnlyProtected: true
+        "retentionDays": 90,
+        "checkOnlyInternal": true,
+        "checkOnlyProtected": true
     }
     ...
 ```
 
 ## passwords complexity
-You can configure your own password policy:
+You can modify the default password policy, which is:
 
 ```
     ...
@@ -58,11 +58,13 @@ Note that:
 ## password reuse
 The re-use of passwords creates the risk of [credential stuffing](https://en.wikipedia.org/wiki/Credential_stuffing). Citadel allows you to detect and prohibit the re-use of passwords.
 
-Every time when users enter a password into a side that is part of your protected scope, their password is stored. This allows Citadel to compare the password to other passwords that are entered in other sites. If Citadel detects that a user is using a username / password combination for one site, to connect to another site, this is raised to the user as a potential phishing attack. 
+Every time when users enter a password into a site that is part of your protected scope, their password is stored. This allows Citadel to compare the password to other passwords that are entered in other sites. If Citadel detects that a user is using a username / password combination for one site, to connect to another site, this is raised to the user as a potential phishing attack. 
+
+Users can then ask for a temporary exception and continue. The account will be recorded as insecure and the user will at some point in time have to log off or change the password.
 
 > **Note**
-> * passwords are stored inside the private storage of Citadel
-> * passwords are security hashed before storing them
+> * passwords are stored inside the secure and private extension storage of Citadel
+> * passwords are securely hashed before storing them (using [Bcrypt](https://en.wikipedia.org/wiki/Bcrypt))
 > * only passwords of sites in the protected scope are hashed
 > * passwords on other sites are hashed and compared, but never stored
 {: .note }
@@ -73,7 +75,7 @@ Every time when users enter a password into a side that is part of your protecte
         "passwordReuse": {
             "action": "WARN",
             "exceptions": {
-                "allowed": false,
+                "allowed": true,
                 "groups": [ ["domain-a.com", "domain-b.com"] ]
             }
         }
@@ -82,18 +84,20 @@ Every time when users enter a password into a side that is part of your protecte
 ```
 
 * `account.passwordReuse.action` the escalation step to take when a login is performed with a re-used password
-* `account.passwordReuse.exceptions.allowed` are users allowed to bypass tne "phishing warning"
+* `account.passwordReuse.exceptions.allowed` are users allowed to request an exception and enter the password
 * `account.passwordReuse.exceptions.groups` list **containing lists** of domains that you allow to share passwords between them
 
-## Multi-Factor Authentication
-You can ensure that whenever users send a password, they *also* use another factor (e.g. TOTP, WebAuthn). If they do not provide one within `waitMinutes` they are logged off. Once connected their session will remain valid for `maxSessionDays`.
+![Phishing alert](/img/screenshot/screenshot-issue-phishing.png)
 
-Not all applications have MFA, so you have to enumerate the list of domains where you require MFA. You can make exceptions for specific subdomains:
+## Multi-Factor Authentication
+You can ensure that whenever users send a password, they *also* use another factor (e.g. TOTP, WebAuthn). If Citadel does not detect them providing one within `waitMinutes` they receive a warning. If they acknowledge the warning they are logged off. By default Citadel also allows them to request an exception. Once they have authenticated using MFA their session will remain valid for `maxSessionDays`.
+
+Not all applications have MFA, so you have to enumerate the list of applications that you want to enforce MFA on. You can make exceptions for specific subdomains:
 ```
     "account": {
         "mfa": {
           "waitMinutes": 10,
-          "maxSessionDays": 14,
+          "maxSessionDays": 30,
           "required": [
             "yourcompany.com",
             "1password.com",
@@ -114,12 +118,12 @@ Not all applications have MFA, so you have to enumerate the list of domains wher
 ## session duration
 Citadel can be configured to limit authenticated session duration by forcing cookies to expire. This reduces the risk of cookies being stolen, should the endpoint ever be compromised. Since it forces users to reconnect, it also ensures that Citadel has recent data bout password quality and account usage.
 
-The default settings is `14` days. You can list the domains to apply the rule to, and specify exceptions to that list. By default, no domains are specified and the feature is disabled.
+The default settings is `30` days. You can list the domains to apply the rule to, and specify exceptions to that list. By default, no domains are specified and the feature is disabled. To enable it, set `domains` to `"*"`, and configure any domains that you want to exclude, or that are not compatible with this feature.
 
 ```
     ...
     "session": {
-        "maxSessionDays": 14,
+        "maxSessionDays": 30,
         "domains": ["*"],
         "exceptions": ["google.com","okta.com"]
     }
@@ -127,9 +131,10 @@ The default settings is `14` days. You can list the domains to apply the rule to
 ```
 
 ## enforcement
-Citadel enforces your policy by blocking access to the protected scope in case of non-compliance. In order to give users due warning, an escalation schema is followed, depending on the type of action defined for the issue at hand. For more information, see the [page on audits](/config/audits).
+Citadel enforces your policy by blocking access to the protected scope in case of non-compliance. In order to not block users when they are performing time-critical tasks, an escalation schema is followed, depending on the type of action defined for the issue at hand. For more information, see the [page on audits](/config/audits).
 
 You can adapt the way that Citadel reacts to different levels of non-compliance, depending on your context and risk factors.
+
 ```
     ...
     "account": {

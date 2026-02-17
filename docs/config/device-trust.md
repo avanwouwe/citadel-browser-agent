@@ -46,7 +46,7 @@ The "worst" control defines the state of your device.
 ```
 
 ## enforcement
-Citadel enforces your policy by blocking access to the protected scope in case of non-compliance. In order to give users due warning, an escalation schema is followed, depending on the type of action defined for the issue at hand. For more information, see the [page on audits](/config/audits).
+Citadel enforces your policy by blocking access to the protected scope in case of non-compliance. In order to give users due warning and not block users when they are performing time-critical tasks, an escalation schema is followed, depending on the type of action defined for the issue at hand. For more information, see the [page on audits](/config/audits).
 
 You can adapt the way that Citadel reacts to different types of issues, depending on your context and risk factors.
 ```

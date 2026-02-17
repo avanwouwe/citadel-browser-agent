@@ -20,6 +20,6 @@ The Account Dashboard shows if your accounts have safe passwords:
 
 The "worst" state defines the global state. For detailed information about why Citadel considers an account unsafe, click on the 🔍 icon.
 
-If an account no longer exists, or if Citadel is incorrectly raising it as unsafe, you can remove it using the 🗑 icon.
+If an account no longer exists, or if Citadel is incorrectly raising it as unsafe, you can remove it using the 🗑 icon. This will also log you out of the system in question.
 
 ![Device Dashboard Screenshot](/img/screenshot/screenshot-dashboard-accounts.png)
