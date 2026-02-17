@@ -158,7 +158,7 @@ class Config {
             ]
         },
         session: {
-            maxSessionDays: 14,
+            maxSessionDays: 30,
             domains: [],
             exceptions: [],
         },
@@ -179,7 +179,7 @@ class Config {
             passwordReuse: {
                 action: "WARN",
                 exceptions: {
-                    allowed: false,
+                    allowed: true,
                     groups: [ ]
                 }
             },
@@ -198,7 +198,7 @@ class Config {
             },
             mfa: {
                 waitMinutes: 10,
-                maxSessionDays: 14,
+                maxSessionDays: 30,
                 required: [],
                 exceptions: []
             }
