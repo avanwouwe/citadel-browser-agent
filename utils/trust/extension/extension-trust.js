@@ -49,6 +49,19 @@ class ExtensionTrust {
         const storage = await ExtensionTrust.#storage.ready()
 
         delete storage.value()[extensionId]
+
+        Dashboard.refreshExtension()
+    }
+
+    static async setState(extensionId, state) {
+        assert(State.values.includes(state), `unknown state type ${state}`)
+
+        const storage = await ExtensionTrust.#storage.ready()
+        const analysis = storage.value()[extensionId]
+        analysis.state = state
+
+        ExtensionTrust.#storage.markDirty()
+        Dashboard.refreshExtension()
     }
 
     static async disable(extensionId) {
@@ -57,9 +70,7 @@ class ExtensionTrust {
 
         const analysis = await ExtensionTrust.#analysisOf(extensionId)
         if (analysis) {
-            analysis.state = State.BLOCKING
-
-            ExtensionTrust.#storage.markDirty()
+            await ExtensionTrust.setState(extensionId, State.BLOCKING)
 
             Dashboard.refreshExtension()
         }

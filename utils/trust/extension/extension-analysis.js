@@ -99,7 +99,8 @@ class ExtensionAnalysis {
 
                     const store = ExtensionStore.of(extensionInfo.updateUrl) ??
                         (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
-                    if (!store) return null
+
+                    if (!store) return ExtensionAnalysis.Headless.#error("error-unknown-store")
 
                     const storePage = await ExtensionStore.pageOf(extensionInfo.id, store)
 
@@ -114,7 +115,7 @@ class ExtensionAnalysis {
                     return analysis
                 } catch (error) {
                     console.error('Extension analysis failed:', error)
-                    return null
+                    return ExtensionAnalysis.Headless.#error("error")
                 } finally {
                     this.isReady = false
                     try {
@@ -124,6 +125,15 @@ class ExtensionAnalysis {
             })
 
             return this.queue
+        }
+
+        static #error(error) {
+            return {
+                evaluation: {
+                    allowed: false,
+                    reasons: [error]
+                }
+            }
         }
 
         static async ofAllInstalled(isfirstAnalysis = false) {
@@ -170,7 +180,8 @@ class ExtensionAnalysis {
             // if we were unable to recover the analysis (network issues, site down, etc)
             // - raise a warning
             // - plan for a new initial scan (if it is for the installation of the extension or other extensions)
-            if (!currAnalysis) {
+            const error = currAnalysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error"))
+            if (error?.length > 0) {
                 if (scanType === ExtensionAnalysis.ScanType.INIT || scanType === ExtensionAnalysis.ScanType.INSTALL) {
                     await ExtensionTrust.allow({
                         storeInfo: { id: extensionInfo.id },
@@ -178,13 +189,14 @@ class ExtensionAnalysis {
                     })
                 }
 
-                ExtensionAnalysis.#log('extension unchecked', 'unable to be checked', Log.WARN, extensionInfo, prevAnalysis, scanType)
+                await ExtensionTrust.setState(extensionInfo.id, State.UNKNOWN)
+                ExtensionAnalysis.#log('extension unchecked', `not checked due to '${error[0]}'`, Log.WARN, extensionInfo, prevAnalysis, scanType)
                 return
             }
 
             // if the extension was allowed, or was previously allowed and the risk did not increase, fine
             const riskIncrease = ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis)
-            if (currAnalysis?.evaluation?.allowed ||
+            if (currAnalysis.evaluation.allowed ||
                 prevAnalysis?.evaluation?.allowed && riskIncrease.length === 0
             ) {
                 const action = scanType === ExtensionAnalysis.ScanType.INSTALL ? "installed" : "kept"
@@ -311,7 +323,7 @@ class ExtensionAnalysis {
         const rejection = evaluation.rejection
 
         const blacklistExtension = !evaluateBlacklist(storeInfo.id, extConfig.whitelist.allowInstall, extConfig.blacklist, true)
-        const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), extConfig.category.allowed, extConfig.category.forbidden, true)
+        const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), [], extConfig.category.forbidden, true)
         const allowVerified = !extConfig.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
         const allowInstallationCnt = storeInfo.numInstalls >= extConfig.installations.required ?? 0
         const allowRating = storeInfo.rating >= (extConfig.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (extConfig.ratings.minRatingCnt ?? 0)

@@ -46,7 +46,7 @@
     "password": {
       "reuse": {
         "title": "Potentiel Alerte de Phishing",
-        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site. \n\n⚠\uFE0F Ceci peut être une attaque de phishing: vérifiez que c'est bien le site que vous pensez.\n\nSi c'est le cas; re-utilisation de mots de passe est dangereux, et interdit.",
+        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site.<p>⚠\uFE0F Ceci peut être une attaque de phishing: vérifiez que c'est bien le site que vous pensez.<p>Si c'est le cas; re-utilisation de mots de passe est dangereux, et interdit.",
         "other-system": "un autre système"
       },
       "quality": {
@@ -153,6 +153,7 @@
         "analyze-manifest": "Analyse du manifeste",
         "analyze-code": "Analyse du code",
         "error": "Une erreur est survenue",
+        "error-network": "Erreur réseau",
         "error-store": "Impossible d’analyser la page de l'extension dans le store",
         "error-manifest": "Impossible d’analyser le manifeste",
         "error-evaluation": "Impossible d'évaluer l'extension"

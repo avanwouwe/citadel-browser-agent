@@ -46,7 +46,7 @@
     "password": {
       "reuse": {
         "title": "Possible Phishing Alert",
-        "message": "You are using the password of {{username}} for {{system}}, to connect to another site.\n\n⚠\uFE0F This may be a phishing attack: verify that this is the site you think it is.\n\nIf it is; re-use of passwords is dangerous, and not allowed.",
+        "message": "You are using the password of {{username}} for {{system}}, to connect to another site.<p>⚠\uFE0F This may be a phishing attack: verify that this is the site you think it is.<p>If it is; re-use of passwords is dangerous, and not allowed.",
         "other-system": "another system"
       },
       "quality": {
@@ -153,6 +153,7 @@
         "analyze-manifest": "Analyzing manifest",
         "analyze-code": "Analyzing code",
         "error": "An error occurred",
+        "error-network": "Network error",
         "error-store": "Unable to analyze the extension store page",
         "error-manifest": "Unable to analyze the manifest",
         "error-evaluation": "Unable to evaluate the extensions"

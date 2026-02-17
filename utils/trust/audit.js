@@ -5,7 +5,7 @@ class State {
     static WARNING = "WARNING"
     static BLOCKING = "BLOCKING"
 
-    static values = [this.PASSING, this.FAILING, this.WARNING, this.BLOCKING]
+    static values = [this.UNKNOWN, this.PASSING, this.FAILING, this.WARNING, this.BLOCKING]
     static indexOf(value) { return this.values.indexOf(value) }
 }
 
@@ -16,7 +16,7 @@ class Action {
     static WARN = "WARN"
     static BLOCK = "BLOCK"
 
-    static values = [this.NOTHING, this.NOTIFY, this.WARN, this.BLOCK]
+    static values = [this.SKIP, this.NOTHING, this.NOTIFY, this.WARN, this.BLOCK]
     static indexOf(value) { return this.values.indexOf(value) }
 }
 

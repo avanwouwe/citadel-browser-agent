@@ -48,7 +48,7 @@ class Modal {
             sendMessage(options.onAcknowledge)
         })
 
-        if (!options.onException) {
+        if (!options.exception) {
             shadow.getElementById('exceptionDiv').hidden = true
             return
         }

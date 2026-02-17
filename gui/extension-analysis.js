@@ -13,12 +13,7 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
             await renderPage()
         } catch (error) {
             console.trace(error)
-            let errorType = 'error'
-            if (!evaluation) errorType = 'error-evaluation'
-            if (!manifest) errorType = 'error-manifest'
-            if (!storeInfo) errorType = 'error-store'
-
-            setError(errorType, error?.message || String(error))
+            setError(error?.message || String(error))
 
             if (config.extensions.exceptions.allowed) proposeException()
         }
@@ -38,10 +33,10 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
                     storeInfo = await analysis.storeInfo
                     manifest = await analysis.manifest
                     evaluation = await analysis.evaluation
-                } catch (error) {
-                    console.trace(error)
-                    setError('error', error?.message || String(error))
-                }
+                    } catch (error) {
+                        console.trace(error)
+                        setError(error?.message || String(error))
+                    }
 
                 sendResponse({ storeInfo, manifest, evaluation })
             })()
@@ -248,10 +243,16 @@ function setStatus(text, showSpinner = true) {
     document.getElementById('status-spinner').hidden = !showSpinner
 }
 
-function setError(type, message) {
-    const error = t(`extension-analysis.block-page.status.${type}`) + (message ? ' : ' + message : '')
+function setError(message) {
+    let errorType = 'error'
+    if (!evaluation) errorType = 'error-evaluation'
+    if (!manifest) errorType = 'error-manifest'
+    if (!storeInfo) errorType = 'error-store'
+    if (!navigator.onLine) errorType = 'error-network'
+
+    const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '')
     evaluation = evaluation ?? {}
-    evaluation.rejection = { reasons: [type] }
+    evaluation.rejection = { reasons: [errorType] }
     evaluation.allowed = false
 
     setStatus(error, false)
