@@ -126,7 +126,7 @@ class PasswordVault {
             if (!salts.bcrypt || !salts.pbkdf2) {
                 debug("initializing password vault")
 
-                await Bcrypt.genSalt().then(salt => salts.bcrypt = salt)
+                await Bcrypt.genSalt(14).then(salt => salts.bcrypt = salt)
                 salts.pbkdf2 = PBKDF2.toBase64(PBKDF2.genSalt())
 
                 PasswordVault.#passwords.clear()
