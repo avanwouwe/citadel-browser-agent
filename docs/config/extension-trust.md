@@ -10,13 +10,13 @@ Browser extensions are essentially Javascript programs that run within the brows
 
 Extensions are packaged and uploaded to an extension store; Chrome has the [Chrome Web Store](https://chromewebstore.google.com/), and Edge and Firefox each have their own. Depending on the resources available to each store, the extensions are more of less vetted for security purposes. Developers can also upload new versions of the extension, which are then automatically distributed to all browsers where the extension is installed. 
 
-Even if extensions requests no permissions at all, extension can still run Javascript code on any page that they can access, read and manipulate the information on the page, and trigger the loading of (hidden) images to send information elsewhere. However, if the extension does not request the `scripting` permission, the scripts have to be included in the extension package and cannot be dynamically loaded from Internet. This means that any malicious code has to pass the security reviews performed by the extension store that it is downloaded from.
+Even if extensions request no permissions at all, any extension can still run Javascript code on any page that they can access, read and manipulate the information on those pages, and trigger the loading of (hidden) images to send information elsewhere. However, if the extension does not request the `scripting` permission, the scripts have to be included in the extension package and cannot be dynamically loaded from Internet. This means that any malicious code has to pass the security reviews performed by the extension store that it is downloaded from.
 
-Extensions are well-placed to siphon off information, recover authentication or session secrets, impersonate the user and exfiltrate information. And since extensions are written in Javascript and are distributed via web stores, the barrier for writing them is relatively low.
+Extensions are well-placed to recover authentication or session secrets, impersonate the user and exfiltrate information. And since extensions are written in Javascript and are distributed via web stores, the barrier for writing them is relatively low.
 
-Citadel tries to protect the confidentiality of authentication or session information, but not necessarily the privacy of the user (e.g. click history or their e-mail address). The approach is based on the assumption that extensions without the ability to recover authentication information pose an acceptable risk, and that  it is unlikely that dangerously malicious extensions would obtain and keep a loyal and large user base without being found out.
+Citadel tries to protect the confidentiality of authentication or session information, but not necessarily the privacy of the user (i.e. their click history or e-mail address). The approach is based on the assumption that extensions without the ability to recover authentication information pose an acceptable risk, and that  it is unlikely that dangerously malicious extensions would obtain and keep a loyal and large user base without being found out.
 
-Citadel tries to also cover the risk of previously non-malicious extension being used by malicious actors (e.g. account compromise or change of owner), by detecting when extensions request more permissions during an update.
+Citadel tries to also cover the risk of previously non-malicious extension being used by malicious actors (e.g. developer account compromise or change of owner), by detecting when extensions request more permissions during an update.
 
 To do this, Citadel checks extensions before they are installed or updated, and scans them periodically. The analysis is based on aspects such as:
 * the permissions requested by the extension
@@ -28,11 +28,11 @@ To do this, Citadel checks extensions before they are installed or updated, and 
 ![Extension Analysis Screenshot](/img/screenshot/screenshot-extension-analysis.png)
 
 The [default configuration of Citadel](https://github.com/avanwouwe/citadel-browser-agent/blob/main/config.js) requires that extensions:
-* are vetted themselves, or their publisher are vetted (i.e. they have a "badge" in the store)
-* have at least 200.000 installations
+* themselves or their publisher are vetted (i.e. they have a "badge" in the store)
+* have at least 200.000 active users
 * have at least 500 ratings, and an average of 4.0 or higher
 * do not request permissions give access to authentication- or session secrets
-* request only access to specific hosts, and not ones that you protect
+* request do not request broad access to all hosts, and not to ones that you protect
 * are not side-loaded
 * are not of category `lifestyle`
 
@@ -70,7 +70,7 @@ You can reject extensions based on the following criteria:
 You can ofcourse also reject based on the permissions requested by the extension. The default configuration prohibits extensions that request permissions that could be used to get access to authentication or session secrets of sites in you protected scope:
 * disallows `proxy`,`debugger`,`clipboardRead` (these are global permissions)
 * disallows `scripting`, `webRequest`, `pageCapture`, `cookies`, if the extension has requested access to all sites
-* disallows extensions that request access to all sites
+* disallows extensions that request broad access to all sites
 * disallows extensions that request access to sites in your protected scope
 * disallows the above permissions, even if they are optional and requested to the user at run-time
 
@@ -102,13 +102,12 @@ The following criteria can be used to ignore the above-mentioned reasons for rej
 * `extensions.whitelist.allowAlways` : always allow the following extensions, based on their id
 Extensions allowed in this manner will always be allowed, irrespective of potential reasons for rejection.
 
-You should use these mechanisms for extensions that you are very confident of, and where the potential risk of disabling the extension would generate severe or widespread issues (e.g. your company-wide password manager)
+You should use these mechanisms for extensions that you are very confident of, and where the inadvertent sudden disabling of the extension would generate severe or widespread issues (e.g. your company-wide password manager)
 
 ## whitelist : only allow installation
 If an extension exceeds the risk level defined in your policies, it is still possible to allow the installation and accept the risk that an extension poses, but to then continue to monitor their risk profile:
 * `extensions.allowExisting` : allow at current risk level, since they were already existing when Citadel was installed
 * `extensions.whitelist.allowInstall` : allow at their current risk level the following extensions, based on their id
-* `extensions.category.allowed` : allow at their current risk level following extensions, based on their category
 * manually, when te user requests an exception.
 
 Contrary to the "allow anytime" cases, these exceptions will continue to be monitored. If their risk profile degrades, for example because they require supplementary forbidden permissions or because their score or popularity reduces, then they are disabled. If you want to re-evaluate 

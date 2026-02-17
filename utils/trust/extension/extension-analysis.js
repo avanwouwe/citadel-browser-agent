@@ -203,11 +203,14 @@ class ExtensionAnalysis {
             }
 
             // 2) whitelisting
-            if (scanType === ExtensionAnalysis.ScanType.UPDATE && config.extensions.whitelist.allowAlways.includes(extensionInfo.id) ||
-                config.extensions.whitelist.allowInstall.includes(extensionInfo.id)
-            ) {
+            let whitelistReason
+            const isInstall = scanType === ExtensionAnalysis.ScanType.INSTALL || scanType === ExtensionAnalysis.ScanType.INIT
+            if (config.extensions.whitelist.allowAlways.includes(extensionInfo.id)) whitelistReason = 'allowAlways'
+            else if (isInstall && config.extensions.whitelist.allowInstall.includes(extensionInfo.id)) whitelistReason = 'allowInstall'
+
+            if (whitelistReason) {
                 await ExtensionTrust.allow(currAnalysis)
-                ExtensionAnalysis.#log('extension kept', 'whitelisted', Log.INFO, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension kept', `whitelisted because '${whitelistReason}'`, Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
@@ -227,12 +230,8 @@ class ExtensionAnalysis {
                 return
             }
 
-            if (extensionInfo.enabled) {
-                await ExtensionTrust.disable(extensionInfo.id)
-                ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
-            } else {
-                ExtensionAnalysis.#log('extension left disabled', `high risk but already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
-            }
+            await ExtensionTrust.disable(extensionInfo.id)
+            ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
         }
     }
 

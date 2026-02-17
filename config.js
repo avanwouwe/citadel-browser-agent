@@ -329,7 +329,6 @@ class Config {
             },
             blacklist: [],
             category: {
-                allowed: [],
                 forbidden: ["lifestyle"],
             },
             verified: {
