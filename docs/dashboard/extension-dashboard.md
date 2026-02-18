@@ -15,7 +15,7 @@ For this reason, Citadel checks extensions before they are installed or updated,
 * how the extension is rated by other users
 * the description of the extension (type, keywords)
 
-Your organisation has defined acceptable levels for all of these aspects. When you install an extension, Citadel verifies and allow or disallows as a result. 
+Your organisation has defined acceptable levels for all of these aspects. When you install an extension, Citadel verifies and allows or disallows as a result. 
 
 Every time when an extension is updated, or it's information changes otherwise, the extension is re-evaluated. The extension is blocked if at any time the extension exceeds the risk level defined by your organisation. 
 
