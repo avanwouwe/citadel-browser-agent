@@ -110,12 +110,11 @@ nav_order: 3
 
 ### Explanation and Justification of Retention Periods
 
-| Types of Data | Retention Period | Justification of Retention Period | Deletion Mechanism at End of Retention |
-| :---- | :---- | :---- | :---- |
-| Current data (local storage) | As long as endpoint / agent installed | Needed for ongoing security monitoring | Deleted upon application/user deletion |
-| Archived data / events in SIEM/XDR | As per SIEM / XDR policy | Retains logs for compliance, incident investigation | Follows SIEM/XDR deletion or expiration policy |
-| Functional traces (local logs) | As above | Needed for troubleshooting, limited scope | Local wipe or agent uninstall |
-| Technical logs (SIEM/XDR) | As above | Lawful, policy-compliant retention | Deletion per organizational retention policy |
+| Types of Data                  | Retention Period                                    | Justification of Retention Period | Deletion Mechanism at End of Retention         |
+|:-------------------------------|:----------------------------------------------------| :---- |:-----------------------------------------------|
+| Current data (local storage)   | As long as endpoint / agent installed               | Needed for ongoing security monitoring | Deleted upon application/user deletion         |
+| Security events                | As per SIEM / XDR policy (generally several months) | Retains logs for compliance, incident investigation | Follows SIEM/XDR deletion or expiration policy |
+| Functional traces (local logs) | As above                                            | Needed for troubleshooting, limited scope | Local log rotation or agent uninstall          |
 
 ### Assessment of Measures
 

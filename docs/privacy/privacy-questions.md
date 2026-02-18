@@ -51,7 +51,7 @@ Citadel is designed with privacy in mind. Here’s what it **does** and **does n
 - **Web Navigation:**  
   Stores a cryptographic “hash” (a scrambled version) of website addresses *only locally*, to allow investigation after incidents.
 
-    - *These hashes cannot be reversed or used to view your browsing history.*
+    - *These hashes cannot easily be reversed to view your browsing history.*
     - *stores the information ONLY on your computer.*
 
 
