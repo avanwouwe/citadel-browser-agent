@@ -248,7 +248,6 @@ function setError(message) {
     if (!evaluation) errorType = 'error-evaluation'
     if (!manifest) errorType = 'error-manifest'
     if (!storeInfo) errorType = 'error-store'
-    if (!navigator.onLine) errorType = 'error-network'
 
     const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '')
     evaluation = evaluation ?? {}
