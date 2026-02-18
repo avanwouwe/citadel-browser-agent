@@ -27,16 +27,15 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
             if (request.type !== 'ANALYZE_EXTENSION') return
 
             (async () => {
-                    try {
+                try {
                     config = request.config
                     const analysis = ExtensionAnalysis.promiseOf(request.storePage, config)
                     storeInfo = await analysis.storeInfo
                     manifest = await analysis.manifest
                     evaluation = await analysis.evaluation
-                    } catch (error) {
-                        console.trace(error)
-                        setError(error?.message || String(error))
-                    }
+                } catch (error) {
+                    setError(error?.message || String(error))
+                }
 
                 sendResponse({ storeInfo, manifest, evaluation })
             })()
@@ -248,6 +247,7 @@ function setError(message) {
     if (!evaluation) errorType = 'error-evaluation'
     if (!manifest) errorType = 'error-manifest'
     if (!storeInfo) errorType = 'error-store'
+    if (message === "fetch error") errorType = 'error-network'
 
     const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '')
     evaluation = evaluation ?? {}
