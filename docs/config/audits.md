@@ -23,6 +23,6 @@ In order to allow users time to react, to prevent blocking them when they are pe
 
 You can set for each control different maximum escalation levels and delays between steps, in order to adapt Citadel to your context and risks.
 
-The delay between steps is in **worked days** and only takes into account the days that the user is active. If a user has a failing control and is absent from work for two weeks (without using the device) Citadel does not take into account this period of absence.
+The delay between steps is in **worked days** and only takes into account the days that the user is active. If a user has a failing control and is absent from work for two weeks (without using the device) Citadel does not take this period of absence into account.
 
 Notifications and warnings are given to the user via OS-level notifications and modal windows that are injected in the pages of the protected scope. When the user clicks on the notification, the user is shown the [dashboard](/dashboard) to show them the controls that are non-compliant. 

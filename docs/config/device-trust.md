@@ -13,8 +13,6 @@ As a CISO / CIO you will have put in place policies and mechanisms to ensure the
 
 If these policies are not applied, this creates an information security risk. Citadel verifies that your devices implement your IT security policies, and can disable access to your system if this is not the case, in order to protect the information.
 
-The "worst" control defines the state of your device.
-
 ![Device Trust alert](/img/screenshot/screenshot-issue-device.png)
 
 ## control configuration

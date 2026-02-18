@@ -58,7 +58,7 @@ Note that:
 ## password reuse
 The re-use of passwords creates the risk of [credential stuffing](https://en.wikipedia.org/wiki/Credential_stuffing). Citadel allows you to detect and prohibit the re-use of passwords.
 
-Every time when users enter a password into a site that is part of your protected scope, their password is stored. This allows Citadel to compare the password to other passwords that are entered in other sites. If Citadel detects that a user is using a username / password combination for one site, to connect to another site, this is raised to the user as a potential phishing attack. 
+Every time when users enter a password into a site that is part of your protected scope, their password is stored. This allows Citadel to compare the password to other passwords that are entered in other sites. If Citadel detects that a user is using a password for one site, to connect to another site, this is raised to the user as a potential phishing attack. 
 
 Users can then ask for a temporary exception and continue. The account will be recorded as insecure and the user will at some point in time have to log off or change the password.
 
