@@ -76,7 +76,8 @@ class Notification {
 
         // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
         if (alert.type === AccountTrust.TYPE && alert.level === State.BLOCKING) {
-            const blockedOverPassword = AccountTrust.getStatus(hostname)?.some(a => a?.report?.state === State.BLOCKING)
+            const failingAccounts = Object.values(AccountTrust.getStatus(hostname))
+            const blockedOverPassword = failingAccounts?.some(acct => acct?.report?.state === State.BLOCKING)
             if (blockedOverPassword) return false
         }
 

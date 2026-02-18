@@ -93,14 +93,14 @@ async function renderDeviceDashboard() {
 }
 
 async function renderAccountDashboard() {
-    const accounttrust = await callServiceWorker("GetAccountStatus")
     const tb = document.getElementById("accounttrust-issues")
     tb.innerHTML = ""
 
     tb.removeEventListener('click', handleDeleteAccount)
     tb.addEventListener('click', handleDeleteAccount)
 
-    for (const acct of accounttrust.accounts) {
+    const failingAccounts = await callServiceWorker("GetAccountStatus")
+    for (const acct of Object.values(failingAccounts)) {
         const next = acct.report.nextState
         let errors = acct.report.issues?.description
         if (acct.report.issues?.count > 0) {

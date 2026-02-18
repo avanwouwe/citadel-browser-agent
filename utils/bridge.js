@@ -29,7 +29,7 @@ class Bridge {
 
         Bridge.listenTo("DeletePassword", ({username, system}) => PasswordVault.deleteAccount(username, system))
 
-        Bridge.listenTo("GetAccountStatus", () => ({ accounts: AccountTrust.getStatus() }))
+        Bridge.listenTo("GetAccountStatus", () => AccountTrust.getStatus())
 
         Bridge.listenTo("DeleteAccount", ({username, system}) => AccountTrust.deleteAccount(username, system))
 

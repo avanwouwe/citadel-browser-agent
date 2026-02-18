@@ -24,10 +24,8 @@ class AccountTrust {
     static getStatus(appName = null) {
         const failingAccounts = AccountTrust.#failingAccounts(appName)
 
-        for (const acct of failingAccounts) {
-            const accountKey = AccountTrust.accountKey(acct.username, acct.system)
+        for (const [accountKey, acct] of Object.entries(failingAccounts)) {
             const finding = AccountTrust.#audit.getFinding(accountKey)
-            acct.report = {...acct.report}
             acct.report.state = finding?.getState() ?? State.FAILING
             acct.report.nextState = finding?.getNextState() ?? { state : State.FAILING }
         }
@@ -48,31 +46,36 @@ class AccountTrust {
     }
 
     static refresh() {
-        const prevAudit = AccountTrust.#audit
-        const newAudit = new Audit(AccountTrust.TYPE)
+        const failingAccounts = AccountTrust.#failingAccounts()
 
-        for (const acct of AccountTrust.#failingAccounts()) {
-            const accountKey = AccountTrust.accountKey(acct.username, acct.system)
+        for (const [accountKey, acct] of Object.entries(failingAccounts)) {
             const warnTrigger = config.account.trigger.warn
             const blockTrigger = config.account.trigger.block
 
-            const control = new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
             const report = {
                 name: accountKey,
                 passing: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
-                timestamp: prevAudit?.getFinding(accountKey)?.report?.timestamp ?? new Date()
+                timestamp: AccountTrust.#audit?.getFinding(accountKey)?.report?.timestamp ?? new Date()
             }
+
+            const control = new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
             control.addReport(report)
-            newAudit.setFinding(control)
+            AccountTrust.#audit.setFinding(control)
         }
 
-        AccountTrust.#audit = newAudit
+        // remove controls for accounts that are no longer failing
+        for (const acct in AccountTrust.#audit.getFindings()) {
+            if (! failingAccounts.hasOwnProperty(acct)) {
+                AccountTrust.#audit.removeFinding(acct)
+            }
+        }
+
         AccountTrust.#audit.save()
         Dashboard.refreshAccount()
     }
 
     static #failingAccounts(appName = null) {
-        const accounts = [ ]
+        const accounts = {}
 
         const app = appName ? AppStats.forAppName(appName) : null
         if (appName && !app) return accounts
@@ -111,7 +114,8 @@ class AccountTrust {
                         .map(key => `• ${description[key]}`)
                     report.issues.description = lines.length ? `${t("accounttrust.password.quality.title")}:\n${lines.join('\n')}` : ''
 
-                    accounts.push({ username, system, report })
+                    const accountKey = AccountTrust.accountKey(username, system)
+                    accounts[accountKey] = { username, system, report }
                 }
             }
         }
