@@ -60,7 +60,7 @@
         "entropy": "Ne contient pas assez de caractères différents",
         "sequence": "Est trop répétitif",
         "username-password": "Doit pas être basé sur le nom d'utilisateur",
-        "reuse": "Doit pas être basé sur le mot de passe de {{account}}"
+        "reuse": "Doit pas réutiliser le mot de passe de {{account}}"
       }
     },
     "notification": {
