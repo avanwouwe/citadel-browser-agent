@@ -192,11 +192,26 @@ String.prototype.isEmpty = function () { return this !== undefined && this !== n
 
 String.prototype.isNotEmpty = function () { return ! this.isEmpty() };
 
-String.prototype.truncate = function(maxLength) {
-    if (this.length > maxLength) {
-        return this.substring(0, maxLength) + "[truncated]";
-    }
-    return this.toString()
+String.prototype.truncate = function (maxLength, position = 'middle', marker = '[truncated]') {
+    if (this.length <= maxLength) return this
+
+    if (maxLength <= marker.length) return this.slice(0, maxLength)
+
+    const remaining = maxLength - marker.length
+
+    // Keep right part
+    if (position === 'start') return marker + this.slice(this.length - remaining)
+
+    // Keep left part
+    if (position === 'end') return this.slice(0, remaining) + marker
+
+    // Keep middle part
+    if (maxLength <= marker.length + 2) return this.slice(0, maxLength)
+
+    const startLength = Math.ceil(remaining / 2)
+    const endLength = Math.floor(remaining / 2)
+
+    return this.slice(0, startLength) + marker + this.slice(this.length - endLength)
 }
 
 String.prototype.htmlNowrap = function () { return `<span style="white-space: nowrap;">${this}</span>` }

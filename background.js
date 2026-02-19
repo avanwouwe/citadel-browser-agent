@@ -269,7 +269,7 @@ function logDownload(event, timestamp, result, level, description) {
 	if (event.endTime) download.endTime = event.endTime
 	if (event.totalBytes) download.totalBytes = event.totalBytes
 	if (event.fileSize) download.fileSize = event.fileSize
-	if (event.filename) download.filename = event.filename
+	if (event.filename) download.filename = event.filename.truncate(config.logging.maxFilenameLength)
 	if (event.mime) download.mime = event.mime
 	if (event.exists) download.exists = event.exists
 	if (event.incognito) download.incognito = event.incognito
@@ -280,7 +280,7 @@ function logDownload(event, timestamp, result, level, description) {
 chrome.downloads.onChanged.addListener((delta) => {
 	if (delta.state && delta.state.current === 'complete') {
 		getDownload(delta.id).then(download => {
-			logDownload(download, download.endTime, "download completed", Log.INFO, `completed download of @@URL@@ to '${download.filename}'`)
+			logDownload(download, download.endTime, "download completed", Log.INFO, `completed download of @@URL@@ to '${download.filename.truncate(75, 'start', '…')}'`)
 		})
 	}
 
