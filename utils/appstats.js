@@ -68,8 +68,6 @@ class AppStats {
         const accounts = app.getOrSet("accounts", { })
         delete accounts[username]
 
-        PasswordVault.deleteAccount(username, appName)
-
         AppStats.markDirty()
     }
 

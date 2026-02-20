@@ -109,7 +109,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 			// purge accounts if they haven't been used for a while
 			for (const [username, details] of AppStats.allAccounts(app)) {
 				if (isDate(details.lastConnected) && daysSince(details.lastConnected) > config.account.retentionDays) {
-					AppStats.deleteAccount(appName, username)
+					await AccountTrust.deleteAccount(appName, username)
 				}
 			}
 		}
@@ -420,10 +420,10 @@ chrome.webRequest.onCompleted.addListener(
 		if (MFACheck.findAuthPattern(url.pathname) && details.statusCode >= 400) {
 			MFACheck.cancelTimer(details.initiator, "failed login")
 
-			new SessionState(details.initiator.toURL().origin).load().then(sessionState =>  {
+			new SessionState(details.initiator.toURL().origin).load().then(async sessionState =>  {
 				if (!sessionState.auth?.username) return
 				const appName = getSitename(details.initiator)
-				AppStats.deleteAccount(appName, sessionState.auth.username)
+				await AccountTrust.deleteAccount(appName, sessionState.auth.username, false)
 			})
 		}
 	}, { urls: ["<all_urls>"] }
@@ -715,11 +715,10 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 			details.transitionType === "form_submit" &&
 			prevUrl.origin + prevUrl.pathname === currUrl.origin + currUrl.pathname
 		) {
-			new SessionState(details.url.toURL().origin).load().then(sessionState =>  {
+			new SessionState(details.url.toURL().origin).load().then(async sessionState =>  {
 				if (! sessionState.auth?.username) return
 				const appName = getSitename(details.url)
-				AppStats.deleteAccount(appName, sessionState.auth.username)
-				AccountTrust.refresh()
+				await AccountTrust.deleteAccount(appName, sessionState.auth.username, false)
 				debug("detected failed login, not storing account")
 			})
 		}

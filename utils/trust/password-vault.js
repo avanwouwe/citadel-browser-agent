@@ -49,7 +49,7 @@ class PasswordVault {
         return passwordReuse.length > 0 ? passwordReuse : undefined
     }
 
-    static deleteAccount(username, system) {
+    static deleteAccount(system, username) {
         system = PasswordVault.#normalizeSystem(system)
 
         const accountKey = AccountTrust.accountKey(username, system)

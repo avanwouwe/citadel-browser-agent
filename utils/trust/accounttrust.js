@@ -33,12 +33,16 @@ class AccountTrust {
         return failingAccounts
     }
 
-    static async deleteAccount(username, appName) {
+    static async deleteAccount(appName, username, logoff = true) {
         assert(username && appName, "missing either username or system")
 
         AppStats.deleteAccount(appName, username)
-        await logOffDomain(appName)
-        await injectFuncIntoDomain(appName, () => location.reload())
+        PasswordVault.deleteAccount(appName, username)
+
+        if (logoff) {
+            await logOffDomain(appName)
+            await injectFuncIntoDomain(appName, () => location.reload())
+        }
 
         AccountTrust.refresh()
 
@@ -64,9 +68,9 @@ class AccountTrust {
         }
 
         // remove controls for accounts that are no longer failing
-        for (const acct in AccountTrust.#audit.getFindings()) {
-            if (! failingAccounts.hasOwnProperty(acct)) {
-                AccountTrust.#audit.removeFinding(acct)
+        for (const accountKey in AccountTrust.#audit.getFindings()) {
+            if (! failingAccounts.hasOwnProperty(accountKey)) {
+                AccountTrust.#audit.removeFinding(accountKey)
             }
         }
 

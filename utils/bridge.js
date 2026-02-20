@@ -27,11 +27,11 @@ class Bridge {
 
         Bridge.listenTo("CheckPasswordReuse", ({username, password}, sender) => PasswordVault.detectReuse(username, password, sender.origin))
 
-        Bridge.listenTo("DeletePassword", ({username, system}) => PasswordVault.deleteAccount(username, system))
+        Bridge.listenTo("DeletePassword", ({system, username}) => PasswordVault.deleteAccount(system, username))
 
         Bridge.listenTo("GetAccountStatus", () => AccountTrust.getStatus())
 
-        Bridge.listenTo("DeleteAccount", ({username, system}) => AccountTrust.deleteAccount(username, system))
+        Bridge.listenTo("DeleteAccount", ({system, username, logoff}) => AccountTrust.deleteAccount(system, username, logoff))
 
         Bridge.listenTo("GetDeviceStatus", () => DeviceTrust.getStatus())
 

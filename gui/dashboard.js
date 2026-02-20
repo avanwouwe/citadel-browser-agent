@@ -177,10 +177,9 @@ async function renderEventsDashboard() {
 
 async function handleDeleteAccount(event) {
     if (event.target.classList.contains('delete-btn')) {
-        const username = event.target.dataset.username
         const system = event.target.dataset.system
-        await callServiceWorker("DeleteAccount", { username, system })
-        await renderAccountDashboard()
+        const username = event.target.dataset.username
+        await callServiceWorker("DeleteAccount", { system, username })
     }
 }
 
