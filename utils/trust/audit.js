@@ -74,11 +74,17 @@ class Audit {
 
     removeFinding(name) {
         delete this.#findings[name]
+
+        this.#updateConclusion()
     }
 
     setFinding(control) {
         this.#findings[control.name] = control
 
+        this.#updateConclusion()
+    }
+
+    #updateConclusion() {
         let worstState = State.indexOf(State.PASSING)
         Object.values(this.#findings).forEach(finding => {
             const findingState = State.indexOf(finding.getState())
