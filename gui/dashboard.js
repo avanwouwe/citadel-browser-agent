@@ -12,10 +12,6 @@ I18n.loadPage('/utils/i18n', (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
 
-    renderDeviceDashboard()
-    renderAccountDashboard()
-    renderExtensionDashboard()
-
     const params = new URLSearchParams(window.location.search)
     const tabName = params.get('tab') ?? 'device'
     selectTab(tabName)
@@ -31,13 +27,14 @@ function selectTab(tabId) {
         tabContents[i].classList.toggle('active', isActive)
     }
 
+    renderDeviceDashboard()
+    renderAccountDashboard()
+    renderExtensionDashboard()
+
     const params = new URLSearchParams(window.location.search)
     params.set('tab', tabId)
     window.history.replaceState({}, '', `${window.location.pathname}?${params}`)
 
-    renderDeviceDashboard()
-    renderAccountDashboard()
-    renderExtensionDashboard()
     if (tabId === "events") startEventRefreshing(); else stopEventRefreshing()
 
     const manualLink = document.getElementById('manual-link')
@@ -187,7 +184,6 @@ async function handleDisallowExtension(event) {
     if (event.target.classList.contains('delete-btn')) {
         const extensionId = event.target.dataset.extension
         await callServiceWorker("DisallowExtension", { extensionId })
-        await renderExtensionDashboard()
     }
 }
 
@@ -220,12 +216,12 @@ async function refreshDeviceStatus() {
 }
 
 const updateBtn = document.getElementById('update-button')
-updateBtn.addEventListener('click', function () {
+updateBtn.addEventListener('click', async function () {
     if (updateBtn.classList.contains('refreshing')) return
 
     updateBtn.classList.add('refreshing')
 
-    refreshDeviceStatus()
+    await refreshDeviceStatus()
 });
 
 (function(){
@@ -286,8 +282,8 @@ function handleVisibilityChange() {
 function startEventRefreshing() {
     if (refreshInterval) return
     renderEventsDashboard()
-    refreshInterval = setInterval(() => {
-        renderEventsDashboard()
+    refreshInterval = setInterval(async () => {
+        await renderEventsDashboard()
     }, 5 * ONE_SECOND)
 }
 
