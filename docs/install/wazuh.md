@@ -42,7 +42,7 @@ In the `ossec.conf` file that is deployed on agents, add the following `<localfi
 > If you change the log level be sure to update the `config.logging.shipLevel` configuration, to ensure that the Event Dashboard shows the correct events. For more information see [logging configuration](/config/logging-reporting).
 {: .note }
 
-# add index template
+## add index template
 When the OpenSearch database in Wazuh encounters a new field, it creates the field as "keyword", instead of as "date" or "integer". This prevents them from being used in aggregations functions in dashboards. In order to ensure that the fields are created with the correct types, they have to be defined in the **index template**. Wazuh has a default template that takes care of the standard Wazuh fields, and a second template has to be added that will be merged with the default Wazuh one.
 
 Go to `Indexer management` > `Dev Tools` and call the OpenSearch API with this snippet:
@@ -96,10 +96,10 @@ PUT _template/wazuh-browseragent
 > This template will only be applied when the **next** index is created, which is generally the next day. If events are injected in the current index, the fields will not be the correct type, and the same field will have different types in different indexes. This may cause strange behaviour elsewhere. You may want to wait with injecting new events until the next index is created, or delete the current index (though this means losing that day's worth of security events
 {: .warn }
 
-# add decoder
+## add decoder
 In order for the log entries to be converted to events, a decoder has to be defined. In the Wazuh `Server Management` > `Decoders` configuration and create a new decoder file `0590-browser-agent_decoder.xml` and fill it with the contents of [0590-browser-agent_decoder.xml](/install/0590-browser-agent_decoder.conf).
 
-# add rules
+## add rules
 Events only generate alerts if they are matched by a rule. In Wazuh `Server Management` > `Rules` configuration create a new rules file `0019-browser-agent_rules.xml` and fill it with the contents of [0019-browser-agent_rules.xml](/install/0019-browser-agent_rules.conf).
 
 Restart the server for the changes to take effect, for example using the `Restart cluster` > `Server Management` > `Status` menu.
