@@ -45,8 +45,6 @@ class AccountTrust {
         }
 
         AccountTrust.refresh()
-
-        logger.log(nowTimestamp(), "account management", "account deleted", `https://${appName}`, Log.WARN, username, `user deleted account of '${username}' for ${appName}`)
     }
 
     static refresh() {

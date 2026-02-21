@@ -31,7 +31,10 @@ class Bridge {
 
         Bridge.listenTo("GetAccountStatus", () => AccountTrust.getStatus())
 
-        Bridge.listenTo("DeleteAccount", ({system, username, logoff}) => AccountTrust.deleteAccount(system, username, logoff))
+        Bridge.listenTo("DeleteAccount", async ({system, username, logoff}) => {
+            await AccountTrust.deleteAccount(system, username, logoff)
+            logger.log(nowTimestamp(), "account management", "account deleted", `https://${system}`, Log.WARN, username, `user deleted account of '${username}' for ${system}`)
+        })
 
         Bridge.listenTo("GetDeviceStatus", () => DeviceTrust.getStatus())
 
