@@ -21,8 +21,9 @@ In the `ossec.conf` file that is deployed on agents, edit the existing `<localfi
     <query type="trace,log,activity" level="info">(process == "sudo") or (process == "sessionlogoutd" and message contains "logout is complete.") or (process == "sshd") or (process == "tccd" and message contains "Update Access Record") or (message contains "SessionAgentNotificationCenter") or (process == "screensharingd" and message contains "Authentication") or (process == "securityd" and eventMessage contains "Session" and subsystem == "com.apple.securityd") or (process == "citadel-browser-agent" and message beginsWith "browser agent : ")</query>
   </localfile>
 ```
-
-
+> **Note**
+> If you change the log level be sure to update the `config.logging.shipLevel` configuration, to ensure that the Event Dashboard shows the correct events. For more information see [logging configuration](/config/logging-reporting).
+{: .note }
 
 ### Windows
 If you haven't already done so, install the [Citadel agent](/install/windows) that Citadel needs to communicate the events outside browser sandbox.
@@ -36,6 +37,10 @@ In the `ossec.conf` file that is deployed on agents, add the following `<localfi
     <ignore>, "level": "(DEBUG|TRACE)", </ignore>
   </localfile>
 ```
+
+> **Note**
+> If you change the log level be sure to update the `config.logging.shipLevel` configuration, to ensure that the Event Dashboard shows the correct events. For more information see [logging configuration](/config/logging-reporting).
+{: .note }
 
 # add index template
 When the OpenSearch database in Wazuh encounters a new field, it creates the field as "keyword", instead of as "date" or "integer". This prevents them from being used in aggregations functions in dashboards. In order to ensure that the fields are created with the correct types, they have to be defined in the **index template**. Wazuh has a default template that takes care of the standard Wazuh fields, and a second template has to be added that will be merged with the default Wazuh one.
