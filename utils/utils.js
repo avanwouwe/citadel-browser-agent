@@ -556,3 +556,19 @@ function serializeToText(obj, indent = 0) {
 function mergeArrays(...arrays) {
     return [...new Set(arrays.flat())]
 }
+
+async function hasPathChanged(tabId, url, seconds) {
+    return new Promise((resolve) => {
+        setTimeout(async () => {
+            try {
+                const tab = await chrome.tabs.get(tabId)
+                const prevUrl = url.toURL()
+                const currUrl = tab.url.toURL()
+
+                resolve(prevUrl.origin + prevUrl.pathname !== currUrl.origin + currUrl.pathname)
+            } catch (error) {
+                resolve(true)
+            }
+        }, seconds * ONE_SECOND)
+    })
+}

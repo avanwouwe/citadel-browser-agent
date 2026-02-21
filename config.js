@@ -13,7 +13,8 @@ class Config {
             shipLevel: 'INFO',
             consoleLevel: 'WARN',
             maskUrlLevel: 'WARN',
-            maxUrlLength: 500,
+            maxUrlLength: 250,
+            maxFilenameLength: 150,
             throttle: {
                 windowDuration: 10,
                 reportFrequency: 60,
@@ -163,6 +164,7 @@ class Config {
             exceptions: [],
         },
         account: {
+            confirmLoginDelay: 5,
             trigger: {
                 warn: 2,
                 block: 7

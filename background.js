@@ -418,7 +418,7 @@ chrome.webRequest.onCompleted.addListener(
 		}
 
 		if (MFACheck.findAuthPattern(url.pathname) && details.statusCode >= 400) {
-			MFACheck.cancelTimer(details.initiator, "failed login")
+			MFACheck.cancelTimer(details.initiator, "failed authentication web request")
 
 			new SessionState(details.initiator.toURL().origin).load().then(async sessionState =>  {
 				if (!sessionState.auth?.username) return
@@ -669,30 +669,36 @@ function registerAccountUsage(url, report) {
 	const account = AppStats.getAccount(app, report.username)
 	account.lastConnected = nowDatestamp()
 
-	const issues = {
-		length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
-		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
-		numberOfLetters: report.password.numberOfLetters < config.account.passwordPolicy.minNumberOfLetters ? 1 : null,
-		numberOfUpperCase: report.password.numberOfUpperCase < config.account.passwordPolicy.minNumberOfUpperCase ? 1 : null,
-		numberOfLowerCase: report.password.numberOfLowerCase < config.account.passwordPolicy.minNumberOfLowerCase ? 1 : null,
-		numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
-		usernameInPassword: report.password.usernameInPassword ? 1 : null,
-		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
-		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
-		reuse: report.password.reuse ? PasswordVault.getReusedAccount(report.password.reuse, report.username, appName)?.label : null,
-	}
-
-	Object.entries(issues).forEach(([key, value]) => {
-		if (!value) {
-			delete issues[key]
-		}
-	})
-
-	issues.count = Object.values(issues).length
-	account.issues = AccountTrust.checkFor(report.username, appName) && issues.count > 0 ? issues : null
-
-	AccountTrust.refresh()
 	AppStats.markDirty()
+
+	// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
+	// since the account will be deleted if the login is not confirmed, these issues will be ignored
+	sleep(config.account.confirmLoginDelay * ONE_SECOND).then(() => {
+		const issues = {
+			length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
+			numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
+			numberOfLetters: report.password.numberOfLetters < config.account.passwordPolicy.minNumberOfLetters ? 1 : null,
+			numberOfUpperCase: report.password.numberOfUpperCase < config.account.passwordPolicy.minNumberOfUpperCase ? 1 : null,
+			numberOfLowerCase: report.password.numberOfLowerCase < config.account.passwordPolicy.minNumberOfLowerCase ? 1 : null,
+			numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
+			usernameInPassword: report.password.usernameInPassword ? 1 : null,
+			entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
+			sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
+			reuse: report.password.reuse ? PasswordVault.getReusedAccount(report.password.reuse, report.username, appName)?.label : null,
+		}
+
+		Object.entries(issues).forEach(([key, value]) => {
+			if (!value) {
+				delete issues[key]
+			}
+		})
+
+		issues.count = Object.values(issues).length
+		account.issues = AccountTrust.checkFor(report.username, appName) && issues.count > 0 ? issues : null
+
+		AccountTrust.refresh()
+		AppStats.markDirty()
+	})
 }
 
 chrome.webNavigation.onCommitted.addListener(async details => {
@@ -703,28 +709,6 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 	setInitiator(details)
 
 	registerInteraction(details.url, details)
-
-	// detect failed logins to prevent storing wrong passwords (i.e. URL looks like a login URL, and it did not change between navigations)
-	const { tabId, url } = details
-
-	if (url) {
-		const currUrl = url.toURL()
-		const prevUrl = await tabState?.getState("LastUrl", tabId)?.then(url => url?.toURL())
-
-	if (MFACheck.findAuthPattern(prevUrl?.href) &&
-			details.transitionType === "form_submit" &&
-			prevUrl.origin + prevUrl.pathname === currUrl.origin + currUrl.pathname
-		) {
-			new SessionState(details.url.toURL().origin).load().then(async sessionState =>  {
-				if (! sessionState.auth?.username) return
-				const appName = getSitename(details.url)
-				await AccountTrust.deleteAccount(appName, sessionState.auth.username, false)
-				debug("detected failed login, not storing account")
-			})
-		}
-	}
-
-	tabState?.setState("LastUrl", tabId, url)
 })
 
 chrome.tabs.onUpdated.addListener(async(tabId, changeInfo, tab) => {
@@ -808,6 +792,16 @@ onMessage((request, sender) => {
 				delete account.lastMFA
 				MFACheck.startTimer(sender.url, config.account.mfa.waitMinutes, showModal)
 			}
+		}
+
+		if (MFACheck.findAuthPattern(sender.tab.url)) {
+			hasPathChanged(sender.tab.id, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
+				if (!hasChanged) {
+					debug("page did not change, login assumed failed")
+					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
+					AccountTrust.deleteAccount(siteUrl.hostname, request.report.username, false)
+				}
+			})
 		}
 	}
 
