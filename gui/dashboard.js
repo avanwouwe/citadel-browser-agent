@@ -139,15 +139,20 @@ async function renderExtensionDashboard() {
             ? `<img src="${analysis.storeInfo.extensionLogo}" alt="${analysis.storeInfo.name} logo" class="extension-logo" onerror="this.style.display='none'">`
             : `<span class="extension-logo-placeholder">🧩</span>`
 
+        const name = analysis.storeInfo?.name ?? ''
+        const storePage = analysis.storeInfo?.storePage
+        const nameElement = storePage
+            ? `<a href="${storePage}" target="_blank" rel="noopener noreferrer">${name}</a>`
+            : `<span>${name}</span>`;
+
         const tr = document.createElement("tr")
         tr.innerHTML =
             `<td>${logo}</td>` +
-            `<td><span class="label ellipsis" title="${analysis.storeInfo?.name ?? ''}">${analysis.storeInfo?.name ?? ''}</span></td>` +
+            `<td class="label ellipsis" title="${name}">${nameElement}</td>` +
             `<td><span class="ellipsis" title="${analysis.id}">${analysis.storeInfo.id}</span></td>` +
             `<td>${issues}</td>` +
             `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
             `<td><span class="delete-btn" data-extension="${analysis.storeInfo.id}">${analysis.isInstalled ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '🗑'}</span></td>`
-
         tb.appendChild(tr)
     }
 }
@@ -165,12 +170,14 @@ async function renderEventsDashboard() {
         const seconds = String(entry.timestamp.getSeconds()).padStart(2, '0')
         const shortTime = `${hours}:${minutes}:${seconds}`
 
+        const url = entry.url ? `<a href="${entry.url}" target="_blank" rel="noopener noreferrer">${entry.url}</a>` : '-'
         tr.innerHTML =
             `<td title="${entry.timestamp.toISOString()}">${shortTime}</td>
              <td>${entry.browseragent.level}</td>
              <td>${entry.browseragent.result ?? entry.browseragent.event}</td>
-             <td><span class="ellipsis" title="${entry.url}">${entry.url || '-'}</span></td>
-             <td><span class="ellipsis" title="${entry.browseragent.description}">${entry.browseragent.description || '-'}</span></td>`
+             <td class="label ellipsis" title="${entry.url}">${url}</td>
+             <td class="ellipsis" title="${entry.browseragent.description}">${entry.browseragent.description || '-'}</td>`
+
         logTable.appendChild(tr)
     }
 }

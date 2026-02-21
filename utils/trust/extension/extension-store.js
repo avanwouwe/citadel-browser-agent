@@ -448,7 +448,8 @@ class ExtensionStore {
                 numInstalls,
                 isVerifiedExtension,
                 isVerifiedPublisher,
-                downloadUrl
+                downloadUrl,
+                storePage: dom?.url
             }
         }
     }
@@ -548,6 +549,7 @@ class ExtensionStore {
                 categories,
                 isVerifiedExtension,
                 downloadUrl,
+                storePage: dom?.url
             }
         }
 
@@ -635,7 +637,8 @@ class ExtensionStore {
                 numRatings,
                 categories,
                 isVerifiedExtension,
-                downloadUrl
+                downloadUrl,
+                storePage: dom?.url
             }
         }
     }
@@ -704,7 +707,8 @@ class ExtensionStore {
                 rating,
                 numRatings,
                 categories,
-                downloadUrl
+                downloadUrl,
+                storePage: dom?.url
             }
         }
     }
