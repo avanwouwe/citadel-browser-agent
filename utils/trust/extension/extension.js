@@ -277,7 +277,7 @@ class Extension {
     static isSideloaded = extensionInfo => Extension.#SIDELOAD_TYPES.includes(extensionInfo.installType)
 
     static async isInstalled(extensionId) {
-        return chrome.management.get(extensionId).then(() => true, () => false)
+        return await chrome.management.get(extensionId).then(() => true, () => false)
     }
 
     static async disable(extensionId) {

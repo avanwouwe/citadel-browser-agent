@@ -6,16 +6,27 @@ class ExtensionTrust {
         ExtensionTrust.#storage.ready().then(() => {
             chrome.management.onInstalled.addListener(async extensionInfo => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.INSTALL))
             chrome.management.onEnabled.addListener(async extensionInfo => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.ENABLE))
+            chrome.management.onUninstalled.addListener(() => Dashboard.refreshExtension())
         })
     }
 
-    static async #analysisOf(extensionId) {
+    static async #get(extensionId) {
         const storage = await ExtensionTrust.#storage.ready()
         return storage.value()[extensionId]
     }
 
+    static async #set(analysis) {
+        const storage = await ExtensionTrust.#storage.ready()
+
+        analysis = cloneDeep(analysis)
+
+        storage.value()[analysis.storeInfo.id] = analysis
+
+        ExtensionTrust.#storage.markDirty()
+    }
+
     static async analysisOf(extensionId) {
-        const analysis = await ExtensionTrust.#analysisOf(extensionId)
+        const analysis = await ExtensionTrust.#get(extensionId)
         return cloneDeep(analysis)
     }
 
@@ -23,29 +34,45 @@ class ExtensionTrust {
         const storage = await ExtensionTrust.#storage.ready()
         const analyses = cloneDeep(await storage.value())
         delete analyses.isDirty
-        Object.values(analyses).forEach(analysis => analysis.issues = serializeToText(ExtensionAnalysis.issuesOf(analysis)))
+
+        await Promise.all(
+            Object.values(analyses).map(async analysis => {
+                analysis.isInstalled = await Extension.isInstalled(analysis.storeInfo.id)
+                analysis.issues = serializeToText(ExtensionAnalysis.issuesOf(analysis))
+            })
+        )
 
         return analyses
     }
 
     static async isAllowed(extensionId) {
-        const analysis = await ExtensionTrust.#analysisOf(extensionId)
+        const analysis = await ExtensionTrust.#get(extensionId)
 
         return analysis || false
     }
 
     static async allow(analysis) {
-        const storage = await ExtensionTrust.#storage.ready()
-
-        analysis = cloneDeep(analysis)
-        analysis.state = State.PASSING
-
-        storage.value()[analysis.storeInfo.id] = analysis
+        await ExtensionTrust.#set(analysis)
+        await ExtensionTrust.setState(analysis.storeInfo.id, State.PASSING)
 
         Dashboard.refreshExtension()
     }
 
-    static async disallow(extensionId) {
+    static async block(analysis) {
+        const prevAnalysis = await ExtensionTrust.#get(analysis.storeInfo.id)
+
+        if (!prevAnalysis) await ExtensionTrust.#set(analysis)
+
+        await ExtensionTrust.setState(analysis.storeInfo.id, State.BLOCKING)
+
+        Dashboard.refreshExtension()
+
+        Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
+    }
+
+    static async delete(extensionId) {
+        if (await Extension.isInstalled(extensionId)) return
+
         const storage = await ExtensionTrust.#storage.ready()
 
         delete storage.value()[extensionId]
@@ -56,24 +83,19 @@ class ExtensionTrust {
     static async setState(extensionId, state) {
         assert(State.values.includes(state), `unknown state type ${state}`)
 
-        const storage = await ExtensionTrust.#storage.ready()
-        const analysis = storage.value()[extensionId]
+        const analysis = await ExtensionTrust.#get(extensionId)
+        if (!analysis) return
+
         analysis.state = state
+
+        if (state !== State.UNKNOWN) {
+            const previouslyAllowed = analysis.evaluation.allowed
+            const currentlyAllowed = state !== State.BLOCKING
+            if (previouslyAllowed && !currentlyAllowed) await Extension.disable(extensionId)
+        }
 
         ExtensionTrust.#storage.markDirty()
         Dashboard.refreshExtension()
-    }
-
-    static async disable(extensionId) {
-        await Extension.disable(extensionId)
-        Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
-
-        const analysis = await ExtensionTrust.#analysisOf(extensionId)
-        if (analysis) {
-            await ExtensionTrust.setState(extensionId, State.BLOCKING)
-
-            Dashboard.refreshExtension()
-        }
     }
 
     static async flush() {

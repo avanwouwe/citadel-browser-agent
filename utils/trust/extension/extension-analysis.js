@@ -164,13 +164,22 @@ class ExtensionAnalysis {
             if (scanType === ExtensionAnalysis.ScanType.INSTALL && prevAnalysis) scanType = ExtensionAnalysis.ScanType.UPDATE
 
             if (Extension.isSideloaded(extensionInfo)) {
-                if (config.extensions.allowSideloading) {
+                const analysis = { storeInfo: { id: extensionInfo.id } }
+
+                if (config.extensions.whitelist.bundled.includes(extensionInfo.id)) {
+                    ExtensionAnalysis.#log('extension kept', 'bundled and kept', Log.INFO, extensionInfo, undefined, scanType)
+                } else if (config.extensions.allowSideloading) {
+                    analysis.allowed = true
+                    await ExtensionTrust.allow(analysis)
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but allowed', Log.INFO, extensionInfo, undefined, scanType)
                 } else if (config.extensions.whitelist.allowAlways.includes(extensionInfo.id)) {
+                    analysis.allowed = true
+                    await ExtensionTrust.allow(analysis)
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but whitelisted', Log.INFO, extensionInfo, undefined, scanType)
                 } else {
+                    analysis.allowed = false
+                    await ExtensionTrust.block(analysis)
                     ExtensionAnalysis.#log('extension disabled', 'side-loaded and therefore disabled', Log.WARN, extensionInfo, undefined, scanType)
-                    await ExtensionTrust.disable(extensionInfo.id)
                 }
                 return
             }
@@ -185,7 +194,7 @@ class ExtensionAnalysis {
                 if (scanType === ExtensionAnalysis.ScanType.INIT || scanType === ExtensionAnalysis.ScanType.INSTALL) {
                     await ExtensionTrust.allow({
                         storeInfo: { id: extensionInfo.id },
-                        pending: true
+                        pending: true,
                     })
                 }
 
@@ -238,11 +247,13 @@ class ExtensionAnalysis {
             else if (!extensionInfo.mayDisable) unableReason = 'cannot disable'
 
             if (unableReason) {
+                await ExtensionTrust.allow(currAnalysis)
+                await ExtensionTrust.setState(extensionInfo.id, State.FAILING)
                 ExtensionAnalysis.#log('extension disable failed', `could not be disabled because '${unableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
                 return
             }
 
-            await ExtensionTrust.disable(extensionInfo.id)
+            await ExtensionTrust.block(currAnalysis)
             ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
         }
     }

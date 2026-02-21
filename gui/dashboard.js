@@ -45,6 +45,8 @@ function selectTab(tabId) {
 
 async function renderDeviceDashboard() {
     const devicetrust = await callServiceWorker("GetDeviceStatus")
+    const controls = Object.values(devicetrust.controls)
+        .sort((a, b) => a.name.localeCompare(b.name))
     const state = devicetrust.state
 
     document.getElementById("status-label").textContent = t("control.state." + state) || "-"
@@ -56,8 +58,6 @@ async function renderDeviceDashboard() {
 
     const tb = document.getElementById("devicetrust-issues")
     tb.innerHTML = ""
-    const controls = Object.values(devicetrust.controls)
-        .sort((a, b) => a.name.localeCompare(b.name))
 
     for (const ctrl of controls) {
         const next = ctrl.nextState
@@ -120,30 +120,33 @@ async function renderAccountDashboard() {
 
 async function renderExtensionDashboard() {
     const extensionTrust = await callServiceWorker("GetExtensionStatus")
+    const extensions = Object.values(extensionTrust)
+        .sort((a, b) => a.storeInfo.id.localeCompare(b.storeInfo.id))
+
     const tb = document.getElementById("extension-details")
     tb.innerHTML = ""
 
-    tb.removeEventListener('click', handleDisallowExtension)
-    tb.addEventListener('click', handleDisallowExtension)
+    tb.removeEventListener('click', handleDeleteExtension)
+    tb.addEventListener('click', handleDeleteExtension)
 
-    for (const analysis of Object.values(extensionTrust)) {
+    for (const analysis of extensions) {
         let issues = ''
         if (analysis.issues) {
             issues = `<span class="has-errors" data-tooltip="${analysis.issues.escapeHtmlEntities()}">&#128269;</span>`
         }
 
-        const logo = analysis.storeInfo.extensionLogo
+        const logo = analysis.storeInfo?.extensionLogo
             ? `<img src="${analysis.storeInfo.extensionLogo}" alt="${analysis.storeInfo.name} logo" class="extension-logo" onerror="this.style.display='none'">`
-            : `<span class="extension-logo-placeholder">📦</span>`
+            : `<span class="extension-logo-placeholder">🧩</span>`
 
         const tr = document.createElement("tr")
         tr.innerHTML =
             `<td>${logo}</td>` +
-            `<td><span class="label ellipsis" title="${analysis.storeInfo.name}">${analysis.storeInfo.name}</span></td>` +
+            `<td><span class="label ellipsis" title="${analysis.storeInfo?.name ?? ''}">${analysis.storeInfo?.name ?? ''}</span></td>` +
             `<td><span class="ellipsis" title="${analysis.id}">${analysis.storeInfo.id}</span></td>` +
             `<td>${issues}</td>` +
             `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
-            `<td><span class="delete-btn" data-extension="${analysis.storeInfo.id}">🗑</span></td>`
+            `<td><span class="delete-btn" data-extension="${analysis.storeInfo.id}">${analysis.isInstalled ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '🗑'}</span></td>`
 
         tb.appendChild(tr)
     }
@@ -180,10 +183,10 @@ async function handleDeleteAccount(event) {
     }
 }
 
-async function handleDisallowExtension(event) {
+async function handleDeleteExtension(event) {
     if (event.target.classList.contains('delete-btn')) {
         const extensionId = event.target.dataset.extension
-        await callServiceWorker("DisallowExtension", { extensionId })
+        await callServiceWorker("DeleteExtension", { extensionId })
     }
 }
 

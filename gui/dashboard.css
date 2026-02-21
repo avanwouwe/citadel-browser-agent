@@ -186,3 +186,8 @@ td:has(.extension-logo), td:has(.extension-logo-placeholder) {
     display: block;
     pointer-events: none;
 }
+
+.extension-logo-placeholder {
+    font-size: 2em;
+    filter: grayscale(100%);
+}
