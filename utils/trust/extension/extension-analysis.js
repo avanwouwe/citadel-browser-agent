@@ -69,6 +69,11 @@ class ExtensionAnalysis {
         static async #ensureOffscreen() {
             if (this.isReady) return
 
+            if (Browser.version.brand === Browser.Firefox) {
+                this.isReady = true
+                return
+            }
+
             if (!await chrome.offscreen.hasDocument()) {
                 await chrome.offscreen.createDocument({
                     url: '/gui/extension-analysis.html',
@@ -104,23 +109,21 @@ class ExtensionAnalysis {
 
                     const storePage = await ExtensionStore.pageOf(extensionInfo.id, store)
 
-                    const analysis = await sendMessagePromise('ANALYZE_EXTENSION', {
+                    return await sendMessagePromise('ANALYZE_EXTENSION', {
                         storePage,
                         logo: Logo.getLogo(),
                         config
                     })
-
-                    await chrome.offscreen.closeDocument()
-
-                    return analysis
                 } catch (error) {
                     console.error('Extension analysis failed:', error)
                     return ExtensionAnalysis.Headless.#error("error")
                 } finally {
                     this.isReady = false
-                    try {
-                        await chrome.offscreen.closeDocument()
-                    } catch {}
+                    if (chrome.offscreen) {
+                        try {
+                            await chrome.offscreen.closeDocument()
+                        } catch {}
+                    }
                 }
             })
 
