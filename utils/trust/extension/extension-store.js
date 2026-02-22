@@ -1,6 +1,8 @@
 class ExtensionStore {
 
     static of(url) {
+        if (!url) return undefined
+
         if (url.startsWith("https://chromewebstore.google.com/detail") || url.startsWith("https://clients2.google.com/service/update")) {
             return ExtensionStore.Chrome
         } else if (url.startsWith("https://addons.mozilla.org/")) {
@@ -50,6 +52,10 @@ class ExtensionStore {
     static async fetchPage(url) {
         const store = ExtensionStore.of(url)
         if (!store) return
+
+        // first normalize the URL
+        const extensionId = await ExtensionStore.extensionIdOf(url)
+        url = await store.pageOf(extensionId)
 
         const response = await Fetch.page(url)
         if (! response.ok) return
@@ -391,6 +397,11 @@ class ExtensionStore {
             const descriptionLine2 = descriptionLine1?.nextElementSibling
             const descriptionLine3 = descriptionLine2?.nextElementSibling
 
+            // description
+            const description = dom.querySelector('meta[property="og:description"]')?.getAttribute('content')
+                ?? dom.querySelector('meta[name="description"]')?.getAttribute('content')
+                ?? null
+
             // extensionLogo
             const extensionLogo = dom.querySelector('meta[property="og:image"]')?.getAttribute('content')
 
@@ -441,6 +452,7 @@ class ExtensionStore {
                 browser: Browser.Chrome,
                 id: extensionId,
                 name: extensionName?.textContent,
+                description,
                 extensionLogo,
                 categories,
                 rating,
@@ -448,8 +460,7 @@ class ExtensionStore {
                 numInstalls,
                 isVerifiedExtension,
                 isVerifiedPublisher,
-                downloadUrl,
-                storePage: dom?.url
+                downloadUrl
             }
         }
     }
@@ -476,7 +487,7 @@ class ExtensionStore {
             'other': null,
         }
 
-        static async pageOf(id) {
+        static pageOf = async (id) => {
             const metadata = await ExtensionStore.Firefox.getMetadata(id)
             return metadata?.slug ? `https://addons.mozilla.org/en-US/firefox/addon/${metadata.slug}/` : null
         }
@@ -485,71 +496,49 @@ class ExtensionStore {
             const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
+            const reduxState = JSON.parse(dom.querySelector('#redux-store-state')?.textContent ?? 'null')
+            const addonData = reduxState?.addons?.byID ? Object.values(reduxState.addons.byID)[0] : null
+
+            if (!addonData) return null
+
             // extensionName
-            const header = dom.querySelector('header.Addon-header')
-            const titleElement = header.querySelector('.AddonTitle')
-            const extensionName = titleElement ?
-                titleElement.textContent.replace(titleElement.querySelector('.AddonTitle-author')?.textContent || '', '').trim() :
-                null
+            const extensionName = addonData.name
+            const description = addonData.summary
 
             // extensionLogo
-            const extensionLogo = dom.querySelector('img.Addon-icon-image')?.getAttribute('src')
+            const extensionLogo = addonData.icons?.['64'] ?? addonData.icons?.['32']
 
             // isVerifiedExtension
-            const isVerifiedExtension = !!header.querySelector('div.Badge[data-testid="badge-recommended"], div.Badge[data-testid="badge-line"]')
+            const isVerifiedExtension = addonData.promoted?.some(p =>
+                p.category === 'recommended' || p.category === 'line'
+            ) ?? false
 
             // rating & numRatings
-            let rating = null
-            let numRatings = null
-            const ratingBadge = header.querySelector('div.Badge[data-testid="badge-star-full"] .Badge-content')
-            if (ratingBadge) {
-                const ratingText = ratingBadge.textContent.trim()
-                const match = ratingText.match(/(\d+(?:\.\d+)?)\s*\((\d[\d\s',.]+)\s*/)
-                if (match) {
-                    rating = parseFloat(match[1])
-                    numRatings = parseInt(match[2].replace(/[\s,.]/g, ''), 10)
-                }
-            }
-
-            // numInstalls
-            let numInstalls = null
-            const userBadge = header.querySelector('div.Badge[data-testid="badge-user-fill"] .Badge-content')
-            if (userBadge) {
-                const usersText = userBadge.textContent.trim()
-                const match = usersText.match(/(\d[\d\s',.]+)/)
-                if (match) {
-                    numInstalls = parseInt(match[1].replace(/[\s',.]/g, ''))
-                }
-            }
+            const rating = addonData.ratings?.average
+            const numRatings = addonData.ratings?.count
+            const numInstalls = addonData.average_daily_users
 
             // categories
-            const categories = []
-            const categoryLinks = dom.querySelectorAll('.AddonMoreInfo-related-category-link')
-            categoryLinks.forEach(link => {
-                const href = link.getAttribute('href')
-                const categorySlugMatch = href.match(/\/firefox\/extensions\/category\/([^/]+)\//)
-                if (categorySlugMatch) {
-                    const category = this.categories[categorySlugMatch[1]]
-                    if (category) {
-                        categories.push(category)
-                    }
-                }
-            })
+            const categories = (addonData.categories ?? [])
+                .map(slug => this.categories[slug])
+                .filter(Boolean)
 
-            const downloadUrl = dom.querySelector('.Addon-install a[href^="https://addons.mozilla.org/firefox/downloads/file"]')?.href
+            const versionId = addonData.currentVersionId
+            const versionData = reduxState?.versions?.byId?.[versionId]
+            const downloadUrl = versionData?.file?.url
 
             return {
                 browser: Browser.Firefox,
                 id: extensionId,
                 name: extensionName,
+                description,
                 extensionLogo,
                 rating,
                 numRatings,
                 numInstalls,
                 categories,
                 isVerifiedExtension,
-                downloadUrl,
-                storePage: dom?.url
+                downloadUrl
             }
         }
 
@@ -588,58 +577,44 @@ class ExtensionStore {
         static pageOf = async (id) => `https://microsoftedge.microsoft.com/addons/detail/${id}/${id}`
 
         static async parsePage(dom) {
-            function parseInstalledNumber(str) {
-                const match = str.match(/([0-9.,'\s]+)/)
-                if (!match) return null
-
-                const numeric = match[1].replace(/[\s,.']/g, '')
-                return Number(numeric).valueOf()
-            }
-
             const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
-            const extensionName = dom.querySelector('title')?.textContent?.replace(' - Microsoft Edge Addons', '')
-            const extensionLogo = dom.querySelector('img[src^="https://store-images.s-microsoft.com"]')?.getAttribute('src')
-
-            // rating & numRatings, numInstalls
-            const ratingMeta = dom.querySelector('meta[itemprop="ratingValue"]')
-            const numRatingsMeta = dom.querySelector('meta[itemprop="ratingCount"]')
-            const numInstallsMeta = dom.querySelector('meta[itemprop="userInteractionCount"]')
-
-            const rating = parseFloat(ratingMeta?.getAttribute('content')) ?? null
-            const numRatings = parseInt(numRatingsMeta?.getAttribute('content')) ?? null
-            const numInstalls = parseInstalledNumber(numInstallsMeta?.getAttribute('content'))
-
-            // isVerifiedExtension
-            const isVerifiedExtension = !!dom.querySelector('a[href*="featured-badge"]')
-
-            // categories
-            const categories = []
-            const categoryElem = dom.getElementById('categoryText')
-            if (categoryElem && categoryElem.href) {
-                const categorySlug = categoryElem.href.match(/\/addons\/category\/([^/]+)/i)?.[1]?.toLowerCase()
-                if (categorySlug) {
-                    const category = this.categories[categorySlug]
-                    if (category) categories.push(category)
-                }
-            }
-
-            const downloadUrl = `https://edge.microsoft.com/extensionwebstorebase/v1/crx?x=id%3D${extensionId}%26installsource%3Dondemand&response=redirect`
+            const apiData = await ExtensionStore.Edge.getMetadata(extensionId)
+            if (!apiData) return null
 
             return {
                 browser: Browser.Edge,
                 id: extensionId,
-                name: extensionName,
-                extensionLogo,
-                numInstalls,
-                rating,
-                numRatings,
-                categories,
-                isVerifiedExtension,
-                downloadUrl,
-                storePage: dom?.url
+                name: apiData.name,
+                description: apiData.description,
+                extensionLogo: 'https:' + apiData.logoUrl,
+                numInstalls: apiData.activeInstallCount,
+                rating: apiData.averageRating,
+                numRatings: apiData.ratingCount,
+                categories: ExtensionStore.Edge.#mapCategories(apiData.categories),
+                isVerifiedExtension: apiData.isBadgedAsFeatured ?? false,
+                downloadUrl: `https://edge.microsoft.com/extensionwebstorebase/v1/crx?x=id%3D${extensionId}%26installsource%3Dondemand&response=redirect`
             }
+        }
+
+        static async getMetadata(extensionId) {
+            try {
+                const response = await fetch(`https://microsoftedge.microsoft.com/addons/getproductdetailsbycrxid/${extensionId}`)
+                if (!response.ok) throw new Error(`HTTP ${response.status}`)
+                return await response.json()
+            } catch (error) {
+                console.trace(`Cannot find Edge metadata for ${extensionId}:`, error)
+                return null
+            }
+        }
+
+        static #mapCategories(categories) {
+            if (!categories) return []
+
+            return categories
+                .map(slug => this.categories[slug?.toLowerCase()])
+                .filter(Boolean)
         }
     }
 
@@ -647,54 +622,54 @@ class ExtensionStore {
         static pattern = new RegExp('^https://addons.opera.com/[^/]+/extensions/details/([^/#?]+)')
 
         static categories = {
-            'privacy-security': { primary: 'make_chrome_yours', secondary: 'privacy' },
-            'accessibility': { primary: 'make_chrome_yours', secondary: 'accessibility' },
-            'appearance': { primary: 'make_chrome_yours', secondary: 'appearance' },
-            'blockchain-cryptocurrency': { primary: 'productivity', secondary: 'crypto' },
-            'developer-tools': { primary: 'productivity', secondary: 'developer' },
-            'downloads': { primary: 'lifestyle', secondary: 'downloads' },
-            'fun': { primary: 'lifestyle', secondary: 'entertainment' },
-            'music': { primary: 'lifestyle', secondary: 'entertainment' },
-            'news-weather': { primary: 'lifestyle', secondary: 'news' },
-            'productivity': { primary: 'productivity', secondary: 'tools' },
-            'search': { primary: 'productivity', secondary: 'tools' },
-            'shopping': { primary: 'lifestyle', secondary: 'shopping' },
-            'social': { primary: 'lifestyle', secondary: 'social' },
-            'translation': { primary: 'productivity', secondary: 'translation' },
+            'privacy-security':          { primary: 'make_chrome_yours', secondary: 'privacy' },
+            'accessibility':             { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'appearance':                { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'blockchain-cryptocurrency': { primary: 'productivity',      secondary: 'tools' },
+            'developer-tools':           { primary: 'productivity',      secondary: 'developer' },
+            'downloads':                 { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'fun':                       { primary: 'lifestyle',         secondary: 'entertainment' },
+            'music':                     { primary: 'lifestyle',         secondary: 'entertainment' },
+            'news-weather':              { primary: 'lifestyle',         secondary: 'news' },
+            'productivity':              { primary: 'productivity',      secondary: 'tools' },
+            'search':                    { primary: 'productivity',      secondary: 'tools' },
+            'shopping':                  { primary: 'lifestyle',         secondary: 'shopping' },
+            'social':                    { primary: 'lifestyle',         secondary: 'social' },
+            'translation':               { primary: 'productivity',      secondary: 'tools' },
         }
 
         static pageOf = async (id) => `https://addons.opera.com/en/extensions/details/${id}/`
 
         static async parsePage(dom) {
-            function parseInteger(str) {
-                if(!str) return null
-                str = str.replace(/[\s,.']/g, '')
-                const num = parseInt(str)
-                return isNaN(num) ? null : num
-            }
+            const parseInteger = str => str ? (parseInt(str.replace(/[\s,.']/g, '')) || null) : null
+            const metaContent = selector => dom.querySelector(selector)?.getAttribute('content')?.trim()
 
             const extensionId = await ExtensionStore.extensionIdOf(dom.url)
             if (!extensionId) return null
 
-            const extensionName = dom.querySelector('h1[itemprop="name"]')?.textContent.trim()
-            const extensionLogo = dom.querySelector('img.icon-pkg')?.getAttribute('src')
+            // extensionName
+            const extensionName = metaContent('meta[property="og:title"]')
+                ?? dom.querySelector('h1[itemprop="name"]')?.textContent?.trim()
+
+            const description = metaContent('meta[property="og:description"]')
+                ?? dom.querySelector('[itemprop="description"]')?.textContent?.trim()
+
+            const extensionLogo = metaContent('meta[property="og:image"]')
+                ?? dom.querySelector('img.icon-pkg')?.getAttribute('src')
+
+            // categories
+            const categorySlug = dom.querySelector('.breadcrumb a[href*="/category/"]')
+                    ?.getAttribute('href')?.match(/\/category\/([^/?]+)/)?.[1]
+            const categories = categorySlug ? [this.categories[categorySlug]].filter(Boolean) : []
+
+            // ratings
             const rating = parseFloat(dom.querySelector('span.rating#rating-value')?.textContent)
-            const numRatings = parseInt(dom.querySelector('span#rating-count')?.textContent)
+            const numRatings = parseInteger(dom.querySelector('span#rating-count')?.textContent)
 
-            const about = Array.from(dom.querySelectorAll('section.about dl dd'))
-            const installsNode = about[0]
-            const numInstalls = parseInteger(installsNode?.textContent)
-
-            const categoriesNode = !!numInstalls ? about[1] : about[0]
-            const catMatch = categoriesNode?.childNodes?.[0]?.getAttribute('href').match(/\/category\/([^/?]+)/)
-
-            const categories = []
-            if (catMatch) {
-                const category = this.categories[catMatch[1].toLowerCase()]
-                if (category) {
-                    categories.push(category)
-                }
-            }
+            // installs - only on real extensions, absent on built-ins
+            const downloadsDt = [...dom.querySelectorAll('section.about dl dt')]
+                .find(dt => dt.textContent.trim() === 'Downloads')
+            const numInstalls = parseInteger(downloadsDt?.nextElementSibling?.textContent)
 
             const downloadUrl = `https://addons.opera.com/extensions/download/${extensionId}/`
 
@@ -702,13 +677,13 @@ class ExtensionStore {
                 browser: Browser.Opera,
                 id: extensionId,
                 name: extensionName,
+                description,
                 extensionLogo,
                 numInstalls,
                 rating,
                 numRatings,
                 categories,
-                downloadUrl,
-                storePage: dom?.url
+                downloadUrl
             }
         }
     }
