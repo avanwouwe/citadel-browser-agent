@@ -23,7 +23,7 @@
     "<all_urls>"
   ],
   "content_security_policy": {
-    "extension_pages": "default-src 'self'; connect-src * data:; style-src 'self'; img-src 'self' data: https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://lh5.googleusercontent.com https://addons.mozilla.org https://store-images.s-microsoft.com https://addons-static.operacdn.com"
+    "extension_pages": "default-src 'self'; connect-src * data:; style-src 'self'; img-src 'self' data: https://lh3.googleusercontent.com https://lh4.googleusercontent.com https://lh5.googleusercontent.com https://addons.mozilla.org https://store-images.s-microsoft.com https://addons-static.operacdn.com https://addons-media.operacdn.com"
   },
   "web_accessible_resources": [
     {
