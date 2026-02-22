@@ -1,5 +1,5 @@
 class Config {
-    static config = {
+    static default = {
         company: {
             name: 'Your Organisation',          // name of your organisation
             contact: undefined,                 // replace with the email address of your support
@@ -387,7 +387,7 @@ class Config {
     ]
 
     static #init(config) {
-        applyPath(config, this.#domainPatterns, (patterns) => {
+        applyPath(config, this.#domainPatterns, patterns => {
             return Object.fromEntries(
                 patterns.map(Config.#netmaskToDomain)
                 .map(domain => [domain, true])
@@ -416,10 +416,13 @@ class Config {
             .join('.')
     }
 
-    static load(newConfig) {
-        mergeDeep(newConfig, Config.config)
+    static load(localConfig = null) {
+        debug(`loading ${localConfig ? 'local' : 'global'} configuration`)
 
-        Config.#init(Config.config)
+        config = cloneDeep(Config.default)
+        if (localConfig) mergeDeep(localConfig, config)
+
+        Config.#init(config)
 
         // calculate the list of protected domains
         const scope = [config.company.domains, config.company.applications, config.domain.isApplication]
@@ -442,11 +445,11 @@ class Config {
         config.company.contact = config.company.contact ?? t('global.contact')
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
-        const exceptions = Config.config.exceptions
-        Config.config.exceptions = {}
+        const exceptions = config.exceptions
+        config.exceptions = {}
 
         for (const exception of Object.values(exceptions)) {
-            const mergedExceptionConfig = cloneDeep(Config.config)
+            const mergedExceptionConfig = cloneDeep(config)
             delete mergedExceptionConfig.exceptions
 
             Config.#init(exception.config)
@@ -454,7 +457,7 @@ class Config {
             mergeDeep(exception.config, mergedExceptionConfig)
 
             for (const domain of exception.domains) {
-                Config.config.exceptions[domain] = mergedExceptionConfig
+                config.exceptions[domain] = mergedExceptionConfig
             }
 
             // but only copy settings that can be overridden
@@ -470,7 +473,7 @@ class Config {
         }
 
         Config.#isLoaded = true
-        Config.#loadResolve?.(Config.config)
+        Config.#loadResolve?.(config)
         Log.start()
     }
 
@@ -484,7 +487,7 @@ class Config {
     static #loadResolve = null
 
     static ready() {
-        if (Config.#isLoaded) return Promise.resolve(Config.config)
+        if (Config.#isLoaded) return Promise.resolve(config)
 
         if (!Config.#loadPromise) {
             Config.#loadPromise = new Promise((resolve) => Config.#loadResolve = resolve)
@@ -497,7 +500,7 @@ class Config {
         Config.assertIsLoaded()
 
         const exception = matchDomain(hostname, config.exceptions)
-        return exception ?? Config.config
+        return exception ?? config
     }
 
     static forURL(url) {
@@ -511,4 +514,4 @@ class Config {
 
 }
 
-let config = Config.config
+let config

@@ -42,11 +42,11 @@
   "background": {
     "service_worker": "serviceworker.js",
     "scripts": [
+      "/utils/utils.js",
       "/config.js",
       "/utils/shim-node-to-browser.js",
       "/utils/definitions.js",
       "/utils/context.js",
-      "/utils/utils.js",
       "/utils/bridge.js",
       "/utils/dashboard.js",
       "/utils/persistence.js",

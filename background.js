@@ -7,7 +7,6 @@ if (chrome.identity?.getProfileUserInfo) {
 	})
 }
 
-const lastExtensionRestart = Date.now()
 let blacklistIP
 let blacklistURL
 let whitelistIP
@@ -16,9 +15,11 @@ let exceptionList
 let ignorelist
 let tabState
 let events = new RingBuffer(200)
-let t = new I18n({}).getTranslator()
+let t
 
-I18n.fromFile('/utils/i18n').then(i18n => t = i18n.getTranslator())
+I18n.fromFile('/utils/i18n')
+	.then(i18n => t = i18n.getTranslator())
+	.then(() => Config.load())
 
 Port.onMessage("config", async (newConfig) => {
 	Config.load(newConfig)
@@ -778,7 +779,7 @@ onMessage((request, sender) => {
 		const config = Config.forURL(siteUrl)
 
 		if (MFACheck.isRequired(siteUrl, config)) {
-			if (config.account.checkOnlyInternal && isExternalUser(request.report.username)) {
+			if (config.account.checkOnlyInternal && isExternalUser(config, request.report.username)) {
 				return
 			}
 

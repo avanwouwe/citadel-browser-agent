@@ -14,7 +14,7 @@ class AccountTrust {
         const config = Config.forHostname(sitename)
 
         if (config.account.checkOnlyProtected && ! Config.isProtected(sitename)) return false
-        if (config.account.checkOnlyInternal && isExternalUser(username)) return false
+        if (config.account.checkOnlyInternal && isExternalUser(config, username)) return false
 
         return true
     }

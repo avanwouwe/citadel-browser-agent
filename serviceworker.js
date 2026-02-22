@@ -1,8 +1,8 @@
+importScripts('utils/utils.js');
 importScripts('config.js');
 importScripts('utils/shim-node-to-browser.js');
 importScripts('utils/definitions.js');
 importScripts('utils/context.js');
-importScripts('utils/utils.js');
 importScripts('utils/bridge.js');
 importScripts('utils/dashboard.js');
 importScripts('utils/persistence.js');
