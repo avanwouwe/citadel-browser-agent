@@ -1,28 +1,33 @@
 class Context {
-    static isServiceWorker() {
-        return typeof chrome !== 'undefined' &&
-            chrome.runtime &&
-            chrome.tabs &&
-            (typeof window === 'undefined'  || typeof browser !== 'undefined' && window === browser.extension?.getBackgroundPage())
-    }
 
-    static isExtensionPage() {
-        return typeof location !== 'undefined' &&
-            (location.protocol === 'chrome-extension:' || location.protocol === 'moz-extension:') &&
-            chrome.windows
-    }
+    static #hasWindow            = () => typeof window !== 'undefined'
+    static #isExtensionProtocol  = () => typeof location !== 'undefined' && (location.protocol === 'chrome-extension:' || location.protocol === 'moz-extension:')
+    static #hasRuntimeId         = () => !!(typeof chrome !== 'undefined' && chrome?.runtime?.id || typeof browser !== 'undefined' && browser?.runtime?.id)
+    static #hasBrowserTabs       = () => !!(typeof chrome !== 'undefined' && chrome.tabs || typeof browser !== 'undefined' && browser.tabs)
+    static #isServiceWorkerScope = () => typeof ServiceWorkerGlobalScope !== 'undefined' && self instanceof ServiceWorkerGlobalScope
 
-    static isContentScript() {
-        if (this.isServiceWorker()) return false
+    static isServiceWorker = () =>
+        Context.#isServiceWorkerScope()
 
-        const hasExtensionId =
-            (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.id) ||
-            (typeof browser !== 'undefined' && browser.runtime && browser.runtime.id);
+    static isExtensionPage = () =>
+        Context.#hasWindow() &&
+        Context.#isExtensionProtocol() &&
+        Context.#hasRuntimeId() &&
+        Context.#hasBrowserTabs()
 
-        return hasExtensionId && !Context.isExtensionPage()
-    }
+    static isOffscreenPage = () =>
+        Context.#hasWindow() &&
+        Context.#isExtensionProtocol() &&
+        Context.#hasRuntimeId() &&
+        !Context.#hasBrowserTabs()
 
-    static isPageScript() {
-        return ! this.isServiceWorker() && ! this.isContentScript()
-    }
+    static isContentScript = () =>
+        Context.#hasWindow() &&
+        !Context.#isExtensionProtocol() &&
+        Context.#hasRuntimeId()
+
+    static isPageScript = () =>
+        Context.#hasWindow() &&
+        !Context.#isExtensionProtocol() &&
+        !Context.#hasRuntimeId()
 }
