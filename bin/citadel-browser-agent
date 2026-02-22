@@ -413,27 +413,26 @@ def getErrors(query):
 
 
 last_devicereport = 0
-devicereport_running = False
+devicereport_lock = threading.Lock()
 
 def generateAndSendReport():
-    global devicereport_running, last_devicereport
+    global last_devicereport
     now = time.time()
-    if devicereport_running and now - last_devicereport < REPORT_TIMEOUT:
-        return
+
+    with devicereport_lock:
+        if now - last_devicereport < REPORT_TIMEOUT:
+            return
+        last_devicereport = now
 
     if not os.path.isfile(osqueryPath):
         warning(f"device trust report not generated, osquery not found at '{osqueryPath}'")
         return
 
     try:
-        devicereport_running = True
-        last_devicereport = now
         audit = generateAudit()
         sendMessage("devicetrust", audit)
     except Exception as e:
         exception("failed to generate report", e)
-    finally:
-        devicereport_running = False
 
 
 def generateAudit():
