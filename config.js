@@ -419,37 +419,37 @@ class Config {
     static load(localConfig = null) {
         debug(`loading ${localConfig ? 'local' : 'global'} configuration`)
 
-        config = cloneDeep(Config.default)
-        if (localConfig) mergeDeep(localConfig, config)
+        const newConfig = cloneDeep(Config.default)
+        if (localConfig) mergeDeep(localConfig, newConfig)
 
-        Config.#init(config)
+        Config.#init(newConfig)
 
         // calculate the list of protected domains
-        const scope = [config.company.domains, config.company.applications, config.domain.isApplication]
-        config.protectedDomains = scope.reduce((result, obj) => {
+        const scope = [newConfig.company.domains, newConfig.company.applications, newConfig.domain.isApplication]
+        newConfig.protectedDomains = scope.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})
 
         // any extension that should *always* be whitelisted, or that is bundled, should definitely be whitelisted for installation
-        config.extensions.whitelist.allowAlways = mergeArrays(
-            config.extensions.whitelist.allowAlways,
-            config.extensions.whitelist.bundled
+        newConfig.extensions.whitelist.allowAlways = mergeArrays(
+            newConfig.extensions.whitelist.allowAlways,
+            newConfig.extensions.whitelist.bundled
         )
 
-        config.extensions.whitelist.allowInstall = mergeArrays(
-            config.extensions.whitelist.allowInstall,
-            config.extensions.whitelist.allowAlways,
+        newConfig.extensions.whitelist.allowInstall = mergeArrays(
+            newConfig.extensions.whitelist.allowInstall,
+            newConfig.extensions.whitelist.allowAlways,
         )
 
-        config.company.contact = config.company.contact ?? t('global.contact')
+        newConfig.company.contact = newConfig.company.contact ?? t('global.contact')
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
-        const exceptions = config.exceptions
-        config.exceptions = {}
+        const exceptions = newConfig.exceptions
+        newConfig.exceptions = {}
 
         for (const exception of Object.values(exceptions)) {
-            const mergedExceptionConfig = cloneDeep(config)
+            const mergedExceptionConfig = cloneDeep(newConfig)
             delete mergedExceptionConfig.exceptions
 
             Config.#init(exception.config)
@@ -457,7 +457,7 @@ class Config {
             mergeDeep(exception.config, mergedExceptionConfig)
 
             for (const domain of exception.domains) {
-                config.exceptions[domain] = mergedExceptionConfig
+                newConfig.exceptions[domain] = mergedExceptionConfig
             }
 
             // but only copy settings that can be overridden
@@ -472,6 +472,7 @@ class Config {
 
         }
 
+        config = newConfig
         Config.#isLoaded = true
         Config.#loadResolve?.(config)
         Log.start()
