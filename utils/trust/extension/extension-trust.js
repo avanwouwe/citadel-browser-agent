@@ -48,7 +48,7 @@ class ExtensionTrust {
     static async isAllowed(extensionId) {
         const analysis = await ExtensionTrust.#get(extensionId)
 
-        return analysis || false
+        return analysis?.state !== State.BLOCKING || false
     }
 
     static async allow(analysis) {
@@ -89,9 +89,9 @@ class ExtensionTrust {
         analysis.state = state
 
         if (state !== State.UNKNOWN) {
-            const previouslyAllowed = analysis.evaluation.allowed
-            const currentlyAllowed = state !== State.BLOCKING
-            if (previouslyAllowed && !currentlyAllowed) await Extension.disable(extensionId)
+            const isEnabled = await Extension.isEnabled(extensionId)
+            const isAllowed = state !== State.BLOCKING
+            if (isEnabled && !isAllowed) await Extension.disable(extensionId)
         }
 
         ExtensionTrust.#storage.markDirty()
