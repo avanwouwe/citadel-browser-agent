@@ -1,4 +1,4 @@
-console.log("Service worker starting.")
+console.log("service worker starting")
 
 let PROFILE_ADDRESS
 if (chrome.identity?.getProfileUserInfo) {
@@ -53,7 +53,7 @@ Port.onMessage("restart",() => {
 })
 
 Port.onMessage("devicetrust",(audit) => {
-	debug("received device trust audit", audit)
+	debug("received device audit", audit)
 
 	for (const report of Object.values(audit.reports)) {
 		report.timestamp = parseTimestamp(report.timestamp)

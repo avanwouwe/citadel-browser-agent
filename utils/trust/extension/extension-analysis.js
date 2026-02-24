@@ -57,7 +57,7 @@ class ExtensionAnalysis {
         static queue = Promise.resolve()
         static isReady = false
         static debouncer = new Debouncer(200, (existing, incoming) => {
-            // Merge function: INSTALL takes priority over ENABLE
+            // When installing we receive both INSTALL and ENABLE; merge into one INSTALL event
             const scanType = (existing.scanType === ExtensionAnalysis.ScanType.INSTALL ||
                 incoming.scanType === ExtensionAnalysis.ScanType.INSTALL)
                 ? ExtensionAnalysis.ScanType.INSTALL
@@ -297,9 +297,9 @@ class ExtensionAnalysis {
         return reasons
     }
 
-    static promiseOf(storeUrl, config) {
+    static promiseOf(storePage, config) {
         const analysis = {}
-        analysis.storeInfo = ExtensionStore.fetchStoreInfo(storeUrl)
+        analysis.storeInfo = ExtensionStore.fetchStoreInfo(storePage)
 
         analysis.manifest = analysis.storeInfo.then(storeInfo => fetch(storeInfo.downloadUrl))
             .then(async response => {
