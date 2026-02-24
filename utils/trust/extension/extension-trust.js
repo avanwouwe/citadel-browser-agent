@@ -1,6 +1,6 @@
 class ExtensionTrust {
 
-    static #storage = new PersistentObject("extensions-accepted")
+    static #storage = new PersistentObject("extensions")
 
     static {
         ExtensionTrust.#storage.ready().then(() => {
@@ -48,7 +48,7 @@ class ExtensionTrust {
     static async isAllowed(extensionId) {
         const analysis = await ExtensionTrust.#get(extensionId)
 
-        return analysis?.state !== State.BLOCKING || false
+        return analysis != null && analysis.state !== State.BLOCKING
     }
 
     static async allow(analysis) {
