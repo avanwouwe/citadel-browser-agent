@@ -34,6 +34,7 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
                     manifest = await analysis.manifest
                     evaluation = await analysis.evaluation
                 } catch (error) {
+                    console.trace(error)
                     setError(error?.message || String(error))
                 }
 
@@ -253,6 +254,10 @@ function setError(message) {
     evaluation = evaluation ?? {}
     evaluation.rejection = { reasons: [errorType] }
     evaluation.allowed = false
+
+    const retryButton = document.getElementById("retryButton")
+    retryButton.hidden = false
+    retryButton.onclick = () => location.reload()
 
     setStatus(error, false)
 }

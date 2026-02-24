@@ -148,6 +148,7 @@
     "block-page": {
       "install": "Install",
       "back": "Back",
+      "retry": "Retry",
       "status": {
         "analyze-store": "Analyzing store page",
         "analyze-manifest": "Analyzing manifest",

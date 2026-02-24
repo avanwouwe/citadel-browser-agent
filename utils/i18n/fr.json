@@ -148,6 +148,7 @@
     "block-page": {
       "install": "Installer",
       "back": "Retour",
+      "retry": "Réessayer",
       "status": {
         "analyze-store": "Analyse de la page d'extension",
         "analyze-manifest": "Analyse du manifeste",
