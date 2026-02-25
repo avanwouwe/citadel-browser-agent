@@ -281,15 +281,15 @@ class ExtensionAnalysis {
                 return
             }
 
-            // if it could not be disabled, it is probably admin-installed and should have been on the whitelist
-            let unableReason
-            if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
-            else if (!extensionInfo.mayDisable) unableReason = 'cannot disable'
+            let unableDisableReason
+            if (!extensionInfo.installType === "admin") unableDisableReason = 'admin installed'
+            else if (!extensionInfo.mayDisable) unableDisableReason = 'cannot disable'
+            else if (Browser.version.brand === Browser.Firefox) unableDisableReason = 'browser is firefox'
 
-            if (unableReason) {
+            if (unableDisableReason) {
                 await ExtensionTrust.allow(currAnalysis)
                 await ExtensionTrust.setState(extensionInfo.id, State.FAILING)
-                ExtensionAnalysis.#log('extension disable failed', `could not be disabled because '${unableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
+                ExtensionAnalysis.#log('extension disable failed', `could not be disabled because '${unableDisableReason}'`, Log.WARN, extensionInfo, currAnalysis, scanType)
                 return
             }
 
