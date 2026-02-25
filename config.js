@@ -325,7 +325,11 @@ class Config {
                 allowed: true,
             },
             whitelist: {
-                bundled: ["ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh"],
+                bundled: [
+                    "ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh", // Google
+                    "uBlock0@raymondhill.net", "newtab@mozilla.org", // Firefox
+                    "jifbgnmbgbdiedhdecealmlgmekpagde", "gojhcdgcpbpfigcaejpfhfegekdgiblk","igpdmclhhlcpoindmhkhillbfhdgoegm" // Opera
+                ],
                 allowInstall: [],
                 allowAlways: [],
             },
@@ -431,12 +435,7 @@ class Config {
             return result
         }, {})
 
-        // any extension that should *always* be whitelisted, or that is bundled, should definitely be whitelisted for installation
-        newConfig.extensions.whitelist.allowAlways = mergeArrays(
-            newConfig.extensions.whitelist.allowAlways,
-            newConfig.extensions.whitelist.bundled
-        )
-
+        // any extension that should *always* be whitelisted should definitely be whitelisted for installation
         newConfig.extensions.whitelist.allowInstall = mergeArrays(
             newConfig.extensions.whitelist.allowInstall,
             newConfig.extensions.whitelist.allowAlways,

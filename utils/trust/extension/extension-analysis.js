@@ -166,6 +166,11 @@ class ExtensionAnalysis {
             if (prevAnalysis?.pending) scanType = ExtensionAnalysis.ScanType.INIT
             if (scanType === ExtensionAnalysis.ScanType.INSTALL && prevAnalysis) scanType = ExtensionAnalysis.ScanType.UPDATE
 
+            if (config.extensions.whitelist.bundled.includes(extensionInfo.id)) {
+                ExtensionAnalysis.#log('extension kept', 'bundled and kept', Log.INFO, extensionInfo, undefined, scanType)
+                return
+            }
+
             if (Extension.isSideloaded(extensionInfo)) {
                 const analysis = { storeInfo: { id: extensionInfo.id } }
 
