@@ -69,11 +69,6 @@ class ExtensionAnalysis {
         static async #ensureOffscreen() {
             if (this.isReady) return
 
-            if (Browser.version.brand === Browser.Firefox) {
-                this.isReady = true
-                return
-            }
-
             if (!await chrome.offscreen.hasDocument()) {
                 await chrome.offscreen.createDocument({
                     url: '/gui/extension-analysis.html',
@@ -97,26 +92,61 @@ class ExtensionAnalysis {
             this.isReady = true
         }
 
+        static async resolveAnalysis(promise) {
+            const analysis = {}
+            try {
+                analysis.storeInfo = await promise.storeInfo
+                analysis.manifest = await promise.manifest
+                analysis.evaluation = await promise.evaluation
+            } catch (exception) {
+                this.findErrorType(exception, analysis)
+            }
+
+            return analysis
+        }
+
+        static findErrorType(exception, analysis) {
+            console.trace(exception)
+            const message = exception?.message || String(exception)
+
+            let errorType = 'error'
+            if (!analysis?.evaluation) errorType = 'error-evaluation'
+            if (!analysis?.manifest) errorType = 'error-manifest'
+            if (!analysis.storeInfo) errorType = 'error-store'
+            if (message === "fetch error") errorType = 'error-network'
+
+            analysis.evaluation = analysis.evaluation ?? {}
+            analysis.evaluation.rejection = { reasons: [errorType] }
+            analysis.evaluation.allowed = false
+            return errorType
+        }
+
         static async fetch(extensionInfo) {
             this.queue = this.queue.then(async () => {
                 try {
-                    await this.#ensureOffscreen()
-
                     const store = ExtensionStore.of(extensionInfo.updateUrl) ??
                         (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
 
-                    if (!store) return ExtensionAnalysis.Headless.#error("error-unknown-store")
+                    if (!store) return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error-unknown-store")
 
                     const storePage = await ExtensionStore.pageOf(extensionInfo.id, store)
 
-                    return await sendMessagePromise('ANALYZE_EXTENSION', {
-                        storePage,
-                        logo: Logo.getLogo(),
-                        config
-                    })
+                    if (!storePage) return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error-unknown-storepage")
+
+                    if (Browser.version.brand === Browser.Firefox) {
+                        const analysis = ExtensionAnalysis.promiseOf(storePage, config)
+                        return await this.resolveAnalysis(analysis)
+                    } else {
+                        await this.#ensureOffscreen()
+                        return await sendMessagePromise('ANALYZE_EXTENSION', {
+                            storePage,
+                            logo: Logo.getLogo(),
+                            config
+                        })
+                    }
                 } catch (error) {
                     console.error('Extension analysis failed:', error)
-                    return ExtensionAnalysis.Headless.#error("error")
+                    return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error")
                 } finally {
                     this.isReady = false
                     if (chrome.offscreen) {
@@ -130,11 +160,14 @@ class ExtensionAnalysis {
             return this.queue
         }
 
-        static #error(error) {
+        static #error(extensionId,error) {
             return {
+                storeInfo: { id: extensionId },
                 evaluation: {
                     allowed: false,
-                    reasons: [error]
+                    rejection: {
+                        reasons: [error]
+                    }
                 }
             }
         }
@@ -173,10 +206,7 @@ class ExtensionAnalysis {
 
             if (Extension.isSideloaded(extensionInfo)) {
                 const analysis = { storeInfo: { id: extensionInfo.id } }
-
-                if (config.extensions.whitelist.bundled.includes(extensionInfo.id)) {
-                    ExtensionAnalysis.#log('extension kept', 'bundled and kept', Log.INFO, extensionInfo, undefined, scanType)
-                } else if (config.extensions.allowSideloading) {
+                if (config.extensions.allowSideloading) {
                     analysis.allowed = true
                     await ExtensionTrust.allow(analysis)
                     ExtensionAnalysis.#log('extension kept', 'side-loaded but allowed', Log.INFO, extensionInfo, undefined, scanType)
@@ -243,13 +273,15 @@ class ExtensionAnalysis {
                 return
             }
 
-            // if it was refused, but it was disabled anyway, leave it disabled
+            // if we arrive here, the extension presence, installation or update was too high risk should be disabled
+            // if it was disabled anyway, just leave it disabled
             if (!extensionInfo.enabled) {
+                await ExtensionTrust.block(currAnalysis)
                 ExtensionAnalysis.#log('extension left disabled', `already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
 
-            // if we arrive here, the extension presence, installation or update was too high risk should be disabled
+            // if it could not be disabled, it is probably admin-installed and should have been on the whitelist
             let unableReason
             if (!extensionInfo.installType === "admin") unableReason = 'admin installed'
             else if (!extensionInfo.mayDisable) unableReason = 'cannot disable'
@@ -261,6 +293,7 @@ class ExtensionAnalysis {
                 return
             }
 
+            // otherwise, disable it
             await ExtensionTrust.block(currAnalysis)
             ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
         }

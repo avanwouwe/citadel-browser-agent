@@ -11,10 +11,9 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
 
         try {
             await renderPage()
-        } catch (error) {
-            console.trace(error)
-            setError(error?.message || String(error))
-
+        } catch (exception) {
+            const errorType = ExtensionAnalysis.Headless.findErrorType(exception, { storeInfo, manifest, evaluation })
+            setError(errorType)
             if (config.extensions.exceptions.allowed) proposeException()
         }
     } else {
@@ -27,18 +26,9 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
             if (request.type !== 'ANALYZE_EXTENSION') return
 
             (async () => {
-                try {
-                    config = request.config
-                    const analysis = ExtensionAnalysis.promiseOf(request.storePage, config)
-                    storeInfo = await analysis.storeInfo
-                    manifest = await analysis.manifest
-                    evaluation = await analysis.evaluation
-                } catch (error) {
-                    console.trace(error)
-                    setError(error?.message || String(error))
-                }
-
-                sendResponse({ storeInfo, manifest, evaluation })
+                const analysisPromise = ExtensionAnalysis.promiseOf(request.storePage, request.config)
+                const analysis = await ExtensionAnalysis.Headless.resolveAnalysis(analysisPromise)
+                sendResponse(analysis)
             })()
 
             return true
@@ -244,21 +234,11 @@ function setStatus(text, showSpinner = true) {
 }
 
 function setError(message) {
-    let errorType = 'error'
-    if (!evaluation) errorType = 'error-evaluation'
-    if (!manifest) errorType = 'error-manifest'
-    if (!storeInfo) errorType = 'error-store'
-    if (message === "fetch error") errorType = 'error-network'
-
-    const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '')
-    evaluation = evaluation ?? {}
-    evaluation.rejection = { reasons: [errorType] }
-    evaluation.allowed = false
-
     const retryButton = document.getElementById("retryButton")
     retryButton.hidden = false
     retryButton.onclick = () => location.reload()
 
+    const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '')
     setStatus(error, false)
 }
 

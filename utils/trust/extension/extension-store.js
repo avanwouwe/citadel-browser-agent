@@ -503,7 +503,7 @@ class ExtensionStore {
 
             // extensionName
             const extensionName = addonData.name
-            const description = addonData.summary
+            const description = (addonData.summary ?? '') + '\n\n' + (addonData.description ?? '')
 
             // extensionLogo
             const extensionLogo = addonData.icons?.['64'] ?? addonData.icons?.['32']

@@ -110,11 +110,13 @@ class Extension {
                 value: { id: extensionId }
             }
 
+            // Firefox does not allow enterprise-installed plugins to disable other plugins
+            const errorLevel = Browser.version.brand === Browser.Firefox ? Log.WARN : Log.ERROR
             const reason =
                 err?.message ??
                 chrome.runtime.lastError?.message ??
                 "unknown error"
-            logger.log(Date.now(), "extension", `extension disable failed`, undefined, Log.ERROR, logObj, `extension '${extensionId}' could not be disabled because '${reason}'`)
+            logger.log(Date.now(), "extension", `extension disable failed`, undefined, errorLevel, logObj, `extension '${extensionId}' could not be disabled because '${reason}'`)
         }
     }
 
