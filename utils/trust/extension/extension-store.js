@@ -14,17 +14,17 @@ class ExtensionStore {
         }
     }
 
-    static async extensionIdOf(url) {
-        const store = ExtensionStore.of(url)
-        const match = url?.match(store?.pattern)
+    static async extensionIdOf(storePage) {
+        const store = ExtensionStore.of(storePage)
+        const match = storePage?.match(store?.pattern)
         const id = match?.[1] ?? null
 
         if (!id) return null
 
-        // For Firefox, convert slug to actual extension ID using API
-        if (store === ExtensionStore.Firefox) {
-            const data = await ExtensionStore.Firefox.getMetadata(id)
-            return data?.guid ?? null
+        if (store === ExtensionStore.Firefox ||
+            store === ExtensionStore.Opera && ! storePage.includes('/extensions/details/app_id/')
+        ) {
+            return store.slugToId(id)
         }
 
         return id
@@ -53,14 +53,11 @@ class ExtensionStore {
         const store = ExtensionStore.of(url)
         if (!store) return
 
-        // first normalize the URL
+        // first normalize the URL, so that we always have the english version
         const extensionId = await ExtensionStore.extensionIdOf(url)
         url = await store.pageOf(extensionId)
 
-        const response = await Fetch.page(url)
-        if (! response.ok) return
-
-        return response
+        return Fetch.page(url)
     }
 
     /**
@@ -325,7 +322,9 @@ class ExtensionStore {
         }
     }
 
-    static #stripCrxHeader(buffer) {
+    static #stripCrxHeader(buffer, depth = 0) {
+        if (depth > 4) throw new Error("CRX nesting depth exceeded")
+
         const arr = new Uint8Array(buffer)
 
         // Detect CRX by magic number "Cr24"
@@ -333,22 +332,26 @@ class ExtensionStore {
             const view = new DataView(buffer)
             const version = view.getUint32(4, true)
 
+            let sliced
             if (version === 2) {
                 const pubKeyLen = view.getUint32(8, true)
                 const sigLen = view.getUint32(12, true)
                 const headerLen = 16 + pubKeyLen + sigLen
-                return buffer.slice(headerLen)
+                sliced = buffer.slice(headerLen)
             } else if (version === 3) {
                 const headerLen = view.getUint32(8, true)
-                return buffer.slice(12 + headerLen)
+                sliced = buffer.slice(12 + headerLen)
             } else {
                 throw new Error("Unknown CRX version: " + version)
             }
+
+            // Recurse in case of nested CRX (Opera wraps CRX2 inside CRX3)
+            return ExtensionStore.#stripCrxHeader(sliced, depth + 1)
         }
 
         // Detect ZIP by magic number "PK\x03\x04"
         if (arr[0] === 0x50 && arr[1] === 0x4B && arr[2] === 0x03 && arr[3] === 0x04) {
-            return buffer // no stripping necessary
+            return buffer
         }
 
         throw new Error("Unknown file: Not a CRX or ZIP archive")
@@ -398,9 +401,12 @@ class ExtensionStore {
             const descriptionLine3 = descriptionLine2?.nextElementSibling
 
             // description
-            const description = dom.querySelector('meta[property="og:description"]')?.getAttribute('content')
+            const overviewSection = Array.from(dom.querySelectorAll('section'))
+                .find(s => s.querySelector('h2')?.textContent?.trim() === 'Overview')
+
+            const description = overviewSection.textContent
+                ?? dom.querySelector('meta[property="og:description"]')?.getAttribute('content')
                 ?? dom.querySelector('meta[name="description"]')?.getAttribute('content')
-                ?? null
 
             // extensionLogo
             const extensionLogo = dom.querySelector('meta[property="og:image"]')?.getAttribute('content')
@@ -488,8 +494,8 @@ class ExtensionStore {
         }
 
         static pageOf = async (id) => {
-            const metadata = await ExtensionStore.Firefox.getMetadata(id)
-            return metadata?.slug ? `https://addons.mozilla.org/en-US/firefox/addon/${metadata.slug}/` : null
+            const slug = await ExtensionStore.Firefox.idToSlug(id)
+            return slug ? `https://addons.mozilla.org/en-US/firefox/addon/${slug}/` : null
         }
 
         static async parsePage(dom) {
@@ -540,6 +546,16 @@ class ExtensionStore {
                 isVerifiedExtension,
                 downloadUrl
             }
+        }
+
+        static async slugToId(slug) {
+            const data = await ExtensionStore.Firefox.getMetadata(slug)
+            return data?.guid
+        }
+
+        static async idToSlug(id) {
+            const data = await ExtensionStore.Firefox.getMetadata(id)
+            return data?.slug
         }
 
         static async getMetadata(extensionId) {
@@ -619,7 +635,7 @@ class ExtensionStore {
     }
 
     static Opera = class {
-        static pattern = new RegExp('^https://addons.opera.com/[^/]+/extensions/details/([^/#?]+)')
+        static pattern = new RegExp('^https://addons.opera.com/[^/]+/extensions/details/(?:app_id/)?([^/#?]+)')
 
         static categories = {
             'privacy-security':          { primary: 'make_chrome_yours', secondary: 'privacy' },
@@ -638,28 +654,52 @@ class ExtensionStore {
             'translation':               { primary: 'productivity',      secondary: 'tools' },
         }
 
-        static pageOf = async (id) => `https://addons.opera.com/en/extensions/details/${id}/`
+        static pageOf = async (id) => `https://addons.opera.com/en/extensions/details/app_id/${id}/`
+
+        static async slugToId(id) {
+            const storePage = `https://addons.opera.com/en/extensions/details/${id}/`
+            const html = await Fetch.page(storePage)
+            const match = html?.content?.match(/<meta property="aoc:app_id" content="([^"]+)"/)
+            return match ? match[1] : null
+        }
+
+        static async getUpdateUrl(extensionId) {
+            try {
+                const url = 'https://extension-updates.opera.com/api/omaha/update/?response=updatecheck&x=' + encodeURIComponent(`id=${extensionId}&v=0.0.0&uc`)
+
+                const response = await fetch(url)
+                if (!response.ok) throw new Error(`omaha API call failed: ${response.status}`)
+
+                const xml = await response.text()
+                const codebase = xml.match(/codebase="([^"]+)"/)?.[1]
+                if (!codebase) throw new Error('no codebase in omaha response')
+                return codebase
+            } catch (error) {
+                console.trace(`Opera omaha lookup failed for ${extensionId}:`, error)
+                return `https://addons.opera.com/extensions/download/${extensionId}/`
+            }
+        }
 
         static async parsePage(dom) {
             const parseInteger = str => str ? (parseInt(str.replace(/[\s,.']/g, '')) || null) : null
             const metaContent = selector => dom.querySelector(selector)?.getAttribute('content')?.trim()
 
-            const extensionId = await ExtensionStore.extensionIdOf(dom.url)
+            const extensionId = metaContent('meta[property="aoc:app_id"]')
             if (!extensionId) return null
 
             // extensionName
             const extensionName = metaContent('meta[property="og:title"]')
                 ?? dom.querySelector('h1[itemprop="name"]')?.textContent?.trim()
 
-            const description = metaContent('meta[property="og:description"]')
-                ?? dom.querySelector('[itemprop="description"]')?.textContent?.trim()
+            const summary = metaContent('meta[property="og:description"]')
+            const description = dom.querySelector('[itemprop="description"]')?.textContent?.trim()
 
             const extensionLogo = metaContent('meta[property="og:image"]')
                 ?? dom.querySelector('img.icon-pkg')?.getAttribute('src')
 
             // categories
             const categorySlug = dom.querySelector('.breadcrumb a[href*="/category/"]')
-                    ?.getAttribute('href')?.match(/\/category\/([^/?]+)/)?.[1]
+                ?.getAttribute('href')?.match(/\/category\/([^/?]+)/)?.[1]
             const categories = categorySlug ? [this.categories[categorySlug]].filter(Boolean) : []
 
             // ratings
@@ -671,13 +711,13 @@ class ExtensionStore {
                 .find(dt => dt.textContent.trim() === 'Downloads')
             const numInstalls = parseInteger(downloadsDt?.nextElementSibling?.textContent)
 
-            const downloadUrl = `https://addons.opera.com/extensions/download/${extensionId}/`
+            const downloadUrl = await ExtensionStore.Opera.getUpdateUrl(extensionId)
 
             return {
                 browser: Browser.Opera,
                 id: extensionId,
                 name: extensionName,
-                description,
+                description: summary + "\n\n" + description,
                 extensionLogo,
                 numInstalls,
                 rating,
