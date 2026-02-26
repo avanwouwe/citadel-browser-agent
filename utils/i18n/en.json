@@ -164,6 +164,7 @@
         "blocked": "The extension you are trying to install was blocked because",
         "blacklist-extension": "it has been blacklisted",
         "blacklist-category": "the category it belongs to has been blacklisted",
+        "blacklist-keyword": "its description mentions '{{example}}'",
         "risk-global": "the overall risk level is too high or unknown",
         "risk-impact": "the risk of it's access to sensitive data is too high or unknown ",
         "risk-likelihood": "the probability that it is malware or can be hacked is too high or unknown",

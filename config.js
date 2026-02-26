@@ -333,7 +333,10 @@ class Config {
                 allowInstall: [],
                 allowAlways: [],
             },
-            blacklist: [],
+            blacklist: {
+                id: [],
+                keyword: ["free vpn", "crypto", "wallet", "video download", "ad block", "coupon", "tab manager"]
+            },
             category: {
                 forbidden: ["lifestyle"],
             },

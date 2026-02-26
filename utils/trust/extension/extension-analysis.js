@@ -29,7 +29,7 @@ class ExtensionAnalysis {
 
             if (
                 !extensionId ||
-                evaluateBlacklist(extensionId, config.extensions.whitelist.allowInstall, config.extensions.blacklist, false) ||
+                evaluateBlacklist(extensionId, config.extensions.whitelist.allowInstall, config.extensions.blacklist.id, false) ||
                 await ExtensionTrust.isAllowed(extensionId) ||
                 ExtensionAnalysis.approved.includes(extensionId) ||
                 await Extension.isInstalled(extensionId)
@@ -118,7 +118,7 @@ class ExtensionAnalysis {
             analysis.evaluation = analysis.evaluation ?? {}
             analysis.evaluation.rejection = { reasons: [errorType] }
             analysis.evaluation.allowed = false
-            return errorType
+            return { errorType, message }
         }
 
         static async fetch(extensionInfo) {
@@ -374,8 +374,9 @@ class ExtensionAnalysis {
         const extConfig = config.extensions
         const rejection = evaluation.rejection
 
-        const blacklistExtension = !evaluateBlacklist(storeInfo.id, extConfig.whitelist.allowInstall, extConfig.blacklist, true)
+        const blacklistExtension = !evaluateBlacklist(storeInfo.id, extConfig.whitelist.allowInstall, extConfig.blacklist.id, true)
         const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), [], extConfig.category.forbidden, true)
+        const blacklistKeyword = ExtensionAnalysis.#evaluateKeywords(storeInfo.description, config.extensions.blacklist.keyword)
         const allowVerified = !extConfig.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
         const allowInstallationCnt = storeInfo.numInstalls >= extConfig.installations.required ?? 0
         const allowRating = storeInfo.rating >= (extConfig.ratings.minRatingLevel ?? 0) && storeInfo.numRatings >= (extConfig.ratings.minRatingCnt ?? 0)
@@ -383,6 +384,9 @@ class ExtensionAnalysis {
         if (blacklistExtension) rejection.reasons.push('blacklist-extension')
 
         if (blacklistCategory) rejection.reasons.push('blacklist-category')
+
+        if (blacklistKeyword) rejection.reasons.push('blacklist-keyword')
+        if (rejection.reasons.length === 1 && rejection.example === undefined) rejection.example = blacklistKeyword
 
         if (evaluation.scores.global == null || evaluation.scores.global > extConfig.risk.maxGlobal) rejection.reasons.push('risk-global')
 
@@ -397,13 +401,13 @@ class ExtensionAnalysis {
         if (!allowRating) rejection.reasons.push('poor-rating')
 
         if (!evaluation.permissionCheck.allowPermissions) rejection.reasons.push('forbidden-permission')
-        if (rejection.reasons.length === 1) rejection.example = evaluation.permissionCheck.blockingPermissions[0]
+        if (rejection.reasons.length === 1 && rejection.example === undefined) rejection.example = evaluation.permissionCheck.blockingPermissions[0]
 
         if (!evaluation.permissionCheck.allowAllDomains) rejection.reasons.push('all-domains')
-        if (rejection.reasons.length === 1) rejection.example = evaluation.permissionCheck.broadHostPermissions[0]
+        if (rejection.reasons.length === 1 && rejection.example === undefined) rejection.example = evaluation.permissionCheck.broadHostPermissions[0]
 
         if (!evaluation.permissionCheck.allowProtectedDomains) rejection.reasons.push('protected-domains')
-        if (rejection.reasons.length === 1) rejection.example = evaluation.permissionCheck.protectedDomains[0]
+        if (rejection.reasons.length === 1 && rejection.example === undefined) rejection.example = evaluation.permissionCheck.protectedDomains[0]
 
         const bypassVerified = extConfig.verified.allowed && (storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension)
         const bypassInstallationCnt = storeInfo.numInstalls >= extConfig.installations.allowed
@@ -500,6 +504,22 @@ class ExtensionAnalysis {
 
     static #evaluateRisk(storeInfo, manifest, staticAnalysis) {
         return { likelihood: null, impact: null , global: null }
+    }
+
+    static #evaluateKeywords(text, keywords) {
+        const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        const buildRegex = keywords => {
+            if (!keywords.length) return null
+
+            const escaped = keywords.map(kw => kw.trim())
+                .filter(Boolean)
+                .map(escapeRegex)
+
+            return new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')
+        }
+
+        const pattern = buildRegex(keywords)
+        return text?.match(pattern)?.[0]
     }
 
     static #log(result, action, level, extensionInfo, analysis, scanType) {

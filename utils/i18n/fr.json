@@ -164,6 +164,7 @@
         "blocked": "L’extension que vous essayez d’installer a été bloquée car",
         "blacklist-extension": "elle a été interdite",
         "blacklist-category": "la catégorie à laquelle elle appartient a été interdite",
+        "blacklist-keyword": "sa description mentionne '{{example}}'",
         "risk-global": "le niveau global de risque est trop élevé ou inconnu",
         "risk-impact": "le risque lié à son accès à des données sensibles est trop élevé ou inconnu",
         "risk-likelihood": "la probabilité qu’il s’agisse d’un logiciel malveillant ou qu’il puisse être piraté est trop élevée ou inconnue",
