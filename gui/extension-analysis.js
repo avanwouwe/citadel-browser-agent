@@ -55,16 +55,6 @@ async function renderPage() {
 
     setStatus(t('extension-analysis.block-page.status.analyze-code'), true)
 
-    // TODO temporarily turn off risk analysis since it is not yet implemented
-    const scores = evaluation.scores
-    scores.global = null
-    scores.impact = null
-    scores.likelihood = null
-
-    renderScore("global")
-    renderScore("likelihood")
-    renderScore("impact")
-
     showAnalysis()
     showInstall(evaluation.allowed)
 }
@@ -187,41 +177,6 @@ function renderVerified(id, isVerified) {
     if (isVerified) element.classList.add('risk-low')
     return element
 }
-
-function renderScore(type) {
-    const id = `risk-${type}`
-    const score = formatScore(evaluation.scores[type])
-    const risk = Extension.Risk.ofScore(score).toLowerCase()
-    const riskClass = `risk-${risk}`
-    const riskLabel = t(`extension-analysis.levels.${risk}`)
-    const scoreLabel = t(`extension-analysis.scores.${type}.label`)
-    const scoreDescription = t(`extension-analysis.scores.${type}.description`)
-
-    const html = `
-        <div class="risk-score ${riskClass}">
-            <small>${scoreLabel}</small>
-            <p>${score ?? "??"} / 10</p>
-            <strong>
-                ${riskLabel}
-                    <span class="help">
-                    <svg width="14px" height="14px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M9 9C9 5.49997 14.5 5.5 14.5 9C14.5 11.5 12 10.9999 12 13.9999" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M12 18.01L12.01 17.9989" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="tooltip">
-                        <span>${scoreDescription}.</span>
-                    </span>
-                </span>
-            </strong>
-        </div>
-    `
-
-    const element = document.getElementById(id)
-    element.innerHTML = html
-}
-
-function formatScore(score) { return score != null ? Number(score).toFixed(1) : score }
 
 function showAnalysis() {
     document.getElementById("status").hidden = true

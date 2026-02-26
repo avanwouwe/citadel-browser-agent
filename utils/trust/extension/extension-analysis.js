@@ -359,17 +359,10 @@ class ExtensionAnalysis {
 
         const evaluation = {
             permissionCheck: ExtensionAnalysis.#evaluatePermissions(manifest, config),
-            scores: this.#evaluateRisk(storeInfo, manifest),
             rejection: {
                 reasons: []
             }
         }
-
-        // TODO temporarily turn off risk analysis since it is not yet implemented
-        const scores = evaluation.scores
-        scores.global = scores.global ?? 0
-        scores.impact = scores.impact ?? 0
-        scores.likelihood = scores.likelihood ?? 0
 
         const extConfig = config.extensions
         const rejection = evaluation.rejection
@@ -387,12 +380,6 @@ class ExtensionAnalysis {
 
         if (blacklistKeyword) rejection.reasons.push('blacklist-keyword')
         if (rejection.reasons.length === 1 && rejection.example === undefined) rejection.example = blacklistKeyword
-
-        if (evaluation.scores.global == null || evaluation.scores.global > extConfig.risk.maxGlobal) rejection.reasons.push('risk-global')
-
-        if (evaluation.scores.impact == null || evaluation.scores.impact > extConfig.risk.maxImpact) rejection.reasons.push('risk-impact')
-
-        if (evaluation.scores.likelihood == null || evaluation.scores.likelihood > extConfig.risk.maxLikelihood) rejection.reasons.push('risk-likelihood')
 
         if (!allowVerified) rejection.reasons.push('not-verified')
 
@@ -502,10 +489,6 @@ class ExtensionAnalysis {
 
     static #broadHostPatterns = ['<all_urls>', '*://*/*', 'http://*/*', 'https://*/*', 'ws://*/*', 'wss://*/*', 'file://*/*']
 
-    static #evaluateRisk(storeInfo, manifest, staticAnalysis) {
-        return { likelihood: null, impact: null , global: null }
-    }
-
     static #evaluateKeywords(text, keywords) {
         const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
         const buildRegex = keywords => {
@@ -547,7 +530,6 @@ class ExtensionAnalysis {
         const evaluation = analysis.evaluation
         const rejection = evaluation?.rejection
 
-        const score = evaluation?.scores?.global
         const rejectionReason = rejection ? rejection.reasons[0] : undefined
         const issues = serializeToText(ExtensionAnalysis.issuesOf(analysis))
 
@@ -558,7 +540,6 @@ class ExtensionAnalysis {
                 id: analysis.storeInfo?.id,
                 version: analysis.manifest?.version,
                 scanType,
-                score: score != null ? Number(score).toFixed(1) : score,
                 rejectionReason,
                 issues,
             }

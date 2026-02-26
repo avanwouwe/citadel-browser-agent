@@ -38,7 +38,7 @@ The [default configuration of Citadel](https://github.com/avanwouwe/citadel-brow
 
 However, it allows bypassing of these criteria if the extension has more than 5.000.000 installations. This is based on the assumption that extensions with such a large audience have implemented the necessary security measures to prevent malicious actors from taking them over.
 
-Citadel also allows for users to **request exceptions**, which are logged as a time-critical security event (`ERROR`). If the risk profile of the extension changes after the exception was made, for example because an updated version of the extension requests more (dangerous) permissions, or because it's score or number of installations go down, the extension is disabled.
+Citadel also allows for users to **request exceptions**, which are logged as a time-critical security event (`ERROR`). If the risk profile of the extension changes after the exception was made, for example because an updated version of the extension requests more (dangerous) permissions, or because it's rating or number of installations go down, the extension is disabled.
 
 You can adapt this policy based on your needs, risk profile, and analysis of the statistical distribution on the [Chrome store](https://chrome-stats.com/chrome/stats), [Edge store](https://chrome-stats.com/edge/stats) or [Firefox store](https://chrome-stats.com/firefox/stats). Another approach could for example be to disallow all extensions by default and to only whitelist extensions as and when the need arises.
 ```
@@ -112,4 +112,4 @@ If an extension exceeds the risk level defined in your policies, it is still pos
 * `extensions.whitelist.allowInstall` : allow at their current risk level the following extensions, based on their id
 * manually, when te user requests an exception.
 
-Contrary to the "allow anytime" cases, these exceptions will continue to be monitored. If their risk profile degrades, for example because they require supplementary forbidden permissions or because their score or popularity reduces, then they are disabled. If you want to re-evaluate 
+Contrary to the "allow anytime" cases, these exceptions will continue to be monitored. If their risk profile degrades, for example because they require supplementary forbidden permissions or because their rating or popularity reduces, then they are disabled. If you want to re-evaluate 

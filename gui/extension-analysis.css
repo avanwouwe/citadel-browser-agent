@@ -105,12 +105,7 @@ body {
 .risk-medium { color: var(--color-risk-medium); font-weight: bold;}
 .risk-high   { color: var(--color-risk-high); font-weight: bold;}
 .risk-critical { color: var(--color-risk-critical); font-weight: bold;}
-.risk-indicator {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-right: 5px;
-    color: #8e2c5a;
-}
+
 #blockedSection { font-weight: bold; font-size: 1.2em}
 #exceptionSection {
     margin: 30px auto 0 auto;
@@ -153,138 +148,7 @@ button:disabled {
     text-align: center;
 }
 #installSection button { margin: 0 10px; }
-.risk-score {
-    display: inline-block;
-    background: #18392d;
-    color: #fff;
-    border-radius: 16px;
-    padding: 10px 26px;
-    font-family: inherit;
-    font-size: 15px;
-    position: relative;
-    margin: 0.5em;
-    width: 250px;
-    box-sizing: border-box;
-}
-.risk-score .help {
-    position: relative;
-    display: inline-block;
-    margin-left: 10px;
-    vertical-align: middle;
-}
-.risk-score .help-icon {
-    cursor: pointer;
-    vertical-align: middle;
-}
-.risk-score .tooltip {
-    display: block;
-    opacity: 0;
-    visibility: hidden;
-    position: absolute;
-    left: 50%;
-    bottom: 130%;
-    transform: translateX(-50%);
-    min-width: 220px;
-    background: #1b252c;
-    color: #fff;
-    border-radius: 6px;
-    padding: 12px;
-    z-index: 10;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.16);
-    transition: opacity 0.2s, visibility 0.2s;
-    pointer-events: none;
-    font-size: 14px;
-    text-align: left;
-}
 
-.risk-score .help:hover .tooltip,
-.risk-score .help:focus-within .tooltip {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-}
-.risk-score .tooltip span strong {
-    color: #88ffaa;
-}
-
-.risk-score {
-    font-size: 15px;
-}
-
-.risk-score p {
-    font-size: 1.1em;
-    margin: 0.2em 0;
-}
-
-.risk-score small {
-    font-weight: 400;
-    font-size: 0.75em;
-}
-
-.risk-score strong {
-    font-size: 0.9em;
-}
-
-.risk-score .tooltip {
-    font-size: 10px;
-    min-width: 180px;
-    padding: 9px 14px;
-    text-align: center;
-}
-
-.risk-indicator {
-    font-size: 1.1em;
-    font-weight: bold;
-    margin-right: 5px;
-    color: #8e2c5a;
-    display: inline-block;
-    width: 100px; /* adjust as needed */
-    text-align: center;
-    /* optionally: */
-    /* background: #fff7fa; border-radius: 4px; padding: 4px 0; */
-}
-
-.risk-indicator-row {
-    display: flex;
-    width: 100%;
-    gap: 16px; /* Even space between the boxes */
-    margin: 0.5em;
-}
-
-.risk-indicator-row .risk-indicator {
-    flex-grow: 1;         /* Each box takes equal space */
-    flex-basis: 0;        /* <- THIS is the key for equal sizing */
-    flex-shrink: 1;
-    min-width: 0;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 48px;     /* or whatever height you want */
-    font-size: 1.05em;
-    box-sizing: border-box;
-    /* Optional styles: */
-    /* background: #f9f9f9;
-    border-radius: 5px; */
-    /* border: 1px solid #e0e0e0; */
-    /* color: #8e2c5a; */
-}
-
-.risk-score.risk-unknown {
-    background: var(--color-risk-unknown);
-}
-.risk-score.risk-low {
-    background: var(--color-risk-low);
-}
-.risk-score.risk-medium {
-    background: var(--color-risk-medium);
-}
-.risk-score.risk-high {
-    background: var(--color-risk-high);
-}
-.risk-score.risk-critical {
-    background: var(--color-risk-critical);
-}
 .spinner {
     display: inline-block;
     width: 1em;
