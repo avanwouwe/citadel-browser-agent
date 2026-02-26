@@ -12,8 +12,8 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
         try {
             await renderPage()
         } catch (exception) {
-            const errorType = ExtensionAnalysis.Headless.findErrorType(exception, { storeInfo, manifest, evaluation })
-            setError(errorType)
+            const { errorType, message } = ExtensionAnalysis.Headless.findErrorType(exception, { storeInfo, manifest, evaluation })
+            setError(errorType, message)
             if (config.extensions.exceptions.allowed) proposeException()
         }
     } else {
@@ -233,7 +233,7 @@ function setStatus(text, showSpinner = true) {
     document.getElementById('status-spinner').hidden = !showSpinner
 }
 
-function setError(message) {
+function setError(errorType, message) {
     const retryButton = document.getElementById("retryButton")
     retryButton.hidden = false
     retryButton.onclick = () => location.reload()
