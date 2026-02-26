@@ -189,3 +189,11 @@ td:has(.extension-logo), td:has(.extension-logo-placeholder) {
     font-size: 2em;
     filter: grayscale(100%);
 }
+
+#extensions td:nth-child(2),
+#extensions th:nth-child(2) {
+    max-width: 300px;
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
