@@ -476,20 +476,20 @@ class ExtensionStore {
         static pattern = new RegExp('^https://addons.mozilla.org/[^/]+/firefox/addon/([^/?#]+)')
 
         static categories = {
-            'tabs': { primary: 'make_chrome_yours', secondary: 'functionality' },
-            'appearance': { primary: 'make_chrome_yours', secondary: 'functionality' },
-            'bookmarks': { primary: 'make_chrome_yours', secondary: 'functionality' },
-            'language-support': { primary: 'make_chrome_yours', secondary: 'functionality' },
-            'download-management': { primary: 'make_chrome_yours', secondary: 'functionality' },
-            'feeds-news-blogging': { primary: 'lifestyle', secondary: 'news' },
-            'games-entertainment': { primary: 'lifestyle', secondary: 'entertainment' },
-            'photos-music-videos': { primary: 'lifestyle', secondary: 'entertainment' },
-            'privacy-security': { primary: 'make_chrome_yours', secondary: 'privacy' },
-            'alerts-updates': { primary: 'productivity', secondary: 'tools' },
-            'search-tools': { primary: 'productivity', secondary: 'tools' },
-            'shopping': { primary: 'lifestyle', secondary: 'shopping' },
-            'social-communication': { primary: 'lifestyle', secondary: 'social' },
-            'web-development': { primary: 'productivity', secondary: 'developer' },
+            'tabs':                  { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'appearance':            { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'bookmarks':             { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'language-support':      { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'download-management':   { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'feeds-news-blogging':   { primary: 'lifestyle',         secondary: 'news' },
+            'games-entertainment':   { primary: 'lifestyle',         secondary: 'games' },
+            'photos-music-videos':   { primary: 'lifestyle',         secondary: 'entertainment' },
+            'privacy-security':      { primary: 'make_chrome_yours', secondary: 'privacy' },
+            'alerts-updates':        { primary: 'productivity',      secondary: 'tools' },
+            'search-tools':          { primary: 'productivity',      secondary: 'tools' },
+            'shopping':              { primary: 'lifestyle',         secondary: 'shopping' },
+            'social-communication':  { primary: 'productivity',      secondary: 'communication' },
+            'web-development':       { primary: 'productivity',      secondary: 'developer' },
             'other': null,
         }
 
@@ -576,18 +576,18 @@ class ExtensionStore {
         static pattern = new RegExp('^https://microsoftedge.microsoft.com/addons/detail/[^/]+/([^/?#]+)')
 
         static categories = {
-            'accessibility': { primary: 'make_chrome_yours', secondary: 'accessibility' },
-            'blogging': { primary: 'lifestyle', secondary: 'news' },
-            'communication': { primary: 'lifestyle', secondary: 'social' },
-            'developer-tools': { primary: 'productivity', secondary: 'developer' },
-            'entertainment': { primary: 'lifestyle', secondary: 'entertainment' },
-            'news-and-weather': { primary: 'lifestyle', secondary: 'news' },
-            'photos': { primary: 'lifestyle', secondary: 'entertainment' },
-            'productivity': { primary: 'productivity', secondary: 'tools' },
-            'search-tools': { primary: 'productivity', secondary: 'tools' },
-            'shopping': { primary: 'lifestyle', secondary: 'shopping' },
-            'social': { primary: 'lifestyle', secondary: 'social' },
-            'sports': { primary: 'lifestyle', secondary: 'entertainment' }
+            'accessibility':     { primary: 'make_chrome_yours', secondary: 'accessibility' },
+            'blogging':          { primary: 'lifestyle',         secondary: 'news' },
+            'communication':     { primary: 'productivity',      secondary: 'communication' },
+            'developer-tools':   { primary: 'productivity',      secondary: 'developer' },
+            'entertainment':     { primary: 'lifestyle',         secondary: 'entertainment' },
+            'news-and-weather':  { primary: 'lifestyle',         secondary: 'news' },
+            'photos':            { primary: 'lifestyle',         secondary: 'entertainment' },
+            'productivity':      { primary: 'productivity',      secondary: 'tools' },
+            'search-tools':      { primary: 'productivity',      secondary: 'tools' },
+            'shopping':          { primary: 'lifestyle',         secondary: 'shopping' },
+            'social':            { primary: 'lifestyle',         secondary: 'social' },
+            'sports':            { primary: 'lifestyle',         secondary: 'entertainment' },
         }
 
         static pageOf = async (id) => `https://microsoftedge.microsoft.com/addons/detail/${id}/${id}`
@@ -639,12 +639,12 @@ class ExtensionStore {
 
         static categories = {
             'privacy-security':          { primary: 'make_chrome_yours', secondary: 'privacy' },
-            'accessibility':             { primary: 'make_chrome_yours', secondary: 'functionality' },
+            'accessibility':             { primary: 'make_chrome_yours', secondary: 'accessibility' },
             'appearance':                { primary: 'make_chrome_yours', secondary: 'functionality' },
             'blockchain-cryptocurrency': { primary: 'productivity',      secondary: 'tools' },
             'developer-tools':           { primary: 'productivity',      secondary: 'developer' },
             'downloads':                 { primary: 'make_chrome_yours', secondary: 'functionality' },
-            'fun':                       { primary: 'lifestyle',         secondary: 'entertainment' },
+            'fun':                       { primary: 'lifestyle',         secondary: 'fun' },
             'music':                     { primary: 'lifestyle',         secondary: 'entertainment' },
             'news-weather':              { primary: 'lifestyle',         secondary: 'news' },
             'productivity':              { primary: 'productivity',      secondary: 'tools' },

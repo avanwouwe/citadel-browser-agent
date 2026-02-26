@@ -112,4 +112,32 @@ If an extension exceeds the risk level defined in your policies, it is still pos
 * `extensions.whitelist.allowInstall` : allow at their current risk level the following extensions, based on their id
 * manually, when te user requests an exception.
 
-Contrary to the "allow anytime" cases, these exceptions will continue to be monitored. If their risk profile degrades, for example because they require supplementary forbidden permissions or because their rating or popularity reduces, then they are disabled. If you want to re-evaluate 
+Contrary to the "allow anytime" cases, these exceptions will continue to be monitored. If their risk profile degrades, for example because they require supplementary forbidden permissions or because their rating or popularity reduces, then they are disabled. If you want to re-evaluate
+
+## categories
+When blacklisting based on categories, categories can be specified at the first level (e.g. `productivity`) to match all extensions in that category, or at the second level (e.g. `communication`) to match only extensions in that specific subcategory.
+
+The available categories are:
+
+* **`productivity`**
+  * `communication`
+  * `developer`
+  * `education`
+  * `tools`
+  * `workflow`
+* **`lifestyle`**
+  * `art`
+  * `entertainment`
+  * `games`
+  * `household`
+  * `fun`
+  * `news`
+  * `shopping`
+  * `social`
+  * `travel`
+  * `well_being`
+* **`make_chrome_yours`**
+  * `accessibility`
+  * `functionality`
+  * `privacy`
+```
