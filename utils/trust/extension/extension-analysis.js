@@ -375,7 +375,7 @@ class ExtensionAnalysis {
         const rejection = evaluation.rejection
 
         const blacklistExtension = !evaluateBlacklist(storeInfo.id, extConfig.whitelist.allowInstall, extConfig.blacklist.id, true)
-        const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), [], extConfig.category.forbidden, true)
+        const blacklistCategory = !evaluateBlacklist(storeInfo.categories.flatMap(c => [c.primary, c.secondary]), [], extConfig.blacklist.category, true)
         const blacklistKeyword = ExtensionAnalysis.#evaluateKeywords(storeInfo.description, config.extensions.blacklist.keyword)
         const allowVerified = !extConfig.verified.required || storeInfo.isVerifiedPublisher || storeInfo.isVerifiedExtension
         const allowInstallationCnt = storeInfo.numInstalls >= extConfig.installations.required ?? 0

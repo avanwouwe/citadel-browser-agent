@@ -63,7 +63,9 @@ You can reject extensions based on the following criteria:
 * `extensions.allowSideloading` : do not allow if they are side-loaded
 * `extensions.verified.required` : do not allow if they or their publisher are not verified (have a badge in the store)
 * `extensions.installations.required` : do not allow extensions if they have less than N installations
-* `extensions.category.forbidden` : do not allow extensions based on their category
+* `extensions.blacklist.id` : do not allow extensions based on their extension id
+* `extensions.blacklist.category` : do not allow extensions based on their category
+* `extensions.blacklist.keyword` : do not allow extensions based on their category
 * `extennsions.ratings.minRatingLevel` : do not allow extensions if they are rated poorly
 * `extennsions.ratings.minRatingCnt` : do not allow extensions if their rating is based on few reviews
 

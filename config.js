@@ -335,10 +335,8 @@ class Config {
             },
             blacklist: {
                 id: [],
-                keyword: ["free vpn", "crypto", "wallet", "video download", "ad block", "coupon", "tab manager"]
-            },
-            category: {
-                forbidden: ["lifestyle"],
+                keyword: ["free vpn", "crypto", "wallet", "video download", "ad block", "coupon", "tab manager"],
+                category: ["lifestyle"],
             },
             verified: {
                 required: true,
