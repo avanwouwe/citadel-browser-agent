@@ -117,7 +117,7 @@ Contrary to the "allow anytime" cases, these exceptions will continue to be moni
 ## categories
 When blacklisting based on categories, categories can be specified at the first level (e.g. `productivity`) to match all extensions in that category, or at the second level (e.g. `communication`) to match only extensions in that specific subcategory.
 
-The available categories are:
+The available categories are the Chrome Web Store categories. The categories of the stores of other browsers have been mapped to the Chrome categories.
 
 * **`productivity`**
   * `communication`
@@ -140,4 +140,3 @@ The available categories are:
   * `accessibility`
   * `functionality`
   * `privacy`
-```
