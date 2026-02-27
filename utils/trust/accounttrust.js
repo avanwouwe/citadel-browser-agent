@@ -51,16 +51,15 @@ class AccountTrust {
         const failingAccounts = AccountTrust.#failingAccounts()
 
         for (const [accountKey, acct] of Object.entries(failingAccounts)) {
-            const warnTrigger = config.account.trigger.warn
-            const blockTrigger = config.account.trigger.block
-
             const report = {
                 name: accountKey,
                 passing: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
-                timestamp: AccountTrust.#audit?.getFinding(accountKey)?.report?.timestamp ?? new Date()
+                timestamp: new Date()
             }
 
-            const control = new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
+            const warnTrigger = config.account.trigger.warn
+            const blockTrigger = config.account.trigger.block
+            const control = AccountTrust.#audit.getFinding(accountKey) ?? new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
             control.addReport(report)
             AccountTrust.#audit.setFinding(control)
         }
