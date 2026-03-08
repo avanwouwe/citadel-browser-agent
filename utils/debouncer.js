@@ -44,3 +44,15 @@ class Debouncer {
         this.#pending.clear()
     }
 }
+
+
+function serialized(fn) {
+    let current = null
+
+    return function(...args) {
+        if (!current) {
+            current = fn(...args).finally(() => current = null)
+        }
+        return current
+    }
+}

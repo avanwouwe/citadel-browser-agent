@@ -43,7 +43,7 @@ function selectTab(tabId) {
     }
 }
 
-async function renderDeviceDashboard() {
+const renderDeviceDashboard = serialized(async function () {
     const devicetrust = await callServiceWorker("GetDeviceStatus")
     const controls = Object.values(devicetrust.controls)
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -87,9 +87,9 @@ async function renderDeviceDashboard() {
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>`
         tb.appendChild(tr)
     }
-}
+})
 
-async function renderAccountDashboard() {
+const renderAccountDashboard = serialized(async function () {
     const tb = document.getElementById("accounttrust-issues")
     tb.innerHTML = ""
 
@@ -99,7 +99,7 @@ async function renderAccountDashboard() {
     const failingAccounts = await callServiceWorker("GetAccountStatus")
     for (const acct of Object.values(failingAccounts)) {
         const next = acct.report.nextState
-        let errors = acct.report.issues?.description
+        let errors = acct.report.issues?.description ?? ''
         if (acct.report.issues?.count > 0) {
             errors = ` <span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">&#128269;</span>`
         }
@@ -110,15 +110,15 @@ async function renderAccountDashboard() {
             `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
             `<td>${errors}</td>` +
             `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
-            `<td class="days">${next.days ?? ""}</td>` +
+            `<td class="days">${next?.days ?? ""}</td>` +
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
             `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
 
         tb.appendChild(tr)
     }
-}
+})
 
-async function renderExtensionDashboard() {
+const renderExtensionDashboard = serialized(async function () {
     const extensionTrust = await callServiceWorker("GetExtensionStatus")
     const extensions = Object.values(extensionTrust)
         .sort((a, b) => a.storeInfo.id.localeCompare(b.storeInfo.id))
@@ -155,9 +155,9 @@ async function renderExtensionDashboard() {
             `<td><span class="delete-btn" data-extension="${analysis.storeInfo.id}">${analysis.isInstalled ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '🗑'}</span></td>`
         tb.appendChild(tr)
     }
-}
+})
 
-async function renderEventsDashboard() {
+const renderEventsDashboard = serialized(async function () {
     const log = await callServiceWorker('GetEvents')
     const logTable = document.getElementById("event-log-entries")
     logTable.innerHTML = ""
@@ -180,7 +180,7 @@ async function renderEventsDashboard() {
 
         logTable.appendChild(tr)
     }
-}
+})
 
 async function handleDeleteAccount(event) {
     if (event.target.classList.contains('delete-btn')) {
