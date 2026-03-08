@@ -25,7 +25,10 @@ class Bridge {
             return msg
         })
 
-        Bridge.listenTo("CheckPasswordReuse", ({username, password}, sender) => PasswordVault.detectReuse(username, password, sender.origin))
+        Bridge.listenTo("CheckPasswordReuse", async ({username, password, system}) => {
+            await PasswordVault.setAccount(username, system, password)
+            return PasswordVault.detectReuse(username, system)
+        })
 
         Bridge.listenTo("DeletePassword", ({system, username}) => PasswordVault.deleteAccount(system, username))
 

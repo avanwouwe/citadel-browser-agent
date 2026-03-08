@@ -21,8 +21,8 @@ class AccountTrust {
 
     static accountKey(username, system) { return JSON.stringify({ u: username, s: system }) }
 
-    static getStatus(appName = null) {
-        const failingAccounts = AccountTrust.#failingAccounts(appName)
+    static getStatus(system = null) {
+        const failingAccounts = AccountTrust.#failingAccounts(system)
 
         for (const [accountKey, acct] of Object.entries(failingAccounts)) {
             const finding = AccountTrust.#audit.getFinding(accountKey)
@@ -33,15 +33,15 @@ class AccountTrust {
         return failingAccounts
     }
 
-    static async deleteAccount(appName, username, logoff = true) {
-        assert(username && appName, "missing either username or system")
+    static async deleteAccount(system, username, logoff = true) {
+        assert(username && system, "missing either username or system")
 
-        AppStats.deleteAccount(appName, username)
-        PasswordVault.deleteAccount(appName, username)
+        AppStats.deleteAccount(system, username)
+        PasswordVault.deleteAccount(system, username)
 
         if (logoff) {
-            await logOffDomain(appName)
-            await injectFuncIntoDomain(appName, () => location.reload())
+            await logOffDomain(system)
+            await injectFuncIntoDomain(system, () => location.reload())
         }
 
         AccountTrust.refresh()
@@ -60,6 +60,7 @@ class AccountTrust {
             const warnTrigger = config.account.trigger.warn
             const blockTrigger = config.account.trigger.block
             const control = AccountTrust.#audit.getFinding(accountKey) ?? new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
+            control.action = acct.report.action
             control.addReport(report)
             AccountTrust.#audit.setFinding(control)
         }
@@ -86,7 +87,7 @@ class AccountTrust {
             for (const [username, details] of AppStats.allAccounts(app)) {
                 if (!AccountTrust.checkFor(username, system)) continue
 
-                const report = { ...details }
+                const report = cloneDeep(details)
                 report.action = report?.issues?.reuse ? config.account.passwordReuse.action : Action.NOTHING
 
                 const issueCount = report.issues?.count ?? 0
@@ -107,7 +108,7 @@ class AccountTrust {
                         entropy:            t("accounttrust.password.quality.entropy"),
                         sequence:           t("accounttrust.password.quality.sequence"),
                         usernameInPassword: t("accounttrust.password.quality.username-password"),
-                        reuse:              t("accounttrust.password.quality.reuse",            { account: report.issues.reuse }),
+                        reuse:              t("accounttrust.password.quality.reuse",            report.issues.reuse),
                     }
 
                     const lines = Object.keys(report.issues)

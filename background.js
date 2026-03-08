@@ -657,7 +657,7 @@ function registerInteraction(url, context) {
 
 
 function registerAccountUsage(url, report) {
-	debug(`use of account '${report.username}' for ${getSitename(url)}'`)
+	debug(`use of account '${report.username}' for ${getSitename(url)}`)
 
 	const config = Config.forURL(url)
 	const appName = getSitename(url)
@@ -684,21 +684,14 @@ function registerAccountUsage(url, report) {
 			numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
 			usernameInPassword: report.password.usernameInPassword ? 1 : null,
 			entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
-			sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
-			reuse: report.password.reuse ? PasswordVault.getReusedAccount(report.password.reuse, report.username, appName)?.label : null,
+			sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null
 		}
 
-		Object.entries(issues).forEach(([key, value]) => {
-			if (!value) {
-				delete issues[key]
-			}
-		})
+		AppStats.setIssues(appName, report.username, issues)
 
-		issues.count = Object.values(issues).length
-		account.issues = AccountTrust.checkFor(report.username, appName) && issues.count > 0 ? issues : null
-
-		AccountTrust.refresh()
-		AppStats.markDirty()
+		if (report.password.reuse) {
+			PasswordVault.updateReuse(appName, report.username)
+		}
 	})
 }
 
@@ -847,10 +840,9 @@ onMessage((request, sender) => {
 	if (request.type === "warn-reuse") {
 		const allowException = config.account.passwordReuse.exceptions.allowed
 		const report = request.report
-		const account = PasswordVault.getReusedAccount(report.password.reuse, report.username, sender.origin)
 		const onAcknowledge = { type: 'acknowledge-reuse', username: report.username, system: sender.origin }
 		const onException = allowException ? { type: 'allow-reuse', report } : undefined
-		Modal.createForTab(sender.tab.id, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", account), onAcknowledge, onException)
+		Modal.createForTab(sender.tab.id, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", report.password.reuse), onAcknowledge, onException)
 
 		logger.log(nowTimestamp(), "password reuse", "password reuse warning", request.url, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
 	}

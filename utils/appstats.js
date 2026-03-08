@@ -77,6 +77,31 @@ class AppStats {
         return app.getOrSet('usage', { })
     }
 
+    static getIssues(appName, username) {
+        const app = AppStats.forAppName(appName)
+        const account = AppStats.getAccount(app, username)
+        return account?.issues ?? {}
+    }
+
+    static setIssues(appName, username, issues = {}) {
+        const app = AppStats.forAppName(appName)
+        const account = AppStats.getAccount(app, username)
+
+        issues = {...issues}
+
+        Object.entries(issues).forEach(([key, value]) => {
+            if (key === 'count' || !value) {
+                delete issues[key]
+            }
+        })
+
+        issues.count = Object.values(issues).length
+        account.issues = issues.count > 0 ? issues : null
+
+        AppStats.markDirty()
+        AccountTrust.refresh()
+    }
+
     static markUsed(app) {
         app.lastUsed = nowDatestamp()
 

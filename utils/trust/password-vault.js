@@ -1,139 +1,199 @@
 class PasswordVault {
 
-    static OTHER_SYSTEM = "[other-system]"
+    static #accounts
+    static #byPassword = {}
 
-    static #passwords
     static salt
     static prehashSalt
 
-    static async detectReuse(username, password, system) {
-        assert (PasswordVault.salt && PasswordVault.prehashSalt, "hash was not defined")
-        assert (password.salt === PasswordVault.prehashSalt, "password was prehashed with incorrect salt")
+    static detectReuse(username, system) {
         system = PasswordVault.#normalizeSystem(system)
 
-        const isProtectedSystem = AccountTrust.checkFor(username, system)
-        const passwordHash = await Bcrypt.hash(password.hash, PasswordVault.salt)
-        const accountKey = AccountTrust.accountKey(username, system)
+        const passwordHash = PasswordVault.#getPassword(system, username)
+        if (!passwordHash) return
 
-        const matchingPasswords = PasswordVault.#passwords[passwordHash] ?? {}
+        const sharingAccounts = PasswordVault.#getAccounts(passwordHash)
+            .filter(account => AccountTrust.checkFor(account.username, account.system))
 
-        // only take check against accounts that are *currently* protected
-        Object.entries(matchingPasswords)
-            .filter(([_, account]) => !AccountTrust.checkFor(account.username, account.system))
-            .forEach(([accountKey]) => delete matchingPasswords[accountKey])
-
-        if (isProtectedSystem) {
-            PasswordVault.#passwords[passwordHash] = matchingPasswords
-
-            if (!(accountKey in matchingPasswords)) {
-                debug(`storing password of ${username} for ${system}`)
-            }
-
-            matchingPasswords[accountKey] = {
-                username,
-                system,
-                lastUsed: nowDatestamp()
-            }
-        }
-
-        let passwordReuse = Object.values(matchingPasswords)
+        let forbiddenReuse = Object.values(sharingAccounts)
             .filter(account => ! inSameDomain(account.system, system))
             .map(account => ({ username: account.username, system: account.system }))
 
-        if (passwordReuse.length > 0 && !isProtectedSystem) {
-            passwordReuse.push({ username, system: PasswordVault.OTHER_SYSTEM })
+
+        // ignore systems that are permitted exceptions
+        const exceptions = Config.forHostname(system).account.passwordReuse.exceptions.groups
+            .map(exceptionGroup => Object.fromEntries(exceptionGroup.map(domain => [domain, true])))
+            .filter(exceptionGroup => matchDomain(system, exceptionGroup))
+
+        const allowedSystems = forbiddenReuse.filter(reuse => exceptions.some(exception => matchDomain(reuse.system, exception)))
+            .map(reuse => reuse.system)
+
+        forbiddenReuse = forbiddenReuse.filter(reuse => !allowedSystems.includes(reuse.system))
+        if (forbiddenReuse.length === 0) return
+
+        const account = forbiddenReuse[0]
+        return {
+            username: account.username,
+            system: account.system,
+            label: `${account?.username ?? '??'} / ${account?.system ?? '??'}`
+        }
+    }
+
+    static #reusingAccounts(system, username) {
+        const reusingAccounts = {}
+
+        // find reusing passwords by checking the passwords
+        const passwordHash = PasswordVault.#getPassword(system, username)
+        if (passwordHash) {
+            for (const { username, system } of PasswordVault.#getAccounts(passwordHash)) {
+                const accountKey = AccountTrust.accountKey(username, system)
+                const account = PasswordVault.#accounts[accountKey]
+                if (! AccountTrust.checkFor(account.username, account.system)) continue
+
+                const reuse = PasswordVault.detectReuse(account.username, account.system)
+                if (reuse) {
+                    reusingAccounts[accountKey] = {
+                        username: account.username,
+                        system: account.system,
+                        reuse
+                    }
+                }
+            }
         }
 
-        passwordReuse = PasswordVault.#removeExceptions(system, passwordReuse)
+        // also find reusing passwords by checking the historical issues (since the password may be deleted)
+        for (const [accountKey, account] of Object.entries(AccountTrust.getStatus())) {
+            const historicalReuse = account?.report?.issues?.reuse
+            if (historicalReuse && historicalReuse.system === system && historicalReuse.username === username) {
+                const actualReuse = PasswordVault.detectReuse(account.username, account.system)
+                reusingAccounts[accountKey] = {
+                    username: account.username,
+                    system: account.system,
+                    reuse: actualReuse
+                }
+            }
+        }
 
-        return passwordReuse.length > 0 ? passwordReuse : undefined
+        return reusingAccounts
+    }
+
+    static #indexAccount(accountKey, passwordHash) {
+        PasswordVault.#byPassword[passwordHash] ??= new Set()
+        PasswordVault.#byPassword[passwordHash].add(accountKey)
+    }
+
+    static #unindexAccount(accountKey, passwordHash) {
+        const set = PasswordVault.#byPassword[passwordHash]
+        if (!set) return
+        set.delete(accountKey)
+        if (set.size === 0) delete PasswordVault.#byPassword[passwordHash]
+    }
+
+    static #buildIndex() {
+        PasswordVault.#byPassword = {}
+        for (const [accountKey, account] of Object.entries(PasswordVault.#accounts)) {
+            if (account?.passwordHash) {
+                PasswordVault.#indexAccount(accountKey, account.passwordHash)
+            }
+        }
+    }
+
+    static #getPassword(system, username) {
+        const accountKey = AccountTrust.accountKey(username, system)
+        return PasswordVault.#accounts[accountKey]?.passwordHash
+    }
+
+    static #getAccounts(passwordHash) {
+        return [...(PasswordVault.#byPassword[passwordHash] ?? [])]
+            .map(key => PasswordVault.#accounts[key])
+            .filter(Boolean)
+    }
+
+    static async setAccount(username, system, password) {
+        assert(PasswordVault.salt && PasswordVault.prehashSalt, "hash was not defined")
+        assert(password.salt === PasswordVault.prehashSalt, "password was prehashed with incorrect salt")
+        if (!AccountTrust.checkFor(username, system)) return
+
+        system = PasswordVault.#normalizeSystem(system)
+        const passwordHash = await Bcrypt.hash(password.hash, PasswordVault.salt)
+        const accountKey = AccountTrust.accountKey(username, system)
+        const existing = PasswordVault.#accounts[accountKey]
+
+        if (existing) {
+            PasswordVault.#unindexAccount(accountKey, existing.passwordHash)
+        }
+        debug(`${existing ? 'updating' : 'storing'} password for account '${username}' / ${system}`)
+
+        PasswordVault.#accounts[accountKey] = { username, system, lastUsed: nowDatestamp(), passwordHash }
+        PasswordVault.#indexAccount(accountKey, passwordHash)
+        PasswordVault.#accounts.isDirty = true
     }
 
     static deleteAccount(system, username) {
         system = PasswordVault.#normalizeSystem(system)
 
         const accountKey = AccountTrust.accountKey(username, system)
-        Object.values(PasswordVault.#passwords).forEach(password => delete password[accountKey])
-        PasswordVault.#passwords.isDirty = true
-    }
+        const existing   = PasswordVault.#accounts[accountKey]
+        if (!existing) return false
 
-    static getReusedAccount(accounts, username, system) {
-        system = PasswordVault.#normalizeSystem(system)
+        PasswordVault.#unindexAccount(accountKey, existing.passwordHash)
+        delete PasswordVault.#accounts[accountKey]
 
-        const otherAccounts = accounts.filter(account => account.system !== system)
+        PasswordVault.updateReuse(system, username)
 
-        if (otherAccounts.length === 0) return undefined
-
-        const account = accounts.filter(account => account.system !== system)[0]
-        const otherSystem = account.system === PasswordVault.OTHER_SYSTEM ? t('accounttrust.password.reuse.other-system') : account.system
-        return {
-            username: account.username,
-            system: otherSystem,
-            label: `${account?.username ?? '??'} / ${account?.system ?? '??'}`
-        }
+        PasswordVault.#accounts.isDirty = true
+        return true
     }
 
     static async purge() {
-        debug("purging password vault")
-
         const cutoff = config.account.retentionDays * ONE_DAY
-        const now = Date.now()
+        const now    = Date.now()
 
-        for (const [passwordHash, accounts] of Object.entries(PasswordVault.#passwords)) {
-            if (passwordHash === "isDirty") continue
+        for (const [accountKey, account] of Object.entries(PasswordVault.#accounts)) {
+            const expired       = !isDate(account.lastUsed) || account.lastUsed < now - cutoff
+            const wrongSalt     = Bcrypt.getSalt(account.passwordHash) !== PasswordVault.salt
+            const notProtected  = !AccountTrust.checkFor(account.username, account.system)  // ← added
 
-            for (const [accountKey, account] of Object.entries(accounts)) {
-                if (!isDate(account.lastUsed) || account.lastUsed < now - cutoff) {
-                    delete accounts[accountKey]
-                    PasswordVault.#passwords.isDirty = true
-                }
+            if (expired || wrongSalt || notProtected) {
+                PasswordVault.#unindexAccount(accountKey, account.passwordHash)
+                delete PasswordVault.#accounts[accountKey]
+                PasswordVault.#accounts.isDirty = true
             }
+        }
+    }
 
-            if (Object.keys(accounts).length === 0 || Bcrypt.getSalt(passwordHash) !==  PasswordVault.salt) {
-                delete PasswordVault.#passwords[passwordHash]
-                PasswordVault.#passwords.isDirty = true
-            }
+    static updateReuse(system, username) {
+        const reusingAccounts = PasswordVault.#reusingAccounts(system, username)
+
+        for (const reuse of Object.values(reusingAccounts)) {
+            const issues = AppStats.getIssues(reuse.system, reuse.username)
+            issues.reuse = reuse.reuse
+
+            AppStats.setIssues(reuse.system, reuse.username, issues)
         }
     }
 
     static #normalizeSystem(system) { return system.isURL() ? system.toURL().hostname : system }
 
-    static #removeExceptions(system, passwordReuse) {
-        const exceptions = Config.forHostname(system).account.passwordReuse.exceptions.groups
-            .map(exceptionGroup => Object.fromEntries(exceptionGroup.map(domain => [domain, true])))
-            .filter(exceptionGroup => matchDomain(system, exceptionGroup))
-
-        const allowedSystems = passwordReuse.filter(reuse => exceptions.some(exception => matchDomain(reuse.system, exception)))
-            .map(reuse => reuse.system)
-
-        let filtered = passwordReuse.filter(pr => !allowedSystems.includes(pr.system))
-
-        if (filtered.length > 0) {
-            const reuseBySystem = passwordReuse.filter(account => account.system === system)
-            filtered = [...filtered, ...reuseBySystem]
-        }
-
-        return filtered
-    }
-
     static {
-        // load the state, re-initializing everything if something looks corrupt
         let salts
-        const loadSalts = new PersistentObject("password-salts").ready().then(obj => salts = obj.value())
-        const loadPasswords = new PersistentObject("passwords").ready().then(obj => PasswordVault.#passwords = obj.value())
+        const loadSalts    = new PersistentObject("password-salts").ready().then(obj => salts = obj.value())
+        const loadAccounts = new PersistentObject("accounts").ready().then(obj => PasswordVault.#accounts = obj.value())
 
-        Promise.all([loadSalts, loadPasswords]).then(async () => {
+        Promise.all([loadSalts, loadAccounts]).then(async () => {
             if (!salts.bcrypt || !salts.pbkdf2) {
                 debug("initializing password vault")
 
                 await Bcrypt.genSalt(14).then(salt => salts.bcrypt = salt)
                 salts.pbkdf2 = PBKDF2.toBase64(PBKDF2.genSalt())
-
-                PasswordVault.#passwords.clear()
+                PasswordVault.#accounts.clear()
             }
 
-            PasswordVault.salt = salts.bcrypt
+            PasswordVault.salt        = salts.bcrypt
             PasswordVault.prehashSalt = salts.pbkdf2
+
+            PasswordVault.#buildIndex()
         })
     }
+
 }

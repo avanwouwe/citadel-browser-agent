@@ -46,8 +46,7 @@
     "password": {
       "reuse": {
         "title": "Potentiel Alerte de Phishing",
-        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site.<p>⚠\uFE0F Ceci peut être une attaque de phishing: vérifiez que c'est bien le site que vous pensez.<p>Si c'est le cas; re-utilisation de mots de passe est dangereux, et interdit.",
-        "other-system": "un autre système"
+        "message": "Vous utilisez le mot de passe de {{username}} pour {{system}}, pour vous connecter à un autre site.<p>⚠\uFE0F Ceci peut être une attaque de phishing: vérifiez que c'est bien le site que vous pensez.<p>Si c'est le cas; re-utilisation de mots de passe est dangereux, et interdit."
       },
       "quality": {
         "title": "Problème(s) avec le mot de passe",
@@ -60,7 +59,7 @@
         "entropy": "Ne contient pas assez de caractères différents",
         "sequence": "Est trop répétitif",
         "username-password": "Doit pas être basé sur le nom d'utilisateur",
-        "reuse": "Doit pas réutiliser le mot de passe de {{account}}"
+        "reuse": "Doit pas réutiliser le mot de passe de {{label}}"
       }
     },
     "notification": {
