@@ -34,9 +34,7 @@ function assert(condition, message) {
     }
 }
 
-function debug(message, ...params) {
-    console.log("CITADEL : " + message, ...params)
-}
+const debug = console.log.bind(console, '[CITADEL]')
 
 function injectPageScript(scriptPath) {
     try {
@@ -60,16 +58,6 @@ function shallowClone(obj) {
     }
 
     return clone
-}
-
-function domReady() {
-    return new Promise(resolve => {
-        if (document.readyState === "loading") {
-            document.addEventListener("DOMContentLoaded", resolve, { once: true })
-        } else {
-            resolve()
-        }
-    })
 }
 
 function sendMessage(type, message, handler) {

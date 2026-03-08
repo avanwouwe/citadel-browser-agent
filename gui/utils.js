@@ -52,6 +52,16 @@ function html2dom(html) {
     return new DOMParser().parseFromString(html, 'text/html')
 }
 
+function domReady() {
+    return new Promise(resolve => {
+        if (document.readyState === "loading") {
+            document.addEventListener("DOMContentLoaded", resolve, { once: true })
+        } else {
+            resolve()
+        }
+    })
+}
+
 function containsSvg(element, dStr) {
     const paths = element?.querySelectorAll('svg path') ?? []
     return Array.from(paths).some(path => path.getAttribute('d') === dStr)

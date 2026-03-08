@@ -356,9 +356,7 @@ function applyPath(obj, attributePaths, func) {
     }
 }
 
-function debug(...params) {
-    console.log(...params)
-}
+const debug = console.log.bind(console)
 
 async function sleep(time) {
     await new Promise(r => setTimeout(r, time))
@@ -572,3 +570,39 @@ async function hasPathChanged(tabId, url, seconds) {
         }, seconds * ONE_SECOND)
     })
 }
+
+function sendMessage(type, message, handler) {
+    if (type && typeof type !== 'string') {
+        handler = message
+        message = type
+        type = undefined
+    }
+
+    if (message && typeof message !== 'object') {
+        handler = message
+        message = undefined
+    }
+
+    message = message ?? { }
+    if (typeof message !== 'object') assert("message must be an object")
+    if (message?.type != null) type = message.type
+    if (type != null && message != null) message.type = type
+
+    chrome.runtime.sendMessage(message, handler)
+}
+
+function sendMessagePromise(type, message) {
+    return new Promise((resolve, reject) => {
+        sendMessage(type, message, result => {
+            if (chrome.runtime.lastError) {
+                reject(chrome.runtime.lastError)
+            } else if (result && result.error) {
+                reject(result.error)
+            } else {
+                resolve(result)
+            }
+        })
+    })
+}
+
+const callServiceWorker = (type, message) => sendMessagePromise(type, message).then(result => result?.data)

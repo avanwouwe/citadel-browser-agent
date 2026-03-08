@@ -81,42 +81,9 @@ class Port {
     }
 
     static {
+        assert(Context.isServiceWorker(), "must load class in service worker")
         Port.#resetRetryDelay()
         Port.#connect()
     }
 
-}
-
-function sendMessage(type, message, handler) {
-    if (type && typeof type !== 'string') {
-        handler = message
-        message = type
-        type = undefined
-    }
-
-    if (message && typeof message !== 'object') {
-        handler = message
-        message = undefined
-    }
-
-    message = message ?? { }
-    if (typeof message !== 'object') assert("message must be an object")
-    if (message?.type != null) type = message.type
-    if (type != null && message != null) message.type = type
-
-    chrome.runtime.sendMessage(message, handler)
-}
-
-function sendMessagePromise(type, message) {
-    return new Promise((resolve, reject) => {
-        sendMessage(type, message, result => {
-            if (chrome.runtime.lastError) {
-                reject(chrome.runtime.lastError)
-            } else if (result && result.error) {
-                reject(result.error)
-            } else {
-                resolve(result)
-            }
-        })
-    })
 }
