@@ -497,6 +497,7 @@ class ExtensionAnalysis {
             const escaped = keywords.map(kw => kw.trim())
                 .filter(Boolean)
                 .map(escapeRegex)
+                .map(kw => kw.replace(/\s+/g, '[\\s-]'))  // "new tab" → "new[\s-]tab"
 
             return new RegExp(`\\b(${escaped.join('|')})\\b`, 'gi')
         }
