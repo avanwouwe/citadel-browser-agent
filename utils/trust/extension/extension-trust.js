@@ -60,14 +60,14 @@ class ExtensionTrust {
 
     static async block(analysis) {
         const prevAnalysis = await ExtensionTrust.#get(analysis.storeInfo.id)
-
         if (!prevAnalysis) await ExtensionTrust.#set(analysis)
 
-        await ExtensionTrust.setState(analysis.storeInfo.id, State.BLOCKING)
+        const disabled = await ExtensionTrust.setState(analysis.storeInfo.id, State.BLOCKING)
+        if (disabled) {
+            Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
+        }
 
         Dashboard.refreshExtension()
-
-        Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
     }
 
     static async delete(extensionId) {
@@ -88,14 +88,17 @@ class ExtensionTrust {
 
         analysis.state = state
 
-        if (state !== State.UNKNOWN) {
-            const isEnabled = await Extension.isEnabled(extensionId)
-            const isAllowed = state !== State.BLOCKING
-            if (isEnabled && !isAllowed) await Extension.disable(extensionId)
+        const isEnabled = await Extension.isEnabled(extensionId)
+        const mustDisable = isEnabled && state === State.BLOCKING
+
+        if (mustDisable) {
+            await Extension.disable(extensionId)
         }
 
         ExtensionTrust.#storage.markDirty()
         Dashboard.refreshExtension()
+
+        return mustDisable
     }
 
     static async flush() {
