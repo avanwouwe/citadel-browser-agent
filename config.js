@@ -36,11 +36,13 @@ class Config {
         exceptions: [ ],
         domain: {
             unhash: [],
-            isApplication: [
+            sensitive: [
                 "apple.com",
                 "google.com",
+                "gmail.com",
                 "microsoft.com",
                 "onmicrosoft.com",
+                "microsoftonline.com",
                 "oraclecloud.com",
                 "sharepoint.com",
                 "hotmail.com",
@@ -100,7 +102,7 @@ class Config {
                 "anydesk.com",
                 "teamviewer.com"
             ],
-            isPublicMail: [
+            publicMail: [
                 "gmail.com",
                 "yahoo.com",
                 "hotmail.com",
@@ -186,7 +188,7 @@ class Config {
                 }
             },
             retentionDays: 90,
-            checkOnlyInternal: true,
+            checkOnlyInternal: false,
             checkOnlyProtected: true,
             passwordPolicy: {
                 minLength: 15,
@@ -335,7 +337,7 @@ class Config {
             },
             blacklist: {
                 id: [],
-                keyword: ["free vpn", "crypto", "wallet", "video download", "ad block", "coupon", "tab manager"],
+                keyword: ["free vpn", "crypto", "wallet", "video download", "ad block", "coupon", "tab manager", "new tab", "wallpaper"],
                 category: ["lifestyle"],
             },
             verified: {
@@ -383,8 +385,8 @@ class Config {
         "company.applications",
         "session.domains",
         "session.exceptions",
-        "domain.isApplication",
-        "domain.isPublicMail",
+        "domain.sensitive",
+        "domain.publicMail",
         "device.exceptions.domains",
         "account.exceptions.domains",
         "account.mfa.required",
@@ -429,12 +431,19 @@ class Config {
 
         Config.#init(newConfig)
 
-        // calculate the list of protected domains
-        const scope = [newConfig.company.domains, newConfig.company.applications, newConfig.domain.isApplication]
-        newConfig.protectedDomains = scope.reduce((result, obj) => {
+        // calculate the list of protected and sensitive domains
+        const protectedDomains = mergeArrays(newConfig.company.domains, newConfig.company.applications)
+        newConfig.protectedDomains = protectedDomains.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})
+
+        const sensitiveDomains = mergeArrays(protectedDomains, newConfig.domain.sensitive)
+        newConfig.sensitiveDomains = sensitiveDomains.reduce((result, obj) => {
+            Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
+            return result
+        }, {})
+
 
         // any extension that should *always* be whitelisted should definitely be whitelisted for installation
         newConfig.extensions.whitelist.allowInstall = mergeArrays(
@@ -511,6 +520,11 @@ class Config {
     static isProtected(sitename) {
         Config.assertIsLoaded()
         return matchDomain(sitename, config.protectedDomains)
+    }
+
+    static isSensitive(sitename) {
+        Config.assertIsLoaded()
+        return matchDomain(sitename, config.sensitiveDomains)
     }
 
 }

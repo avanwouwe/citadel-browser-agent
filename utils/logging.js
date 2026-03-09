@@ -118,7 +118,7 @@ class Log {
         const hashedHostname = url.hostname?.hashDJB2()
         const isUnhash = hashedHostname && config.domain.unhash.hasOwnProperty(hashedHostname)
 
-        if (! Config.isProtected(url.hostname) &&
+        if (! Config.isSensitive(url.hostname) &&
             ! isUnhash &&
             Log.#levelValue[level] < config.logging.maskUrlLevel
         ) {

@@ -71,8 +71,7 @@ class Notification {
         if (!alert) return false
 
         const hostname = url.toURL()?.hostname
-        const isProtected = matchDomain(hostname, config.company.applications) || matchDomain(hostname, config.company.domains)
-        if (!isProtected) return false
+        if (!Config.isProtected(hostname)) return false
 
         // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
         if (alert.type === AccountTrust.TYPE && alert.level === State.BLOCKING) {

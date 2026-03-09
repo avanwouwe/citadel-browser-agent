@@ -16,16 +16,19 @@ Of course, these policies will only be enforced on endpoints that are running Ci
 ![Account Trust alert](/img/screenshot/screenshot-issue-mfa.png)
 
 ## general configuration
-By default, Citadel protects the privacy of your end-users and:
+By default, Citadel applies the password policy to all types of usernames, i.e. `user@yourcompany.com`, `user` and `user@gmail.com`.
+
+But to protect the privacy of your end-users, it:
+* only applies the policy to the systems in your protected scope
 * purges accounts after 90 days of not being used
-* excludes clearly personal accounts, i.e. includes `username` or `username@your-company.com` but not `username@gmail.com`
-* applies the password policy only to your protected scope
+
+If `checkOnlyInternal` is set to `true` then the policy is not applied to external users. The domain of usernames is used to determine if the user is internal or external. If you have defined `company.domains` then any domain not in that list is considered external. If you have not defined `company.domains` then any domain in `domain.publicMail` (containing a default list of known public mail services) is considered external. Usernames without a domain are always considered as internal. 
 
 ```
     ...
     "accounts": {
         "retentionDays": 90,
-        "checkOnlyInternal": true,
+        "checkOnlyInternal": false,
         "checkOnlyProtected": true
     }
     ...

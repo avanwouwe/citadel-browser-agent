@@ -30,8 +30,8 @@ The following attributes specify lists of domains:
 * `company.applications`
 * `session.domains`
 * `session.exceptions`
-* `domain.isApplication`
-* `domain.isPublicMail`
+* `domain.sensitive`
+* `domain.publicMail`
 * `device.exceptions.domains`
 * `account.exceptions.domains`
 * `account.mfa.required`
@@ -72,16 +72,16 @@ For example, to ignore warnings about HTTP traffic over your VPN, you can overri
     ...
 ```
 
-Or you can enable password policy enforcement, irrespective of the username used, but only for connections within your domain:
+Or you can disable password policy enforcement of external domains for specific domains. A typical example would be domains that are part of your protected scope but that are shared, such as `accounts.google.com` or `login.microsoftonline.com`:
 ```
     ...
     "exceptions": [
         {
-          "description" : "apply password policy to external logins for all company applications",
-          "domains": ["yourcompany.com"],
+          "description" : "do not apply password policy to external domains",
+          "domains": ["accounts.google.com"],
           "config": {
             "account": {
-              "checkOnlyInternal": false
+              "checkOnlyInternal": true
             }
           }
         }

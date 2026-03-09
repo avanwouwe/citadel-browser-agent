@@ -329,7 +329,7 @@ function isExternalUser(config, username) {
 
     if (Object.keys(config.company.domains)?.length > 0) return ! matchDomain(domain, config.company.domains)
 
-    return matchDomain(domain, config.domain.isPublicMail) === true
+    return matchDomain(domain, config.domain.publicMail) === true
 }
 
 function getPath(obj, path) {

@@ -453,7 +453,7 @@ class ExtensionAnalysis {
         const domains = []
         const protocols = ['https:', 'http:', 'ftp:', 'file:', 'ws:', 'wss:']
 
-        for (const domain of Object.keys(config.protectedDomains)) {
+        for (const domain of Object.keys(config.sensitiveDomains)) {
             const testUrls = [
                 domain,
                 ...protocols.map(proto => `${proto}//${domain}`),
