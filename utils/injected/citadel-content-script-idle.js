@@ -126,6 +126,7 @@ function repeatEvent(event, target) {
         const synthEvent = new KeyboardEvent(event.type, {
             bubbles: true,
             cancelable: true,
+            composed: event.composed,
             key: event.key,
             code: event.code,
             location: event.location,
@@ -138,13 +139,36 @@ function repeatEvent(event, target) {
         })
 
         Object.defineProperties(synthEvent, {
-            keyCode: { value: event.keyCode },
-            which: { value: event.which },
-            charCode: { value: event.charCode },
+            keyCode:  { value: event.keyCode,  writable: false, enumerable: true },
+            which:    { value: event.which,    writable: false, enumerable: true },
+            charCode: { value: event.charCode, writable: false, enumerable: true },
         })
 
         synthEvent.syntheticCitadelEvent = true
         target.dispatchEvent(synthEvent)
+
+        // isTrusted=false blocks browser default action for keyboard events
+        // synthetic keydown above handles SPAs that listen for keydown Enter explicitly
+        // click below handles native forms and SPAs that don't
+        // guard: only click if target is an input field, not a button, to avoid double submit
+        const form = target.closest("form")
+
+        const submitButton =
+            // 1. explicit submit in a real form
+            form?.querySelector('[type="submit"], button:not([type="button"])')
+            // 2. SPA: walk up to find nearest ancestor that contains a submit-like button
+            ?? target.closest("div, section, main, article, [role='dialog'], [role='main']")
+                ?.querySelector('[type="submit"], button:not([type="button"])')
+
+        if (submitButton) {
+            const clickEvent = new MouseEvent("click", {
+                bubbles: true,
+                cancelable: true,
+            })
+            clickEvent.syntheticCitadelEvent = true
+            submitButton.dispatchEvent(clickEvent)
+        }
+
         return
     }
 
