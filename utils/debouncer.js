@@ -48,11 +48,25 @@ class Debouncer {
 
 function serialized(fn) {
     let current = null
+    let dirty   = false
+
+    function schedule(...args) {
+        current = fn(...args).finally(() => {
+            if (dirty) {
+                dirty = false
+                schedule(...args)
+            } else {
+                current = null
+            }
+        })
+        return current
+    }
 
     return function(...args) {
-        if (!current) {
-            current = fn(...args).finally(() => current = null)
+        if (current) {
+            dirty = true
+            return current
         }
-        return current
+        return schedule(...args)
     }
 }
