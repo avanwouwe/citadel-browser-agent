@@ -21,4 +21,4 @@ Citadel **does not**:
 * generate one report per user (since users may have multiple machines, or even just multiple browsers or profiles within a browser)
 * manage the duration of "session" cookies (if Citadel would set their expiration date that would store them, which is also problematic)
 
-Be aware that some browsers (Firefox) have a "safe mode" or "troubleshoot mode" that allows users to disable all extensions, even if they were "force installed".
+Be aware that Firefox has a "safe mode" or "troubleshoot mode" that allows users to disable all extensions, even if they were "force installed". Firefox also does not allow automated disabling of extensions.
