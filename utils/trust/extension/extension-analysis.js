@@ -284,7 +284,7 @@ class ExtensionAnalysis {
             let unableDisableReason
             if (!extensionInfo.installType === "admin") unableDisableReason = 'admin installed'
             else if (!extensionInfo.mayDisable) unableDisableReason = 'cannot disable'
-            else if (Browser.version.brand === Browser.Firefox) unableDisableReason = 'browser is firefox'
+            else if (Browser.version.brand === Browser.Firefox) unableDisableReason = 'browser is Firefox'
 
             if (unableDisableReason) {
                 await ExtensionTrust.allow(currAnalysis)

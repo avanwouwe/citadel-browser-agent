@@ -60,7 +60,12 @@ class AccountTrust {
             const warnTrigger = config.account.trigger.warn
             const blockTrigger = config.account.trigger.block
             const control = AccountTrust.#audit.getFinding(accountKey) ?? new Control(accountKey, acct.report.action, warnTrigger, blockTrigger)
+
+            // take into account the current configuration
             control.action = acct.report.action
+            control.warnTrigger = warnTrigger
+            control.blockTrigger = blockTrigger
+
             control.addReport(report)
             AccountTrust.#audit.setFinding(control)
         }

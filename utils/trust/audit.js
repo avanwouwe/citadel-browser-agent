@@ -172,8 +172,8 @@ class Control {
     action
     definition
     report
-    #warnTrigger
-    #blockTrigger
+    warnTrigger
+    blockTrigger
     #lastDayStart
     #failedDays = 0
 
@@ -183,8 +183,8 @@ class Control {
         this.name = controlName
         this.action = action
         this.definition = definition
-        this.#warnTrigger = warnTrigger
-        this.#blockTrigger = blockTrigger
+        this.warnTrigger = warnTrigger
+        this.blockTrigger = blockTrigger
     }
 
     addReport(report) {
@@ -216,9 +216,9 @@ class Control {
             return State.BLOCKING
         } else if (this.action === Action.NOTHING || this.action === Action.NOTIFY) {
             return State.FAILING
-        } else if (this.#failedDays >= this.#blockTrigger) {
+        } else if (this.#failedDays >= this.blockTrigger) {
             return State.BLOCKING
-        } else if (this.#failedDays >= this.#warnTrigger) {
+        } else if (this.#failedDays >= this.warnTrigger) {
             return State.WARNING
         } else {
             return State.FAILING
@@ -234,10 +234,10 @@ class Control {
             return { state: State.BLOCKING }
         } else if (this.action === Action.NOTHING || this.action === Action.NOTIFY) {
             return { state: State.FAILING }
-        } else if (this.#failedDays < this.#warnTrigger) {
-            return { state: State.WARNING, days: this.#warnTrigger - this.#failedDays }
-        } else if (this.#failedDays < this.#blockTrigger) {
-            return { state: State.BLOCKING, days: this.#blockTrigger - this.#failedDays }
+        } else if (this.#failedDays < this.warnTrigger) {
+            return { state: State.WARNING, days: this.warnTrigger - this.#failedDays }
+        } else if (this.#failedDays < this.blockTrigger) {
+            return { state: State.BLOCKING, days: this.blockTrigger - this.#failedDays }
         } else {
             return { state: State.BLOCKING }
         }
@@ -254,8 +254,8 @@ class Control {
             action: this.action,
             definition: this.definition,
             report: report,
-            warnTrigger: this.#warnTrigger,
-            blockTrigger: this.#blockTrigger,
+            warnTrigger: this.warnTrigger,
+            blockTrigger: this.blockTrigger,
             lastDayStart: this.#lastDayStart?.toISOString(),
             failedDays: this.#failedDays
         }
