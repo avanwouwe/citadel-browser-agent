@@ -443,20 +443,6 @@ async function logOffDomain(domain) {
     })
 }
 
-// clear all storage *except* for application statistics and extensions exceptions
-async function clearStorage() {
-    chrome.storage.local.clear()
-
-    await AppStats.flush()
-    await ExtensionTrust.flush()
-
-    chrome.runtime.reload()
-}
-
-function navigateTo(tabId, url) {
-    chrome.tabs.update(tabId, { url })
-}
-
 function evaluateBlacklist(entry, whitelist, blacklist, defaultValue) {
     if (Array.isArray(entry)) return entry.every(item => evaluateBlacklist(item, whitelist, blacklist, defaultValue))
 

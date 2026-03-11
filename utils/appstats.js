@@ -136,4 +136,24 @@ class AppStats {
             debug(`interaction with ${appName}`)
         }
     }
+
+    // cleaning up of application statistics to prevent infinite build-up of irrelevant data
+    static async purge() {
+        for (const [appName, app] of AppStats.allApps()) {
+            const config = Config.forHostname(appName)
+
+            // purge applications if they haven't been used for a while
+            if (isDate(app.lastUsed) && daysSince(app.lastUsed) > config.application.retentionDays) {
+                AppStats.deleteApp(appName)
+                continue
+            }
+
+            // purge accounts if they haven't been used for a while
+            for (const [username, details] of AppStats.allAccounts(app)) {
+                if (isDate(details.lastConnected) && daysSince(details.lastConnected) > config.account.retentionDays) {
+                    await AccountTrust.deleteAccount(appName, username)
+                }
+            }
+        }
+    }
 }

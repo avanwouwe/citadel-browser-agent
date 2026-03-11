@@ -5,7 +5,7 @@ importScripts('utils/definitions.js');
 importScripts('utils/context.js');
 importScripts('utils/bridge.js');
 importScripts('utils/dashboard.js');
-importScripts('utils/persistence.js');
+importScripts('utils/storage.js');
 importScripts('utils/debouncer.js');
 importScripts('utils/encryption/bcrypt.js');
 importScripts('utils/encryption/pbkdf2.js');

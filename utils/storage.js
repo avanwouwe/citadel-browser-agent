@@ -1,3 +1,41 @@
+class LocalStorage {
+
+    static QUOTA = 10 * 1024 * 1024
+    static bytesInUse = () => chrome.storage.local.getBytesInUse(null)
+
+    static async checkQuota(percent) {
+        assert(percent >= 0.0 && percent <= 1.0, "percent must be between 0.0 and 1.0")
+
+        const bytesInUse = await LocalStorage.bytesInUse()
+        const threshold = LocalStorage.QUOTA * percent
+
+        if (bytesInUse > threshold) {
+            logger.log(nowTimestamp(), "report", "local storage alert", undefined, Log.WARN, undefined, 'local storage almost full, clearing storage')
+            await LocalStorage.clear()
+        }
+    }
+
+    static async purge() {
+        const storageUsed = (await LocalStorage.bytesInUse()) / (1024 * 1024)
+        logger.log(nowTimestamp(), "report", "local storage usage", undefined, Log.INFO, storageUsed, `${storageUsed.toFixed(1)} Mb used`)
+
+        await Promise.all([
+            AppStats.purge(),
+            SessionState.purge(),
+            PasswordVault.purge(),
+        ])
+    }
+
+    static async clear() {
+        await chrome.storage.local.clear()
+
+        await ExtensionTrust.flush()
+
+        chrome.runtime.reload()
+    }
+
+}
+
 class HydratedObject {
 
     #storageKey
@@ -22,6 +60,8 @@ class HydratedObject {
     }
 
     async save() {
+        await LocalStorage.checkQuota(0.98)
+
         try {
             const data = this.#dehydrate(this.#target)
             await chrome.storage.local.set({ [this.#storageKey]: data })

@@ -72,59 +72,48 @@ Port.onMessage("devicetrust",(audit) => {
 	Dashboard.refreshDevice()
 })
 
-chrome.runtime.onUpdateAvailable.addListener(() => {
-	try {
-		reportInteractions()
+function logInstall(reason) {
+	const version = chrome.runtime.getManifest().version
+	logger.log(nowTimestamp(), "agent install", reason, undefined, Log.INFO, version, `${reason} of browser agent version ${version}`)
+}
 
-		Alarm.clear()
+chrome.runtime.onUpdateAvailable.addListener(async () => {
+	try {
+		logInstall("update")
+		reportDaily()
 	} catch (error) {
 		debug("error while preparing update of extension", error)
 	}
 
-	clearStorage()
+	chrome.runtime.reload()
 })
 
-chrome.runtime.onInstalled.addListener((details) => {
-	Alarm.start()
+chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {
+	const currentVersion = chrome.runtime.getManifest().version
 
-	setTimeout(async () => {
-		const version = chrome.runtime.getManifest().version
-		logger.log(nowTimestamp(), "agent install", details.reason, undefined, Log.INFO, version, `${details.reason} of browser agent version ${version}`, undefined, undefined, false)
+	if (reason === "install") {
+		Alarm.start()
 
-		await ExtensionAnalysis.Headless.ofAllInstalled(details.reason === "install")
-	}, 1 * ONE_MINUTE)
+		setTimeout(async () => {
+			logInstall(reason)
+			await ExtensionAnalysis.Headless.ofAllInstalled(true)
+		}, 1 * ONE_MINUTE)
+	} else if (reason === "update" && previousVersion !== currentVersion) {
+		debug(`updating from version${previousVersion} to ${currentVersion}`)
+		await LocalStorage.clear()
+	}
 })
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
 	if (alarm.name === Alarm.DAILY) {
-		// daily cleaning up of application statistics to prevent infinite build-up of irrelevant data
-		for (const [appName, app] of AppStats.allApps()) {
-			const config = Config.forHostname(appName)
+		await LocalStorage.purge()
 
-			// purge applications if they haven't been used for a while
-			if (isDate(app.lastUsed) && daysSince(app.lastUsed) > config.application.retentionDays) {
-				AppStats.deleteApp(appName)
-				continue
-			}
-
-			// purge accounts if they haven't been used for a while
-			for (const [username, details] of AppStats.allAccounts(app)) {
-				if (isDate(details.lastConnected) && daysSince(details.lastConnected) > config.account.retentionDays) {
-					await AccountTrust.deleteAccount(appName, username)
-				}
-			}
-		}
-
-		await SessionState.purge()
-		await PasswordVault.purge()
-
-		reportInteractions()
-
-		DeviceTrust.report()
+		reportDaily()
 	}
 
 	if (alarm.name === Alarm.BIWEEKLY) {
-		reportApplications()
+		reportBiweekly()
+
 		await ExtensionAnalysis.Headless.ofAllInstalled()
 	}
 
@@ -510,7 +499,7 @@ chrome.webRequest.onCompleted.addListener(
 )
 
 
-function reportInteractions() {
+function reportDaily() {
 	Config.assertIsLoaded()
 
 	function report(isAuthenticated) {
@@ -569,9 +558,10 @@ function reportInteractions() {
 		report(false)
 	}
 
+	DeviceTrust.report()
 }
 
-function reportApplications() {
+function reportBiweekly() {
 	Config.assertIsLoaded()
 
 	function report(isAuthenticated) {
