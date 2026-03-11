@@ -3,7 +3,7 @@
 set -eu
 
 PACKAGE_ID="org.citadelagent"
-VERSION="1.4.1"
+VERSION="1.4.2"
 BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 OUTPUT_PKG="citadel-browser-agent-$VERSION.pkg"
 
