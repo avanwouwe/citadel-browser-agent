@@ -90,11 +90,10 @@ class AccountTrust {
         const apps = app ? [[appName, app]] : AppStats.allApps()
         for (const [system, app] of apps) {
             for (const [username, details] of AppStats.allAccounts(app)) {
-                if (!AccountTrust.checkFor(username, system)) continue
+                if (! details.issues?.reuse && ! AccountTrust.checkFor(username, system)) continue
 
                 const report = cloneDeep(details)
                 report.action = report?.issues?.reuse ? config.account.passwordReuse.action : Action.NOTHING
-
                 const issueCount = report.issues?.count ?? 0
                 for (const currAction of Action.values) {
                     if (issueCount >= config.account.actions[currAction] && Action.indexOf(currAction) > Action.indexOf(report.action)) {

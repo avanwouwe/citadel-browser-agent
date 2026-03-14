@@ -139,6 +139,8 @@ class AppStats {
 
     // cleaning up of application statistics to prevent infinite build-up of irrelevant data
     static async purge() {
+        debug("purging AppStat database")
+
         for (const [appName, app] of AppStats.allApps()) {
             const config = Config.forHostname(appName)
 
