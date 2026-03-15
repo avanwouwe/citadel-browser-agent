@@ -14,6 +14,7 @@ let whitelistURL
 let exceptionList
 let ignorelist
 let tabState
+let issueRegistrationDebouncer
 let events = new RingBuffer(200)
 let t
 
@@ -42,6 +43,7 @@ Port.onMessage("config", async (newConfig) => {
 
 	tabState = new TabState(true)
 
+	issueRegistrationDebouncer = new Debouncer(config.account.confirmLoginDelay * ONE_SECOND)
 	const version = chrome.runtime.getManifest().version
 	const configHash = config?.hashDJB2()
 
@@ -107,6 +109,8 @@ chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {
 chrome.alarms.onAlarm.addListener(async (alarm) => {
 	if (alarm.name === Alarm.DAILY) {
 		await LocalStorage.purge()
+
+		issueRegistrationDebouncer.clearAll()
 
 		reportDaily()
 	}
@@ -646,6 +650,28 @@ function registerInteraction(url, context) {
 }
 
 
+function registerAccountIssues(data) {
+	const { config, appName, report } = data
+
+	const issues = {
+		length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
+		numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
+		numberOfLetters: report.password.numberOfLetters < config.account.passwordPolicy.minNumberOfLetters ? 1 : null,
+		numberOfUpperCase: report.password.numberOfUpperCase < config.account.passwordPolicy.minNumberOfUpperCase ? 1 : null,
+		numberOfLowerCase: report.password.numberOfLowerCase < config.account.passwordPolicy.minNumberOfLowerCase ? 1 : null,
+		numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
+		usernameInPassword: report.password.usernameInPassword ? 1 : null,
+		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
+		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null
+	}
+
+	AppStats.setIssues(appName, report.username, issues)
+
+	if (report.password.reuse) {
+		PasswordVault.updateReuse(appName, report.username)
+	}
+}
+
 function registerAccountUsage(url, report) {
 	debug(`use of account '${report.username}' for ${getSitename(url)}`)
 
@@ -664,25 +690,7 @@ function registerAccountUsage(url, report) {
 
 	// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
 	// since the account will be deleted if the login is not confirmed, these issues will be ignored
-	sleep(config.account.confirmLoginDelay * ONE_SECOND).then(() => {
-		const issues = {
-			length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
-			numberOfDigits: report.password.numberOfDigits < config.account.passwordPolicy.minNumberOfDigits ? 1 : null,
-			numberOfLetters: report.password.numberOfLetters < config.account.passwordPolicy.minNumberOfLetters ? 1 : null,
-			numberOfUpperCase: report.password.numberOfUpperCase < config.account.passwordPolicy.minNumberOfUpperCase ? 1 : null,
-			numberOfLowerCase: report.password.numberOfLowerCase < config.account.passwordPolicy.minNumberOfLowerCase ? 1 : null,
-			numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
-			usernameInPassword: report.password.usernameInPassword ? 1 : null,
-			entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
-			sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null
-		}
-
-		AppStats.setIssues(appName, report.username, issues)
-
-		if (report.password.reuse) {
-			PasswordVault.updateReuse(appName, report.username)
-		}
-	})
+	issueRegistrationDebouncer.debounce(url, { config, appName, report }, registerAccountIssues)
 }
 
 chrome.webNavigation.onCommitted.addListener(async details => {
