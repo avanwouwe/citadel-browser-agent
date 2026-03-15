@@ -650,8 +650,8 @@ function registerInteraction(url, context) {
 }
 
 
-function registerAccountIssues(data) {
-	const { config, appName, report } = data
+function registerAccountIssues(config, report, siteUrl) {
+	const appName = getSitename(siteUrl)
 
 	const issues = {
 		length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
@@ -687,10 +687,6 @@ function registerAccountUsage(url, report) {
 	account.lastConnected = nowDatestamp()
 
 	AppStats.markDirty()
-
-	// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
-	// since the account will be deleted if the login is not confirmed, these issues will be ignored
-	issueRegistrationDebouncer.debounce(url, { config, appName, report }, registerAccountIssues)
 }
 
 chrome.webNavigation.onCommitted.addListener(async details => {
@@ -746,7 +742,8 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 })
 
 onMessage((request, sender) => {
-	const siteUrl =  sender.url.toURL()
+	const siteUrl = sender.url.toURL()
+	const tabId = sender.tab.id
 
 	if (request.type === "user-interaction") {
 		registerInteraction(siteUrl, sender)
@@ -755,25 +752,36 @@ onMessage((request, sender) => {
 	if (request.type === "print-dialog") {
 		registerInteraction(siteUrl, sender)
 
-		logger.log(nowTimestamp(), "print dialog", null, siteUrl, Log.INFO, "", "user opened print dialog", sender.origin, sender.tab.id)
+		logger.log(nowTimestamp(), "print dialog", null, siteUrl, Log.INFO, "", "user opened print dialog", sender.origin, tabId)
 	}
 
 	if (request.type === "file-select") {
 		registerInteraction(siteUrl, sender)
 
-		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, sender.tab.id)
+		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, tabId)
 	}
 
 	if (request.type === "account-usage") {
-		registerAccountUsage(siteUrl, request.report)
-
 		const config = Config.forURL(siteUrl)
 
-		if (MFACheck.isRequired(siteUrl, config)) {
-			if (config.account.checkOnlyInternal && isExternalUser(config, request.report.username)) {
-				return
-			}
+		registerAccountUsage(siteUrl, request.report)
 
+		// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
+		hasPathChanged(tabId, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
+			// if several logins were performed in rapid succession, only check the last one
+			issueRegistrationDebouncer.debounce(tabId, undefined, _ => {
+				if (MFACheck.findAuthPattern(siteUrl.path) && ! hasChanged) {
+					debug("page did not change, login assumed failed")
+					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
+					AccountTrust.deleteAccount(siteUrl.hostname, request.report.username, false)
+					return
+				}
+
+				registerAccountIssues(config, request.report, siteUrl)
+			})
+		})
+
+		if (MFACheck.isRequired(siteUrl, config) && AccountTrust.checkFor(request.report.username, siteUrl)) {
 			debug(`MFA required for connection of '${request.report.username}' to ${siteUrl.hostname}`)
 
 			const app = AppStats.forURL(siteUrl)
@@ -784,16 +792,6 @@ onMessage((request, sender) => {
 				delete account.lastMFA
 				MFACheck.startTimer(sender.url, config.account.mfa.waitMinutes, showModal)
 			}
-		}
-
-		if (MFACheck.findAuthPattern(sender.tab.url)) {
-			hasPathChanged(sender.tab.id, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
-				if (!hasChanged) {
-					debug("page did not change, login assumed failed")
-					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
-					AccountTrust.deleteAccount(siteUrl.hostname, request.report.username, false)
-				}
-			})
 		}
 	}
 
@@ -831,7 +829,7 @@ onMessage((request, sender) => {
 		const exception = logObj.value
 		exception.exceptionReason = request.exceptionReason
 		ExtensionTrust.allow(request.analysis)
-		ExtensionAnalysis.showStorePage(sender.tab.id, request.storePage)
+		ExtensionAnalysis.showStorePage(tabId, request.storePage)
 		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason ${exception.exceptionReason}`)
 	}
 
@@ -840,20 +838,20 @@ onMessage((request, sender) => {
 		const report = request.report
 		const onAcknowledge = { type: 'acknowledge-reuse', username: report.username, system: sender.origin }
 		const onException = allowException ? { type: 'allow-reuse', report } : undefined
-		Modal.createForTab(sender.tab.id, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", report.password.reuse), onAcknowledge, onException)
+		Modal.createForTab(tabId, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", report.password.reuse), onAcknowledge, onException)
 
 		logger.log(nowTimestamp(), "password reuse", "password reuse warning", request.url, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "acknowledge-reuse") {
-		Modal.removeFromTab(sender.tab.id)
+		Modal.removeFromTab(tabId)
 	}
 
 	if (request.type === "allow-reuse") {
 		// register the account so that at the next click it will not be seen as the first time that it was used
 		registerAccountUsage(siteUrl, request.report)
 
-		injectFuncIntoTab(sender.tab.id, () => location.reload())
+		injectFuncIntoTab(tabId, () => location.reload())
 		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, undefined, `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 

@@ -84,8 +84,8 @@ class AppStats {
     }
 
     static setIssues(appName, username, issues = {}) {
-        const app = AppStats.forAppName(appName)
-        const account = AppStats.getAccount(app, username)
+        const account = AppStats.forAppName(appName)?.accounts[username]
+        if (! account) return
 
         issues = {...issues}
 

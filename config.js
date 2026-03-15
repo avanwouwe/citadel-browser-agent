@@ -166,7 +166,7 @@ class Config {
             exceptions: [],
         },
         account: {
-            confirmLoginDelay: 20,
+            confirmLoginDelay: 10,
             trigger: {
                 warn: 2,
                 block: 7
