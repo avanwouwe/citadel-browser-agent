@@ -56,11 +56,12 @@ class CombinedBlacklist {
 	}
 
 	find(query) {
-		if (query === CombinedBlacklist.TEST_BLACKLIST) { return 'test blacklist' }
+		if (query === CombinedBlacklist.TEST_BLACKLIST) return { name: 'test blacklist', entry: query }
 
 		for (const [name, blacklist] of Object.entries(this.#blacklists)) {
-			if (blacklist.find(query)) {
-				return name
+			const entry = blacklist.find(query)
+			if (entry) {
+				return { name, entry }
 			}
 		}
 	}
@@ -120,7 +121,7 @@ class IPBlacklist {
 	    	const cidr = this.#sortedCidrList[mid];
 
    	     	if (cidr.contains(ipNumber)) {
-   	     		return cidr;
+   	     		return ip;
    	     	}
 
    	     	if (ipNumber < cidr.start) {
@@ -187,7 +188,7 @@ class URLBlacklist {
 	 * - (in the case of a URL) if the entire domain was blacklisted by a domain-level blacklist-entry
 	 * - (in the case of a URL) if the URL was blacklisted, but without the query or hash part
 	 * @param {Object} query - a string containing a hostname or URL, or a URL object
-	 * @returns {Boolean} - Returns true if a match was found and null if not
+	 * @returns {String} - Returns the matching URL or hostname if found, or null if not
 	 */
 
 	find(query) {
@@ -203,7 +204,7 @@ class URLBlacklist {
 			query = query.toLowerCase()
 
 			if (! query.isURL()) {
-				return this.#urlSet.hasOwnProperty(query)
+				return this.#urlSet.hasOwnProperty(query) ? query : null
 			}
 
 			query = query.toURL()
@@ -213,13 +214,10 @@ class URLBlacklist {
 			return null
 		}
 
-		if (
-			this.#urlSet.hasOwnProperty(query.href) ||
-			this.#urlSet.hasOwnProperty(query.hostname) ||
-			this.#urlSet.hasOwnProperty(`${query.protocol}//${query.hostname}${query.port.length > 0 ? ':' + query.port : ""}${query.pathname}`)
-		) {
-			return true
-		}
+		if (this.#urlSet.hasOwnProperty(query.href)) return query.href
+		if (this.#urlSet.hasOwnProperty(query.hostname)) return query.hostname
+		const baseUrl = `${query.protocol}//${query.hostname}${query.port.length > 0 ? ':' + query.port : ""}${query.pathname}`
+		if (this.#urlSet.hasOwnProperty(baseUrl)) return baseUrl
 
 		return null
 	}

@@ -168,10 +168,11 @@ function evaluateRequest(details) {
 	if (blacklist) {
 		let whitelist = whitelistURL?.find(url) ?? whitelistIP?.find(ip)
 		if (! whitelist) {
+			result.blacklistEntry = blacklist.entry
 			result.result = isNavigate ? "navigation blacklisted" : "request blacklisted"
 			result.level = Log.ERROR
 			result.value = url.href
-			result.description = `${result.result} because target is on blacklist '${blacklist}'`
+			result.description = `${result.result} because target is on blacklist '${blacklist.name}'`
 
 			if (exceptionList.find(details.url)) {
 				result.level = Log.downgrade(result.level)
@@ -199,7 +200,7 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 		case "ignored":
 			return
 		case "navigation blacklisted":
-			blockPage(details.tabId, evaluation.description, evaluation.value)
+			blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
 	}
 
 	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId)
@@ -215,7 +216,7 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
 		case "ignored":
 			return
 		case "request blacklisted":
-			blockPage(details.tabId, evaluation.description, evaluation.value)
+			blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
 	}
 
 	logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
@@ -232,7 +233,7 @@ chrome.webRequest.onResponseStarted.addListener((details) => {
 	const evaluation = evaluateRequest(details)
 
 	if (evaluation.result === "request blacklisted") {
-		blockPage(details.tabId, evaluation.description, evaluation.value)
+		blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
 
 		logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
 	}
@@ -743,7 +744,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 
 onMessage((request, sender) => {
 	const siteUrl = sender.url.toURL()
-	const tabId = sender.tab.id
+	const tabId = sender?.tab?.id
 
 	if (request.type === "user-interaction") {
 		registerInteraction(siteUrl, sender)

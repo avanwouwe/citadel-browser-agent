@@ -20,9 +20,10 @@ async function showPopup(message, title = "Citadel browser agent"
     await chrome.tabs.update(tabId, { url: chrome.runtime.getURL("/gui/popup.html") })
 }
 
-function blockPage(tabId, reason, blockedPage) {
+function blockPage(tabId, reason, blockedPage, blacklistEntry) {
     tabState?.setState("BlockedPage", tabId, {
         reason,
+        blacklistEntry,
         url: blockedPage,
         contact: config.company.contact,
         logo: Logo.getLogo(),

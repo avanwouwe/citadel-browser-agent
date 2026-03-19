@@ -19,7 +19,7 @@ async function renderPage(i18n) {
     }
 
     const values = {
-        securityAnalysisUrl: await getSecurityAnalysisUrl(blocked.url)
+        securityAnalysisUrl: await getSecurityAnalysisUrl(blocked.blacklistEntry)
     }
 
     i18n.translatePage(handlers, values)

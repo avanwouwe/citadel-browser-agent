@@ -31,16 +31,24 @@ body {
 }
 
 .content {
-    display: inline-block;
+    display: block;
+    width: 560px;
+    max-width: calc(100% - 40px);
+    margin: 20px auto;
     text-align: left;
-    max-width: 600px;
-    margin: 20px;
     padding: 20px;
+    box-sizing: border-box;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.content p {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 0 0.5em;
+    align-items: baseline;
+}
 .title {
     font-weight: bold;
 }
