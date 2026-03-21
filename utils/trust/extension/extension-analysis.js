@@ -173,9 +173,17 @@ class ExtensionAnalysis {
         }
 
         static async ofAllInstalled(isfirstAnalysis = false) {
-            for (const ext of await chrome.management.getAll()) {
+            const installed = await chrome.management.getAll()
+            for (const ext of installed) {
                 const scanType = isfirstAnalysis ? ExtensionAnalysis.ScanType.INIT : ExtensionAnalysis.ScanType.PERIODIC
                 await ExtensionAnalysis.Headless.ofExtension(ext, scanType)
+            }
+
+            // if the extension is no longer installed, clear the state
+            for (const extensionId of Object.keys(await ExtensionTrust.getStatus())) {
+                if (! installed.some(inst => inst.id === extensionId)) {
+                    await ExtensionTrust.setState(extensionId, State.UNKNOWN)
+                }
             }
         }
 
