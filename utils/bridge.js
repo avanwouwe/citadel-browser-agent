@@ -48,6 +48,15 @@ class Bridge {
 
         Bridge.listenTo("GetExtensionStatus", async() => await ExtensionTrust.getStatus())
 
+        Bridge.listenTo("EnableExtension", async ({extensionId, enable}) => {
+            if (enable) {
+                const analysis = await ExtensionTrust.analysisOf(extensionId)
+                if (analysis.state === State.BLOCKING) return
+            }
+
+            await Extension.enable(extensionId, enable)
+        })
+
         Bridge.listenTo("DeleteExtension", async ({extensionId}) => await ExtensionTrust.delete(extensionId))
 
         Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))

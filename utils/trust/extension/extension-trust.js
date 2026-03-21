@@ -5,8 +5,12 @@ class ExtensionTrust {
     static {
         ExtensionTrust.#storage.ready().then(() => {
             chrome.management.onInstalled.addListener(async extensionInfo => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.INSTALL))
-            chrome.management.onEnabled.addListener(async extensionInfo => ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.ENABLE))
             chrome.management.onUninstalled.addListener(() => Dashboard.refreshExtension())
+            chrome.management.onDisabled.addListener(() => Dashboard.refreshExtension())
+            chrome.management.onEnabled.addListener(async extensionInfo => {
+                Dashboard.refreshExtension()
+                ExtensionAnalysis.Headless.ofExtension(extensionInfo, ExtensionAnalysis.ScanType.ENABLE)
+            })
         })
     }
 
@@ -38,7 +42,10 @@ class ExtensionTrust {
         await Promise.all(
             Object.values(analyses).map(async analysis => {
                 analysis.isInstalled = await Extension.isInstalled(analysis.storeInfo.id)
-                analysis.issues = serializeToText(ExtensionAnalysis.issuesOf(analysis))
+                analysis.isEnabled   = await Extension.isEnabled(analysis.storeInfo.id)
+                analysis.mayDisable  = await Extension.mayDisable(analysis.storeInfo.id)
+                analysis.mayEnable   = await Extension.mayEnable(analysis.storeInfo.id)
+                analysis.issues      = serializeToText(ExtensionAnalysis.issuesOf(analysis))
             })
         )
 
@@ -92,7 +99,7 @@ class ExtensionTrust {
         const mustDisable = isEnabled && state === State.BLOCKING
 
         if (mustDisable) {
-            await Extension.disable(extensionId)
+            await Extension.enable(extensionId, false)
         }
 
         ExtensionTrust.#storage.markDirty()

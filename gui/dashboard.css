@@ -197,3 +197,75 @@ td:has(.extension-logo), td:has(.extension-logo-placeholder) {
     word-break: break-word;
     overflow-wrap: break-word;
 }
+
+/* ── Extension enable/disable toggle ───────────────────────────── */
+
+td.action-cell {
+    text-align: center;
+    vertical-align: middle;
+    width: 52px;
+    padding: 4px;
+}
+
+/* Padlock: no pointer, just informational */
+.blocked-icon {
+    font-size: 1.1em;
+    opacity: 0.75;
+    cursor: default;
+}
+
+/* Toggle track */
+.ext-toggle {
+    position: relative;
+    display: inline-block;
+    width: 36px;
+    height: 20px;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Hide the native checkbox */
+.ext-toggle-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+/* Track */
+.ext-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: #ccc;
+    border-radius: 20px;
+    transition: background 0.2s;
+}
+
+/* Thumb */
+.ext-toggle-slider::before {
+    content: "";
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    left: 3px;
+    top: 3px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+/* Checked state */
+.ext-toggle-input:checked + .ext-toggle-slider {
+    background: #43d25e;
+}
+
+.ext-toggle-input:checked + .ext-toggle-slider::before {
+    transform: translateX(16px);
+}
+
+/* Disabled (if ever needed) */
+.ext-toggle-input:disabled + .ext-toggle-slider {
+    opacity: 0.45;
+    cursor: not-allowed;
+}

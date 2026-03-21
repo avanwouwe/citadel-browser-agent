@@ -74,7 +74,7 @@
       "title": "Extensions",
       "name": "Nom",
       "id": "Id",
-      "state": "État"
+      "allowed": "Permis"
     }
   },
   "events": {
@@ -146,7 +146,7 @@
       },
       "page-blocked-header": "Analyse de l’extension",
       "install-blocked": {
-        "blocked": "L’extension que vous essayez d’installer a été bloquée car",
+        "blocked": "L’extension est bloquée car",
         "blacklist-extension": "elle a été interdite",
         "blacklist-category": "la catégorie à laquelle elle appartient a été interdite",
         "blacklist-keyword": "sa description mentionne '{{example}}'",

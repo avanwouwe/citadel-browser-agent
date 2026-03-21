@@ -2,14 +2,14 @@ class Modal {
     static #HOST_ELEMENT_ID = "CitadelModalOverlayHost"
 
     static async createForDomain(domain, title, message, onAcknowledge, onException) {
-        const options = Modal.#prepareOptions(title, message, onAcknowledge, onException)
+        const options = Modal.prepareOptions(title, message, onAcknowledge, onException)
 
         await injectFilesIntoDomain(domain, ['/gui/utils.js', '/gui/modal.js'])
         await injectFuncIntoDomain(domain, async options => await Modal.create(options), [options])
     }
 
     static async createForTab(tabId, title, message, onAcknowledge, onException) {
-        const options = Modal.#prepareOptions(title, message, onAcknowledge, onException)
+        const options = Modal.prepareOptions(title, message, onAcknowledge, onException)
 
         await injectFilesIntoTab(tabId, ['/gui/utils.js', '/gui/modal.js']).catch(err => console.error(err))
         await injectFuncIntoTab(tabId, async options => await Modal.create(options), [options])
@@ -34,7 +34,10 @@ class Modal {
         host.id = Modal.#HOST_ELEMENT_ID
         document.body.appendChild(host)
         const shadow = host.attachShadow({mode: 'open'})
-        shadow.innerHTML = `<style>${await css.text()}</style>${await page.text()}`
+        const sheet = new CSSStyleSheet()
+        await sheet.replace(await css.text())
+        shadow.adoptedStyleSheets = [sheet]
+        shadow.innerHTML = await page.text()
 
         shadow.getElementById('companyLogo').src = options.logo || ''
         shadow.getElementById('modalTitle').textContent = options.text.title || ''
@@ -46,6 +49,7 @@ class Modal {
 
         acknowledge.addEventListener('click', function () {
             sendMessage(options.onAcknowledge)
+            host.remove()
         })
 
         if (!options.exception) {
@@ -75,15 +79,16 @@ class Modal {
 
         submit.addEventListener('click', function() {
             const onException = options.exception.onException ?? {}
-            onException.reason = textarea.value.trim()
+            onException.exceptionReason = textarea.value.trim()
 
             sendMessage(onException)
+            host.remove()
         })
     }
 
-    static #prepareOptions(title, message, onAcknowledge, onException) {
+    static prepareOptions(title, message, onAcknowledge, onException, showLogo = true) {
         const options = {
-            logo: Logo.getLogo(),
+            logo: showLogo ? Logo.getLogo() : undefined,
             text: {
                 title,
                 message,

@@ -74,7 +74,7 @@
       "title": "Extensions",
       "name": "Name",
       "id": "Id",
-      "state": "State"
+      "allowed": "Allowed"
     }
   },
   "events": {
@@ -146,7 +146,7 @@
       },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {
-        "blocked": "The extension you are trying to install was blocked because",
+        "blocked": "The extension is blocked because",
         "blacklist-extension": "it has been blacklisted",
         "blacklist-category": "the category it belongs to has been blacklisted",
         "blacklist-keyword": "its description mentions '{{example}}'",

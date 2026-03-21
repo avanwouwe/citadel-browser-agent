@@ -129,6 +129,9 @@ const renderExtensionDashboard = serialized(async function () {
     tb.removeEventListener('click', handleDeleteExtension)
     tb.addEventListener('click', handleDeleteExtension)
 
+    tb.removeEventListener('click', handleExtensionAction)
+    tb.addEventListener('click', handleExtensionAction)
+
     for (const analysis of extensions) {
         let issues = ''
         if (analysis.issues) {
@@ -143,16 +146,35 @@ const renderExtensionDashboard = serialized(async function () {
         const storePage = analysis.storeInfo?.storePage
         const nameElement = storePage
             ? `<a href="${storePage}" target="_blank" rel="noopener noreferrer">${name}</a>`
-            : `<span>${name}</span>`;
+            : `<span>${name}</span>`
+
+        const isBlocked   = analysis.state === State.BLOCKING
+
+        let actionCell
+        if (!analysis.isInstalled) {
+            actionCell = `<span class="delete-btn" data-extension="${analysis.storeInfo.id}">🗑</span>`
+        } else if (isBlocked) {
+            actionCell = `<span class="blocked-icon" data-extension="${analysis.storeInfo.id}">🔒</span>`
+        } else if (analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable) {
+            actionCell = ''
+        } else {
+            const checked = analysis.isEnabled ? 'checked' : ''
+            actionCell =
+                `<label class="ext-toggle">` +
+                `<input type="checkbox" class="ext-toggle-input" ${checked}` +
+                ` data-extension="${analysis.storeInfo.id}">` +
+                `<span class="ext-toggle-slider"></span>` +
+                `</label>`
+        }
 
         const tr = document.createElement("tr")
         tr.innerHTML =
             `<td>${logo}</td>` +
             `<td class="label ellipsis" title="${name}">${nameElement}</td>` +
-            `<td><span class="ellipsis" title="${analysis.id}">${analysis.storeInfo.id}</span></td>` +
+            `<td><span class="ellipsis" title="${analysis.storeInfo.id}">${analysis.storeInfo.id}</span></td>` +
             `<td>${issues}</td>` +
             `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
-            `<td><span class="delete-btn" data-extension="${analysis.storeInfo.id}">${analysis.isInstalled ? '&nbsp;&nbsp;&nbsp;&nbsp;' : '🗑'}</span></td>`
+            `<td class="action-cell">${actionCell}</td>`
         tb.appendChild(tr)
     }
 })
@@ -187,6 +209,26 @@ async function handleDeleteAccount(event) {
         const system = event.target.dataset.system
         const username = event.target.dataset.username
         await callServiceWorker("DeleteAccount", { system, username })
+    }
+}
+
+async function handleExtensionAction(event) {
+    const input = event.target
+    const extensionId = input.dataset.extension
+    if (input.classList.contains('ext-toggle-input')) {
+        const enable = input.checked
+        await callServiceWorker("EnableExtension", { extensionId, enable })
+    } else if (input.classList.contains('blocked-icon')) {
+        const extensionTrust = await callServiceWorker("GetExtensionStatus")
+        const analysis = extensionTrust[extensionId]
+        const rejection = analysis?.evaluation?.rejection
+
+        if (!rejection) return
+
+        const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
+        const onException =  { type: 'allow-extension', analysis }
+        const options = Modal.prepareOptions(t('extension-analysis.disable-modal.title'), reason, {}, onException, false)
+        await Modal.create(options)
     }
 }
 

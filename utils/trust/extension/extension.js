@@ -91,24 +91,23 @@ class Extension {
 
     static isSideloaded = extensionInfo => Extension.#SIDELOAD_TYPES.includes(extensionInfo.installType)
 
-    static async isInstalled(extensionId) {
-        return await chrome.management.get(extensionId)
-            .then(() => true, () => false)
-    }
+    static #getExt = (extensionId, fn) => chrome.management.get(extensionId).then(fn, () => false)
 
-    static async isEnabled(extensionId) {
-        return chrome.management.get(extensionId)
-            .then(ext => ext.enabled, () => false)
-    }
+    static isInstalled = extensionId => Extension.#getExt(extensionId, () => true)
+    static isEnabled   = extensionId => Extension.#getExt(extensionId, ext => ext.enabled)
+    static mayDisable  = extensionId => Extension.#getExt(extensionId, ext => !!ext.mayDisable)
+    static mayEnable   = extensionId => Extension.#getExt(extensionId, ext => !!ext.mayEnable)
 
-    static async disable(extensionId) {
+    static async enable(extensionId, enabled) {
         try {
-            await chrome.management.setEnabled(extensionId, false)
+            await chrome.management.setEnabled(extensionId, enabled)
         } catch (err) {
             const logObj = {
                 type: "extension",
                 value: { id: extensionId }
             }
+
+            const action = enabled ? 'enable' : 'disable'
 
             // Firefox does not allow enterprise-installed plugins to disable other plugins
             const errorLevel = Browser.version.brand === Browser.Firefox ? Log.WARN : Log.ERROR
@@ -116,7 +115,7 @@ class Extension {
                 err?.message ??
                 chrome.runtime.lastError?.message ??
                 "unknown error"
-            logger.log(Date.now(), "extension", `extension disable failed`, undefined, errorLevel, logObj, `extension '${extensionId}' could not be disabled because '${reason}'`)
+            logger.log(Date.now(), "extension", `extension ${action} failed`, undefined, errorLevel, logObj, `could not ${action} extension '${extensionId}' because '${reason}'`)
         }
     }
 

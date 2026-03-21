@@ -822,7 +822,7 @@ onMessage((request, sender) => {
 
 		Notification.acknowledge(alertType, exceptionDuration)
 
-		logger.log(nowTimestamp(), "exception", `${alertType} exception used`, sender.url, Log.ERROR, request.reason, `user used ${alertType} exception`)
+		logger.log(nowTimestamp(), "exception", `${alertType} exception used`, sender.url, Log.ERROR, request.exceptionReason, `user used ${alertType} exception`)
 	}
 
 	if (request.type === "allow-extension") {
@@ -831,7 +831,7 @@ onMessage((request, sender) => {
 		exception.exceptionReason = request.exceptionReason
 		ExtensionTrust.allow(request.analysis)
 		ExtensionAnalysis.showStorePage(tabId, request.storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason ${exception.exceptionReason}`)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason '${exception.exceptionReason}'`)
 	}
 
 	if (request.type === "warn-reuse") {
@@ -867,13 +867,13 @@ onMessage((request, sender) => {
 		AppStats.markDirty()
 
 		Modal.removeFromDomain(request.domain)
-		logger.log(nowTimestamp(), "exception", "MFA exception used", sender.url, Log.ERROR, request.reason, `user used MFA exception for account ${app.lastAccount} for ${request.domain}`)
+		logger.log(nowTimestamp(), "exception", "MFA exception used", sender.url, Log.ERROR, request.exceptionReason, `user used MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 
 	if (request.type === "allow-blacklist") {
 		exceptionList.add(request.url.toURL()?.hostname)
 
-		logger.log(nowTimestamp(), "exception", "blacklist exception used", request.url, Log.ERROR, request.reason, "user used exception: " + request.description)
+		logger.log(nowTimestamp(), "exception", "blacklist exception used", request.url, Log.ERROR, request.exceptionReason, "user used exception: " + request.description)
 	}
 })
 
