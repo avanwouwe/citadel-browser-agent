@@ -252,7 +252,7 @@ class ExtensionAnalysis {
             // if the extension was allowed, or was previously allowed and the risk did not increase, fine
             const riskIncrease = ExtensionAnalysis.riskIncrease(prevAnalysis, currAnalysis)
             if (currAnalysis.evaluation.allowed ||
-                prevAnalysis?.evaluation?.allowed && riskIncrease.length === 0
+                prevAnalysis && prevAnalysis.state !== State.BLOCKING && riskIncrease.length === 0
             ) {
                 const action = scanType === ExtensionAnalysis.ScanType.INSTALL ? "installed" : "kept"
 
