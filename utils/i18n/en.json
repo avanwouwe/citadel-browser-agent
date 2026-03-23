@@ -158,7 +158,8 @@
         "poor-rating": "it was rated poorly or insufficiently",
         "forbidden-permission": "it requests a forbidden permission '{{example}}'",
         "all-domains": "it requests access to all traffic using '{{example}}'",
-        "protected-domain": "it requests access to protected domain '{{example}}'"
+        "protected-domain": "it requests access to protected domain '{{example}}'",
+        "sideloaded": "it was sideloaded"
       },
       "details": {
         "header": "Extension Details",

@@ -213,19 +213,30 @@ class ExtensionAnalysis {
             }
 
             if (Extension.isSideloaded(extensionInfo)) {
-                const analysis = { storeInfo: { id: extensionInfo.id } }
+                const evaluation = {}
+                const analysis = {
+                    evaluation,
+                    storeInfo: {
+                        id: extensionInfo.id,
+                        name : extensionInfo.name,
+                    }
+                }
+
                 if (config.extensions.allowSideloading) {
-                    analysis.allowed = true
+                    evaluation.allowed = true
                     await ExtensionTrust.allow(analysis)
-                    ExtensionAnalysis.#log('extension kept', 'side-loaded but allowed', Log.INFO, extensionInfo, undefined, scanType)
+                    ExtensionAnalysis.#log('extension kept', 'sideloaded but allowed', Log.INFO, extensionInfo, undefined, scanType)
                 } else if (config.extensions.whitelist.allowAlways.includes(extensionInfo.id)) {
-                    analysis.allowed = true
+                    evaluation.allowed = true
                     await ExtensionTrust.allow(analysis)
-                    ExtensionAnalysis.#log('extension kept', 'side-loaded but whitelisted', Log.INFO, extensionInfo, undefined, scanType)
+                    ExtensionAnalysis.#log('extension kept', 'sideloaded but whitelisted', Log.INFO, extensionInfo, undefined, scanType)
+                } else if (prevAnalysis && ! prevAnalysis.evaluation.allowed &&  prevAnalysis.state !== State.BLOCKING) {
+                    ExtensionAnalysis.#log('extension kept', 'sideloaded but excepted', Log.INFO, extensionInfo, undefined, scanType)
                 } else {
-                    analysis.allowed = false
+                    evaluation.allowed = false
+                    evaluation.rejection = { reasons: ['sideloaded'] }
                     await ExtensionTrust.block(analysis)
-                    ExtensionAnalysis.#log('extension disabled', 'side-loaded and therefore disabled', Log.WARN, extensionInfo, undefined, scanType)
+                    ExtensionAnalysis.#log('extension disabled', 'sideloaded and therefore disabled', Log.WARN, extensionInfo, undefined, scanType)
                 }
                 return
             }

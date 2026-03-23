@@ -158,7 +158,8 @@
         "poor-rating": "elle a été mal notée ou insuffisamment notée",
         "forbidden-permission": "elle demande la permission interdite '{{example}}",
         "all-domains": "elle demande l'accès à tout le trafic en utilisant '{{example}}'",
-        "protected-domain": "elle demande l'accès au domaine protégé '{{example}}'"
+        "protected-domain": "elle demande l'accès au domaine protégé '{{example}}'",
+        "sideloaded": "elle a été sideloadée"
       },
       "details": {
         "header": "Détails de l’extension",

@@ -27,14 +27,14 @@ To do this, Citadel checks extensions before they are installed or updated, and 
 
 ![Extension Analysis Screenshot](/img/screenshot/screenshot-extension-analysis.png)
 
-The [default configuration of Citadel](https://github.com/avanwouwe/citadel-browser-agent/blob/main/config.js) requires that extensions:
+The [default configuration of Citadel](https://github.com/avanwouwe/citadel-browser-agent/blob/main/config.js) requires that regular store-based extensions:
 * themselves or their publisher are vetted (i.e. they have a "badge" in the store)
 * have at least 200.000 active users
 * have at least 500 ratings, and an average of 4.0 or higher
-* do not request permissions give access to authentication- or session secrets
-* request do not request broad access to all hosts, and not to ones that you protect
-* are not side-loaded
+* do not request extension permissions that give access to authentication- or session secrets
+* do not request broad access to all hosts, and not to ones that you protect
 * are not of category `lifestyle`
+* do not mention specific keywords in their description, such as `crypto` or `tab manager`
 
 However, it allows bypassing of these criteria if the extension has more than 5.000.000 installations. This is based on the assumption that extensions with such a large audience have implemented the necessary security measures to prevent malicious actors from taking them over.
 
@@ -55,12 +55,18 @@ You can adapt this policy based on your needs, risk profile, and analysis of the
 
 Users can see the status of their extensions on the [Extension Dashboard](/dashboard/extension-dashboard).
 
+# sideloaded extensions
+By default Citadel does not allow sideloaded extensions. It is possible to add sideloaded extensions to the whitelist, or to request exceptions for them. However, Citadel does not perform risk-based analysis on the sideloaded extensions, in the way that it does for regular store-based extensions.
+
+# policy configuration
+The following aspects can be used to specify your browser extension policy.
+
 ## blacklist
 Using the `extensions.blacklist` you can specify extensions that are blacklisted, by listing their extension id. Users will not be able to install these extensions, or even request an exception.
 
 ## policy reject
 You can reject extensions based on the following criteria:
-* `extensions.allowSideloading` : do not allow if they are side-loaded
+* `extensions.allowSideloading` : do not allow if they are sideloaded
 * `extensions.verified.required` : do not allow if they or their publisher are not verified (have a badge in the store)
 * `extensions.installations.required` : do not allow extensions if they have less than N installations
 * `extensions.blacklist.id` : do not allow extensions based on their extension id
@@ -69,7 +75,7 @@ You can reject extensions based on the following criteria:
 * `extennsions.ratings.minRatingLevel` : do not allow extensions if they are rated poorly
 * `extennsions.ratings.minRatingCnt` : do not allow extensions if their rating is based on few reviews
 
-You can ofcourse also reject based on the permissions requested by the extension. The default configuration prohibits extensions that request permissions that could be used to get access to authentication or session secrets of sites in you protected scope:
+You can of course also reject based on the permissions requested by the extension. The default configuration prohibits extensions that request permissions that could be used to get access to authentication or session secrets of sites in you protected scope:
 * disallows `proxy`,`debugger`,`clipboardRead` (these are global permissions)
 * disallows `scripting`, `webRequest`, `pageCapture`, `cookies`, if the extension has requested access to all sites
 * disallows extensions that request broad access to all sites
