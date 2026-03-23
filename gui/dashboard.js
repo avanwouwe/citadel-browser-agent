@@ -153,15 +153,13 @@ const renderExtensionDashboard = serialized(async function () {
         let actionCell
         if (!analysis.isInstalled) {
             actionCell = `<span class="delete-btn" data-extension="${analysis.storeInfo.id}">🗑</span>`
-        } else if (isBlocked) {
-            actionCell = `<span class="blocked-icon" data-extension="${analysis.storeInfo.id}">🔒</span>`
         } else if (analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable) {
             actionCell = ''
         } else {
             const checked = analysis.isEnabled ? 'checked' : ''
             actionCell =
                 `<label class="ext-toggle">` +
-                `<input type="checkbox" class="ext-toggle-input" ${checked}` +
+                `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked': ''}" ${checked}` +
                 ` data-extension="${analysis.storeInfo.id}">` +
                 `<span class="ext-toggle-slider"></span>` +
                 `</label>`
@@ -215,10 +213,12 @@ async function handleDeleteAccount(event) {
 async function handleExtensionAction(event) {
     const input = event.target
     const extensionId = input.dataset.extension
-    if (input.classList.contains('ext-toggle-input')) {
-        const enable = input.checked
-        await callServiceWorker("EnableExtension", { extensionId, enable })
-    } else if (input.classList.contains('blocked-icon')) {
+    const enable = input.checked
+    if (! input.classList.contains('ext-toggle-input')) return
+
+    if (input.classList.contains('ext-blocked') && enable) {
+        event.preventDefault()
+
         const extensionTrust = await callServiceWorker("GetExtensionStatus")
         const analysis = extensionTrust[extensionId]
         const rejection = analysis?.evaluation?.rejection
@@ -229,6 +229,8 @@ async function handleExtensionAction(event) {
         const onException =  { type: 'allow-extension', analysis }
         const options = Modal.prepareOptions(t('extension-analysis.disable-modal.title'), reason, {}, onException, false)
         await Modal.create(options)
+    } else {
+        await callServiceWorker("EnableExtension", { extensionId, enable })
     }
 }
 

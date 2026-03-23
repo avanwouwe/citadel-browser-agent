@@ -207,13 +207,6 @@ td.action-cell {
     padding: 4px;
 }
 
-/* Padlock: no pointer, just informational */
-.blocked-icon {
-    font-size: 1.1em;
-    opacity: 0.75;
-    cursor: default;
-}
-
 /* Toggle track */
 .ext-toggle {
     position: relative;
