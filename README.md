@@ -14,7 +14,7 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
   </tr>
 </table>
 
-Full documentation on the public site : [https://citadelagent.org](https://citadelagent.org)
+Full documentation on the public site : [citadelagent.org](https://citadelagent.org)
 
 ## Overview
 In today's cybersecurity landscape it is difficult to have good control over your endpoints and their use. You need a solution to ensure endpoint compliance, but most of those do not manage the browser. And it is difficult to get a full-blown MDM installed on endpoints that are not provided by your organisation, such as in the case of employee BYOD, or of external staff. Many applications do not allow you to configure a password policy, and if they do provide security controls such as "MFA must be enabled", it is only as part of an "Enterprise" licence. So you have to select, integrate and maintain several solutions, each one costing a couple of dollars per endpoint.
@@ -38,7 +38,7 @@ On top of this, Citadel detects the following events in the browser:
 
 Citadel also reports on usage statistics of applications, allowing for detection of shadow IT and unused licences.
 
-Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](/doc/wazuh.md).
+Events and reports are written as syslog entries with a relevant level, and can then be consumed by a SIEM or EDR. Citadel comes [pre-integrated with Wazuh](https://www.citadelagent.org/install/wazuh/).
 
 ## Web-filtering
 Can blacklist URLs, IP ranges or domains, using lists periodically downloaded from the internet. By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can then temporarily bypass the blacklist for that hostname. The exception request is logged, as are the navigation and web requests that use the exception.
@@ -49,7 +49,7 @@ It is possible to define a whitelist that will override the blacklist.
 Citadel helps you identify shadow IT and unused licences. It does this by inspecting internet use (navigation, clicking, application logins). Citadel attempts to identify sites that are "applications" by separating authenticated and unauthenticated internet sites.
 
 The reports are generated as security events. Two types of reports are generated:
-* one event per day, per application, showing the number of interactions (triggered once per day)
+* one event per day, per application (triggered once per day)
 * one event per application (triggered once every two weeks)
   * showing the number of days the application was not used
   * and the accounts used for that application, if they are not conforming to security policies (password quality, etc)
@@ -78,7 +78,7 @@ Citadel uses [osquery](https://osquery.io/) to check the state of various contro
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
 
-The shadow IT detection only reports on interaction with (authenticated) applications, and only tracks the number of interactions per site, per day.
+The shadow IT detection only reports on whether the user interacted with (authenticated) applications on that day.
 
 The data is logged on the local machine and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 
@@ -92,7 +92,7 @@ The design objective of Citadel is to allow a CISO or a CIO to secure staff lapt
 
 ### what about the privacy of my staff?
 Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. By default:
-* shadow IT detection only logs the name of the site, and the number of interactions (not the duration of usage)
+* shadow IT detection only logs the name of the site (not the duration or amount of usage)
 * shadow IT detection tries to report only on applications (i.e. websites that require authentication)
 * events lower than `INFO` log level are masked or hashed (meaning only sensitive events such as downloads and alerts are logged with details)
 * log levels allow you to log events locally but not send them to your EDR, thus allowing post-incident analysis without having everything centrally logged
@@ -116,4 +116,4 @@ Citadel is mainly intended for policy enforcement, licence management and DFIR. 
 For more detail see the complete [list of limitations](/docs/config/limitations.md).
 
 ### does Citadel help me with my ISO 27001 certification?
-Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of I  SO 27001 controls. For more information, see the [overview of controls](/docs/privacy/ISO27001.md).
+Citadel, when integrated with your SIEM (like [Wazuh](https://wazuh.com/)), providers many features that cover a wide range of ISO 27001 controls. For more information, see the [overview of controls](/docs/privacy/ISO27001.md).
