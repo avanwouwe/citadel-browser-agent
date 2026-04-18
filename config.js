@@ -426,7 +426,7 @@ class Config {
     static load(localConfig = null) {
         debug(`loading ${localConfig ? 'local' : 'global'} configuration`)
 
-        const newConfig = cloneDeep(Config.default)
+        const newConfig = structuredClone(Config.default)
         if (localConfig) mergeDeep(localConfig, newConfig)
 
         Config.#init(newConfig)
@@ -458,7 +458,7 @@ class Config {
         newConfig.exceptions = {}
 
         for (const exception of Object.values(exceptions)) {
-            const mergedExceptionConfig = cloneDeep(newConfig)
+            const mergedExceptionConfig = structuredClone(newConfig)
             delete mergedExceptionConfig.exceptions
 
             Config.#init(exception.config)

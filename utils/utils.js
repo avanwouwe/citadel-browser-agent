@@ -255,6 +255,8 @@ function isObject(item) {
 function mergeDeep(source, target) {
     for (const key in source) {
         if (Object.prototype.hasOwnProperty.call(source, key)) {
+            if (key === '__proto__' || key === 'constructor' || key === 'prototype') continue
+
             if (isObject(source[key])) {
                 // If the property is an object, we need to merge recursively
                 if (!target[key]) {
@@ -275,29 +277,6 @@ const DATE_REGEX = /[0-9]{4}-[0-9]{2}-[0-9]{2}/
 function isDate(str) {
     return DATE_REGEX.test(str)
 }
-
-function cloneDeep(obj) {
-    if (obj === null || typeof obj !== 'object') {
-        return obj
-    }
-
-    if (obj instanceof Date) {
-        return new Date(obj)
-    }
-
-    if (Array.isArray(obj)) {
-        return obj.map(item => cloneDeep(item))
-    }
-
-    const clonedObj = {};
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            clonedObj[key] = cloneDeep(obj[key])
-        }
-    }
-    return clonedObj
-}
-
 
 /**
  * Checks if a hostname matches any domain in a given object of domain patterns

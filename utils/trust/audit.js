@@ -244,7 +244,7 @@ class Control {
     }
 
     dehydrate() {
-        const report = cloneDeep(this.report)
+        const report = structuredClone(this.report)
         if (report?.timestamp) {
             report.timestamp = report.timestamp.toISOString()
         }

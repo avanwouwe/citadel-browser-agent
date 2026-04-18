@@ -22,7 +22,7 @@ class ExtensionTrust {
     static async #set(analysis) {
         const storage = await ExtensionTrust.#storage.ready()
 
-        analysis = cloneDeep(analysis)
+        analysis = structuredClone(analysis)
 
         storage.value()[analysis.storeInfo.id] = analysis
 
@@ -31,12 +31,12 @@ class ExtensionTrust {
 
     static async analysisOf(extensionId) {
         const analysis = await ExtensionTrust.#get(extensionId)
-        return cloneDeep(analysis)
+        return structuredClone(analysis)
     }
 
     static async getStatus() {
         const storage = await ExtensionTrust.#storage.ready()
-        const analyses = cloneDeep(await storage.value())
+        const analyses = structuredClone(await storage.value())
         delete analyses.isDirty
 
         await Promise.all(
