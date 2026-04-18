@@ -8,7 +8,7 @@ importScripts('utils/dashboard.js');
 importScripts('utils/storage.js');
 importScripts('utils/debouncer.js');
 importScripts('utils/encryption/bcrypt.js');
-importScripts('utils/encryption/pbkdf2.js');
+importScripts('utils/encryption/secure-message.js');
 importScripts('utils/trust/password-vault.js');
 importScripts('utils/trust/passwords.js');
 importScripts('utils/trust/mfa.js');

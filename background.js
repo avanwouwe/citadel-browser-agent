@@ -674,9 +674,6 @@ function registerAccountIssues(config, report, siteUrl) {
 }
 
 function registerAccountUsage(url, report) {
-	debug(`use of account '${report.username}' for ${getSitename(url)}`)
-
-	const config = Config.forURL(url)
 	const appName = getSitename(url)
 	const app = AppStats.getOrCreateApp(appName)
 	app.lastUsed = nowDatestamp()
@@ -690,20 +687,82 @@ function registerAccountUsage(url, report) {
 	AppStats.markDirty()
 }
 
-chrome.webNavigation.onCommitted.addListener(async details => {
-	if (details.parentFrameId >= 0 || details.tabId < 0) {
-		return
+function patchNavigatorCredentials(encryptionKey) {
+	const originalCredentialsCreate = navigator.credentials.create
+	const originalCredentialsGet = navigator.credentials.get
+
+	navigator.credentials.create = async function(options) {
+		const credentials = await originalCredentialsCreate.apply(this, arguments)
+
+		try {
+			if (typeof SecureMessage === 'undefined') {
+				console.error("error while intercepting credentials.create : SecureMessage not yet loaded")
+			} else if (options?.publicKey) {
+				await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+			}
+		} catch (error) {
+			console.error("error while intercepting credentials.create", error)
+		}
+
+		return credentials
 	}
+
+	navigator.credentials.get = async function(options) {
+		const credentials = await originalCredentialsGet.apply(this, arguments)
+
+		try {
+			if (typeof SecureMessage === 'undefined') {
+				console.error("error while intercepting credentials.create : SecureMessage not yet loaded")
+			} else if (options?.password) {
+				if (credentials && credentials.type === "password" && credentials.id && credentials.password) {
+					await SecureMessage.sendMessage("AccountUsage",
+						{ subtype: "password", username: credentials.id, password: credentials.password },
+						encryptionKey,
+					)
+				}
+			} else if (options?.publicKey) {
+				await SecureMessage.sendMessage("account-usage", { subtype: "public-key" })
+			}
+		} catch (error) {
+			console.error("error while intercepting credentials.get", error)
+		}
+
+		return credentials
+	}
+}
+
+chrome.webNavigation.onCommitted.addListener(async details => {
+	if (details.documentLifecycle && details.documentLifecycle !== 'active') return
+
+	const { tabId, frameId, parentFrameId, url } = details
+
+	if (url.isWebURL()) {
+		try {
+			const secureMessageKey = await SecureMessage.getPublicKey()
+
+			await chrome.scripting.executeScript({
+				target: { tabId, frameIds: [frameId] },
+				world: 'MAIN',
+				injectImmediately: true,
+				func: patchNavigatorCredentials,
+				args: [secureMessageKey]
+			})
+		} catch (error) {
+			debug("unable to inject into frame", details)
+		}
+	}
+
+	if (parentFrameId >= 0 || tabId < 0) return
 
 	setInitiator(details)
 
-	registerInteraction(details.url, details)
+	registerInteraction(url, details)
 })
 
 chrome.tabs.onUpdated.addListener(async(tabId, changeInfo, tab) => {
 	if (changeInfo.status !== "complete") return
 
-	Notification.showIfRequired(tab.url, tabId)
+	await Notification.showIfRequired(tab.url, tabId)
 
 	if (ExtensionStore.of(tab.url)) {
 		await ExtensionAnalysis.Interactive.start(tab.id, tab.url)
@@ -742,6 +801,63 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 	}
 })
 
+async function auditPassword(username, system, password) {
+	const report = {
+		username,
+		password: PasswordCheck.analyzeAccount(username, password)
+	}
+	report.password.reuse = await PasswordVault.detectReuse(username, system, password)
+	return report
+}
+
+SecureMessage.listenTo("AuditPassword", async ({ username, password }, { url: system }) => auditPassword(username, system, password))
+
+SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, { url, tab }) => {
+	const siteUrl = url.toURL()
+	const tabId = tab?.id
+
+	if (subtype === "public-key") {
+		debug("detected use of navigator.credentials API to get public key")
+
+		MFACheck.cancelTimer(siteUrl, "public key auth")
+	} else if (subtype === "password") {
+		debug(`detected use of account '${username}' for ${siteUrl.hostname}`)
+
+		const config = Config.forURL(siteUrl)
+		const report = await auditPassword(username, siteUrl, password)
+
+		registerAccountUsage(siteUrl, report)
+
+		// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
+		hasPathChanged(tabId, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
+			// if several logins were performed in rapid succession, only check the last one
+			issueRegistrationDebouncer.debounce(tabId, undefined, _ => {
+				if (MFACheck.findAuthPattern(siteUrl.path) && ! hasChanged) {
+					debug("page did not change, login assumed failed")
+					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
+					AccountTrust.deleteAccount(siteUrl.hostname, report.username, false)
+					return
+				}
+
+				registerAccountIssues(config, report, siteUrl)
+			})
+		})
+
+		if (MFACheck.isRequired(siteUrl, config) && AccountTrust.checkFor(report.username, siteUrl)) {
+			debug(`MFA required for connection of '${report.username}' to ${siteUrl.hostname}`)
+
+			const app = AppStats.forURL(siteUrl)
+			const account = AppStats.getAccount(app, report.username)
+
+			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
+				const showModal = account.lastMFA === undefined
+				delete account.lastMFA
+				MFACheck.startTimer(siteUrl, config.account.mfa.waitMinutes, showModal)
+			}
+		}
+	}
+})
+
 onMessage((request, sender) => {
 	const siteUrl = sender.url.toURL()
 	const tabId = sender?.tab?.id
@@ -762,46 +878,8 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, tabId)
 	}
 
-	if (request.type === "account-usage") {
-		const config = Config.forURL(siteUrl)
-
-		registerAccountUsage(siteUrl, request.report)
-
-		// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
-		hasPathChanged(tabId, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
-			// if several logins were performed in rapid succession, only check the last one
-			issueRegistrationDebouncer.debounce(tabId, undefined, _ => {
-				if (MFACheck.findAuthPattern(siteUrl.path) && ! hasChanged) {
-					debug("page did not change, login assumed failed")
-					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
-					AccountTrust.deleteAccount(siteUrl.hostname, request.report.username, false)
-					return
-				}
-
-				registerAccountIssues(config, request.report, siteUrl)
-			})
-		})
-
-		if (MFACheck.isRequired(siteUrl, config) && AccountTrust.checkFor(request.report.username, siteUrl)) {
-			debug(`MFA required for connection of '${request.report.username}' to ${siteUrl.hostname}`)
-
-			const app = AppStats.forURL(siteUrl)
-			const account = AppStats.getAccount(app, request.report.username)
-
-			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
-				const showModal = account.lastMFA === undefined
-				delete account.lastMFA
-				MFACheck.startTimer(sender.url, config.account.mfa.waitMinutes, showModal)
-			}
-		}
-	}
-
 	if (request.type === "receive-totp") {
 		MFACheck.cancelTimer(siteUrl, 'TOTP in form')
-	}
-
-	if (request.type === "request-credential" && request.subtype === "public-key") {
-		MFACheck.cancelTimer(siteUrl, "public key auth")
 	}
 
 	if (request.type === "acknowledge-alert") {
@@ -853,7 +931,7 @@ onMessage((request, sender) => {
 		registerAccountUsage(siteUrl, request.report)
 
 		injectFuncIntoTab(tabId, () => location.reload())
-		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, undefined, `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
+		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "acknowledge-mfa") {
@@ -867,13 +945,13 @@ onMessage((request, sender) => {
 		AppStats.markDirty()
 
 		Modal.removeFromDomain(request.domain)
-		logger.log(nowTimestamp(), "exception", "MFA exception used", sender.url, Log.ERROR, request.exceptionReason, `user used MFA exception for account ${app.lastAccount} for ${request.domain}`)
+		logger.log(nowTimestamp(), "exception", "MFA exception used", sender.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), `user used MFA exception for account ${app.lastAccount} for ${request.domain}`)
 	}
 
 	if (request.type === "allow-blacklist") {
 		exceptionList.add(request.url.toURL()?.hostname)
 
-		logger.log(nowTimestamp(), "exception", "blacklist exception used", request.url, Log.ERROR, request.exceptionReason, "user used exception: " + request.description)
+		logger.log(nowTimestamp(), "exception", "blacklist exception used", request.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), "user used exception: " + request.description)
 	}
 })
 

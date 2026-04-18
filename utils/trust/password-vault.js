@@ -1,21 +1,22 @@
 class PasswordVault {
 
+    static HASH_ROUNDS = 15
+
     static #accounts
     static #byPassword = {}
 
     static salt
-    static prehashSalt
 
-    static detectReuse(username, system) {
+    static async detectReuse(username, system, password) {
         system = PasswordVault.#normalizeSystem(system)
 
-        const passwordHash = PasswordVault.#getPassword(system, username)
-        if (!passwordHash) return
+        await PasswordVault.setAccount(username, system, password)
 
-        return PasswordVault.#detectReuse(passwordHash, system)
+        const passwordHash = PasswordVault.#getPassword(system, username)
+        return passwordHash ? PasswordVault.#detectReuseHash(passwordHash, system) : undefined
     }
 
-    static #detectReuse(passwordHash, system) {
+    static #detectReuseHash(passwordHash, system) {
         const sharingAccounts = PasswordVault.#getAccounts(passwordHash)
 
         const sharesProtectedPasswords = sharingAccounts.some(account => AccountTrust.checkFor(account.username, account.system))
@@ -54,7 +55,7 @@ class PasswordVault {
                 const accountKey = AccountTrust.accountKey(username, system)
                 const account = PasswordVault.#accounts[accountKey]
 
-                const reuse = PasswordVault.detectReuse(account.username, account.system)
+                const reuse = PasswordVault.#detectReuseHash(account.passwordHash, account.system)
                 if (reuse) {
                     reusingAccounts[accountKey] = {
                         username: account.username,
@@ -65,11 +66,11 @@ class PasswordVault {
             }
         }
 
-        // also find reusing passwords by checking the historical issues (since the password may be deleted)
+        // also find reusing passwords by checking the historical issues (since the password may have be deleted since)
         for (const [accountKey, account] of Object.entries(AccountTrust.getStatus())) {
             const historicalReuse = account?.report?.issues?.reuse
             if (historicalReuse && historicalReuse.system === system && historicalReuse.username === username) {
-                const actualReuse = PasswordVault.detectReuse(account.username, account.system)
+                const actualReuse = PasswordVault.#detectReuseHash(account.passwordHash, account.system)
                 reusingAccounts[accountKey] = {
                     username: account.username,
                     system: account.system,
@@ -114,12 +115,11 @@ class PasswordVault {
     }
 
     static async setAccount(username, system, password) {
-        assert(PasswordVault.salt && PasswordVault.prehashSalt, "hash was not defined")
-        assert(password.salt === PasswordVault.prehashSalt, "password was prehashed with incorrect salt")
+        assert(PasswordVault.salt, "salt is not defined")
         system = PasswordVault.#normalizeSystem(system)
 
-        const passwordHash = await Bcrypt.hash(password.hash, PasswordVault.salt)
-        const reuse = PasswordVault.#detectReuse(passwordHash, system)
+        const passwordHash = await Bcrypt.hash(password, PasswordVault.salt)
+        const reuse = PasswordVault.#detectReuseHash(passwordHash, system)
 
         if (!reuse && ! AccountTrust.checkFor(username, system)) return
 
@@ -164,7 +164,7 @@ class PasswordVault {
             const wrongSalt   = Bcrypt.getSalt(account.passwordHash) !== PasswordVault.salt
             const isExpired   = ! isDate(account.lastUsed) || account.lastUsed < now - cutoff
             const isProtected = AccountTrust.checkFor(account.username, account.system)
-            const isReusing   = !! PasswordVault.#detectReuse(account.passwordHash, account.system)
+            const isReusing   = !! PasswordVault.#detectReuseHash(account.passwordHash, account.system)
 
             if (! isReusing && (isExpired || wrongSalt || ! isProtected)) {
                 PasswordVault.#unindexAccount(accountKey, account.passwordHash)
@@ -188,24 +188,24 @@ class PasswordVault {
     static #normalizeSystem(system) { return system.isURL() ? system.toURL().hostname : system }
 
     static {
-        let salts
-        const loadSalts    = new PersistentObject("password-salts").ready().then(obj => salts = obj.value())
-        const loadAccounts = new PersistentObject("accounts").ready().then(obj => PasswordVault.#accounts = obj.value())
+        (async () => {
+            let [{ PasswordVaultSalt: salt }, accounts] = await Promise.all([
+                chrome.storage.local.get("PasswordVaultSalt"),
+                new PersistentObject("accounts").ready()
+            ])
 
-        Promise.all([loadSalts, loadAccounts]).then(async () => {
-            if (!salts.bcrypt || !salts.pbkdf2) {
+            PasswordVault.#accounts = accounts.value()
+
+            if (!salt) {
                 debug("initializing password vault")
-
-                await Bcrypt.genSalt(14).then(salt => salts.bcrypt = salt)
-                salts.pbkdf2 = PBKDF2.toBase64(PBKDF2.genSalt())
+                salt = await Bcrypt.genSalt(PasswordVault.HASH_ROUNDS)
+                await chrome.storage.local.set({ PasswordVaultSalt: salt })
                 PasswordVault.#accounts.clear()
             }
 
-            PasswordVault.salt        = salts.bcrypt
-            PasswordVault.prehashSalt = salts.pbkdf2
+            PasswordVault.salt = salt
 
             PasswordVault.#buildIndex()
-        })
+        })()
     }
-
 }

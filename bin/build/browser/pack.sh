@@ -12,18 +12,13 @@ bundle() {
     cat "$@" > "$output"
 }
 
-START_FILES=(
-    ./utils/injected/citadel-page-script.js
-)
-
 IDLE_FILES=(
     ./utils/context.js
-    ./utils/encryption/pbkdf2.js
+    ./utils/encryption/secure-message.js
     ./utils/trust/passwords.js
     ./utils/trust/mfa.js
 )
 
 rm -rf $BUNDLE_DIR
 mkdir -p $BUNDLE_DIR
-bundle "$BUNDLE_DIR/citadel-bundle-start.js" "${START_FILES[@]}"
 bundle "$BUNDLE_DIR/citadel-bundle-idle.js" "${IDLE_FILES[@]}"

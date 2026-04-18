@@ -19,18 +19,12 @@ class Bridge {
         })
 
         Bridge.listenTo("InitPasswordCheck", (_, sender) => {
-            const msg = { salt: PasswordVault.prehashSalt }
             const app = AppStats.forURL(sender.origin)
-            msg.accounts = app ? AppStats.allAccounts(app).map(([key]) => key) : undefined
-            return msg
+            const accounts = app ? AppStats.allAccounts(app).map(([key]) => key) : []
+            return { accounts  }
         })
 
-        Bridge.listenTo("CheckPasswordReuse", async ({username, password, system}) => {
-            await PasswordVault.setAccount(username, system, password)
-            return PasswordVault.detectReuse(username, system)
-        })
-
-        Bridge.listenTo("DeletePassword", ({system, username}) => PasswordVault.deleteAccount(system, username))
+        Bridge.listenTo("DeletePassword", ({ username }, { url: system }) => PasswordVault.deleteAccount(system, username))
 
         Bridge.listenTo("GetAccountStatus", () => AccountTrust.getStatus())
 

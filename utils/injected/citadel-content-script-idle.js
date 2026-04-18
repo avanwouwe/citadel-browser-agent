@@ -45,21 +45,6 @@ document.addEventListener('drop', function(event) {
     })
 }, true)
 
-window.addEventListener("message", function(event) {
-    if (event.source !== window || event.origin !== window.location.origin) return
-
-    if (event.data.type === "request-credential" && event.data.subtype === "public-key") {
-        debug("detected use of navigator.credentials API to get public key")
-        sendMessage(event.data.type, { subtype: event.data.subtype })
-    }
-
-    if (event.data.type === "request-credential" && event.data.subtype === "password") {
-        debug("detected use of navigator.credentials API to get password")
-        sendMessage("account-usage", { report: event.data.report })
-    }
-
-})
-
 const system = window.location.origin
 let sessionState
 new SessionState(system).load().then(obj => sessionState = obj)
@@ -232,24 +217,32 @@ checkLogin = async function(event, button) {
     const loginForm = analyzeForm(fields, button)
 
     if (loginForm?.password) {
-        try {
-            event.preventDefault()
-            event.stopImmediatePropagation()
+        // if this is the first time we're connecting to the site, first check if the password is reused (could be phishing)
+        if (PasswordCheck.isFirstConnection(loginForm.username)) {
+            try {
+                event.preventDefault()
+                event.stopImmediatePropagation()
 
-            loginForm.password.reuse = await loginForm.password.reuse
-
-            if (loginForm.password.reuse && PasswordCheck.isFirstConnection(loginForm.username)) {
-                await sendMessage("warn-reuse", { report: loginForm })
-                await callServiceWorker("DeletePassword", { username: loginForm.username, system })
-                return
+                const encryptionKey = await SecureMessage.getPublicKey()
+                const report = await SecureMessage.sendMessage("AuditPassword", loginForm, encryptionKey)
+                if (report.password.reuse) {
+                    await sendMessage("warn-reuse", { report })
+                    await callServiceWorker("DeletePassword", { username: loginForm.username })
+                    return
+                }
+            } catch (error) {
+                console.error('exception when analyzing login', error.stack)
             }
-        } catch (error) {
-            console.error('exception when analyzing login', error)
+
+            repeatEvent(event, button)
         }
 
-        await sendMessage("account-usage", { report: loginForm })
-
-        repeatEvent(event, button)
+        try {
+            const encryptionKey = await SecureMessage.getPublicKey()
+            await SecureMessage.sendMessage("AccountUsage",{ subtype: "password", username: loginForm.username, password: loginForm.password }, encryptionKey)
+        } catch (error) {
+            console.error('exception when analyzing login', error.stack)
+        }
     }
 
     if (loginForm?.totp) sendMessage("receive-totp")
@@ -258,7 +251,7 @@ checkLogin = async function(event, button) {
 function analyzeForm(formElements, eventElement) {
     formElements = formElements.filter(elem => elem.value?.length < 100 && ! PasswordCheck.isCreditCard(elem.value))
 
-    let username, password, TOTP
+    let username, password, totp
     const formHasPassword = formElements.some(elem => elem.type === 'password')
 
     for (let elem of formElements) {
@@ -268,7 +261,7 @@ function analyzeForm(formElements, eventElement) {
             if (MFACheck.isTOTP(elem.value)) {
                 debug("found TOTP", elem.value)
 
-                TOTP = elem.value
+                totp = elem.value
                 continue
             }
         }
@@ -304,34 +297,19 @@ function analyzeForm(formElements, eventElement) {
 
     debug("form username is ", username)
     debug("form password is ", password ? "<masked>" : undefined)
-    debug("form TOTP is ", TOTP)
+    debug("form TOTP is ", totp)
 
     if (username !== undefined) sessionState.setUsername(username)
     if (password !== undefined) sessionState.setPassword()
-    if (TOTP !== undefined) sessionState.setTOTP()
+    if (totp !== undefined) sessionState.setTOTP()
 
     if (sessionState.auth.password === undefined) return
-    if (password === undefined && TOTP === undefined) return
+    if (password === undefined && totp === undefined) return
 
     const login = {
         username: sessionState.auth.username,
-        password: undefined,
+        password,
         totp: sessionState.auth.totp
-    }
-
-    if (password) {
-        login.password = PasswordCheck.analyzeAccount(sessionState.auth.username, password)
-
-        const salt = PasswordCheck.getSalt()
-        if (salt) {
-            login.password.reuse = PBKDF2.hash(password, salt).then(hashed => {
-                return callServiceWorker("CheckPasswordReuse", {
-                    username: login.username,
-                    password: hashed,
-                    system
-                })
-            })
-        }
     }
 
     if (sessionState.auth.totp) {

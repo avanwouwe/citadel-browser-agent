@@ -52,7 +52,7 @@
       "/utils/storage.js",
       "/utils/debouncer.js",
       "/utils/encryption/bcrypt.js",
-      "/utils/encryption/pbkdf2.js",
+      "/utils/encryption/secure-message.js",
       "/utils/trust/password-vault.js",
       "/utils/trust/passwords.js",
       "/utils/trust/mfa.js",
@@ -103,12 +103,12 @@
       "js": [
         "/utils/context.js",
         "/utils/session-state.js",
-        "/utils/encryption/pbkdf2.js",
+        "/utils/encryption/secure-message.js",
         "/utils/trust/passwords.js",
         "/utils/trust/mfa.js",
         "/utils/injected/citadel-content-script-idle.js"
       ],
-      "run_at": "document_idle"
+      "run_at": "document_end"
     }
 
   ],

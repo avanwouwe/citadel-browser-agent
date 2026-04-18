@@ -121,7 +121,7 @@ Not all applications have MFA, so you have to enumerate the list of applications
 ## session duration
 Citadel can be configured to limit authenticated session duration by forcing cookies to expire. This reduces the risk of cookies being stolen, should the endpoint ever be compromised. Since it forces users to reconnect, it also ensures that Citadel has recent data bout password quality and account usage.
 
-The default settings is `30` days. You can list the domains to apply the rule to, and specify exceptions to that list. By default, no domains are specified and the feature is disabled. To enable it, set `domains` to `"*"`, and configure any domains that you want to exclude, or that are not compatible with this feature.
+The default settings is `30` days. You can list the domains to apply the rule to, and specify exceptions to that list. By default, no domains are specified and the feature is disabled, since some applications do not appreciate having cookies expire when they do not expect it. To enable it, set `domains` to `"*"`, and configure any domains that you want to exclude, for example because they have their own session duration already configured, or that are not compatible with this feature.
 
 ```
     ...

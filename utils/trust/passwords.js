@@ -261,37 +261,11 @@ class PasswordCheck {
         return Math.round(entropy * 1000) / 1000
     }
 
-    static #salt
     static #knownAccounts = []
-    static #ELEMENT_NAME = "citadel-password-check"
-
-    static getSalt() {
-        if (!PasswordCheck.#salt)
-            if (Context.isPageScript()) {
-                const el = document.querySelector(`meta[name="${PasswordCheck.#ELEMENT_NAME}"]`)
-                PasswordCheck.#salt = el?.content ? PBKDF2.fromBase64(el.content) : undefined
-            } else if (Context.isServiceWorker()) {
-                PasswordCheck.#salt = PBKDF2.fromBase64(PasswordVault.prehashSalt)
-            }
-
-        return PasswordCheck.#salt
-    }
 
     static {
         if (Context.isContentScript()) {
-            callServiceWorker("InitPasswordCheck").then(info => {
-                PasswordCheck.#knownAccounts = info.accounts
-                PasswordCheck.#salt = info.salt ? PBKDF2.fromBase64(info.salt) : undefined
-
-                document.head.appendChild(Object.assign(document.createElement("meta"), {
-                    name: PasswordCheck.#ELEMENT_NAME,
-                    content: info.salt
-                }))
-            })
+            callServiceWorker("InitPasswordCheck").then(info => PasswordCheck.#knownAccounts = info.accounts)
         }
     }
-}
-
-if (Context.isPageScript()) {
-    window.CitadelPasswordCheck = PasswordCheck
 }

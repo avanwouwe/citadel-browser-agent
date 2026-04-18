@@ -125,9 +125,11 @@ function getDomain(hostname) {
 
 const URL_REGEX = /^[a-z]{1,5}:\/\//i
 
-String.prototype.isURL = function () { return URL_REGEX.test(this) }
+String.prototype.isURL = function() { return URL_REGEX.test(this) }
 
-String.prototype.toURL = function () {
+String.prototype.isWebURL = function() { return this.startsWith('http://') || this.startsWith('https://') }
+
+String.prototype.toURL = function() {
     try {
         return new URL(this)
     } catch (error) {
@@ -135,9 +137,11 @@ String.prototype.toURL = function () {
     }
 }
 
-URL.prototype.toURL = function () {
-    return this
-}
+URL.prototype.isURL = function() { return true }
+
+URL.prototype.isWebURL = function() { return this.protocol === 'http:' || this.protocol === 'https:' }
+
+URL.prototype.toURL = function() { return this }
 
 function setInitiator(details) {
     details.initiator = details.documentUrl ?? details.initiator
@@ -577,7 +581,7 @@ function sendMessage(type, message, handler) {
     chrome.runtime.sendMessage(message, handler)
 }
 
-function sendMessagePromise(type, message) {
+async function sendMessagePromise(type, message) {
     return new Promise((resolve, reject) => {
         sendMessage(type, message, result => {
             if (chrome.runtime.lastError) {
