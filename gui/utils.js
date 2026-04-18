@@ -38,7 +38,7 @@ function navigateTo(tabId, url) {
     chrome.tabs.update(tabId, { url })
 }
 
-function openDashboard(tabName, foreground = true) {
+function openDashboard(tabName = undefined, foreground = true) {
     const dashboardRoot = chrome.runtime.getURL("/gui/dashboard.html");
     const dashboardUrl = dashboardRoot + (tabName ? `?tab=${tabName}` : '')
 
