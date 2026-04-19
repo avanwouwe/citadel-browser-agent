@@ -36,7 +36,7 @@ class ExtensionTrust {
 
     static async getStatus() {
         const storage = await ExtensionTrust.#storage.ready()
-        const analyses = structuredClone(await storage.value())
+        const analyses = structuredClone({ ...await storage.value() })
         delete analyses.isDirty
 
         await Promise.all(

@@ -143,6 +143,10 @@ URL.prototype.isWebURL = function() { return this.protocol === 'http:' || this.p
 
 URL.prototype.toURL = function() { return this }
 
+function safeHref(url) {
+    return url?.isWebURL() ? url : null
+}
+
 function setInitiator(details) {
     details.initiator = details.documentUrl ?? details.initiator
 }

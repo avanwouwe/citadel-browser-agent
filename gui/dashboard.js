@@ -106,13 +106,26 @@ const renderAccountDashboard = serialized(async function () {
 
         const tr = document.createElement("tr")
         tr.innerHTML =
-            `<td><span class="ellipsis" title="${acct.username}">${acct.username}</span></td>` +
-            `<td class="label"><span class="ellipsis" title="${acct.system}"><a href="https://${acct.system}" target="_blank" rel="noopener noreferrer">${acct.system}</a></span></td>` +
+            `<td><span class="ellipsis"></span></td>` +
+            `<td class="label"><span class="ellipsis"><a target="_blank" rel="noopener noreferrer"></a></span></td>` +
             `<td>${errors}</td>` +
             `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
             `<td class="days">${next?.days ?? ""}</td>` +
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
-            `<td><span class="delete-btn" data-username="${acct.username}" data-system="${acct.system}">🗑</span></td>`
+            `<td><span class="delete-btn">🗑</span></td>`
+
+        const userSpan = tr.cells[0].querySelector("span")
+        userSpan.title = acct.username
+        userSpan.textContent = acct.username
+
+        const systemAnchor = tr.cells[1].querySelector("a")
+        systemAnchor.href = `https://${acct.system}`
+        systemAnchor.textContent = acct.system
+        tr.cells[1].querySelector("span").title = acct.system
+
+        const deleteBtn = tr.querySelector(".delete-btn")
+        deleteBtn.dataset.username = acct.username
+        deleteBtn.dataset.system = acct.system
 
         tb.appendChild(tr)
     }
@@ -138,15 +151,33 @@ const renderExtensionDashboard = serialized(async function () {
             issues = `<span class="has-errors" data-tooltip="${analysis.issues.escapeHtmlEntities()}">&#128269;</span>`
         }
 
-        const logo = analysis.storeInfo?.extensionLogo
-            ? `<img src="${analysis.storeInfo.extensionLogo}" alt="${analysis.storeInfo.name} logo" class="extension-logo" onerror="this.style.display='none'">`
-            : `<span class="extension-logo-placeholder">🧩</span>`
-
         const name = analysis.storeInfo?.name ?? ''
-        const storePage = analysis.storeInfo?.storePage
-        const nameElement = storePage
-            ? `<a href="${storePage}" target="_blank" rel="noopener noreferrer">${name}</a>`
-            : `<span>${name}</span>`
+
+        let logoEl
+        if (analysis.storeInfo?.extensionLogo) {
+            logoEl = document.createElement("img")
+            logoEl.src = analysis.storeInfo.extensionLogo
+            logoEl.alt = `${name} logo`
+            logoEl.className = "extension-logo"
+            logoEl.addEventListener("error", () => { logoEl.style.display = 'none' })
+        } else {
+            logoEl = document.createElement("span")
+            logoEl.className = "extension-logo-placeholder"
+            logoEl.textContent = "🧩"
+        }
+
+        const storePage = safeHref(analysis.storeInfo?.storePage)
+        let nameEl
+        if (storePage) {
+            nameEl = document.createElement("a")
+            nameEl.href = storePage
+            nameEl.target = "_blank"
+            nameEl.rel = "noopener noreferrer"
+            nameEl.textContent = name
+        } else {
+            nameEl = document.createElement("span")
+            nameEl.textContent = name
+        }
 
         const isBlocked   = analysis.state === State.BLOCKING
 
@@ -167,12 +198,20 @@ const renderExtensionDashboard = serialized(async function () {
 
         const tr = document.createElement("tr")
         tr.innerHTML =
-            `<td>${logo}</td>` +
-            `<td class="label ellipsis" title="${name}">${nameElement}</td>` +
-            `<td><span class="ellipsis" title="${analysis.storeInfo.id}">${analysis.storeInfo.id}</span></td>` +
+            `<td></td>` +
+            `<td class="label ellipsis"></td>` +
+            `<td><span class="ellipsis"></span></td>` +
             `<td>${issues}</td>` +
             `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
             `<td class="action-cell">${actionCell}</td>`
+
+        tr.cells[0].appendChild(logoEl)
+        tr.cells[1].title = name
+        tr.cells[1].appendChild(nameEl)
+        const idSpan = tr.cells[2].querySelector("span")
+        idSpan.title = analysis.storeInfo.id
+        idSpan.textContent = analysis.storeInfo.id
+
         tb.appendChild(tr)
     }
 })
@@ -190,13 +229,31 @@ const renderEventsDashboard = serialized(async function () {
         const seconds = String(entry.timestamp.getSeconds()).padStart(2, '0')
         const shortTime = `${hours}:${minutes}:${seconds}`
 
-        const url = entry.url ? `<a href="${entry.url}" target="_blank" rel="noopener noreferrer">${entry.url}</a>` : '-'
         tr.innerHTML =
-            `<td title="${entry.timestamp.toISOString()}">${shortTime}</td>
-             <td>${entry.browseragent.level}</td>
-             <td>${entry.browseragent.result ?? entry.browseragent.event}</td>
-             <td class="label ellipsis" title="${entry.url}">${url}</td>
-             <td class="ellipsis" title="${entry.browseragent.description}">${entry.browseragent.description || '-'}</td>`
+            `<td></td>` +
+            `<td></td>` +
+            `<td></td>` +
+            `<td class="label ellipsis"></td>` +
+            `<td class="ellipsis"></td>`
+
+        tr.cells[0].title = entry.timestamp.toISOString()
+        tr.cells[0].textContent = shortTime
+        tr.cells[1].textContent = entry.browseragent.level
+        tr.cells[2].textContent = entry.browseragent.result ?? entry.browseragent.event
+        tr.cells[3].title = entry.url ?? ''
+        const href = safeHref(entry.url)
+        if (href) {
+            const a = document.createElement("a")
+            a.href = href
+            a.target = "_blank"
+            a.rel = "noopener noreferrer"
+            a.textContent = entry.url
+            tr.cells[3].appendChild(a)
+        } else {
+            tr.cells[3].textContent = entry.url ?? '-'
+        }
+        tr.cells[4].title = entry.browseragent.description ?? ''
+        tr.cells[4].textContent = entry.browseragent.description || '-'
 
         logTable.appendChild(tr)
     }
