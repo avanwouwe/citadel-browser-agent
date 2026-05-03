@@ -151,7 +151,7 @@ You can adapt the way that Citadel reacts to different levels of non-compliance,
             "block": 7
         },
         "exceptions": {
-            "duration": 60,
+            "duration": 60 * 24,
             "domains": ["*"]
         }
     }

@@ -177,7 +177,7 @@ class Config {
                 BLOCK: 6
             },
             exceptions: {
-                duration: 60,
+                duration: 60 * 24,
                 domains: ["*"]
             },
             passwordReuse: {
@@ -210,7 +210,7 @@ class Config {
         webfilter: {
             blacklist: {
                 exceptions: {
-                    duration: 60
+                    duration: 60 * 24
                 },
                 ip: {
                     "FireHOL (level 1)": {
@@ -287,12 +287,12 @@ class Config {
                 "default": "WARN",
                 "SKIP": [],
                 "NOTHING": [],
-                "NOTIFY": ["MaxUptime", "SSHKeys"],
+                "NOTIFY": ["MaxUptime", "SSHKeys", "UnusedFiles"],
                 "WARN": [],
                 "BLOCK": ["DriveEncryption", "RemovableStorage"]
             },
             exceptions: {
-                duration: 60,
+                duration: 60 * 24,
                 domains: ["*"]
             },
             controls: {

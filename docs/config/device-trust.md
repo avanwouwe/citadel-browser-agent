@@ -62,7 +62,7 @@ You can adapt the way that Citadel reacts to different types of issues, dependin
             "block": 7
         },
         "exceptions": {
-            "duration": 60,
+            "duration": 60 * 24,
             "domains": ["*"]
         }
     }

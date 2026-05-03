@@ -52,14 +52,14 @@ The IP blacklist is expected to contain one IPv4 address or one CIDR formatted s
 Both blacklists can contain lines starting with `#`, which are interpreted as comments.
 
 ## blacklist exceptions
-By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can bypass the blacklist for that host temporarily. The duration is stated in minutes, and setting it to `0` disables the possibility to ask for exceptions.
+By default, users can request an exception if they are blocked by a blacklist. They are then asked to provide a reason for the exception, after which they can bypass the blacklist for that host temporarily. The duration is set to one day by default (stated in minutes), and setting it to `0` disables the possibility to ask for exceptions.
 
 ```
     ...
     "webfilter": {
         "blacklist": {
             "exceptions": {
-                "duration": 0
+                "duration": 60 * 24
             },
         }
     }        
