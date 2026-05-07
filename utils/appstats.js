@@ -79,8 +79,9 @@ class AppStats {
 
     static getIssues(appName, username) {
         const app = AppStats.forAppName(appName)
-        const account = AppStats.getAccount(app, username)
-        return account?.issues ?? {}
+        const account = app?.accounts?.[username]
+
+        return account ? account.issues ?? {} : undefined
     }
 
     static setIssues(appName, username, issues = {}) {
