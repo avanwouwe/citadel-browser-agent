@@ -201,7 +201,7 @@ String.prototype.isEmpty = function () { return this !== undefined && this !== n
 String.prototype.isNotEmpty = function () { return ! this.isEmpty() };
 
 String.prototype.truncate = function (maxLength, position = 'middle', marker = '[truncated]') {
-    if (this.length <= maxLength) return this
+    if (this.length <= maxLength) return this.toString()
 
     if (maxLength <= marker.length) return this.slice(0, maxLength)
 
