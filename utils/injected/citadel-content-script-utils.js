@@ -77,6 +77,9 @@ function sendMessage(type, message, handler) {
     if (message?.type != null) type = message.type
     if (type != null && message != null) message.type = type
 
+    // ensure that sender.url will have URL currently in bar, and not just the page that was originally loaded
+    message.pageUrl = window.location.href
+
     chrome.runtime.sendMessage(message, handler)
 }
 

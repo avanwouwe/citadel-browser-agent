@@ -370,9 +370,15 @@ function onMessage(type, listener, once= false) {
 
         if (type && message.type !== type) return
 
+        // let the sender specify the sender.url, to allow senders to handle pushState-manipulation of URL bar
+        const context = {...sender}
+        if (message.pageUrl?.toURL()?.origin === sender.url?.toURL()?.origin) {
+            context.url = message.pageUrl ?? sender.url
+        }
+
         if (once) chrome.runtime.onMessage.removeListener(safeListener)
 
-        return listener(message, sender, sendResponse)
+        return listener(message, context, sendResponse)
     }
 
     chrome.runtime.onMessage.addListener(safeListener)
@@ -538,7 +544,7 @@ async function hasPathChanged(tabId, url, seconds) {
 
                 resolve(prevUrl.origin + prevUrl.pathname !== currUrl.origin + currUrl.pathname)
             } catch (error) {
-                resolve(true)
+                resolve(false)
             }
         }, seconds * ONE_SECOND)
     })
@@ -560,6 +566,9 @@ function sendMessage(type, message, handler) {
     if (typeof message !== 'object') assert("message must be an object")
     if (message?.type != null) type = message.type
     if (type != null && message != null) message.type = type
+
+    // ensure that sender.url will have URL currently in bar, and not just the page that was originally loaded
+    message.pageUrl = window.location.href
 
     chrome.runtime.sendMessage(message, handler)
 }
