@@ -833,7 +833,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 			// if several logins were performed in rapid succession, only check the last one
 			issueRegistrationDebouncer.debounce(tabId, undefined, _ => {
 				if (MFACheck.findAuthPattern(siteUrl.pathname) && ! hasChanged) {
-					debug("page did not change, login assumed failed")
+					debug("tab was closed or location did not change, login assumed failed")
 					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
 					AccountTrust.deleteAccount(siteUrl.hostname, report.username, false)
 					return
