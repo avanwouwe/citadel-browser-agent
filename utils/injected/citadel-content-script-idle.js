@@ -275,14 +275,17 @@ function analyzeForm(formElements, eventElement) {
             }
         }
 
-        if ((elem.type === 'text' || elem.type === 'email') && (
-            formHasPassword && username === undefined ||
-            MFACheck.findAuthPattern(window.location.pathname) &&  (
-                isUsernameField(elem.name) ||
-                isUsernameField(elem.id) ||
-                findEmailPattern(elem.value)
+        if (username === undefined &&
+            (elem.type === 'text' || elem.type === 'email') &&
+            (
+                formHasPassword ||
+                elem.autocomplete === 'email' || elem.autocomplete === 'username' ||
+                MFACheck.findAuthPattern(window.location.pathname) && (
+                    isUsernameField(elem.name) ||
+                    isUsernameField(elem.id) ||
+                    findEmailPattern(elem.value)
+                )
             )
-        )
         ) {
             debug("found username (in form)", elem.value)
             username = elem.value

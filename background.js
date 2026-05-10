@@ -832,7 +832,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 		hasPathChanged(tabId, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
 			// if several logins were performed in rapid succession, only check the last one
 			issueRegistrationDebouncer.debounce(tabId, undefined, _ => {
-				if (MFACheck.findAuthPattern(siteUrl.path) && ! hasChanged) {
+				if (MFACheck.findAuthPattern(siteUrl.pathname) && ! hasChanged) {
 					debug("page did not change, login assumed failed")
 					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
 					AccountTrust.deleteAccount(siteUrl.hostname, report.username, false)
@@ -931,6 +931,7 @@ onMessage((request, sender) => {
 		registerAccountUsage(siteUrl, request.report)
 
 		injectFuncIntoTab(tabId, () => location.reload())
+		return
 		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 
