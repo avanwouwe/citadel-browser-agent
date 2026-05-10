@@ -210,6 +210,9 @@ function repeatEvent(event, target) {
     }
 }
 
+const setPointerBusy = () => document.body.classList.add('citadel-busy')
+const setPointerNormal = () => document.body.classList.remove('citadel-busy')
+
 checkLogin = async function(event, button) {
     if (event.syntheticCitadelEvent) return
 
@@ -220,6 +223,8 @@ checkLogin = async function(event, button) {
         // if this is the first time we're connecting to the site, first check if the password is reused (could be phishing)
         if (PasswordCheck.isFirstConnection(loginForm.username)) {
             try {
+                setPointerBusy()
+
                 event.preventDefault()
                 event.stopImmediatePropagation()
 
@@ -234,6 +239,9 @@ checkLogin = async function(event, button) {
                 console.error('exception when analyzing login', error.stack)
             }
 
+            document.body.style.cursor = 'default'
+
+            setPointerNormal()
             repeatEvent(event, button)
         }
 

@@ -100,6 +100,9 @@
     {
       "matches": ["<all_urls>"],
       "all_frames": true,
+      "css": [
+        "/utils/injected/citadel-content-script.css"
+      ],
       "js": [
         "/utils/context.js",
         "/utils/session-state.js",
@@ -110,7 +113,6 @@
       ],
       "run_at": "document_end"
     }
-
   ],
   "action": {
     "default_title": "Click to see security report",
