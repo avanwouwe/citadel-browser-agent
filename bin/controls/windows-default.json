@@ -202,6 +202,19 @@
         }
       }
     },
+    "WirelessNetworking": {
+      "query": "SELECT '\"' || network_name || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Enterprise');",
+      "text": {
+        "en": {
+          "label": "No insecure wireless networks",
+          "explain": "https://www.citadelagent.org/control/WirelessNetworking"
+        },
+        "fr": {
+          "label": "Aucun réseau sans fil non sécurisé",
+          "explain": "https://www.citadelagent.org/control/WirelessNetworking"
+        }
+      }
+    },
     "RemovableStorage": {
       "query": "SELECT device_id AS error FROM logical_drives WHERE description LIKE '%removable%';",
       "text": {
