@@ -81,7 +81,7 @@ class Notification {
         }
 
         const exceptions = config[alert.type]?.exceptions
-        const onAcknowledge = { type: 'acknowledge-alert', alert }
+        const onAcknowledge = alert.level !== State.BLOCKING ? { type: 'acknowledge-alert', alert } : undefined
         const onException = (alert.level === State.BLOCKING && exceptions?.duration > 0 && matchDomain(hostname, exceptions?.domains)) ? { type: 'allow-alert', alert } : undefined
 
         await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
