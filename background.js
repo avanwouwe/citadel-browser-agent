@@ -931,7 +931,6 @@ onMessage((request, sender) => {
 		registerAccountUsage(siteUrl, request.report)
 
 		injectFuncIntoTab(tabId, () => location.reload())
-		return
 		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
 	}
 
