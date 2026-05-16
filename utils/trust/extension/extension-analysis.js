@@ -323,10 +323,8 @@ class ExtensionAnalysis {
         const rejection = evaluation?.rejection
 
         return {
-            isBroad: evaluation?.permissionCheck?.isBroad,
+            reasons: rejection?.reasons,
             blockingPermissions: evaluation?.permissionCheck?.blockingPermissions,
-            protectedDomains: evaluation?.permissionCheck?.protectedDomains,
-            reasons: rejection?.reasons
         }
     }
 
