@@ -49,7 +49,6 @@ class Modal {
 
         acknowledge.addEventListener('click', function () {
             sendMessage(options.onAcknowledge)
-            host.remove()
         })
 
         if (!options.exception) {

@@ -83,6 +83,7 @@ chrome.runtime.onUpdateAvailable.addListener(async () => {
 	try {
 		logInstall("update")
 		reportDaily()
+		await Modal.removeFromDomain("*")
 	} catch (error) {
 		debug("error while preparing update of extension", error)
 	}
