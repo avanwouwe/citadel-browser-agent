@@ -91,6 +91,23 @@
                 </div>
 
                 <div class="method">
+                    <h4>Step 1b: Show hidden files</h4>
+                    <p>
+                        Some sensitive files may be <strong>hidden</strong> — their names start with a dot
+                        (e.g. <code>.passwords</code>, <code>.backup-codes</code>). Windows hides these
+                        by default, but they are still fully accessible to malware and attackers.
+                        Being hidden provides no security. To reveal them:
+                    </p>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong> and navigate to <strong>Downloads</strong></li>
+                        <li>On <strong>Windows 11</strong>: click <strong>View</strong> → <strong>Show</strong> → <strong>Hidden items</strong></li>
+                        <li>On <strong>Windows 10</strong>: click the <strong>View</strong> tab and check <strong>Hidden items</strong></li>
+                        <li>Hidden files will appear, slightly greyed out</li>
+                        <li>Check whether any of these hidden files contain sensitive credentials</li>
+                    </ol>
+                </div>
+
+                <div class="method">
                     <h4>Step 2: Store codes securely</h4>
                     <ol>
                         <li><strong>For password manager emergency kits (1Password, Bitwarden, etc.):</strong>
@@ -112,10 +129,10 @@
                 <div class="method">
                     <h4>Step 3: Securely delete the files</h4>
                     <ol>
-                        <li>Select the sensitive file(s) in Downloads</li>
+                        <li>Select the sensitive file(s) in Downloads — including any greyed-out hidden files</li>
                         <li>Press <kbd>Shift</kbd> + <kbd>Delete</kbd> to permanently delete (bypassing Recycle Bin)</li>
                         <li>Click <strong>Yes</strong> to confirm permanent deletion</li>
-                        <li>Empty your <strong>Recycle Bin</strong> if you deleted without Shift key</li>
+                        <li>Empty your <strong>Recycle Bin</strong> if you deleted without the Shift key</li>
                     </ol>
                 </div>
 
@@ -151,6 +168,23 @@
                 </div>
 
                 <div class="method">
+                    <h4>Step 1b: Show hidden files</h4>
+                    <p>
+                        Some sensitive files may be <strong>hidden</strong> — their names start with a dot
+                        (e.g. <code>.passwords</code>, <code>.backup-codes</code>). macOS hides these from
+                        Finder by default, but they are still fully accessible to malware and attackers.
+                        Being hidden provides no security. To reveal them:
+                    </p>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and navigate to your <strong>Downloads</strong> folder</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd> (period)</li>
+                        <li>Hidden files will appear, greyed out to indicate they are normally invisible</li>
+                        <li>Check whether any of these hidden files contain sensitive credentials</li>
+                        <li>Press the same shortcut again to hide them when you are done</li>
+                    </ol>
+                </div>
+
+                <div class="method">
                     <h4>Step 2: Store codes securely</h4>
                     <ol>
                         <li><strong>For password manager emergency kits (1Password, Bitwarden, etc.):</strong>
@@ -172,10 +206,10 @@
                 <div class="method">
                     <h4>Step 3: Securely delete the files</h4>
                     <ol>
-                        <li>Select the sensitive file(s) in Downloads</li>
+                        <li>Select the sensitive file(s) in Downloads — including any greyed-out hidden files</li>
                         <li>Press <kbd>Command</kbd> + <kbd>Delete</kbd> to move to Trash</li>
                         <li>Open <strong>Finder</strong> and select <strong>Empty Trash</strong> from the Finder menu</li>
-                        <li>OR press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>Delete</kbd> to empty trash immediately</li>
+                        <li>OR press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>Delete</kbd> to empty Trash immediately</li>
                         <li>Click <strong>Empty Trash</strong> to confirm</li>
                     </ol>
                 </div>
@@ -208,9 +242,15 @@
                     <h4>To verify your Downloads folder is clean:</h4>
                     <ol>
                         <li>Open <strong>File Explorer</strong> and go to <strong>Downloads</strong></li>
+                        <li>If some of the identified files are hidden, show hidden files first:
+                            <ul>
+                                <li><strong>Windows 11:</strong> View → Show → Hidden items</li>
+                                <li><strong>Windows 10:</strong> View tab → check Hidden items</li>
+                            </ul>
+                        </li>
                         <li>Search for files containing "password", "recovery", "backup", or "emergency"</li>
                         <li>Use the search box in the top-right: <kbd>*password*</kbd> or <kbd>*recovery*</kbd></li>
-                        <li>No sensitive files should appear in the results</li>
+                        <li>No sensitive files — visible or hidden — should appear in the results</li>
                     </ol>
                 </div>
             </div>
@@ -221,11 +261,14 @@
                     <h4>To verify your Downloads folder is clean:</h4>
                     <ol>
                         <li>Open <strong>Finder</strong> and navigate to <strong>Downloads</strong></li>
-                        <li>Press <kbd>Command</kbd> + <kbd>F</kbd> to search</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd> to also show hidden dot-files</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>F</kbd> to open search</li>
                         <li>Search for files containing "password", "recovery", "backup", or "emergency"</li>
                         <li>Set the search scope to "Downloads"</li>
-                        <li>No sensitive files should appear in the results</li>
+                        <li>No sensitive files — visible or hidden — should appear in the results</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd> again to hide dot-files when done</li>
                     </ol>
+                    <p class="note"><strong>Tip:</strong> Right-click any greyed-out hidden file and select <strong>Get Info</strong> to understand what it is before deciding whether to delete it.</p>
                 </div>
             </div>
         </div>

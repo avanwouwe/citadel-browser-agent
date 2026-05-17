@@ -87,6 +87,29 @@
                 </div>
 
                 <div class="method">
+                    <h4>Step 1b: Show hidden files</h4>
+                    <p>
+                        Some export files may be <strong>hidden</strong> — their names start with a dot
+                        (e.g. <code>.export.csv</code>, <code>.export-2023.json</code>). Windows hides
+                        these by default, but they are still fully accessible to malware and attackers.
+                        To reveal them:
+                    </p>
+                    <ol>
+                        <li>Open <strong>File Explorer</strong> and navigate to <strong>Downloads</strong></li>
+                        <li>On <strong>Windows 11</strong>: click <strong>View</strong> → <strong>Show</strong> → <strong>Hidden items</strong></li>
+                        <li>On <strong>Windows 10</strong>: click the <strong>View</strong> tab and check <strong>Hidden items</strong></li>
+                        <li>Hidden files will appear, slightly greyed out</li>
+                        <li>Repeat the search from Step 1 to include hidden files in the results</li>
+                    </ol>
+                    <p>
+                        You can safely delete most hidden export files you find in Downloads — they are
+                        typically leftovers from tools or scripts that generated exports automatically.
+                        If you are unsure what a file contains, right-click it and select
+                        <strong>Properties</strong> for details.
+                    </p>
+                </div>
+
+                <div class="method">
                     <h4>Step 2: Review and delete the files</h4>
                     <ol>
                         <li>For each old export file:
@@ -96,7 +119,7 @@
                                 <li>If you haven't used it in 30+ days, you probably don't need it</li>
                             </ul>
                         </li>
-                        <li>Select the files you want to delete</li>
+                        <li>Select the files you want to delete — including any greyed-out hidden files</li>
                         <li>Press <kbd>Shift</kbd> + <kbd>Delete</kbd> for permanent deletion</li>
                         <li>Click <strong>Yes</strong> to confirm</li>
                     </ol>
@@ -137,6 +160,29 @@
                 </div>
 
                 <div class="method">
+                    <h4>Step 1b: Show hidden files</h4>
+                    <p>
+                        Some export files may be <strong>hidden</strong> — their names start with a dot
+                        (e.g. <code>.export.csv</code>, <code>.export-2023.json</code>). macOS hides
+                        these from Finder by default, but they are still fully accessible to malware
+                        and attackers. To reveal them:
+                    </p>
+                    <ol>
+                        <li>Open <strong>Finder</strong> and navigate to your <strong>Downloads</strong> folder</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd> (period)</li>
+                        <li>Hidden files will appear, greyed out to indicate they are normally invisible</li>
+                        <li>Repeat the search from Step 1 — hidden files will now be included in the results</li>
+                        <li>Press the same shortcut again to hide them when you are done</li>
+                    </ol>
+                    <p>
+                        You can safely delete most hidden export files you find in Downloads — they are
+                        typically leftovers from tools or scripts that generated exports automatically.
+                        If you are unsure what a file contains, right-click it and select
+                        <strong>Get Info</strong> for details.
+                    </p>
+                </div>
+
+                <div class="method">
                     <h4>Step 2: Review and delete the files</h4>
                     <ol>
                         <li>For each old export file:
@@ -146,7 +192,7 @@
                                 <li>If you haven't used it in 30+ days, you probably don't need it</li>
                             </ul>
                         </li>
-                        <li>Select the files you want to delete</li>
+                        <li>Select the files you want to delete — including any greyed-out hidden files</li>
                         <li>Press <kbd>Command</kbd> + <kbd>Delete</kbd> to move to Trash</li>
                         <li>Empty the Trash: <strong>Finder</strong> → <strong>Empty Trash</strong></li>
                     </ol>
@@ -180,9 +226,15 @@
                     <h4>To verify old exports are removed:</h4>
                     <ol>
                         <li>Open <strong>File Explorer</strong> and go to <strong>Downloads</strong></li>
+                        <li>If some of the identified files are hidden, show hidden files first:
+                            <ul>
+                                <li><strong>Windows 11:</strong> View → Show → Hidden items</li>
+                                <li><strong>Windows 10:</strong> View tab → check Hidden items</li>
+                            </ul>
+                        </li>
                         <li>Search for: <kbd>*export*.csv OR *export*.json OR *export*.txt</kbd></li>
                         <li>Review the results and check the <strong>Date modified</strong> column</li>
-                        <li>All remaining export files should be recent (less than 30 days old)</li>
+                        <li>All remaining export files — visible or hidden — should be recent (less than 30 days old)</li>
                     </ol>
                 </div>
             </div>
@@ -193,11 +245,14 @@
                     <h4>To verify old exports are removed:</h4>
                     <ol>
                         <li>Open <strong>Finder</strong> and navigate to <strong>Downloads</strong></li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd> to also show hidden dot-files</li>
                         <li>Press <kbd>Command</kbd> + <kbd>F</kbd> to search</li>
                         <li>Search for files with "export" in the name that are CSV, JSON, or TXT files</li>
                         <li>Review the results and check <strong>Date Modified</strong></li>
-                        <li>All remaining export files should be recent (accessed within 30 days)</li>
+                        <li>All remaining export files — visible or hidden — should be recent (accessed within 30 days)</li>
+                        <li>Press <kbd>Command</kbd> + <kbd>Shift</kbd> + <kbd>.</kbd> again to hide dot-files when done</li>
                     </ol>
+                    <p class="note"><strong>Tip:</strong> Right-click any greyed-out hidden file and select <strong>Get Info</strong> to understand what it is before deciding whether to delete it.</p>
                 </div>
             </div>
         </div>
