@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadDisplayName</key>
+    <string>Citadel Agent - MDM Profile</string>
+    <key>PayloadDescription</key>
+    <string>Grants Citadel Browser Agent Full Disk Access and force-installs the Citadel browser extension in Chrome, Edge, Brave and Firefox.</string>
+    <key>PayloadIdentifier</key>
+    <string>org.citadelagent</string>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>DD834F1B-EEA0-479B-95CA-20379B3B4A56</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+    <key>PayloadOrganization</key>
+    <string>citadelagent.org</string>
+    <key>PayloadScope</key>
+    <string>System</string>
+    <key>PayloadRemovalDisallowed</key>
+    <true/>
+    <key>PayloadContent</key>
+    <array>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>com.apple.TCC.configuration-profile-policy</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Full Disk Access</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.pppc</string>
+            <key>PayloadUUID</key>
+            <string>9B37DD69-0942-4B2E-88CD-ADA3C6102BA4</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>Services</key>
+            <dict>
+                <key>SystemPolicyAllFiles</key>
+                <array>
+                    <dict>
+                        <key>Identifier</key>
+                        <string>/Library/Scripts/Citadel/citadel-browser-agent</string>
+                        <key>IdentifierType</key>
+                        <string>path</string>
+                        <key>CodeRequirement</key>
+                        <string>identifier "org.citadelagent" and certificate leaf = H"160ab5c76f5faff538939a887c5acb732e70c4c7"</string>
+                        <key>Authorization</key>
+                        <string>Allow</string>
+                        <key>StaticCode</key>
+                        <false/>
+                    </dict>
+                </array>
+            </dict>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>com.google.Chrome</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Chrome Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.chrome</string>
+            <key>PayloadUUID</key>
+            <string>543327C6-1292-4536-A3F0-CC4E73D1623B</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>com.microsoft.Edge</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Edge Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.edge</string>
+            <key>PayloadUUID</key>
+            <string>727A9867-D025-4FBE-A223-A68049D2AC5B</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>com.brave.Browser</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Brave Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.brave</string>
+            <key>PayloadUUID</key>
+            <string>9EDFF867-0913-409D-9DCC-778BFD7267BA</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>org.mozilla.firefox</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Firefox Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.firefox</string>
+            <key>PayloadUUID</key>
+            <string>7A885DEE-32EA-4A3C-9E48-4950AC3CEA67</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>EnterprisePoliciesEnabled</key>
+            <true/>
+            <key>ExtensionSettings</key>
+            <dict>
+                <key>{090510dc-b0ac-44dd-8e44-fee9b778180d}</key>
+                <dict>
+                    <key>installation_mode</key>
+                    <string>force_installed</string>
+                    <key>install_url</key>
+                    <string>https://addons.mozilla.org/firefox/downloads/latest/citadel-browser-agent/latest.xpi</string>
+                </dict>
+            </dict>
+        </dict>
+
+    </array>
+</dict>
+</plist>

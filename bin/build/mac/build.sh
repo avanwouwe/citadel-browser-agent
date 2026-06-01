@@ -51,6 +51,8 @@ build_for_arch() {
         --onedir \
         ../../citadel-browser-agent
 
+    ./signing/sign-binary.sh dist/citadel-browser-agent
+
     deactivate
 
     # Copy the build to the architecture-specific directory

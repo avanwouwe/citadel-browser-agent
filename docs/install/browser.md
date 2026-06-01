@@ -26,54 +26,11 @@ reg add "HKEY_LOCAL_MACHINE\Software\Policies\BraveSoftware\Brave\ExtensionInsta
 
 
 ## macOS
-On macOS the plugin can be force-installed on all endpoints, by configuration profiles using your MDM. This works for Chrome, Firefox, Edge and Brave. Unfortunately Opera does not support automated installation and the plugin has to be manually installed, using the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
+On macOS the plugin is force-installed via MDM-deployed configuration profiles. This works for Chrome, Firefox, Edge and Brave. Opera does not support automated installation, so on Opera the plugin has to be installed manually from the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
+
+The browser-policy payloads for all four supported browsers are bundled into the same [citadel-agent.mobileconfig](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/mac/citadel-agent.mobileconfig), see the [macOS installation page](macos.md#mdm-configuration-profile) for upload instructions per MDM vendor.
 
 > [!NOTE]  
-> If you have already force-installed another plugin via the Google Workspace admin, using profiles will override the Workspace list of force-installed extensions. If you add Citadel in using the [Google Workspace admin](https://admin.google.com/ac/chrome/apps/) this has the advantage that you can force the use of the extension in private sessions.
-
-You can use this profile for the following browsers:
-* Chrome : `com.google.Chrome`
-* Edge : `com.microsoft.Edge` 
-* Brave : `com.brave.Browser`
-
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-    <key>ExtensionInstallForcelist</key>
-    <array>
-        <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
-    </array>
-    
-    <key>NativeMessagingAllowlist</key>
-    <array>
-        <string>citadel.browser.agent</string>
-    </array>
-</dict>
-</plist>
-```
-
-And this one for Firefox : `org.mozilla.firefox`.
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-  <dict>
-    <key>ExtensionSettings</key>
-    <dict>
-      <key>{090510dc-b0ac-44dd-8e44-fee9b778180d}</key>
-      <dict>
-        <key>installation_mode</key>
-        <string>force_installed</string>
-        <key>install_url</key>
-        <string>https://addons.mozilla.org/firefox/downloads/latest/citadel-browser-agent/latest.xpi</string>
-      </dict>
-    </dict>
-    <key>EnterprisePoliciesEnabled</key>
-    <true/>
-  </dict>
-</plist>
-```
+> If you have already force-installed another plugin via the Google Workspace admin, using profiles will override the Workspace list of force-installed extensions. If you add Citadel via the [Google Workspace admin](https://admin.google.com/ac/chrome/apps/) instead, you can also force the extension on in private sessions. In that case, delete the `com.google.Chrome` payload from the mobileconfig before uploading.
 
 
