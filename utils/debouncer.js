@@ -46,7 +46,7 @@ class Debouncer {
     }
 
     clearAll() {
-        for (const [key, {timeout}] of this.#pending) {
+        for (const [_, {timeout}] of this.#pending) {
             clearTimeout(timeout)
         }
         this.#pending.clear()
