@@ -15,6 +15,7 @@ let exceptionList
 let ignorelist
 let tabState
 let issueRegistrationDebouncer
+let blockDebouncer = new Debouncer(5 * ONE_SECOND, null, true)
 let events = new RingBuffer(200)
 let t
 
@@ -186,6 +187,15 @@ function evaluateRequest(details) {
 	return result
 }
 
+function handleBlock(details, evaluation, type, timestamp) {
+	blockDebouncer.debounce(details.tabId, null, () => {
+		blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
+
+		logger.log(timestamp, type, evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId
+		)
+	})
+}
+
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 	if (details.parentFrameId >= 0 ||
 		details.documentLifecycle && details.documentLifecycle !== 'active'
@@ -201,10 +211,12 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 		case "ignored":
 			return
 		case "navigation blacklisted":
-			blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
+			handleBlock(details, evaluation, "navigate", timestamp)
+			return
+		default:
+			logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId)
 	}
 
-	logger.log(timestamp, "navigate", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, undefined, details.tabId)
 })
 
 
@@ -217,29 +229,26 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
 		case "ignored":
 			return
 		case "request blacklisted":
-			blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
+			handleBlock(details, evaluation, "request", timestamp)
+			return
+		default:
+			logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
 	}
 
-	logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
-},  { urls: ["<all_urls>"] })
-
+}, { urls: ["<all_urls>"] })
 
 // check for blacklist when finally connected, since at this time we have the IP address
 chrome.webRequest.onResponseStarted.addListener((details) => {
-	if (details.ip === undefined) return			// for example for cached entries
+	if (details.ip === undefined) return        // e.g. cached entries
 
-	// the event was already logged before, only log a second event if there was a blacklist issue
 	setInitiator(details)
 	const timestamp = timestampToISO(details.timeStamp)
 	const evaluation = evaluateRequest(details)
 
 	if (evaluation.result === "request blacklisted") {
-		blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
-
-		logger.log(timestamp, "request", evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId)
+		handleBlock(details, evaluation, "request", timestamp)
 	}
-
-},  { urls: ["<all_urls>"] })
+}, { urls: ["<all_urls>"] })
 
 
 function getDownload(downloadId) {
@@ -963,6 +972,11 @@ chrome.action.onClicked.addListener(() => {
 chrome.notifications.onClicked.addListener(function(notificationId) {
 	if (notificationId === DeviceTrust.TYPE || notificationId === AccountTrust.TYPE) {
 		openDashboard(notificationId)
+
+		if (Notification.showing?.type === notificationId && Notification.showing?.level === State.BLOCKING) {
+			return
+		}
+
 		Notification.acknowledge(notificationId)
 	}
 })
