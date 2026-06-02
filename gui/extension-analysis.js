@@ -72,6 +72,8 @@ function showInstall(allowed) {
 }
 
 function renderStoreInfo() {
+    assert(storeInfo,'web store parsing error')
+
     renderLogo(storeInfo.extensionLogo)
     document.getElementById('extension-name').textContent = storeInfo.name
     document.getElementById('extension-id').textContent = storeInfo.id
@@ -93,6 +95,9 @@ const riskClassMap = {
 }
 
 function renderManifestInfo() {
+    assert(manifest,'manifest analysis error')
+    assert(evaluation,'evaluation error')
+
     renderManifestVersion('risk-value-manifest', manifest.manifest_version)
 
     const risks = evaluation.permissionCheck.effectivePermissions.map(permission => Extension.Permissions.riskOf(permission))

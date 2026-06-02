@@ -38,6 +38,7 @@ class ExtensionStore {
         dom.url = storePage
 
         const storeInfo = await ExtensionStore.of(storePage).parsePage(dom)
+        if (!storeInfo) return null
 
         const uniqueCategories = new Map()
         storeInfo.categories.forEach(category => {
@@ -61,7 +62,7 @@ class ExtensionStore {
     }
 
     /**
-     * Praes an extension package and returns structured contents
+     * Parses an extension package and returns structured contents
      * @param {ArrayBuffer} buffer - buffer containing the extension CRX file
      * @returns {Promise<Object>} - Object containing CRX contents
      * */
@@ -357,107 +358,113 @@ class ExtensionStore {
         throw new Error("Unknown file: Not a CRX or ZIP archive")
     }
 
+    /**
+     * Validates the output of any parsePage() call against the minimum field
+     * contract shared by all stores. Logs a warning listing the absent fields
+     *
+     * Required strings  (truthy)  : name · description · downloadUrl
+     * Required numbers  (finite)  : rating · numRatings · numInstalls
+     *
+     * Fields that are optional in every store (extensionLogo, categories,
+     * isVerified*) are intentionally left out of this check.
+     */
+    static #validateParsing(storeInfo, extensionId) {
+        const missing = [
+            ...['name', 'description', 'downloadUrl']
+                .filter(f => !storeInfo[f]),
+            ...['rating', 'numRatings', 'numInstalls']
+                .filter(f => typeof storeInfo[f] !== 'number' || !Number.isFinite(storeInfo[f])),
+        ]
+
+        if (missing.length > 0) {
+            console.warn('Store parse failed', { extensionId, missing })
+            return null
+        }
+        return storeInfo
+    }
+
     static Chrome = class {
         static pattern = new RegExp('^https://chromewebstore.google.com/detail/[^/]+/([^/?#]+)')
 
         static pageOf = async (id) => `https://chromewebstore.google.com/detail/${id}/${id}`
 
         static async parsePage(dom) {
-            function parseRatingsNumber(str) {
+
+            function parseDecimalOrKCount(str) {
                 str = str?.trim()
                 const match = str?.match(/^(\d+(?:[.,]\d+)?)/)
-                if (!match) {
-                    return null
-                }
-
+                if (!match) return null
                 let numberStr = match[1]
-
                 if (numberStr.indexOf('.') !== -1 || numberStr.indexOf(',') !== -1) {
                     numberStr = numberStr.replace(',', '.')
                     return Math.round(parseFloat(numberStr) * 1000)
-                } else {
-                    return parseInt(numberStr, 10)
                 }
+                return parseInt(numberStr, 10)
             }
 
-            function parseInstalledNumber(str) {
+            function parseSeparatedCount(str) {
                 str = str?.trim()
-                let match = str?.match(/^([\d\s,.']+)/)
+                const match = str?.match(/^([\d\s,.']+)/)
                 if (!match) return null
-
-                let numberStr = match[1].replace(/[\s,.']/g, '')
-
-                return parseInt(numberStr)
+                return parseInt(match[1].replace(/[\s,.']/g, ''), 10)
             }
 
             const extensionId = await ExtensionStore.extensionIdOf(dom.url)
-            if (!extensionId || dom?.url?.toURL()?.pathname?.endsWith("/error")) return
+            if (!extensionId || dom?.url?.toURL()?.pathname?.endsWith('/error')) return null
 
-            // extensionName
-            const extensionName = dom.querySelector('h1')
+            const nameEl    = dom.querySelector('h1')
+            const titleRow  = nameEl?.parentElement
+            const badgesRow = titleRow?.nextElementSibling
+            const metaRow   = badgesRow?.nextElementSibling
 
-            const descriptionLine1 = extensionName?.parentNode?.parentNode
-            const descriptionLine2 = descriptionLine1?.nextElementSibling
-            const descriptionLine3 = descriptionLine2?.nextElementSibling
-
-            // description
             const overviewSection = Array.from(dom.querySelectorAll('section'))
                 .find(s => s.querySelector('h2')?.textContent?.trim() === 'Overview')
 
-            const description = overviewSection.textContent
+            const ratingWidget = badgesRow?.querySelector('[style*="--star-icon-size"]')
+            const ratingSpan   = [...(ratingWidget?.querySelectorAll('span') ?? [])]
+                .find(s => /^\d+[.,]?\d*$/.test(s.textContent.trim()))
+            const ratingRaw    = parseDecimalOrKCount(ratingSpan?.textContent)
+
+            const reviewsCountAnchor = Array.from(
+                dom.querySelectorAll(`a[href*="/${extensionId}/reviews"]`)
+            ).find(a => a.textContent.trim())
+
+            const numRatings = ratingWidget
+                ? parseDecimalOrKCount(reviewsCountAnchor?.textContent)
+                : badgesRow
+                    ? 0
+                    : undefined
+
+            const numInstalls = Array.from(metaRow?.childNodes ?? [])
+                .filter(node => node.nodeType === Node.TEXT_NODE)
+                .map(node => parseSeparatedCount(node.textContent))
+                .find(count => count != null) ?? null
+
+            const description = overviewSection?.textContent
                 ?? dom.querySelector('meta[property="og:description"]')?.getAttribute('content')
                 ?? dom.querySelector('meta[name="description"]')?.getAttribute('content')
+                ?? null
 
-            // extensionLogo
             const extensionLogo = dom.querySelector('meta[property="og:image"]')?.getAttribute('content')
 
-            // rating
-            const ratingNode = Array.from(dom.querySelectorAll('[style]'))
-                .find(el => el.getAttribute('style')?.includes('--star-icon-size'))
-            const rating = parseRatingsNumber(ratingNode?.childNodes[0]?.childNodes[0]?.textContent) / 1000
+            const rating = numRatings === 0 ? 0 : (ratingRaw != null ? ratingRaw / 1000 : null)
 
-            // numInstalls
-            const numInstalls = descriptionLine3 ?
-                Array.from(descriptionLine3?.childNodes)
-                    .filter(node => node.nodeType === Node.TEXT_NODE)
-                    .map(textNode => parseInstalledNumber(textNode.textContent))
-                    .find(count => count !== null) || null
-                : null
+            const isVerifiedPublisher = !!badgesRow && containsSvg(badgesRow, 'M23 11.99L20.56 9.2l.34-3.69-3.61-.82L15.4 1.5 12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 11.99l2.44 2.79-.34 3.7 3.61.82 1.89 3.2 3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69 2.44-2.8zm-3.95 1.48l-.56.65.08.85.18 1.95-1.9.43-.84.19-.44.74-.99 1.68-1.78-.77-.8-.34-.79.34-1.78.77-.99-1.67-.44-.74-.84-.19-1.9-.43.18-1.96.08-.85-.56-.65L3.67 12l1.29-1.48.56-.65-.09-.86-.18-1.94 1.9-.43.84-.19.44-.74.99-1.68 1.78.77.8.34.79-.34 1.78-.77.99 1.68.44.74.84.19 1.9.43-.18 1.95-.08.85.56.65 1.29 1.47-1.28 1.48z')
+            const isVerifiedExtension = !!badgesRow && containsSvg(badgesRow, 'M20 10c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 2.03.76 3.87 2 5.28V23l6-2 6 2v-7.72c1.24-1.41 2-3.25 2-5.28zm-8-6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 15-4 1.02v-3.1c1.18.68 2.54 1.08 4 1.08s2.82-.4 4-1.08v3.1L12 19zm-3-9c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z')
 
-            // isVerifiedPublisher
-            const isVerifiedPublisher = containsSvg(descriptionLine2,"M23 11.99L20.56 9.2l.34-3.69-3.61-.82L15.4 1.5 12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 11.99l2.44 2.79-.34 3.7 3.61.82 1.89 3.2 3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69 2.44-2.8zm-3.95 1.48l-.56.65.08.85.18 1.95-1.9.43-.84.19-.44.74-.99 1.68-1.78-.77-.8-.34-.79.34-1.78.77-.99-1.67-.44-.74-.84-.19-1.9-.43.18-1.96.08-.85-.56-.65L3.67 12l1.29-1.48.56-.65-.09-.86-.18-1.94 1.9-.43.84-.19.44-.74.99-1.68 1.78.77.8.34.79-.34 1.78-.77.99 1.68.44.74.84.19 1.9.43-.18 1.95-.08.85.56.65 1.29 1.47-1.28 1.48z")
-
-            // isVerifiedExtension
-            const isVerifiedExtension = containsSvg(descriptionLine2, "M20 10c0-4.42-3.58-8-8-8s-8 3.58-8 8c0 2.03.76 3.87 2 5.28V23l6-2 6 2v-7.72c1.24-1.41 2-3.25 2-5.28zm-8-6c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6 2.69-6 6-6zm0 15-4 1.02v-3.1c1.18.68 2.54 1.08 4 1.08s2.82-.4 4-1.08v3.1L12 19zm-3-9c0-1.66 1.34-3 3-3s3 1.34 3 3-1.34 3-3 3-3-1.34-3-3z")
-
-            // numRatings
-            const anchor = dom.querySelector('a[href*="/' + extensionId + '/reviews"]')
-            const numRatings = parseRatingsNumber(anchor?.textContent)
-
-            // categories
-            const categories = descriptionLine3 ?
-                Array.from(descriptionLine3.querySelectorAll('a[href*="./category/extensions/"]'))
-                    .map(link => {
-                        const href = link.getAttribute('href')
-                        const categoryMatch = href.match(/\/category\/extensions\/([^/]+)(?:\/([^/]+))?/)
-                        if (categoryMatch) {
-                            return { primary: categoryMatch[1], secondary: categoryMatch[2] }
-                        }
-                    })
-                    .filter(category => !!category)
-                : []
-
-            const emailNode = [...dom.querySelectorAll('details')]
-                ?.find(details => [...details.children].some(child => child.tagName === 'SUMMARY'))
-            const email = emailNode?.querySelector(':scope > div')?.textContent
-            const website = emailNode?.parentNode?.querySelector('a')?.href
+            const categories = Array.from(metaRow?.querySelectorAll('a[href*="./category/extensions/"]') ?? [])
+                .map(link => {
+                    const m = link.getAttribute('href')?.match(/\/category\/extensions\/([^/]+)(?:\/([^/]+))?/)
+                    return m ? { primary: m[1], secondary: m[2] } : null
+                })
+                .filter(Boolean)
 
             const downloadUrl = `https://clients2.google.com/service/update2/crx?response=redirect&acceptformat=crx2,crx3&prodversion=${Browser.version.version}&x=id%3D${extensionId}%26uc`
 
-            return {
+            const result = {
                 browser: Browser.Chrome,
                 id: extensionId,
-                name: extensionName?.textContent,
+                name: nameEl?.textContent?.trim() ?? null,
                 description,
                 extensionLogo,
                 categories,
@@ -466,8 +473,10 @@ class ExtensionStore {
                 numInstalls,
                 isVerifiedExtension,
                 isVerifiedPublisher,
-                downloadUrl
+                downloadUrl,
             }
+
+            return ExtensionStore.#validateParsing(result, extensionId)
         }
     }
 
@@ -503,49 +512,37 @@ class ExtensionStore {
             if (!extensionId) return null
 
             const reduxState = JSON.parse(dom.querySelector('#redux-store-state')?.textContent ?? 'null')
-            const addonData = reduxState?.addons?.byID ? Object.values(reduxState.addons.byID)[0] : null
+            const addonData  = reduxState?.addons?.byID ? Object.values(reduxState.addons.byID)[0] : null
 
             if (!addonData) return null
 
-            // extensionName
-            const extensionName = addonData.name
-            const description = (addonData.summary ?? '') + '\n\n' + (addonData.description ?? '')
+            const description = [addonData.summary, addonData.description]
+                .filter(Boolean)
+                .join('\n\n') || null
 
-            // extensionLogo
-            const extensionLogo = addonData.icons?.['64'] ?? addonData.icons?.['32']
-
-            // isVerifiedExtension
             const isVerifiedExtension = addonData.promoted?.some(p =>
                 p.category === 'recommended' || p.category === 'line'
             ) ?? false
 
-            // rating & numRatings
-            const rating = addonData.ratings?.average
-            const numRatings = addonData.ratings?.count
-            const numInstalls = addonData.average_daily_users
-
-            // categories
             const categories = (addonData.categories ?? [])
                 .map(slug => this.categories[slug])
                 .filter(Boolean)
 
-            const versionId = addonData.currentVersionId
-            const versionData = reduxState?.versions?.byId?.[versionId]
-            const downloadUrl = versionData?.file?.url
-
-            return {
+            const result = {
                 browser: Browser.Firefox,
                 id: extensionId,
-                name: extensionName,
+                name: addonData.name ?? null,
                 description,
-                extensionLogo,
-                rating,
-                numRatings,
-                numInstalls,
+                extensionLogo: addonData.icons?.['64'] ?? addonData.icons?.['32'] ?? null,
+                rating: addonData.ratings?.average ?? null,
+                numRatings: addonData.ratings?.count ?? null,
+                numInstalls: addonData.average_daily_users ?? null,
                 categories,
                 isVerifiedExtension,
-                downloadUrl
+                downloadUrl: reduxState?.versions?.byId?.[addonData.currentVersionId]?.file?.url ?? null,
             }
+
+            return ExtensionStore.#validateParsing(result, extensionId)
         }
 
         static async slugToId(slug) {
@@ -599,19 +596,21 @@ class ExtensionStore {
             const apiData = await ExtensionStore.Edge.getMetadata(extensionId)
             if (!apiData) return null
 
-            return {
+            const result = {
                 browser: Browser.Edge,
                 id: extensionId,
-                name: apiData.name,
-                description: apiData.description,
-                extensionLogo: 'https:' + apiData.logoUrl,
-                numInstalls: apiData.activeInstallCount,
-                rating: apiData.averageRating,
-                numRatings: apiData.ratingCount,
+                name: apiData.name ?? null,
+                description: apiData.description ?? null,
+                extensionLogo: apiData.logoUrl ? 'https:' + apiData.logoUrl : null,
+                numInstalls: apiData.activeInstallCount ?? null,
+                rating: apiData.averageRating ?? null,
+                numRatings: apiData.ratingCount ?? null,
                 categories: ExtensionStore.Edge.#mapCategories(apiData.categories),
                 isVerifiedExtension: apiData.isBadgedAsFeatured ?? false,
                 downloadUrl: `https://edge.microsoft.com/extensionwebstorebase/v1/crx?x=id%3D${extensionId}%26installsource%3Dondemand&response=redirect`
             }
+
+            return ExtensionStore.#validateParsing(result, extensionId)
         }
 
         static async getMetadata(extensionId) {
@@ -682,49 +681,53 @@ class ExtensionStore {
 
         static async parsePage(dom) {
             const parseInteger = str => str ? (parseInt(str.replace(/[\s,.']/g, '')) || null) : null
-            const metaContent = selector => dom.querySelector(selector)?.getAttribute('content')?.trim()
+            const metaContent  = selector => dom.querySelector(selector)?.getAttribute('content')?.trim()
 
             const extensionId = metaContent('meta[property="aoc:app_id"]')
             if (!extensionId) return null
 
-            // extensionName
             const extensionName = metaContent('meta[property="og:title"]')
                 ?? dom.querySelector('h1[itemprop="name"]')?.textContent?.trim()
+                ?? null
 
-            const summary = metaContent('meta[property="og:description"]')
-            const description = dom.querySelector('[itemprop="description"]')?.textContent?.trim()
+            const descriptionText = dom.querySelector('[itemprop="description"]')?.textContent?.trim() ?? null
+            const description = descriptionText != null
+                ? [metaContent('meta[property="og:description"]'), descriptionText].filter(Boolean).join('\n\n')
+                : null
+
+            const rating     = parseFloat(dom.querySelector('span.rating#rating-value')?.textContent)
+            const numRatings = parseInteger(dom.querySelector('span#rating-count')?.textContent)
+
+            const numInstalls = parseInteger(
+                [...dom.querySelectorAll('section.about dl dt')]
+                    .find(dt => dt.textContent.trim() === 'Downloads')
+                    ?.nextElementSibling?.textContent
+            )
 
             const extensionLogo = metaContent('meta[property="og:image"]')
                 ?? dom.querySelector('img.icon-pkg')?.getAttribute('src')
+                ?? null
 
-            // categories
             const categorySlug = dom.querySelector('.breadcrumb a[href*="/category/"]')
                 ?.getAttribute('href')?.match(/\/category\/([^/?]+)/)?.[1]
             const categories = categorySlug ? [this.categories[categorySlug]].filter(Boolean) : []
 
-            // ratings
-            const rating = parseFloat(dom.querySelector('span.rating#rating-value')?.textContent)
-            const numRatings = parseInteger(dom.querySelector('span#rating-count')?.textContent)
-
-            // installs - only on real extensions, absent on built-ins
-            const downloadsDt = [...dom.querySelectorAll('section.about dl dt')]
-                .find(dt => dt.textContent.trim() === 'Downloads')
-            const numInstalls = parseInteger(downloadsDt?.nextElementSibling?.textContent)
-
             const downloadUrl = await ExtensionStore.Opera.getUpdateUrl(extensionId)
 
-            return {
+            const result = {
                 browser: Browser.Opera,
                 id: extensionId,
                 name: extensionName,
-                description: summary + "\n\n" + description,
+                description,
                 extensionLogo,
-                numInstalls,
                 rating,
                 numRatings,
+                numInstalls,
                 categories,
-                downloadUrl
+                downloadUrl,
             }
+
+            return ExtensionStore.#validateParsing(result, extensionId)
         }
     }
 }
