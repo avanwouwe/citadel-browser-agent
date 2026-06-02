@@ -1,4 +1,5 @@
 #!/bin/bash
+set -euo pipefail
 
 PACKAGE_ID="org.citadelagent"
 
@@ -6,10 +7,24 @@ rm -rf binaries
 
 # Clean up previous build artifacts
 clean_build() {
-      rm -rf build
-      rm -rf dist
-      rm -rf citadel-browser-agent.spec
-      rm -rf citadel-venv
+    rm -rf build
+    rm -rf dist
+    rm -rf citadel-browser-agent.spec
+    rm -rf citadel-venv
+}
+
+# Ensure Rosetta 2 is installed (required for x86_64 builds on Apple Silicon)
+ensure_rosetta() {
+    if [[ "$(uname -m)" == "arm64" ]]; then
+        if ! pkgutil --pkg-info com.apple.pkg.RosettaUpdateAuto &>/dev/null; then
+            echo "Rosetta 2 not found. Installing..."
+            softwareupdate --install-rosetta --agree-to-license
+        else
+            echo "Rosetta 2 is already installed."
+        fi
+    else
+        echo "Running on Intel — Rosetta not required."
+    fi
 }
 
 # Build for a specific architecture
@@ -71,12 +86,12 @@ build_for_arch() {
     clean_build
 }
 
+
 # Build for both architectures
+ensure_rosetta
 build_for_arch "arm64"
 build_for_arch "x86_64"
-
 
 echo "Universal build completed."
 
 ./package.sh
-

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -eu
+set -euo pipefail
 
 PACKAGE_ID="org.citadelagent"
 VERSION="1.4.3"
