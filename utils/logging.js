@@ -71,7 +71,7 @@ class Log {
         }
 
         // if the value is an object, move it to the "details" node
-        if (typeof value === 'object' && value.type) {
+        if (typeof value === 'object' && value?.type) {
             const details = value.value
             if (details && typeof details === 'object'  ) {
                 logEntry['browseragent']['detail'] = {};
