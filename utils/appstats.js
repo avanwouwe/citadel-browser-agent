@@ -37,7 +37,7 @@ class AppStats {
     }
 
     static getAccount(app, username) {
-        assert(app && username, "must specify app and username")
+        assert(app && username, "must specify app and username", app, username)
 
         const accounts = app.getOrSet("accounts", {})
         return accounts.getOrSet(username, { domain: PasswordCheck.getDomainFromUsername(username) })

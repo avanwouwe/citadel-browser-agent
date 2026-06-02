@@ -48,7 +48,7 @@ You can modify the default password policy, which is:
             "minNumberOfLowerCase": 1,
             "minNumberOfSymbols": 1,
             "minEntropy": 2.5,
-            "minSequence": 4
+            "minSequence": 0.6
         }
     }
     ...

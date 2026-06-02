@@ -198,7 +198,7 @@ class Config {
                 minNumberOfLowerCase: 1,
                 minNumberOfSymbols: 1,
                 minEntropy: 2.5,
-                minSequence: 4
+                minSequence: 0.6
             },
             mfa: {
                 waitMinutes: 10,

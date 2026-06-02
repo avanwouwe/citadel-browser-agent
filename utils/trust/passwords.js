@@ -113,41 +113,50 @@ class PasswordCheck {
         return matches ? matches[1] : null
     }
 
-    // divide the length of the string by the number of sequential characters
-    // ignore transitions between unknown chars and alpha to numeric (and vice versa)
+    // returns a value between 0 and 1, where 0 is "sequence" and 1 is not
     static #analyzeSequence(password, reference) {
         password = password.toLowerCase()
+        const len = password.length
+        if (len < 3) return 1
 
-        let ignoredNext = 1
-        let sequentialNext = 0;
+        const runs = []
+        let runLen    = 1
+        let runIsDigit = !isNaN(password[0])
 
-        for (let i = 0; i < password.length - 1; i++) {
-            const currentChar = password[i];
-            const nextChar = password[i + 1];
+        for (let i = 0; i < len - 1; i++) {
+            const cur      = password[i]
+            const nxt      = password[i + 1]
+            const curIdx   = reference.indexOf(cur)
+            const nxtIdx   = reference.indexOf(nxt)
+            const curDigit = !isNaN(cur)
+            const nxtDigit = !isNaN(nxt)
 
-            const currentIndex = reference.indexOf(currentChar);
-            const nextIndex = reference.indexOf(nextChar);
+            const isContiguous =
+                curIdx !== -1 &&
+                nxtIdx !== -1 &&
+                (curDigit === nxtDigit) &&
+                Math.abs(nxtIdx - curIdx) === 1
 
-            if (currentIndex === -1 || nextIndex === -1) {
-                ignoredNext++
-                continue;
-            }
-
-            // skip if transitioning between numbers and letters
-            const isCurrentCharNumber = !isNaN(currentChar);
-            const isNextCharNumber = !isNaN(nextChar);
-            if (isCurrentCharNumber !== isNextCharNumber) {
-                ignoredNext++
-                continue;
-            }
-
-            const diff = Math.abs(nextIndex - currentIndex);
-            if (diff === 1) {
-                sequentialNext++
+            if (isContiguous) {
+                runLen++
+            } else {
+                if (runLen > 1) runs.push({ len: runLen, isDigit: runIsDigit })
+                runLen    = 1
+                runIsDigit = nxtDigit          // new run starts with nxt
             }
         }
+        if (runLen > 1) runs.push({ len: runLen, isDigit: runIsDigit })
 
-        return Math.pow((password.length  - ignoredNext) / sequentialNext, 2)
+        // digits:  3-char minimum — "123" appended to a password is always intentional
+        // letters: 4-char minimum — 3-char keyboard adjacency is common in natural words
+        const sig = runs.filter(r => r.len >= (r.isDigit ? 3 : 4))
+        if (sig.length === 0) return 1
+
+        const longest  = Math.max(...sig.map(r => r.len))
+        const coverage = sig.reduce((s, r) => s + r.len, 0) / len
+        const ratio    = longest / len
+
+        return 1 - Math.min(1, coverage + ratio * ratio)
     }
 
     static #keyboards = {
