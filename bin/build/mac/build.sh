@@ -44,16 +44,21 @@ build_for_arch() {
         BREW_CMD="/usr/local/bin/brew"
     fi
 
-    # Ensure the latest version of Python is installed
-    if [ ! -f "$BREW_CMD" ]; then
+    # Ensure Homebrew is installed
+    if [ ! -x "$BREW_CMD" ]; then
         echo "WARNING: installing Homebrew at $BREW_CMD"
         $ARCH_CMD /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     fi
 
-    $ARCH_CMD brew install python
+    # Load Homebrew into the current shell environment (PATH, etc.)
+    # so freshly-installed brew is usable immediately without re-running.
+    eval "$($ARCH_CMD "$BREW_CMD" shellenv)"
+
+    # Ensure the latest version of Python is installed
+    $ARCH_CMD "$BREW_CMD" install python
 
     # Create and activate virtual environment
-    $ARCH_CMD $PYTHON_CMD -m venv citadel-venv
+    $ARCH_CMD "$PYTHON_CMD" -m venv citadel-venv
     source citadel-venv/bin/activate
 
     # Install PyInstaller and build
