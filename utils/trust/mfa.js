@@ -2,10 +2,8 @@ class MFACheck {
 
     static isRequired(url, config) {
         const hostname = getSitename(url)
-
         const isRequired = matchDomain(hostname, config.account.mfa.required)
         const isExempted = matchDomain(hostname, config.account.mfa.exceptions)
-
         return isRequired && !isExempted
     }
 
@@ -14,14 +12,19 @@ class MFACheck {
      * @param {string} url - The URL that triggered the expectation of MFA
      * @param {int} minutes - The number of minutes to wait
      * @param {boolean} showModal - Should a modal window be shown
-     * */
+     */
     static startTimer(url, minutes, showModal) {
-        const hostname = getSitename(url)
-        const domain = getDomain(hostname)
+        const domain = getDomain(getSitename(url))
+        const session = MFACheck.#sessions.get(domain)
 
-        if (MFACheck.#mfaTimers[domain]) {
-            clearTimeout(MFACheck.#mfaTimers[domain].timerId)
-            delete MFACheck.#mfaTimers[domain]
+        if (session?.state === 'cancelled' && (Date.now() - session.cancelledAt) < MFACheck.#CANCEL_GRACE) {
+            debug(`MFA startTimer suppressed for ${domain} — cancelled ${Date.now() - session.cancelledAt}ms ago`)
+            MFACheck.#sessions.delete(domain)
+            return
+        }
+
+        if (session?.state === 'waiting') {
+            clearTimeout(session.timerId)
         }
 
         debug(`MFA session starting for ${domain}, timer started`)
@@ -32,13 +35,11 @@ class MFACheck {
             logger.log(nowTimestamp(), "block", "MFA blocked", url, Log.WARN, undefined, `blocked access to ${domain} due to missing MFA`)
 
             await logOffDomain(domain)
-
             await injectFuncIntoDomain(domain, () => location.reload())
 
             if (showModal) {
                 const title = t("mfa.title")
                 const message = t("mfa.disconnected", { contact: config.company.contact })
-
                 const onAcknowledge = { type: 'acknowledge-mfa', domain }
                 const onException = { type: 'allow-mfa', domain }
 
@@ -46,27 +47,27 @@ class MFACheck {
                 await Modal.createForDomain(domain, title, message, onAcknowledge, onException)
             }
 
-            delete MFACheck.#mfaTimers[domain]
+            MFACheck.#sessions.delete(domain)
         }, minutes * ONE_MINUTE)
 
-        MFACheck.#mfaTimers[domain] = {
-            timerId,
-            timestamp: Date.now(),
-            domain
-        }
+        MFACheck.#sessions.set(domain, { state: 'waiting', timerId, startedAt: Date.now() })
     }
 
     /**
-     * Called when MFA timer is cancelled (MFA received or password failed)
+     * Called when MFA timer is canceled (MFA received or password failed)
      * @param {string} url - The URL of the MFA timer
      * @param {string} reason - The reason the timer was interrupted (TOTP, WebAuth, etc)
      */
     static cancelTimer(url, reason) {
-        const hostname = getSitename(url)
-        const domain = getDomain(hostname)
-        const waitingSince = MFACheck.#mfaTimers[domain]?.timestamp
+        const domain = getDomain(getSitename(url))
+        const session = MFACheck.#sessions.get(domain)
 
-        if (!waitingSince) {
+        debug(`MFA detected using "${reason} at ${url}`)
+
+        // Record cancel intent before early-return so a racing startTimer is also suppressed
+        MFACheck.#sessions.set(domain, { state: 'cancelled', cancelledAt: Date.now() })
+
+        if (session?.state !== 'waiting') {
             return
         }
 
@@ -75,15 +76,14 @@ class MFACheck {
         account.lastMFA = nowDatestamp()
         AppStats.markDirty()
 
-        const elapsedTime = (Date.now() - waitingSince) / 1000
-
+        const elapsedTime = (Date.now() - session.startedAt) / 1000
         debug(`MFA timer for ${domain} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason}`)
 
-        clearTimeout(MFACheck.#mfaTimers[domain].timerId)
-        delete MFACheck.#mfaTimers[domain]
+        clearTimeout(session.timerId)
     }
 
-    static #mfaTimers = {}
+    static #sessions = new Map()   // domain -> { state: 'waiting'|'cancelled', ... }
+    static #CANCEL_GRACE = 5000
 
     static #TOTP_FORMAT_REGEX = /^[0-9]{6,8}$/
     static isTOTP = (str) => MFACheck.#TOTP_FORMAT_REGEX.test(str)
