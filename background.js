@@ -336,7 +336,7 @@ function handleError(hook, eventType, filter) {
 				else level = undefined
 
 				if (level) {
-					logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, level, details.error, `browser error ${details.error} [${level}] for ${eventType} to ${details.url}`, details.initiator, details.tabId)
+					logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, level, details.error, `browser error ${details.error} [${level}] for ${eventType} to @@URL@@`, details.initiator, details.tabId)
 				}
             }
         }
