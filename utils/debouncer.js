@@ -1,31 +1,39 @@
 class Debouncer {
     #delay
-    #pending = new Map()  // key → {timeout, data}
+    #pending = new Map()
     #mergeFn
+    #leading
 
-    constructor(delay, mergeFn = null) {
+    constructor(delay, mergeFn = null, leading = false) {
         this.#delay = delay
         this.#mergeFn = mergeFn
+        this.#leading = leading
     }
 
     debounce(key, data, callback) {
         const existing = this.#pending.get(key)
 
-        if (existing) {
-            clearTimeout(existing.timeout)
-            // Merge new data with existing if merge function provided
-            data = this.#mergeFn ? this.#mergeFn(existing.data, data) : data
-        }
-
-        const timeout = setTimeout(async () => {
-            this.#pending.delete(key)
+        if (this.#leading) {
+            if (existing) return                            // within window → swallow
+            const timeout = setTimeout(() => this.#pending.delete(key), this.#delay)
+            this.#pending.set(key, { timeout, data })
             try {
-                await callback(data)
+                callback(data)
             } catch (error) {
                 console.error(`Debounced callback error:`, error)
             }
-        }, this.#delay)
+            return
+        }
 
+        if (existing) {
+            clearTimeout(existing.timeout)
+            data = this.#mergeFn ? this.#mergeFn(existing.data, data) : data
+        }
+        const timeout = setTimeout(async () => {
+            this.#pending.delete(key)
+            try { await callback(data) }
+            catch (error) { console.error(`Debounced callback error:`, error) }
+        }, this.#delay)
         this.#pending.set(key, { timeout, data })
     }
 
