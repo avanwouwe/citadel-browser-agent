@@ -222,6 +222,43 @@ String.prototype.truncate = function (maxLength, position = 'middle', marker = '
     return this.slice(0, startLength) + marker + this.slice(this.length - endLength)
 }
 
+function htmlToPlainText(html) {
+    if (html == null) return "";
+
+    let s = String(html);
+
+    // 1. Normalize <br> to a single newline
+    s = s.replace(/<br\s*\/?>/gi, "\n");
+
+    // 2. Block-level tags -> newline (covers <p>, <p/>, </p>, <div>, <li>, <h1>..)
+    const block = "p|div|li|ul|ol|h[1-6]|section|article|header|footer|blockquote|tr|table";
+    s = s.replace(new RegExp(`</?(?:${block})\\b[^>]*>`, "gi"), "\n");
+
+    // 3. Remove any remaining (inline) tags: <b>, </u>, <span ...>, <link ...>, </link>
+    s = s.replace(/<\/?[a-z][^>]*>/gi, "");
+
+    // 4. Decode the entities a browser would render
+    s = s
+        .replace(/&nbsp;/gi, "\u00a0")
+        .replace(/&amp;/gi, "&")
+        .replace(/&lt;/gi, "<")
+        .replace(/&gt;/gi, ">")
+        .replace(/&quot;/gi, '"')
+        .replace(/&#39;|&apos;/gi, "'");
+
+    // 5. Collapse horizontal whitespace (spaces, tabs) — but NOT newlines
+    s = s.replace(/[ \t\f\v]+/g, " ");
+
+    // 6. Trim each line, drop the spaces hugging newlines
+    s = s.replace(/[ \t]*\n[ \t]*/g, "\n");
+
+    // 7. Cap runs of blank lines to at most one blank line (like paragraph spacing)
+    s = s.replace(/\n{3,}/g, "\n\n");
+
+    // 8. Trim leading/trailing whitespace overall
+    return s.trim();
+}
+
 String.prototype.htmlNowrap = function () { return `<span style="white-space: nowrap;">${this}</span>` }
 
 String.prototype.htmlMonospace = function () { return `<span style="font-family: 'Courier New', Courier, monospace;">${this}</span>` }
