@@ -274,10 +274,10 @@ class Config {
             exceptions: {
                 'net::ERR_SSL_CLIENT_AUTH_CERT_NEEDED' : 'NEVER',
                 'net::ERR_BLOCKED_BY_CLIENT' : 'NEVER',
-                'net::ERR_BLOCKED_BY_ORB' : 'DEBUG',
-                'net::ERR_BLOCKED_BY_CSP' : 'DEBUG',
-                'net::ERR_BLOCKED_BY_RESPONSE' : 'DEBUG',
-                'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'DEBUG',
+                'net::ERR_BLOCKED_BY_ORB' : 'NEVER',
+                'net::ERR_BLOCKED_BY_CSP' : 'NEVER',
+                'net::ERR_BLOCKED_BY_RESPONSE' : 'NEVER',
+                'net::ERR_BLOCKED_BY_FINGERPRINTING_PROTECTION' : 'NEVER',
             }
         },
         device: {
