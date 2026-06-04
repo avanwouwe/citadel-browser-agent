@@ -51,8 +51,8 @@ Port.onMessage("config", async (newConfig) => {
 	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, undefined, undefined, false)
 })
 
-Port.onMessage("restart",() => {
-	chrome.runtime.reload()
+Port.onMessage("restart", () => {
+	restartExtension()
 })
 
 Port.onMessage("devicetrust",(audit) => {
@@ -89,7 +89,7 @@ chrome.runtime.onUpdateAvailable.addListener(async () => {
 		debug("error while preparing update of extension", error)
 	}
 
-	chrome.runtime.reload()
+	restartExtension()
 })
 
 chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {

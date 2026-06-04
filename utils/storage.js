@@ -31,7 +31,7 @@ class LocalStorage {
 
         await ExtensionTrust.flush()
 
-        chrome.runtime.reload()
+        restartExtension()
     }
 
 }
