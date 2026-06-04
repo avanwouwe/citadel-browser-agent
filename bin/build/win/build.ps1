@@ -3,7 +3,7 @@ Remove-Item -Path "dist" -Force -Recurse -ErrorAction SilentlyContinue
 Remove-Item -Path "build" -Force -Recurse -ErrorAction SilentlyContinue
 Remove-Item -Path "obj" -Force -Recurse -ErrorAction SilentlyContinue
 
-$PYTHON_PATH = "$env:LOCALAPPDATA\Programs\Python\Python313"
+$PYTHON_PATH = "$env:LOCALAPPDATA\Programs\Python\Python314"
 
 & "$PYTHON_PATH\Scripts\pip" install --upgrade pyinstaller pywin32
 
