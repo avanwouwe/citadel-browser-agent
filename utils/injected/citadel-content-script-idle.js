@@ -237,11 +237,12 @@ checkLogin = async function(event, button) {
                 }
             } catch (error) {
                 console.error('exception when analyzing login', error.stack)
+            } finally {
+                setPointerNormal()
             }
 
             document.body.style.cursor = 'default'
 
-            setPointerNormal()
             repeatEvent(event, button)
         }
 
