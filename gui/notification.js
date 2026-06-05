@@ -159,8 +159,8 @@ class Notification {
             const notification = {
                 type: "basic",
                 iconUrl: Logo.getLogo(),
-                title: htmlToPlainText(alert.notification.title),
-                message: htmlToPlainText(alert.notification.message),
+                title: collapseWhitespace(htmlToPlainText(alert.notification.title)),
+                message: collapseWhitespace(htmlToPlainText(alert.notification.message)),
             }
 
             if (Browser.version.brand !== Browser.Firefox) {
