@@ -61,7 +61,7 @@
       }
     },
     "MaxUptime": {
-      "query": "SELECT '' AS error FROM uptime WHERE total_seconds / 60 / 60 / 24 > 30;",
+      "query": "SELECT 'System not restarted in ' || (total_seconds / 86400) || ' days' AS error FROM uptime WHERE total_seconds / 86400 > 30;",
       "text": {
         "en": {
           "label": "System was restarted recently",
@@ -86,7 +86,7 @@
       }
     },
     "DriveEncryption": {
-      "query": "SELECT '' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\BitlockerStatus\\BootStatus' AND data != '1';",
+      "query": "SELECT 'Drive not encrypted: ' || ld.device_id AS error\nFROM logical_drives ld\nLEFT JOIN bitlocker_info bi ON bi.drive_letter = ld.device_id\nWHERE ld.drive_type = 'Local Disk'\n  AND (bi.protection_status IS NULL OR bi.protection_status != 1);",
       "text": {
         "en": {
           "label": "Disk is encrypted",
@@ -99,7 +99,7 @@
       }
     },
     "LockScreen": {
-      "query": "SELECT 'Screen lock not required on resume' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure' AND data != '1'\nUNION ALL\nSELECT 'Screen lock timeout too high: ' || data AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut' AND CAST(data AS INTEGER) > 600\nUNION ALL\nSELECT 'Screen lock disabled' AS error FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveActive' AND data != '1'\nUNION ALL\nSELECT 'No screen saver program specified' AS error \nWHERE NOT EXISTS (\n  SELECT 1 \n  FROM registry \n  WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\SCRNSAVE.EXE' \n);",
+      "query": "WITH\n  inactivity_lock AS (\n    SELECT CAST(data AS INTEGER) AS val FROM registry\n    WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\InactivityTimeoutSecs'\n      AND CAST(data AS INTEGER) >= 1\n  ),\n  inactivity_lock_ok AS (\n    SELECT 1 FROM inactivity_lock WHERE val <= 600\n  ),\n  screensaver_active AS (\n    SELECT 1 FROM registry\n    WHERE path IN (\n      'HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaveActive',\n      'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveActive'\n    ) AND data = '1'\n  ),\n  screensaver_secured AS (\n    SELECT 1 FROM registry\n    WHERE path IN (\n      'HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaverIsSecure',\n      'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaverIsSecure'\n    ) AND data = '1'\n  ),\n  screensaver_timeout AS (\n    SELECT COALESCE(\n      (SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_CURRENT_USER\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaveTimeOut'),\n      (SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_CURRENT_USER\\Control Panel\\Desktop\\ScreenSaveTimeOut')\n    ) AS val\n  )\nSELECT 'Screen lock timeout too high (' || val || 's)' AS error\nFROM inactivity_lock\nWHERE NOT EXISTS (SELECT 1 FROM inactivity_lock_ok)\nUNION ALL\nSELECT 'No screen lock configured' AS error\nWHERE NOT EXISTS (SELECT 1 FROM inactivity_lock)\n  AND NOT EXISTS (SELECT 1 FROM screensaver_active)\nUNION ALL\nSELECT 'Screen saver active but lock on resume not enabled' AS error\nWHERE NOT EXISTS (SELECT 1 FROM inactivity_lock)\n  AND EXISTS (SELECT 1 FROM screensaver_active)\n  AND NOT EXISTS (SELECT 1 FROM screensaver_secured)\nUNION ALL\nSELECT 'Screen lock timeout too high (' || val || 's)' AS error\nFROM screensaver_timeout\nWHERE NOT EXISTS (SELECT 1 FROM inactivity_lock)\n  AND EXISTS (SELECT 1 FROM screensaver_active)\n  AND EXISTS (SELECT 1 FROM screensaver_secured)\n  AND val IS NOT NULL AND val > 600",
       "text": {
         "en": {
           "label": "Screen locking is enabled",
@@ -112,7 +112,7 @@
       }
     },
     "Firewall": {
-      "query": "SELECT '' AS error FROM windows_security_center WHERE firewall != 'Good';",
+      "query": "SELECT 'Firewall status: ' || firewall AS error FROM windows_security_center WHERE firewall != 'Good';",
       "text": {
         "en": {
           "label": "Firewall is enabled",
@@ -138,7 +138,7 @@
       }
     },
     "AutoUpdates": {
-      "query": "SELECT 'AUOptions = ' || data AS error\nFROM (\n  SELECT\n    CASE\n      WHEN policies.name IS NOT NULL THEN policies.data\n      ELSE normal.data\n    END AS data\n  FROM\n    (\n      SELECT name,data FROM registry\n      WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions'\n    ) AS policies\n  FULL OUTER JOIN\n    (\n\t\t  SELECT name,data FROM registry\n\t\t  WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions'\n    ) AS normal\n  ON 1=1\n) AS update_policy\nWHERE CAST(data AS INTEGER) < 4\n\nUNION ALL \n\nSELECT 'NoAutoUpdate = ' || data AS error\nFROM registry\nWHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' AND data = '1'\n\nUNION ALL\n\nSELECT 'Windows Update service = ' || status AS error\nFROM services\nWHERE name = 'wuauserv' AND status != 'RUNNING';",
+      "query": "SELECT\n  CASE CAST(data AS INTEGER)\n    WHEN 1 THEN 'Automatic updates disabled'\n    WHEN 2 THEN 'Automatic updates: notify only, no download'\n    WHEN 3 THEN 'Automatic updates: auto-download but manual install required'\n    ELSE 'Automatic updates: unexpected configuration value ' || data\n  END AS error\nFROM (\n  SELECT\n    CASE\n      WHEN policies.name IS NOT NULL THEN policies.data\n      ELSE normal.data\n    END AS data\n  FROM\n    (SELECT name,data FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions') AS policies\n  FULL OUTER JOIN\n    (SELECT name,data FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions') AS normal\n  ON 1=1\n) AS update_policy\nWHERE CAST(data AS INTEGER) < 4\nUNION ALL\nSELECT 'Automatic updates disabled via policy' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' AND data = '1'\nUNION ALL\nSELECT 'Windows Update service not running' AS error FROM services WHERE name = 'wuauserv' AND status != 'RUNNING';",
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
@@ -151,7 +151,7 @@
       }
     },
     "Antivirus": {
-      "query": "SELECT '' AS error FROM windows_security_center WHERE antivirus != 'Good'",
+      "query": "SELECT 'Antivirus status: ' || antivirus AS error FROM windows_security_center WHERE antivirus != 'Good';",
       "text": {
         "en": {
           "label": "Antivirus protection is enabled",
@@ -164,7 +164,7 @@
       }
     },
     "SharingPreferences": {
-      "query": "SELECT 'Remote Desktop is enabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' AND data = '0'\nUNION ALL\nSELECT 'File and Printer Sharing is enabled' FROM services WHERE name = 'LanmanServer' AND start_type != 'DISABLED'\nUNION ALL\nSELECT 'Remote Registry is enabled' FROM services WHERE name = 'RemoteRegistry' AND start_type != 'DISABLED';",
+      "query": "SELECT 'Remote Desktop is enabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' AND data = '0'\nUNION ALL\nSELECT 'Non-admin file share exists: ' || name AS error FROM shared_resources WHERE type = 0 AND name NOT LIKE '%$'\nUNION ALL\nSELECT 'Remote Registry is enabled' AS error FROM services WHERE name = 'RemoteRegistry' AND status = 'RUNNING';",
       "text": {
         "en": {
           "label": "Sharing services are disabled",
@@ -190,7 +190,7 @@
       }
     },
     "BootOptions": {
-      "query": "SELECT 'UEFI secure boot is disabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State\\UEFISecureBootEnabled' AND data != 1;",
+      "query": "SELECT 'UEFI secure boot is disabled' AS error WHERE NOT EXISTS (\n  SELECT 1 FROM registry\n  WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State\\UEFISecureBootEnabled'\n    AND data = '1'\n);",
       "text": {
         "en": {
           "label": "Boot options are secure",
@@ -203,7 +203,7 @@
       }
     },
     "RemovableStorage": {
-      "query": "SELECT device_id AS error FROM logical_drives WHERE description LIKE '%removable%';",
+      "query": "SELECT 'Removable storage device connected: ' || device_id AS error FROM logical_drives WHERE drive_type = 'Removable Disk';",
       "text": {
         "en": {
           "label": "No USB storage devices",
