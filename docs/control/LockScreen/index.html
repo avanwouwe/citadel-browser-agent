@@ -12,24 +12,23 @@
         <div class="breadcrumb">
             <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">LockScreen</span>
         </div>
-        <h1>LockScreen Control</h1>
+        <h1>Screen Locking</h1>
     </header>
 
     <section class="control-info">
         <h2>What does this control check?</h2>
         <p>
-            The LockScreen control verifies that your computer is configured to automatically
-            lock the screen when you step away. This ensures your device requires a password
-            to access it after a short period of inactivity.
+            This control verifies that your computer automatically locks its screen after a period of inactivity,
+            and that unlocking it requires your password or PIN.
         </p>
         <p>
-            <strong>Important:</strong> Without automatic screen locking, anyone who approaches
-            your unattended computer can access all your files, emails, passwords, and applications
-            as if they were you. If they can access your email, they can reset passwords for virtually
-            any online account (banking, social media, work systems, etc.) by using the "forgot password"
-            feature. This creates serious security and privacy risks.
+            <strong>The risk:</strong> If your screen does not lock automatically, anyone who walks up to your
+            unattended computer can access everything: your files, your emails, your passwords, and any system
+            you are currently logged into. From your email alone, they can reset passwords for virtually any
+            account — banking, work systems, social media — using the "forgot password" feature.
         </p>
     </section>
+
     <section class="security-importance">
         <h2>Why is this important?</h2>
         <div class="importance-grid">
@@ -69,33 +68,92 @@
         <div class="platform-content">
             <!-- Windows Instructions -->
             <div class="platform-panel" id="windows">
-                <h3>Enabling Screen Lock on Windows</h3>
+                <h3>Fix instructions for Windows</h3>
 
-                <div class="method">
+                <p>Windows offers several ways to lock your screen automatically. Find your specific error message below and follow the corresponding instructions.</p>
+
+                <!-- Error: No screen lock configured -->
+                <div class="error-case">
+                    <h4 class="error-message">"No screen lock configured"</h4>
+                    <p>Your computer has no automatic lock mechanism configured at all. The simplest fix is to configure your power settings so the screen turns off after inactivity, and to require a password when it wakes up:</p>
                     <ol>
-                        <li>Click the <strong>Start</strong> button and select <strong>Settings</strong></li>
-                        <li>Click <strong>Personalization</strong></li>
-                        <li>Click <strong>Lock screen</strong> in the left sidebar</li>
-                        <li>Scroll down and click <strong>Screen saver settings</strong></li>
-                        <li>In the dropdown menu, select any screen saver (e.g., <strong>Blank</strong>)</li>
-                        <li>Set <strong>Wait</strong> to <strong>10 minutes</strong> (or less)</li>
-                        <li>Check the box <strong>"On resume, display logon screen"</strong></li>
-                        <li>Click <strong>Apply</strong> and then <strong>OK</strong></li>
+                        <li>Click <strong>Start</strong> → <strong>Settings</strong> → <strong>System</strong> → <strong>Power &amp; sleep</strong></li>
+                        <li>Under <strong>Screen</strong>, set both <strong>"On battery power, turn off after"</strong> and <strong>"When plugged in, turn off after"</strong> to <strong>10 minutes</strong> or less</li>
+                        <li>Then go to <strong>Settings</strong> → <strong>Accounts</strong> → <strong>Sign-in options</strong></li>
+                        <li>Under <strong>"Require sign-in"</strong>, select <strong>"When PC wakes up from sleep"</strong></li>
                     </ol>
                 </div>
 
-                <div class="note">
-                    <strong>Alternative method:</strong> You can also search for "Change screen saver" in the Start menu to access these settings directly.
+                <!-- Error: Sleep timeout too high on AC -->
+                <div class="error-case">
+                    <h4 class="error-message">"Sleep timeout too high on AC (Xs)"</h4>
+                    <p>When your computer is plugged in, the screen stays on for too long before locking — giving anyone who approaches your desk too large a window of opportunity. Fix it:</p>
+                    <ol>
+                        <li>Click <strong>Start</strong> → <strong>Settings</strong> → <strong>System</strong> → <strong>Power &amp; sleep</strong></li>
+                        <li>Under <strong>Screen</strong>, set <strong>"When plugged in, turn off after"</strong> to <strong>10 minutes</strong> or less</li>
+                    </ol>
                 </div>
 
-                <div class="warning-box">
-                    <strong>⚠️ Important notes:</strong>
+                <!-- Error: Sleep timeout too high on battery -->
+                <div class="error-case">
+                    <h4 class="error-message">"Sleep timeout too high on battery (Xs)"</h4>
+                    <p>When running on battery, the screen stays on for too long before locking — a particular risk for laptops used in public spaces or shared offices. Fix it:</p>
+                    <ol>
+                        <li>Click <strong>Start</strong> → <strong>Settings</strong> → <strong>System</strong> → <strong>Power &amp; sleep</strong></li>
+                        <li>Under <strong>Screen</strong>, set <strong>"On battery power, turn off after"</strong> to <strong>10 minutes</strong> or less</li>
+                    </ol>
+                </div>
+
+                <!-- Error: Sign-in not required on wake -->
+                <div class="error-case">
+                    <h4 class="error-message">"Sign-in not required on wake from sleep"</h4>
+                    <p>Your screen turns off after inactivity, but when it wakes up it does not ask for your password — meaning anyone can press a key and get straight in. Fix it:</p>
+                    <ol>
+                        <li>Click <strong>Start</strong> → <strong>Settings</strong> → <strong>Accounts</strong> → <strong>Sign-in options</strong></li>
+                        <li>Under <strong>"Require sign-in"</strong>, select <strong>"When PC wakes up from sleep"</strong></li>
+                    </ol>
+                    <div class="note">If this setting is greyed out, it is managed by your organisation's IT department. Contact them to have it corrected.</div>
+                </div>
+
+                <!-- Error: Screen saver active but sign-in not required -->
+                <div class="error-case">
+                    <h4 class="error-message">"Screen saver active but sign-in not required on resume"</h4>
+                    <p>Your screen saver activates after inactivity, but it does not lock the computer — anyone can press a key and get straight in without entering a password. Fix it:</p>
+                    <ol>
+                        <li>Right-click the desktop and select <strong>Personalize</strong></li>
+                        <li>Click <strong>Lock screen</strong> in the left sidebar</li>
+                        <li>Scroll down and click <strong>Screen saver settings</strong></li>
+                        <li>Check the box <strong>"On resume, display logon screen"</strong></li>
+                        <li>Click <strong>Apply</strong> then <strong>OK</strong></li>
+                    </ol>
+                </div>
+
+                <!-- Error: Screen saver timeout too high -->
+                <div class="error-case">
+                    <h4 class="error-message">"Screen saver timeout too high (Xs)"</h4>
+                    <p>Your screen saver is correctly configured to lock the screen, but it takes too long to activate — more than 10 minutes. This leaves your computer unlocked for too long when you step away. Fix it:</p>
+                    <ol>
+                        <li>Right-click the desktop and select <strong>Personalize</strong></li>
+                        <li>Click <strong>Lock screen</strong> in the left sidebar</li>
+                        <li>Scroll down and click <strong>Screen saver settings</strong></li>
+                        <li>Set <strong>Wait</strong> to <strong>10 minutes</strong> or less</li>
+                        <li>Click <strong>Apply</strong> then <strong>OK</strong></li>
+                    </ol>
+                </div>
+
+                <!-- Error: Inactivity timeout too high (GPO) -->
+                <div class="error-case">
+                    <h4 class="error-message">"Screen lock inactivity timeout too high (Xs)"</h4>
+                    <p>Automatic screen locking is configured on your machine, but the timeout is set to more than 10 minutes — leaving your computer unlocked for too long when you step away.</p>
+                    <p>This setting requires administrator rights to change:</p>
                     <ul>
-                        <li>Set the timeout to 10 minutes or less for better security</li>
-                        <li>The "On resume, display logon screen" option must be checked</li>
-                        <li>You can manually lock your screen anytime by pressing <kbd>Windows</kbd> + <kbd>L</kbd></li>
-                        <li>Make sure you know your login password before enabling this</li>
+                        <li><strong>If you are the administrator of your own machine</strong> — open <strong>Settings</strong> → <strong>Accounts</strong> → <strong>Sign-in options</strong> and reduce the inactivity timeout to 10 minutes or less.</li>
+                        <li><strong>If your machine is managed by an IT department</strong> — you cannot change this yourself. Contact your IT department and ask them to reduce the screen lock timeout to 10 minutes or less.</li>
                     </ul>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>💡 Good habit:</strong> Whatever method locks your screen automatically, you can always lock it immediately by pressing <kbd>Windows</kbd> + <kbd>L</kbd>. Do this every time you step away from your desk, even for a minute.
                 </div>
             </div>
 
@@ -107,24 +165,18 @@
                     <ol>
                         <li>Click the <strong>Apple menu</strong> in the top-left corner</li>
                         <li>Select <strong>System Settings</strong> (or <strong>System Preferences</strong> on older versions)</li>
-                        <li>Click <strong>Lock Screen</strong> (or <strong>Security & Privacy</strong> → <strong>General</strong> tab)</li>
-                        <li>Set <strong>"Require password after screen saver begins or display is off"</strong> to <strong>immediately</strong> (or the shortest time available)</li>
-                        <li>Optionally, set <strong>"Turn display off on battery when inactive"</strong> and <strong>"Turn display off on power adapter when inactive"</strong> to 10 minutes or less</li>
+                        <li>Click <strong>Lock Screen</strong></li>
+                        <li>Set <strong>"Require password after screen saver begins or display is off"</strong> to <strong>Immediately</strong></li>
+                        <li>Set <strong>"Turn display off on battery when inactive"</strong> and <strong>"Turn display off on power adapter when inactive"</strong> to <strong>10 minutes</strong> or less</li>
                     </ol>
                 </div>
 
                 <div class="note">
-                    <strong>Tip:</strong> You can set up Hot Corners to lock your screen instantly. Go to <strong>Desktop & Dock</strong> → <strong>Hot Corners</strong> and set a corner to "Lock Screen".
+                    <strong>Tip:</strong> You can set up Hot Corners to lock your screen instantly. Go to <strong>Desktop &amp; Dock</strong> → <strong>Hot Corners</strong> and assign a corner to "Lock Screen".
                 </div>
 
                 <div class="warning-box">
-                    <strong>⚠️ Important notes:</strong>
-                    <ul>
-                        <li>Set password requirement to "immediately" for best security</li>
-                        <li>You can manually lock your screen anytime by pressing <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Q</kbd></li>
-                        <li>If using FileVault, you'll need your encryption password when unlocking</li>
-                        <li>Make sure you know your login password before enabling this</li>
-                    </ul>
+                    <strong>💡 Good habit:</strong> You can lock your screen immediately at any time by pressing <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Q</kbd>. Do this every time you step away from your desk, even for a minute.
                 </div>
             </div>
         </div>
@@ -132,36 +184,8 @@
 
     <section class="verification">
         <h2>Verifying the fix</h2>
-        <p>After configuring screen locking, Citadel will automatically verify this control during its next check.</p>
-
-        <div class="platform-content">
-            <!-- Windows Verification -->
-            <div class="platform-panel" id="windows-verify">
-                <div class="method">
-                    <h4>To verify screen lock is working:</h4>
-                    <ol>
-                        <li>Wait for the configured timeout period without touching your computer</li>
-                        <li>Your screen should go blank (screen saver activates)</li>
-                        <li>Move your mouse or press a key</li>
-                        <li>You should be prompted to enter your password to unlock</li>
-                    </ol>
-                    <p><strong>Quick test:</strong> Press <kbd>Windows</kbd> + <kbd>L</kbd> to lock immediately, then verify you need to enter your password to unlock.</p>
-                </div>
-            </div>
-
-            <!-- macOS Verification -->
-            <div class="platform-panel" id="macos-verify">
-                <div class="method">
-                    <h4>To verify screen lock is working:</h4>
-                    <ol>
-                        <li>Wait for your display to turn off or screen saver to start</li>
-                        <li>Move your mouse or press a key to wake the display</li>
-                        <li>You should be prompted to enter your password immediately</li>
-                    </ol>
-                    <p><strong>Quick test:</strong> Press <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Q</kbd> to lock immediately, then verify you need to enter your password to unlock.</p>
-                </div>
-            </div>
-        </div>
+        <p>After making changes, Citadel will verify this control automatically during its next check. You do not need to do anything else.</p>
+        <p><strong>To test immediately:</strong> Lock your screen manually (<kbd>Windows</kbd> + <kbd>L</kbd> on Windows, <kbd>Control</kbd> + <kbd>Command</kbd> + <kbd>Q</kbd> on macOS) and confirm that you are prompted for your password or PIN to get back in.</p>
     </section>
 
     <footer class="page-footer">
