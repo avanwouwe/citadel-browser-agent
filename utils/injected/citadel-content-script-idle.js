@@ -4,7 +4,9 @@ function safeHandler(fn) {
     return async function (...args) {
         try {
             await fn(...args)
-        } catch (e) {}
+        } catch (e) {
+            console.error(e)
+        }
     }
 }
 
