@@ -86,7 +86,7 @@
       }
     },
     "DriveEncryption": {
-      "query": "SELECT 'Drive not encrypted: ' || ld.device_id AS error\nFROM logical_drives ld\nLEFT JOIN bitlocker_info bi ON bi.drive_letter = ld.device_id\nWHERE ld.drive_type = 'Local Disk'\n  AND (bi.protection_status IS NULL OR bi.protection_status != 1);",
+      "query": "SELECT\n  CASE\n    WHEN bi.protection_status IS NULL THEN 'Drive encryption status unknown: ' || ld.device_id\n    ELSE 'Drive not encrypted: ' || ld.device_id\n  END AS error\nFROM logical_drives ld\nLEFT JOIN bitlocker_info bi ON bi.drive_letter = ld.device_id\nWHERE ld.description = 'Local Fixed Disk'\n  AND (bi.protection_status IS NULL OR bi.protection_status != 1);",
       "text": {
         "en": {
           "label": "Disk is encrypted",
@@ -203,7 +203,7 @@
       }
     },
     "RemovableStorage": {
-      "query": "SELECT 'Removable storage device connected: ' || device_id AS error FROM logical_drives WHERE drive_type = 'Removable Disk';",
+      "query": "SELECT 'Removable storage device connected: ' || device_id AS error FROM logical_drives WHERE description LIKE '%Removable%';",
       "text": {
         "en": {
           "label": "No USB storage devices",
