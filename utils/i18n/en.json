@@ -142,7 +142,7 @@
         "error-network": "Network error",
         "error-store": "Unable to analyze the extension store page",
         "error-manifest": "Unable to analyze the manifest",
-        "error-evaluation": "Unable to evaluate the extensions"
+        "error-evaluation": "Unable to evaluate the extension"
       },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {
@@ -151,9 +151,9 @@
         "blacklist-category": "the category it belongs to has been blacklisted",
         "blacklist-keyword": "its description mentions '{{example}}'",
         "risk-global": "the overall risk level is too high or unknown",
-        "risk-impact": "the risk of it's access to sensitive data is too high or unknown ",
+        "risk-impact": "the risk of its access to sensitive data is too high or unknown ",
         "risk-likelihood": "the probability that it is malware or can be hacked is too high or unknown",
-        "not-verified": "neither the extension nor it's publisher are verified by the extension store",
+        "not-verified": "neither the extension nor its publisher are verified by the extension store",
         "installation-count": "it is not well-known",
         "poor-rating": "it was rated poorly or insufficiently",
         "forbidden-permission": "it requests a forbidden permission '{{example}}'",

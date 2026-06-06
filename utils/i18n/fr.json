@@ -2,7 +2,7 @@
   "global": {
     "yes": "Oui",
     "no": "Non",
-    "it-support": "votre support IT"
+    "contact": "votre support IT"
   },
   "control": {
     "state": {
@@ -55,18 +55,18 @@
         "number-uppercase": "Doit contenir au moins {{min}} lettre(s) majuscule(s)",
         "number-lowercase": "Doit contenir au moins {{min}} lettre(s) minuscule(s)",
         "number-symbols": "Doit contenir au moins {{min}} symbole(s)",
-        "length": "Doit contenir au moins {{min}} charactèrss",
+        "length": "Doit contenir au moins {{min}} charactèrs",
         "entropy": "Ne contient pas assez de caractères différents",
         "sequence": "Est trop répétitif",
-        "username-password": "Doit pas être basé sur le nom d'utilisateur",
-        "reuse": "Doit pas réutiliser le mot de passe de {{label}}"
+        "username-password": "Ne doit pas être basé sur le nom d'utilisateur",
+        "reuse": "Ne doit pas réutiliser le mot de passe de {{label}}"
       }
     },
     "notification": {
       "title": "Problèmes de sécurité",
       "failing": "Un de vos comptes présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
-      "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisée.<p/><u>Dans <b>{{days}} jours</b> votre accès sera bloqué</u>.<p/> Cliquez pour corriger le compte ou contactez {{contact}}.",
-      "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisée. Votre accès a été bloqué. Cliquez pour corriger le compte ou contactez {{contact}}."
+      "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisé.<p/><u>Dans <b>{{days}} jours</b> votre accès sera bloqué</u>.<p/> Cliquez pour corriger le compte ou contactez {{contact}}.",
+      "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisé. Votre accès a été bloqué. Cliquez pour corriger le compte ou contactez {{contact}}."
     }
   },
   "extensiontrust": {
@@ -94,7 +94,7 @@
     }
   },
   "mfa": {
-    "title": "Vous connectez pas avec MFA",
+    "title": "Vous ne connectez pas avec MFA",
     "disconnected": "Vous avez été déconnecté car vous n'avez pas utilisé l'authentification multifacteur (MFA).<P>Reconnectez-vous et configurez votre compte pour utiliser MFA, comme un mot de passe à usage unique basé sur le temps (TOTP).<P>Contactez {{contact}} si vous avez besoin d’aide."
   },
   "block-page": {
@@ -114,7 +114,7 @@
   "block-modal": {
     "request-exception": "En cas d’urgence ou de situation exceptionnelle, vous pouvez <span class=\"clickable\">demander une exception</span> si vous êtes bloqué.",
     "request-exception-header": "Demander une exception",
-    "provide-reason": "Veuillez préciser la raison de votre demande d’exception",
+    "provide-reason": "Veuillez fournir la raison de votre demande d’exception",
     "submit-request": "Envoyer la demande",
     "acknowledge": "OK"
   },
@@ -156,7 +156,7 @@
         "not-verified": "ni l'extension ni son éditeur ne sont vérifiés par le magasin d'extensions",
         "installation-count": "elle n'est pas bien connue",
         "poor-rating": "elle a été mal notée ou insuffisamment notée",
-        "forbidden-permission": "elle demande la permission interdite '{{example}}",
+        "forbidden-permission": "elle demande la permission interdite '{{example}}'",
         "all-domains": "elle demande l'accès à tout le trafic en utilisant '{{example}}'",
         "protected-domain": "elle demande l'accès au domaine protégé '{{example}}'",
         "sideloaded": "elle a été sideloadée"
@@ -184,7 +184,7 @@
       },
       "request-exception": "Si vous êtes <b><u>certain</u></b> que l’extension ne représente pas un risque de sécurité, vous pouvez <span id=\"clickable\">demander une exception temporaire</span>",
       "request-exception-header": "Demander une exception",
-      "provide-reason": "Veuillez indiquer la raison de votre demande d’exception",
+      "provide-reason": "Veuillez fournir la raison de votre demande d’exception",
       "submit-request": "Envoyer la demande"
     },
     "permissions": {
@@ -340,7 +340,7 @@
         "description": "Donne accès à l’API chrome.identity.",
         "analysis": "Les extensions disposant de la permission identity peuvent demander aux utilisateurs de s’authentifier avec leur compte Google via OAuth 2.0, mais l’utilisateur doit approuver la demande pour obtenir un jeton d’accès."
       },
-      "identity.email": {
+      "identity_email": {
         "description": "Donne accès à l’adresse e-mail de l’utilisateur via l’API chrome.identity.",
         "analysis": "Aucune analyse de risque disponible."
       },
