@@ -43,6 +43,12 @@ The TCC portion of the configuration profile is enforced **only** when it is pus
 
 The browser payloads are inert on devices where the corresponding browser is not installed.
 
+If you do not have an MDM, you can still install Citadel manually on endpoints:
+* install the plugin using the [Chrome store](https://chromewebstore.google.com/)
+* install the [installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) 
+  * when you install the package, you will have to bypass the Gatekeeper warnings saying that the package is unsigned
+  * when starting for the first time, end-users will get `citadel-browser-agent would like to access your Downloads folder` warnings (and they can refuse)
+
 ### Deploy
 
 Upload the file as a raw configuration profile in your MDM. The upload action is named differently depending on the platform:
