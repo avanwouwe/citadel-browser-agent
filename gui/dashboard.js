@@ -179,7 +179,7 @@ const renderExtensionDashboard = serialized(async function () {
             nameEl.textContent = name
         }
 
-        const isBlocked   = analysis.state === State.BLOCKING
+        const isBlocked = analysis.state === State.BLOCKING
 
         let actionCell
         if (!analysis.isInstalled) {
@@ -190,7 +190,7 @@ const renderExtensionDashboard = serialized(async function () {
             const checked = analysis.isEnabled ? 'checked' : ''
             actionCell =
                 `<label class="ext-toggle">` +
-                `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked': ''}" ${checked}` +
+                `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked' : ''}" ${checked}` +
                 ` data-extension="${analysis.storeInfo.id}">` +
                 `<span class="ext-toggle-slider"></span>` +
                 `</label>`
@@ -283,7 +283,7 @@ async function handleExtensionAction(event) {
         if (!rejection) return
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
-        const onException =  { type: 'allow-extension', analysis }
+        const onException = { type: 'allow-extension', analysis }
         const options = Modal.prepareOptions(t('extension-analysis.disable-modal.title'), reason, {}, onException, false)
         await Modal.create(options)
     } else {
@@ -298,14 +298,29 @@ async function handleDeleteExtension(event) {
     }
 }
 
+// ── Refresh spinner ───────────────────────────────────────────────────────────
+
+const REFRESH_TIMEOUT_MS = 60 * ONE_SECOND
+let refreshTimeout = null
+
+function clearRefreshSpinner() {
+    updateBtn.classList.remove('refreshing')
+    if (refreshTimeout) {
+        clearTimeout(refreshTimeout)
+        refreshTimeout = null
+    }
+}
+
+// ── Port / service-worker connection ─────────────────────────────────────────
+
 let port
 
 function connect() {
-    port = chrome.runtime.connect({name: "SecurityDashboard"})
+    port = chrome.runtime.connect({ name: "SecurityDashboard" })
     port.onDisconnect.addListener(reconnect)
-    port.onMessage.addListener(async(msg) => {
+    port.onMessage.addListener(async (msg) => {
         if (msg.type === 'RefreshDeviceStatus') {
-            updateBtn.classList.remove('refreshing')
+            clearRefreshSpinner()
             await renderDeviceDashboard()
         } else if (msg.type === 'RefreshAccountStatus') {
             await renderAccountDashboard()
@@ -331,31 +346,30 @@ updateBtn.addEventListener('click', async function () {
     if (updateBtn.classList.contains('refreshing')) return
 
     updateBtn.classList.add('refreshing')
+    refreshTimeout = setTimeout(clearRefreshSpinner, REFRESH_TIMEOUT_MS)
 
     await refreshDeviceStatus()
-});
+})
 
-(function(){
+// ── Tooltip ───────────────────────────────────────────────────────────────────
+
+;(function () {
     let tooltip, hideHandler
 
-    document.body.addEventListener('click', function(ev) {
+    document.body.addEventListener('click', function (ev) {
         const el = ev.target.closest('.has-errors')
 
-        // Remove existing tooltip if any
         if (tooltip) {
-            // If the click is inside the tooltip, do nothing
             if (ev.target.closest('.click-tooltip')) {
                 return
             }
-            // If clicking another info icon, remove current and continue
             tooltip.remove()
             tooltip = null
             if (hideHandler) document.removeEventListener('click', hideHandler, true)
         }
 
-        if (!el) return;
+        if (!el) return
 
-        // Create tooltip
         tooltip = document.createElement('div')
         tooltip.className = "click-tooltip"
         tooltip.innerText = el.dataset.tooltip || ''
@@ -365,9 +379,7 @@ updateBtn.addEventListener('click', async function () {
         tooltip.style.top = (window.scrollY + rect.bottom + 6) + 'px'
         tooltip.style.left = (window.scrollX + rect.left) + 'px'
 
-        // Handler to hide tooltip only when clicking outside both .has-info and the tooltip
-        hideHandler = function(ev2) {
-            // If click is on the info icon or inside the tooltip, do nothing
+        hideHandler = function (ev2) {
             if (ev2.target.closest('.has-info') || ev2.target.closest('.click-tooltip')) return
             if (tooltip) {
                 tooltip.remove()
@@ -379,7 +391,9 @@ updateBtn.addEventListener('click', async function () {
     })
 })()
 
-document.addEventListener('visibilitychange', handleVisibilityChange);
+// ── Event tab auto-refresh ────────────────────────────────────────────────────
+
+document.addEventListener('visibilitychange', handleVisibilityChange)
 let refreshInterval = null
 
 function handleVisibilityChange() {
@@ -404,4 +418,3 @@ function stopEventRefreshing() {
         refreshInterval = null
     }
 }
-
