@@ -48,7 +48,13 @@ class Modal {
         acknowledge.textContent = options.text.acknowledge || ''
 
         acknowledge.addEventListener('click', function () {
-            sendMessage(options.onAcknowledge)
+            try {
+                sendMessage(options.onAcknowledge)
+            } catch (e) {
+                if (e.message.startsWith("Extension context invalidated")) {
+                    host.remove()
+                }
+            }
         })
 
         if (!options.exception) {

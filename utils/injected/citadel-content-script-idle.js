@@ -1,38 +1,45 @@
 injectPageScript('/utils/injected/bundle/citadel-bundle-idle.js')
 
-listeners.clickListener = function(event) {
+function safeHandler(fn) {
+    return async function (...args) {
+        try {
+            await fn(...args)
+        } catch (e) {}
+    }
+}
+
+listeners.clickListener = safeHandler(async function(event) {
     sendMessage("user-interaction")
 
     const button = event.target.closest('button, input[type="button"], input[type="submit"]')
-    if (button && !button.disabled && button.offsetParent != null && ! button.isHidden()) {
-        checkLogin(event, button)
+    if (button && !button.disabled && button.offsetParent != null && !button.isHidden()) {
+        await checkLogin(event, button)
     }
-}
+})
 
-listeners.keyListener = function(event) {
+listeners.keyListener = safeHandler(async function(event) {
     if (event.key === 'Enter') {
         sendMessage("user-interaction")
 
-        if  (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'BUTTON') {
-            checkLogin(event, event.target)
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'BUTTON') {
+            await checkLogin(event, event.target)
         }
     }
-}
+})
 
-window.addEventListener('beforeprint', function() {
+window.addEventListener('beforeprint', safeHandler(function() {
     sendMessage("print-dialog")
-}, true)
+}), true)
 
-document.addEventListener('change', function(event) {
+document.addEventListener('change', safeHandler(function(event) {
     if (event.target?.type === 'file') {
         for (const file of event.target.files) {
-            sendMessage('file-select', { subtype : 'picked file', file: cloneFile(file)
-         })
+            sendMessage('file-select', { subtype: 'picked file', file: cloneFile(file) })
         }
     }
-}, true)
+}), true)
 
-document.addEventListener('drop', function(event) {
+document.addEventListener('drop', safeHandler(function(event) {
     Array.from(event.dataTransfer.files).forEach(file => {
         sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
     })
@@ -43,7 +50,7 @@ document.addEventListener('drop', function(event) {
             sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
         }
     })
-}, true)
+}), true)
 
 const system = window.location.origin
 let sessionState
