@@ -86,7 +86,7 @@
       }
     },
     "DriveEncryption": {
-      "query": "SELECT\n  CASE\n    WHEN bi.protection_status IS NULL THEN 'Drive encryption status unknown: ' || ld.device_id\n    ELSE 'Drive not encrypted: ' || ld.device_id\n  END AS error\nFROM logical_drives ld\nLEFT JOIN bitlocker_info bi ON bi.drive_letter = ld.device_id\nWHERE ld.description = 'Local Fixed Disk'\n  AND (bi.protection_status IS NULL OR bi.protection_status != 1);",
+      "query": "SELECT '' AS error WHERE NOT EXISTS (\n  SELECT 1 FROM registry\n  WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\BitLockerStatus\\BootStatus'\n    AND data = '1'\n);",
       "text": {
         "en": {
           "label": "Disk is encrypted",
