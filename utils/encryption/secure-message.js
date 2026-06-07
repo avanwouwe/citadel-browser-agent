@@ -1,12 +1,12 @@
 class SecureMessage {
     static MAX_PAYLOAD_LENGTH = 190     // RSA-OAEP max = modulusBytes(256) - 2*hashLen(32) - 2 = 190
     static CHANNEL_NAME = "SecureMessage"
-    static publicKey
+    static #publicKey
     static #privateKey
 
     static async getPublicKey() {
-        if (Context.isServiceWorker())  return SecureMessage.publicKey
-        if (Context.isContentScript())  return chrome.storage.session.get("SecureMessageKey").then(data => data.SecureMessageKey)
+        if (Context.isServiceWorker())  return SecureMessage.#publicKey
+        if (Context.isContentScript())  return callServiceWorker("SecureMessageKey")
 
         debug("method cannot be called in this context")
     }
@@ -74,7 +74,7 @@ class SecureMessage {
 
     static {
         if (Context.isServiceWorker()) {
-            SecureMessage.publicKey = crypto.subtle.generateKey(
+            SecureMessage.#publicKey = crypto.subtle.generateKey(
                 { name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
                 false,
                 ["encrypt", "decrypt"]

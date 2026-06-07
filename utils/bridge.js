@@ -24,6 +24,8 @@ class Bridge {
             return { accounts  }
         })
 
+        Bridge.listenTo("SecureMessageKey", async () => SecureMessage.getPublicKey())
+
         Bridge.listenTo("DeletePassword", ({ username }, { url: system }) => PasswordVault.deleteAccount(system, username))
 
         Bridge.listenTo("GetAccountStatus", () => AccountTrust.getStatus())
