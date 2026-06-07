@@ -3,7 +3,7 @@
 set -euo pipefail
 
 PACKAGE_ID="org.citadelagent"
-VERSION="1.4.5"
+VERSION="1.4.6"
 BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 OUTPUT_PKG="citadel-browser-agent-$VERSION.pkg"
 
