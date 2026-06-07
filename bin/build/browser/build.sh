@@ -18,4 +18,4 @@ cp -r utils gui "$BUILD_ROOT"
 cd ./bin/build/browser/ || exit
 mv "$BUILD_ROOT" $OUTPUT_PKG
 cd "$OUTPUT_PKG" || exit
-zip -r ../"$OUTPUT_PKG".zip .
+zip -r ../"$OUTPUT_PKG".zip . -x "*.DS_Store"
