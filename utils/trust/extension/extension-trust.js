@@ -1,5 +1,7 @@
 class ExtensionTrust {
 
+    static TYPE = "extension"
+
     static #storage = new PersistentObject("extensions")
 
     static {

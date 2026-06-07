@@ -970,7 +970,7 @@ chrome.action.onClicked.addListener(() => {
 })
 
 chrome.notifications.onClicked.addListener(function(notificationId) {
-	if (notificationId === DeviceTrust.TYPE || notificationId === AccountTrust.TYPE) {
+	if (notificationId === DeviceTrust.TYPE || notificationId === AccountTrust.TYPE || notificationId === ExtensionTrust.TYPE) {
 		openDashboard(notificationId)
 
 		if (Notification.showing?.type === notificationId && Notification.showing?.level === State.BLOCKING) {
