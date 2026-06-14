@@ -35,9 +35,9 @@ class Modal {
         document.body.appendChild(host)
         const shadow = host.attachShadow({mode: 'open'})
         shadow.innerHTML = await page.text()
-        const style = document.createElement('style')
-        style.textContent = await css.text()
-        shadow.prepend(style)
+        const sheet = new CSSStyleSheet()
+        sheet.replaceSync(await css.text())
+        shadow.adoptedStyleSheets = [sheet]
 
         shadow.getElementById('companyLogo').src = options.logo || ''
         shadow.getElementById('modalTitle').textContent = options.text.title || ''
