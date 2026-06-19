@@ -72,7 +72,7 @@ The special log level `NEVER` is used to disable logging.
 In order to minimize the amount of personal data, Citadel masks URLs of events unless the information is strictly necessary, such as:
 * if the host is part of the protected scope
 * if the event is of `maskUrlevel` or higher (by default set to `WARN`)
-* if the host has been explicitly been exempted from masking (by placing it in the `domain.unhash` list)
+* if the host has been explicitly been exempted from masking (by placing the domain or it's hash in the `domain.unhash` list)
 
 When masking the URL the hostname, username, pathname, hash and search components of the URL are separately hashed. This allows SOC analysis some level of understanding of a click-stream, without unduly exposing sensitive personal information.
 

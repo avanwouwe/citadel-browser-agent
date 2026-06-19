@@ -126,7 +126,7 @@ class Log {
         url = urlObj
 
         const hashedHostname = url.hostname?.hashDJB2()
-        const isUnhash = hashedHostname && config.domain.unhash.hasOwnProperty(hashedHostname)
+        const isUnhash = hashedHostname && config.domain.unhash.hasOwnProperty(hashedHostname) || matchDomain(url.hostname, config.domain.unhash)
 
         if (! Config.isSensitive(url.hostname) &&
             ! isUnhash &&
