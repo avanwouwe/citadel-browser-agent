@@ -74,6 +74,7 @@
       }
     },
     "SystemUpdated": {
+      "query": "SELECT value AS error FROM plist WHERE path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'RecommendedUpdates' AND subkey = 'Display Name' AND value LIKE 'macOS %';",
       "text": {
         "en": {
           "label": "System is up to date",

@@ -328,27 +328,6 @@ def loadControlPacks():
 
     return controls
 
-def checkSystemUpdated():
-    report = { }
-
-    try:
-        if SYSTEM_OS == "macos":
-            result = subprocess.run(["softwareupdate", "--list"], capture_output=True, text=True, check=True)
-            out = result.stdout + result.stderr
-            isUpdated = "No new software available" in out
-            addReport(report, "SystemUpdated", [] if isUpdated else [''])
-
-        elif SYSTEM_OS == "windows":
-            errors = getErrors("SELECT '' AS error FROM windows_security_center WHERE autoupdate != 'Good'")
-            addReport(report, "SystemUpdated", errors)
-
-        else:
-            raise Exception("unsupported OS")
-    except Exception as e:
-        exception("failed to check OS updates", e)
-
-    return report
-
 def checkBlacklist(type, forbiddenLabel, requiredLabel, query):
     report = { }
 
@@ -471,7 +450,6 @@ def generateAudit():
 
     reports.update(checkApplications())
     reports.update(checkProcesses())
-    reports.update(checkSystemUpdated())
 
     return {"definitions": definitions, "reports": reports}
 

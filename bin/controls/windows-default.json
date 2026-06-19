@@ -74,6 +74,7 @@
       }
     },
     "SystemUpdated": {
+      "query": "SELECT '' AS error FROM windows_security_center WHERE autoupdate != 'Good';",
       "text": {
         "en": {
           "label": "System is up to date",
