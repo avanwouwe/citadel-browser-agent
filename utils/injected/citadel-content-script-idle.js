@@ -250,8 +250,6 @@ checkLogin = async function(event, button) {
                 setPointerNormal()
             }
 
-            document.body.style.cursor = 'default'
-
             repeatEvent(event, button)
         }
 
