@@ -39,9 +39,9 @@ class Modal {
         sheet.replaceSync(await css.text())
         shadow.adoptedStyleSheets = [sheet]
 
-        shadow.getElementById('companyLogo').src = options.logo || ''
-        shadow.getElementById('modalTitle').textContent = options.text.title || ''
-        shadow.getElementById('modalMessage').innerHTML = options.text.message || ''
+        shadow.getElementById('companyLogo').src = options.logo ?? ''
+        shadow.getElementById('modalTitle').textContent = options.text.title ?? ''
+        shadow.getElementById('modalMessage').safeInnerHTML(options.text.message ?? '')
 
         const acknowledge = shadow.getElementById('acknowledgeButton')
         acknowledge.hidden = options.onAcknowledge === undefined

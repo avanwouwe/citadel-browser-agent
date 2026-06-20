@@ -109,7 +109,7 @@ async function sha256Hash(str) {
 
 /**
  * Parse safe markup and create DOM elements
- * Supported tags: <b>, <i>, <u>, <strong>, <em>, <link>, <code>
+ * Supported tags: <b>, <i>, <u>, <strong>, <em>, <link>, <code>, <nowrap>, <mono>
  * Links can have id attributes: <link id="mylink">click here</link>
  *
  * @param {string} text - Text with safe markup
@@ -119,7 +119,7 @@ async function sha256Hash(str) {
 
 if (typeof HTMLElement !== 'undefined') {
     HTMLElement.prototype.safeInnerHTML = function(text, handlers = {}) {
-        const allowedTags = ['b', 'i', 'u', 'strong', 'em', 'code', 'link']
+        const allowedTags = ['b', 'i', 'u', 'strong', 'em', 'code', 'link', 'nowrap', 'mono']
         const container = document.createDocumentFragment()
         const stack = [container]
 
@@ -149,21 +149,24 @@ if (typeof HTMLElement !== 'undefined') {
                             let el
                             if (tagName === 'link') {
                                 if (href) {
-                                    // Real link with href - create <a> tag
                                     el = document.createElement('a')
                                     el.href = href
                                     el.target = '_blank'
                                     el.rel = 'noopener noreferrer'
                                 } else {
-                                    // Clickable action - create <span>
                                     el = document.createElement('span')
                                     el.className = 'i18n-link'
                                     el.style.cursor = 'pointer'
-
                                     if (id && handlers[id]) {
                                         el.addEventListener('click', handlers[id])
                                     }
                                 }
+                            } else if (tagName === 'nowrap') {
+                                el = document.createElement('span')
+                                el.style.whiteSpace = 'nowrap'
+                            } else if (tagName === 'mono') {
+                                el = document.createElement('span')
+                                el.style.fontFamily = "'Courier New', Courier, monospace"
                             } else {
                                 el = document.createElement(tagName)
                             }

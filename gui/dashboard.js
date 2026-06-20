@@ -66,7 +66,7 @@ const renderDeviceDashboard = serialized(async function () {
         let label = ctrlText("label") ?? ctrl.name
         const explainPage = ctrlText("explain")
         if (explainPage) {
-            label = `<a href="${explainPage}" target="_blank">${label}</a>`
+            label = `<a href="${safeHref(explainPage)}" target="_blank">${label.escapeHtmlEntities()}</a>`
         }
 
         let errors = ''

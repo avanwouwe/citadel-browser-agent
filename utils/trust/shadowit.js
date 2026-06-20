@@ -36,7 +36,7 @@ class ShadowIT {
 
     static showWarning(tabId, url) {
         const hostname = url.hostname
-        const contact = config.company.contact.htmlNowrap()
+        const contact = config.company.contact.embedTag('nowrap')
         const onAcknowledge = { type: "acknowledge-shadow-it", url: url.origin }
         const onException = { type: "allow-shadow-it", url: url.origin }
 

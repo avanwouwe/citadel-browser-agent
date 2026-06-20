@@ -147,20 +147,6 @@ function safeHref(url) {
     return url?.isWebURL() ? url : null
 }
 
-const _escapeMap = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-}
-
-function sanitize(str) {
-    if (str == null) return str
-
-    return String(str).replace(/[&<>"']/g, c => _escapeMap[c])
-}
-
 function setInitiator(details) {
     details.initiator = details.documentUrl ?? details.initiator
 }
@@ -277,9 +263,7 @@ function collapseWhitespace(str) {
     return str.replace(/\s+/g, ' ')
 }
 
-String.prototype.htmlNowrap = function () { return `<span style="white-space: nowrap;">${this}</span>` }
-
-String.prototype.htmlMonospace = function () { return `<span style="font-family: 'Courier New', Courier, monospace;">${this}</span>` }
+String.prototype.embedTag = function (tag) { return `<${tag}>${this}</${tag}>` }
 
 Object.prototype.getOrSet = function (attr, defaultValue) {
     if (this.hasOwnProperty(attr)) {

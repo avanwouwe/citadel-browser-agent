@@ -60,8 +60,8 @@ class Port {
             }, Port.#retryDelay)
 
 
-            const error = isString(Port.#lastError) ? " " + t("errors.messaging.with-error", { error: Port.#lastError.htmlMonospace() }) : ""
-            const message = t("errors.messaging.please-contact", { contact: config.company.contact.htmlNowrap() })
+            const error = isString(Port.#lastError) ? " " + t("errors.messaging.with-error", { error: Port.#lastError.embedTag('mono') }) : ""
+            const message = t("errors.messaging.please-contact", { contact: config.company.contact.embedTag('nowrap') })
 
             rateLimit(Port.#LOST_EVENTS_POPUP, Port.#LOST_EVENTS_FREQ, (mustShowPopup) => {
                 if (mustShowPopup) {
