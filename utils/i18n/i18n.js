@@ -24,7 +24,7 @@ class I18n {
         }
 
         return template.replace(/{{\s*([\w.]+)\s*}}/g, (match, p1) => {
-            return (p1 in values) ? values[p1] : match
+            return (p1 in values) ? sanitize(values[p1]) : match
         })
     }
 

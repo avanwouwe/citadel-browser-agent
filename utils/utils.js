@@ -147,6 +147,20 @@ function safeHref(url) {
     return url?.isWebURL() ? url : null
 }
 
+const _escapeMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+}
+
+function sanitize(str) {
+    if (str == null) return str
+
+    return String(str).replace(/[&<>"']/g, c => _escapeMap[c])
+}
+
 function setInitiator(details) {
     details.initiator = details.documentUrl ?? details.initiator
 }
