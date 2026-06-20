@@ -314,6 +314,7 @@ class ExtensionAnalysis {
 
             // otherwise, disable it
             await ExtensionTrust.block(currAnalysis)
+            riskIncrease.forEach(reason => logger.log(nowTimestamp(), "extension", "risk increase", storePage, Log.WARN, reason, `extension '${extensionInfo.id}' added risk ${reason}`))
             ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
         }
     }
@@ -526,7 +527,7 @@ class ExtensionAnalysis {
     static #log(result, action, level, extensionInfo, analysis, scanType) {
         const storePage = analysis?.storeInfo?.storePage
         const logObj = ExtensionAnalysis.toLogObject(analysis ?? extensionInfo, scanType)
-        logger.log(Date.now(), "extension", result, storePage, level, logObj, `extension '${extensionInfo.id}' was ${action} during ${scanType} scan`)
+        logger.log(nowTimestamp(), "extension", result, storePage, level, logObj, `extension '${extensionInfo.id}' was ${action} during ${scanType} scan`)
     }
 
     static toLogObject(input, scanType) {
