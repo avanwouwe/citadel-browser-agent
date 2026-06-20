@@ -1,7 +1,8 @@
-// Tracks the shadow-IT hosts the user has already handled — either by acknowledging a
-// warning or by being granted a block exception. Persisted via PersistentObject (chrome
-// storage), not page storage, so the grants survive service-worker restarts and clearing
-// the browser cache. The value is a map of hostname -> expiry timestamp (epoch ms).
+// Tracks the shadow-IT applications the user has already handled — either by acknowledging a warning or by being
+// granted a block exception. The value is a map of matched application pattern -> expiry timestamp
+// (epoch ms). Grants are keyed on the configured pattern (e.g. "dropbox.com") rather than
+// the exact hostname, so that handling one host of an application also covers its other
+// hosts (e.g. acknowledging "www.dropbox.com" also covers "api.dropbox.com").
 class ShadowIT {
 
     static #storage = new PersistentObject("shadow-it")
@@ -47,19 +48,34 @@ class ShadowIT {
         assert(hostname, "hostname is required")
         assert(durationDays != null, "duration is required")
 
-        ShadowIT.#grants[hostname] = Date.now() + durationDays * ONE_DAY
+        const key = ShadowIT.#patternFor(hostname)
+        ShadowIT.#grants[key] = Date.now() + durationDays * ONE_DAY
     }
 
-    // true when an unexpired grant exists for the hostname, i.e. the user has already been
-    // warned or granted an exception and we should not bother them again yet
+    // the configured shadow-IT pattern (in the block or warn lists) that the hostname matches, walking the domain
+    // suffixes the same way as matchDomain(). Returns the hostname itself when the hostname matches no configured application.
+    static #patternFor(hostname) {
+        const parts = (hostname ?? "").split('.')
+
+        for (let i = 0; i < parts.length; i++) {
+            const candidate = parts.slice(i).join('.')
+            if (config.shadowit.block[candidate] || config.shadowit.warn[candidate]) return candidate
+        }
+
+        return hostname
+    }
+
+    // true when an unexpired grant exists for the hostname's application, i.e. the user has
+    // already been warned or granted an exception and we should not bother them again yet
     static #isHandled(hostname) {
         assert(hostname, "hostname is required")
 
-        const expiresAt = ShadowIT.#grants[hostname]
+        const key = ShadowIT.#patternFor(hostname)
+        const expiresAt = ShadowIT.#grants[key]
         if (! expiresAt) return false
 
         if (expiresAt <= Date.now()) {
-            delete ShadowIT.#grants[hostname]
+            delete ShadowIT.#grants[key]
             return false
         }
 
