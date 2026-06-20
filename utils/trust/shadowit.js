@@ -43,11 +43,11 @@ class ShadowIT {
         Modal.createForTab(tabId, t("shadow-it.warn.title"), t("shadow-it.warn.message", { hostname, contact }), onAcknowledge, onException)
     }
 
-    static grant(hostname, durationMinutes) {
+    static grant(hostname, durationDays) {
         assert(hostname, "hostname is required")
-        assert(durationMinutes != null, "duration is required")
+        assert(durationDays != null, "duration is required")
 
-        ShadowIT.#grants[hostname] = Date.now() + durationMinutes * ONE_MINUTE
+        ShadowIT.#grants[hostname] = Date.now() + durationDays * ONE_DAY
     }
 
     // true when an unexpired grant exists for the hostname, i.e. the user has already been

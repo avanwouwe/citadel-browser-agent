@@ -484,9 +484,9 @@ class Config {
             block: [],
             alwaysBlock: false,
             exceptions: {
-                duration: 60 * 24 * 365 // lifetime (minutes) of a block exception granted by the user
+                duration: 365       // lifetime (in days) of an exception for an application
             },
-            warnInterval: 60 * 24       // re-show the warning after this many minutes once acknowledged
+            warnInterval: 7         // re-show the warning after this many days once acknowledged
         },
         extensions: {
             risk: {
