@@ -25,7 +25,7 @@ When overriding default settings in the JSON configuration file, the following r
 
 ## specifying domains
 The following attributes specify lists of domains:
-* `domain.unhash`
+* `domain.unmask`
 * `company.domains`
 * `company.applications`
 * `session.domains`

@@ -90,6 +90,4 @@ Once a user has dismissed warnings or obtained exceptions for a specific shadow 
 ## identifying new applications
 Citadel comes with a set of common shadow IT applications, but this list will never be complete. By aggregating application usage statistics, and reverse-sorting by the unique number of users, it is possible to identify widely used shadow IT applications specific to your organization. 
 
-Since Citadel masks traffic that is not related to your protected scope, this means that your top N applications will include many hashed host names. By adding those hashes to `domain.unhash` you can unmask those applications, and thus ensure that they do not represent a risk.
-
-By default Citadel hashes any URL that is not related to your protected scope. This makes identifying use of unauthorized 
+Since Citadel masks traffic that is not related to your protected scope, this means that your top N applications will include many hashed host names. By adding those hashes or domains to `domain.unmask` you can unmask those applications, and thus ensure that they do not represent a risk.

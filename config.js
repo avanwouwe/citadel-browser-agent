@@ -36,7 +36,7 @@ class Config {
         },
         exceptions: [ ],
         domain: {
-            unhash: [],
+            unmask: [],
             sensitive: [
                 "apple.com",
                 "google.com",
@@ -551,7 +551,7 @@ class Config {
     ]
 
     static #domainPatterns = [
-        "domain.unhash",
+        "domain.unmask",
         "company.domains",
         "company.applications",
         "session.domains",
@@ -604,7 +604,7 @@ class Config {
 
         Config.#init(newConfig)
 
-        // calculate the list of protected, sensitive and unhash domains
+        // calculate the list of protected, sensitive and unmask domains
         const protectedDomains = mergeArrays(newConfig.company.domains, newConfig.company.applications)
         newConfig.protectedDomains = protectedDomains.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
@@ -617,8 +617,8 @@ class Config {
             return result
         }, {})
 
-        const unhashDomains = mergeArrays(newConfig.domain.unhash, newConfig.shadowit.warn, newConfig.shadowit.block)
-        newConfig.domain.unhash = unhashDomains.reduce((result, obj) => {
+        const unmaskDomains = mergeArrays(newConfig.domain.unmask, newConfig.shadowit.warn, newConfig.shadowit.block)
+        newConfig.domain.unmask = unmaskDomains.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})

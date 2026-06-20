@@ -125,14 +125,14 @@ class Log {
         if (! urlObj) return url    // if we can't parse the URL, we can't mask it
         url = urlObj
 
-        const hashedHostname = url.hostname?.hashDJB2()
-        const isUnhash = hashedHostname && config.domain.unhash.hasOwnProperty(hashedHostname) || matchDomain(url.hostname, config.domain.unhash)
+        const maskedHostname = url.hostname?.hashDJB2()
+        const isUnmask = maskedHostname && config.domain.unmask.hasOwnProperty(maskedHostname) || matchDomain(url.hostname, config.domain.unmask)
 
         if (! Config.isSensitive(url.hostname) &&
-            ! isUnhash &&
+            ! isUnmask &&
             Log.#levelValue[level] < config.logging.maskUrlLevel
         ) {
-            url.hostname ? url.hostname = hashedHostname : undefined
+            url.hostname ? url.hostname = maskedHostname : undefined
             url.username ? url.username = url.username.hashDJB2() : undefined
             url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashDJB2() : undefined
             url.hash ? url.hash = url.hash.hashDJB2() : undefined
