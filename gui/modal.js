@@ -45,7 +45,7 @@ class Modal {
 
         const acknowledge = shadow.getElementById('acknowledgeButton')
         acknowledge.hidden = options.onAcknowledge === undefined
-        acknowledge.textContent = options.text.acknowledge || ''
+        acknowledge.textContent = options.text.acknowledge ?? ''
 
         acknowledge.addEventListener('click', function () {
             try {
@@ -62,10 +62,10 @@ class Modal {
             return
         }
 
-        shadow.getElementById('exceptionEnabler').innerHTML = options.exception.text.request || ''
-        shadow.getElementById('exceptionTitle').innerText = options.exception.text.requestHeader || ''
-        shadow.getElementById('exceptionTextarea').placeholder = options.exception.text.provideReason || ''
-        shadow.getElementById('exceptionSubmit').innerText = options.exception.text.submitRequest || 'Submit'
+        shadow.getElementById('exceptionEnabler').innerHTML = options.exception.text.request ?? ''
+        shadow.getElementById('exceptionTitle').innerText = options.exception.text.requestHeader ?? ''
+        shadow.getElementById('exceptionTextarea').placeholder = options.exception.text.provideReason ?? ''
+        shadow.getElementById('exceptionSubmit').innerText = options.exception.text.submitRequest ?? 'Submit'
 
         const exceptionEnabler = shadow.getElementById('exceptionEnabler')
         const exceptionSection = shadow.getElementById('exceptionSection')

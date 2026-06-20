@@ -148,9 +148,10 @@ if (typeof HTMLElement !== 'undefined') {
                         } else {
                             let el
                             if (tagName === 'link') {
-                                if (href) {
+                                const safeHref = href && href.isWebURL() ? href : null
+                                if (safeHref) {
                                     el = document.createElement('a')
-                                    el.href = href
+                                    el.href = safeHref
                                     el.target = '_blank'
                                     el.rel = 'noopener noreferrer'
                                 } else {

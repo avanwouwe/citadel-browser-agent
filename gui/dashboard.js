@@ -66,7 +66,7 @@ const renderDeviceDashboard = serialized(async function () {
         let label = ctrlText("label") ?? ctrl.name
         const explainPage = ctrlText("explain")
         if (explainPage) {
-            label = `<a href="${safeHref(explainPage)}" target="_blank">${label.escapeHtmlEntities()}</a>`
+            label = `<a href="${(safeHref(explainPage) ?? '').escapeHtmlEntities()}" target="_blank">${label.escapeHtmlEntities()}</a>`
         }
 
         let errors = ''
@@ -183,7 +183,7 @@ const renderExtensionDashboard = serialized(async function () {
 
         let actionCell
         if (!analysis.isInstalled) {
-            actionCell = `<span class="delete-btn" data-extension="${analysis.storeInfo.id}">${Icons.delete}</span>`
+            actionCell = `<span class="delete-btn" data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">${Icons.delete}</span>`
         } else if (analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable) {
             actionCell = ''
         } else {
@@ -191,7 +191,7 @@ const renderExtensionDashboard = serialized(async function () {
             actionCell =
                 `<label class="ext-toggle">` +
                 `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked' : ''}" ${checked}` +
-                ` data-extension="${analysis.storeInfo.id}">` +
+                ` data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">` +
                 `<span class="ext-toggle-slider"></span>` +
                 `</label>`
         }
