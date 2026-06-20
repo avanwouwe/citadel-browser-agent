@@ -1,5 +1,6 @@
 class Config {
     static default = {
+        maxReasonLength: 150,                   // max number of characters when users give a reason
         company: {
             name: 'Your Organisation',          // name of your organisation
             contact: undefined,                 // replace with the email address of your support
@@ -44,6 +45,7 @@ class Config {
                 "onmicrosoft.com",
                 "microsoftonline.com",
                 "oraclecloud.com",
+                "office.com",
                 "sharepoint.com",
                 "hotmail.com",
                 "outlook.com",
@@ -61,46 +63,13 @@ class Config {
                 "1password.com",
                 "bitwarden.com",
                 "lastpass.com",
-                "airbyte.com",
-                "jamfcloud.com",
-                "fleetdm.com",
                 "jumpcloud.com",
-                "crowdstrike.com",
-                "sentinelone.com",
-                "docker.com",
-                "docker.io",
-                "vanta.com",
-                "securityscorecard.io",
-                "bitsight.com",
-                "openai.com",
-                "anthropic.com",
-                "claude.ai",
-                "storylane.io",
-                "usetiful.com",
                 "workos.com",
                 "okta.com",
                 "auth0.com",
-                "n8n.io",
-                "zapier.com",
-                "tableau.com",
-                "qlik.com",
                 "zoom.com",
                 "webex.com",
-                "airtable.com",
-                "databricks.com",
-                "snowflake.com",
-                "basecamp.com",
-                "clickup.com",
-                "monday.com",
-                "intercom.com",
-                "crisp.chat",
-                "zendesk.com",
                 "document360.com",
-                "document360.io",
-                "datadoghq.com",
-                "newrelic.com",
-                "anydesk.com",
-                "teamviewer.com"
             ],
             publicMail: [
                 "gmail.com",
@@ -319,6 +288,206 @@ class Config {
                 macos: undefined
             },
         },
+        shadowit: {
+            warn: [
+                // 🔴 AI Tools
+                "chatgpt.com",
+                "chat.openai.com",
+                "claude.ai",
+                "gemini.google.com",
+                "copilot.microsoft.com",
+                "perplexity.ai",
+                "poe.com",
+                "chat.mistral.ai",
+                "grok.com",
+                "x.ai",
+                "jasper.ai",
+                "copy.ai",
+                "you.com",
+
+                // 🔴 AI Vibe Coding / App Builders
+                "lovable.dev",
+                "base44.com",
+                "bolt.new",
+                "v0.dev",
+                "same.dev",
+                "tempolabs.ai",
+                "create.xyz",
+                "app.devin.ai",
+                "mgx.dev",
+
+                // 🔴 AI Code Editors (Cloud)
+                "cursor.com",
+                "cursor.sh",
+                "windsurf.ai",
+                "codeium.com",
+                "tabnine.com",
+                "supermaven.com",
+                "aider.chat",
+
+                // 🔴 Text Transmission / Translation
+                "grammarly.com",
+                "deepl.com",
+                "translate.google.com",
+
+                // 🔴 Code & Text Paste
+                "pastebin.com",
+                "gist.github.com",
+
+                // 🔴 Tunneling
+                "ngrok.com",
+                "ngrok.io",
+                "localtunnel.me",
+                "trycloudflare.com",
+                "serveo.net",
+
+                // 🔴 Online Document Processing
+                "smallpdf.com",
+                "ilovepdf.com",
+                "pdf24.org",
+                "sejda.com",
+
+                // 🔴 Cloud Storage (Personal)
+                "dropbox.com",
+                "drive.google.com",
+                "wetransfer.com",
+                "mega.nz",
+                "icloud.com",
+                "box.com",
+                "sync.com",
+                "mediafire.com",
+                "pcloud.com",
+                "tresorit.com",
+                "fromsmash.com",
+                "transfernow.net",
+                "filebin.net",
+
+                // 🟠 No-Code / Low-Code App Builders
+                "bubble.io",
+                "flutterflow.io",
+                "glideapps.com",
+                "softr.io",
+                "adalo.com",
+                "retool.com",
+                "appsmith.com",
+                "weweb.io",
+                "webflow.com",
+                "framer.com",
+
+                // 🟠 Shadow Backend / Deployment
+                "vercel.com",
+                "netlify.com",
+                "railway.app",
+                "render.com",
+                "fly.io",
+                "supabase.com",
+                "neon.tech",
+                "planetscale.com",
+                "xano.com",
+
+                // 🟠 Messaging & Collaboration
+                "web.whatsapp.com",
+                "web.telegram.org",
+                "signal.org",
+                "discord.com",
+                "app.slack.com",
+                "messenger.com",
+                "viber.com",
+                "skype.com",
+                "web.snapchat.com",
+                "element.io",
+                "groupme.com",
+                "line.me",
+                "kik.com",
+
+                // 🟠 Project Management (Personal)
+                "trello.com",
+                "notion.so",
+                "airtable.com",
+                "monday.com",
+                "clickup.com",
+                "asana.com",
+                "basecamp.com",
+
+                // 🟠 Email & Disposable Identity
+                "mail.google.com",
+                "proton.me",
+                "tuta.com",
+                "temp-mail.org",
+                "guerrillamail.com",
+
+                // 🟠 Remote Access
+                "teamviewer.com",
+                "anydesk.com",
+                "parsec.app",
+                "logmein.com",
+                "splashtop.com",
+
+                // 🟠 Screen Recording & Screenshot
+                "loom.com",
+                "gyazo.com",
+                "screencastify.com",
+                "prntscr.com",
+                "streamable.com",
+
+                // 🟠 Note-taking
+                "evernote.com",
+                "roamresearch.com",
+                "sync.obsidian.md",
+
+                // 🟠 Video Conferencing (Ungoverned)
+                "whereby.com",
+                "meet.jit.si",
+
+                // 🟠 AI Workflow / Agent Builders
+                "dify.ai",
+                "flowiseai.com",
+                "relevanceai.com",
+                "stack-ai.com",
+                "langflow.org",
+
+                // 🟡 VPN / Anonymization
+                "nordvpn.com",
+                "expressvpn.com",
+                "protonvpn.com",
+                "windscribe.com",
+                "psiphon3.com",
+
+                // 🟡 Dev Environments (Cloud)
+                "github.com",
+                "gitlab.com",
+                "replit.com",
+                "jsfiddle.net",
+                "codepen.io",
+                "stackblitz.com",
+                "glitch.com",
+                "codesandbox.io",
+                "gitpod.io",
+
+                // 🟡 Automation / Integration
+                "zapier.com",
+                "make.com",
+                "ifttt.com",
+                "n8n.io",
+
+                // 🟡 Shadow CRM / Marketing
+                "mailchimp.com",
+                "canva.com",
+                "hubspot.com",
+                "pipedrive.com",
+
+                // 🟡 Survey & Form Collection
+                "surveymonkey.com",
+                "typeform.com",
+                "jotform.com",
+            ],
+            block: [],
+            alwaysBlock: false,
+            exceptions: {
+                duration: 60 * 24 * 365 // lifetime (minutes) of a block exception granted by the user
+            },
+            warnInterval: 60 * 24       // re-show the warning after this many minutes once acknowledged
+        },
         extensions: {
             risk: {
                 maxLikelihood: 8.0,
@@ -335,7 +504,7 @@ class Config {
                     "jifbgnmbgbdiedhdecealmlgmekpagde", "gojhcdgcpbpfigcaejpfhfegekdgiblk","igpdmclhhlcpoindmhkhillbfhdgoegm" // Opera
                 ],
                 allowInstall: [],
-                allowAlways: [],
+                allowAlways: ["gaiabdglljkdhmekohlhdajbffpndkdd"],
             },
             blacklist: {
                 id: [],
@@ -393,6 +562,8 @@ class Config {
         "account.exceptions.domains",
         "account.mfa.required",
         "account.mfa.exceptions",
+        "shadowit.warn",
+        "shadowit.block",
     ]
 
     static #init(config) {
@@ -433,19 +604,24 @@ class Config {
 
         Config.#init(newConfig)
 
-        // calculate the list of protected and sensitive domains
+        // calculate the list of protected, sensitive and unhash domains
         const protectedDomains = mergeArrays(newConfig.company.domains, newConfig.company.applications)
         newConfig.protectedDomains = protectedDomains.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})
 
-        const sensitiveDomains = mergeArrays(protectedDomains, newConfig.domain.sensitive)
+        const sensitiveDomains = mergeArrays(protectedDomains, newConfig.domain.sensitive, newConfig.shadowit.warn, newConfig.shadowit.block)
         newConfig.sensitiveDomains = sensitiveDomains.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
         }, {})
 
+        const unhashDomains = mergeArrays(newConfig.domain.unhash, newConfig.shadowit.warn, newConfig.shadowit.block)
+        newConfig.domain.unhash = unhashDomains.reduce((result, obj) => {
+            Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
+            return result
+        }, {})
 
         // any extension that should *always* be whitelisted should definitely be whitelisted for installation
         newConfig.extensions.whitelist.allowInstall = mergeArrays(

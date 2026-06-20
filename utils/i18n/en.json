@@ -109,7 +109,7 @@
     "request-exception-header": "Request an Exception",
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
-    "request-submitted-popup": "Your exception request has been submitted. You can retry the operation."
+    "request-submitted-popup": "Your exception request has been submitted. You can now access the site."
   },
   "block-modal": {
     "request-exception": "In urgent and exceptional cases you can <span class=\"clickable\">request an exception</span> if you are blocked.",
@@ -117,6 +117,15 @@
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
     "acknowledge": "OK"
+  },
+  "shadow-it": {
+    "block": {
+      "reason": "application is not authorized (shadow IT)"
+    },
+    "warn": {
+      "title": "Unauthorized application",
+      "message": "<b>{{hostname}}</b> is an unauthorized application (shadow IT). Be careful not to share confidential or company data with it, and contact {{contact}} if you need an approved alternative."
+    }
   },
   "extension-analysis": {
     "levels": {

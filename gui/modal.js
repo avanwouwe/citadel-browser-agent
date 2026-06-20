@@ -84,7 +84,7 @@ class Modal {
 
         submit.addEventListener('click', function() {
             const onException = options.exception.onException ?? {}
-            onException.exceptionReason = textarea.value.trim()
+            onException.reason = textarea.value.trim()
 
             sendMessage(onException)
             host.remove()

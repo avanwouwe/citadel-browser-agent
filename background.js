@@ -28,7 +28,8 @@ Port.onMessage("config", async (newConfig) => {
 
 	await Promise.all([
 		AccountTrust.init(),
-		DeviceTrust.init()
+		DeviceTrust.init(),
+		ShadowIT.init()
 	]);
 
 	[blacklistIP, blacklistURL] = await Promise.all([
@@ -166,6 +167,17 @@ function evaluateRequest(details) {
 		}
 	}
 
+	if (isNavigate && ShadowIT.action(url) === Action.BLOCK) {
+		result.result = "shadow IT blocked"
+		result.level = Log.WARN
+		result.value = url.origin
+		result.description = t("shadow-it.block.reason")
+		result.blockOptions = {
+			exceptionType: "shadow-it",
+			allowException: config.shadowit.exceptions.duration > 0
+		}
+	}
+
 	const blacklist = blacklistURL?.find(url) ?? blacklistIP?.find(ip)
 	if (blacklist) {
 		let whitelist = whitelistURL?.find(url) ?? whitelistIP?.find(ip)
@@ -175,6 +187,10 @@ function evaluateRequest(details) {
 			result.level = Log.ERROR
 			result.value = url.href
 			result.description = `${result.result} because target is on blacklist '${blacklist.name}'`
+			result.blockOptions = {
+				exceptionType: "blacklist",
+				allowException: config.webfilter.blacklist.exceptions.duration > 0
+			}
 
 			if (exceptionList.find(details.url)) {
 				result.level = Log.downgrade(result.level)
@@ -189,7 +205,7 @@ function evaluateRequest(details) {
 
 function handleBlock(details, evaluation, type, timestamp) {
 	blockDebouncer.debounce(details.tabId, null, () => {
-		blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry)
+		blockPage(details.tabId, evaluation.description, evaluation.value, evaluation.blacklistEntry, evaluation.blockOptions)
 
 		logger.log(timestamp, type, evaluation.result, details.url, evaluation.level, evaluation.value, evaluation.description, details.initiator, details.tabId
 		)
@@ -211,6 +227,9 @@ chrome.webNavigation.onBeforeNavigate.addListener((details) => {
 		case "ignored":
 			return
 		case "navigation blacklisted":
+			handleBlock(details, evaluation, "navigate", timestamp)
+			return
+		case "shadow IT blocked":
 			handleBlock(details, evaluation, "navigate", timestamp)
 			return
 		default:
@@ -760,6 +779,11 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 		} catch (error) {
 			debug("unable to inject into frame", details)
 		}
+
+		const target = url.toURL()
+		if (ShadowIT.action(target) === Action.WARN) {
+			ShadowIT.showWarning(tabId, target)
+		}
 	}
 
 	if (parentFrameId >= 0 || tabId < 0) return
@@ -869,27 +893,27 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 })
 
 onMessage((request, sender) => {
-	const siteUrl = sender.url.toURL()
+	const senderUrl = sender.url.toURL()
 	const tabId = sender?.tab?.id
 
 	if (request.type === "user-interaction") {
-		registerInteraction(siteUrl, sender)
+		registerInteraction(senderUrl, sender)
 	}
 
 	if (request.type === "print-dialog") {
-		registerInteraction(siteUrl, sender)
+		registerInteraction(senderUrl, sender)
 
-		logger.log(nowTimestamp(), "print dialog", null, siteUrl, Log.INFO, "", "user opened print dialog", sender.origin, tabId)
+		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, null, "user opened print dialog", null, tabId)
 	}
 
 	if (request.type === "file-select") {
-		registerInteraction(siteUrl, sender)
+		registerInteraction(senderUrl, sender)
 
-		logger.log(nowTimestamp(), "file select", request.subtype, siteUrl, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, tabId)
+		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, tabId)
 	}
 
 	if (request.type === "receive-totp") {
-		MFACheck.cancelTimer(siteUrl, 'TOTP in form')
+		MFACheck.cancelTimer(senderUrl, 'TOTP in form')
 	}
 
 	if (request.type === "acknowledge-alert") {
@@ -929,7 +953,7 @@ onMessage((request, sender) => {
 		const onException = allowException ? { type: 'allow-reuse', report } : undefined
 		Modal.createForTab(tabId, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", report.password.reuse), onAcknowledge, onException)
 
-		logger.log(nowTimestamp(), "password reuse", "password reuse warning", request.url, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
+		logger.log(nowTimestamp(), "password reuse", "password reuse warning", sender.origin, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "acknowledge-reuse") {
@@ -938,10 +962,10 @@ onMessage((request, sender) => {
 
 	if (request.type === "allow-reuse") {
 		// register the account so that at the next click it will not be seen as the first time that it was used
-		registerAccountUsage(siteUrl, request.report)
+		registerAccountUsage(senderUrl, request.report)
 
 		injectFuncIntoTab(tabId, () => location.reload())
-		logger.log(nowTimestamp(), "password reuse", "password reuse exception used", request.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), `user used exception for password reuse for '${request.report.username}' on ${sender.origin}`)
+		logger.log(nowTimestamp(), "exception", "password reuse exception used", sender.origin, Log.ERROR, request.reason.truncate(config.maxReasonLength, 'end'), `password reuse exception for '${request.report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "acknowledge-mfa") {
@@ -949,19 +973,35 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "allow-mfa") {
-		const app = AppStats.forURL(siteUrl)
+		const app = AppStats.forURL(senderUrl)
 		const account = AppStats.getAccount(app, app.lastAccount)
 		account.lastMFA = nowDatestamp()
 		AppStats.markDirty()
 
 		Modal.removeFromDomain(request.domain)
-		logger.log(nowTimestamp(), "exception", "MFA exception used", sender.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), `user used MFA exception for account ${app.lastAccount} for ${request.domain}`)
+		logger.log(nowTimestamp(), "exception", "MFA exception", senderUrl.origin, Log.ERROR, request.reason.truncate(config.maxReasonLength, 'end'), `MFA exception used for account '${app.lastAccount}' on '${request.domain}'`)
 	}
 
 	if (request.type === "allow-blacklist") {
 		exceptionList.add(request.url.toURL()?.hostname)
 
-		logger.log(nowTimestamp(), "exception", "blacklist exception used", request.url, Log.ERROR, request.exceptionReason.truncate(150, 'end'), "user used exception: " + request.description)
+		logger.log(nowTimestamp(), "exception", "blacklist exception", request.url, Log.ERROR, request.reason.truncate(config.maxReasonLength, 'end'), `blacklist exception used : ${request.description}`)
+	}
+
+	if (request.type === "acknowledge-shadow-it") {
+		const app = request.url?.toURL()
+
+		ShadowIT.grant(app?.hostname, config.shadowit.warnInterval)
+		Modal.removeFromTab(tabId)
+
+		logger.log(nowTimestamp(), "shadow IT", "shadow IT warning", app, Log.WARN, null, `shadow IT warning for '${app?.hostname}'`)
+	}
+
+	if (request.type === "allow-shadow-it") {
+		const app = request.url?.toURL()
+		ShadowIT.grant(app?.hostname, config.shadowit.exceptions.duration)
+
+		logger.log(nowTimestamp(), "exception", "shadow IT exception", app, Log.ERROR, request.reason?.truncate(config.maxReasonLength, 'end'), `shadow IT exception used for ${app?.hostname}`)
 	}
 })
 

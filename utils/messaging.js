@@ -61,7 +61,7 @@ class Port {
 
 
             const error = isString(Port.#lastError) ? " " + t("errors.messaging.with-error", { error: Port.#lastError.htmlMonospace() }) : ""
-            const message = t("errors.messaging.please-contact", {contact: config.company.contact.htmlNowrap()})
+            const message = t("errors.messaging.please-contact", { contact: config.company.contact.htmlNowrap() })
 
             rateLimit(Port.#LOST_EVENTS_POPUP, Port.#LOST_EVENTS_FREQ, (mustShowPopup) => {
                 if (mustShowPopup) {

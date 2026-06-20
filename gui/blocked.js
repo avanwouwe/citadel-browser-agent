@@ -18,11 +18,14 @@ async function renderPage(i18n) {
         }
     }
 
-    const values = {
-        securityAnalysisUrl: await getSecurityAnalysisUrl(blocked.blacklistEntry)
-    }
+    const hasSecurityAnalysis = blocked.blacklistEntry != null
+    const values = { securityAnalysisUrl: hasSecurityAnalysis ? await getSecurityAnalysisUrl(blocked.blacklistEntry) : '' }
 
     i18n.translatePage(handlers, values)
+
+    if (! hasSecurityAnalysis) {
+        document.getElementById('securityAnalysis').style.display = 'none'
+    }
 
     document.getElementById("logo").src = blocked.logo
     document.getElementById('url').textContent = blocked.url || t("block-page.not-specified")
@@ -43,7 +46,7 @@ async function renderPage(i18n) {
         submitButton.addEventListener('click', function() {
             const exceptionReason = exceptionReasonInput.value.trim()
 
-            sendMessage('allow-blacklist', {
+            sendMessage(`allow-${blocked.exceptionType}`, {
                 url: blocked.url,
                 description: blocked.reason,
                 reason: exceptionReason
