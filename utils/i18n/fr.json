@@ -9,7 +9,7 @@
       "UNKNOWN": "INCONNU",
       "PASSING": "VALIDÉ",
       "FAILING": "ÉCHEC",
-      "WARNING": "ALERTE",
+      "WARNING": "AVERTISSEMENT",
       "BLOCKING": "BLOQUÉ"
     }
   },
