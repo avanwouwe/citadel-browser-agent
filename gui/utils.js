@@ -109,7 +109,7 @@ async function sha256Hash(str) {
 
 /**
  * Parse safe markup and create DOM elements
- * Supported tags: <b>, <i>, <u>, <strong>, <em>, <link>, <code>, <nowrap>, <mono>
+ * Supported tags: <b>, <i>, <u>, <strong>, <em>, <link>, <code>, <nowrap>, <mono>, <p>, <br>
  * Links can have id attributes: <link id="mylink">click here</link>
  *
  * @param {string} text - Text with safe markup
@@ -119,7 +119,7 @@ async function sha256Hash(str) {
 
 if (typeof HTMLElement !== 'undefined') {
     HTMLElement.prototype.safeInnerHTML = function(text, handlers = {}) {
-        const allowedTags = ['b', 'i', 'u', 'strong', 'em', 'code', 'link', 'nowrap', 'mono']
+        const allowedTags = ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'code', 'link', 'nowrap', 'mono']
         const container = document.createDocumentFragment()
         const stack = [container]
 
@@ -128,11 +128,11 @@ if (typeof HTMLElement !== 'undefined') {
 
         while (i < text.length) {
             if (text[i] === '<') {
-                // Match: <link id="name" href="url">text</link> or <link id="name">text</link>
                 const tagMatch = text.slice(i).match(/^<(\/?)([\w]+)(?:\s+id="([^"]*)")?(?:\s+href="([^"]*)")?>/);
 
                 if (tagMatch) {
-                    const [fullMatch, isClosing, tagName, id, href] = tagMatch
+                    const [fullMatch, isClosing, rawTagName, id, href] = tagMatch
+                    const tagName = rawTagName.toLowerCase()
 
                     if (allowedTags.includes(tagName)) {
                         if (currentText) {
@@ -147,11 +147,14 @@ if (typeof HTMLElement !== 'undefined') {
                             }
                         } else {
                             let el
-                            if (tagName === 'link') {
-                                const safeHref = href && href.isWebURL() ? href : null
-                                if (safeHref) {
+                            if (tagName === 'br') {
+                                stack[stack.length - 1].appendChild(document.createElement('br'))
+                                i += fullMatch.length
+                                continue
+                            } else if (tagName === 'link') {
+                                if (href) {
                                     el = document.createElement('a')
-                                    el.href = safeHref
+                                    el.href = href
                                     el.target = '_blank'
                                     el.rel = 'noopener noreferrer'
                                 } else {
@@ -169,7 +172,7 @@ if (typeof HTMLElement !== 'undefined') {
                                 el = document.createElement('span')
                                 el.style.fontFamily = "'Courier New', Courier, monospace"
                             } else {
-                                el = document.createElement(tagName)
+                                el = document.createElement(tagName)                         // handles <b>, <i>, <p>, etc.
                             }
 
                             if (id) {
