@@ -148,7 +148,7 @@ function evaluateRequest(details) {
 
 	if (Config.isProtected(url.hostname)) {
 		if (
-			! IPv4Range.isLoopback(url.hostname) && url.hostname !== 'localhost' &&
+			! isLocalLoopback(url.hostname) &&
 			Config.forHostname(url.hostname).warningProtocols.includes(url.protocol)
 		) {
 			if (getDomain(details.initiator?.toURL()?.hostname) === getDomain(url.hostname) && AppStats.forURL(details.initiator)?.isAuthenticated) {

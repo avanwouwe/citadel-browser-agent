@@ -633,6 +633,8 @@ const callServiceWorker = (type, message) => sendMessagePromise(type, message).t
 function restartExtension() {
     // If notifications are showing when we restart, the extension context of those tabs will be invalidated
     // thus making it impossible for users to remove the modals. To prevent that, better removed them.
-    // This does mean that in some edge cases, pages that were "blocked for security reasons" are unblockec.
+    // This does mean that in some edge cases, pages that were "blocked for security reasons" are unblocked.
     Modal.removeFromDomain("*").then(() => chrome.runtime.reload())
 }
+
+function isLocalLoopback(hostname) { return IPv4Range.isLoopback(hostname) || hostname.toLowerCase() === 'localhost'}
