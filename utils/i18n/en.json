@@ -109,6 +109,7 @@
     "request-exception-header": "Request an Exception",
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
+    "characters-remaining": "{{remaining}} characters remaining",
     "request-submitted-popup": "Your exception request has been submitted. You can now access the site."
   },
   "block-modal": {
@@ -116,6 +117,7 @@
     "request-exception-header": "Request an Exception",
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
+    "characters-remaining": "{{remaining}} characters remaining",
     "acknowledge": "OK"
   },
   "shadow-it": {

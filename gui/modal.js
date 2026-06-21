@@ -78,6 +78,15 @@ class Modal {
 
         const textarea = shadow.getElementById('exceptionTextarea')
         const submit = shadow.getElementById('exceptionSubmit')
+
+        const remainingTemplate = options.exception.text.charactersRemaining ?? '{{remaining}}'
+        attachReasonLimit(
+            textarea,
+            shadow.getElementById('exceptionCounter'),
+            options.exception.maxReasonLength,
+            remaining => remainingTemplate.replace('{{remaining}}', remaining)
+        )
+
         textarea.addEventListener('input', () => {
             submit.disabled = !textarea.value.trim()
         })
@@ -112,7 +121,9 @@ class Modal {
                     requestHeader: t("block-modal.request-exception-header"),
                     provideReason: t("block-modal.provide-reason"),
                     submitRequest: t("block-modal.submit-request"),
+                    charactersRemaining: t("block-modal.characters-remaining"),
                 },
+                maxReasonLength: config.maxReasonLength,
                 onException
             }
         }

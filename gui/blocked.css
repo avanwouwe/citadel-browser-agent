@@ -59,6 +59,18 @@ body {
     margin-top: 10px;
 }
 
+.reason-counter {
+    margin-top: 4px;
+    font-size: 0.70em;
+    color: #808080;
+    text-align: right;
+}
+
+.reason-counter-warning {
+    color: #cc0000;
+    font-weight: bold;
+}
+
 button {
     margin: 10px auto 0;
     padding: 10px 20px;

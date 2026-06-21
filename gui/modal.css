@@ -77,6 +77,16 @@ button {
     width:100%; min-width:210px; min-height: 70px;
     padding: 0.4em; resize:vertical;
 }
+.reason-counter {
+    margin-top: 0.3em;
+    font-size: 0.70em;
+    color: #808080;
+    text-align: right;
+}
+.reason-counter-warning {
+    color: #cc0000;
+    font-weight: bold;
+}
 .exception-submit {
     padding: 0.5em 1.5em; background-color: #007bff; color: white; border: none;
     cursor: pointer; border-radius: 4px; transition: background .2s;

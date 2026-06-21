@@ -38,6 +38,13 @@ async function renderPage(i18n) {
         const exceptionReasonInput = document.getElementById('exceptionReason')
         const submitButton = document.getElementById('submitException')
 
+        attachReasonLimit(
+            exceptionReasonInput,
+            document.getElementById('reasonCounter'),
+            blocked.maxReasonLength,
+            remaining => t("block-page.characters-remaining", { remaining })
+        )
+
         submitButton.disabled = true
         exceptionReasonInput.addEventListener('input', function() {
             submitButton.disabled = !exceptionReasonInput.value.trim()

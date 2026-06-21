@@ -69,6 +69,29 @@ function html2dom(html) {
     return new DOMParser().parseFromString(html, 'text/html')
 }
 
+/**
+ * Enforce a maximum reason length on a textarea and keep a live "characters
+ * remaining" counter in sync, turning it red as it approaches the limit.
+ *
+ * @param {HTMLTextAreaElement} textarea - the reason input
+ * @param {HTMLElement} counter - element used to display the remaining count
+ * @param {number} maxLength - maximum number of characters allowed
+ * @param {(remaining: number) => string} formatRemaining - builds the counter label
+ */
+function attachReasonLimit(textarea, counter, maxLength, formatRemaining) {
+    textarea.maxLength = maxLength
+    const threshold = Math.max(10, Math.ceil(maxLength * 0.1))
+
+    const update = () => {
+        const remaining = maxLength - textarea.value.length
+        counter.textContent = formatRemaining(remaining)
+        counter.classList.toggle('reason-counter-warning', remaining <= threshold)
+    }
+
+    textarea.addEventListener('input', update)
+    update()
+}
+
 function domReady() {
     return new Promise(resolve => {
         if (document.readyState === "loading") {
