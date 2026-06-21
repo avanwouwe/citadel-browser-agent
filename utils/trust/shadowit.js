@@ -50,6 +50,7 @@ class ShadowIT {
 
         const key = ShadowIT.#patternFor(hostname)
         ShadowIT.#grants[key] = Date.now() + durationDays * ONE_DAY
+        Modal.removeFromDomain(key)
     }
 
     // the configured shadow-IT pattern (in the block or warn lists) that the hostname matches, walking the domain
@@ -59,7 +60,7 @@ class ShadowIT {
 
         for (let i = 0; i < parts.length; i++) {
             const candidate = parts.slice(i).join('.')
-            if (config.shadowit.block[candidate] || config.shadowit.warn[candidate]) return candidate
+            if (candidate in config.shadowit.block || candidate in config.shadowit.warn) return candidate
         }
 
         return hostname

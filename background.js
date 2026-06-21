@@ -1041,7 +1041,6 @@ onMessage((request, sender) => {
 		const app = request.url?.toURL()
 
 		ShadowIT.grant(app?.hostname, config.shadowit.warnInterval)
-		Modal.removeFromTab(tabId)
 
 		logger.log(nowTimestamp(), "shadow IT", "shadow IT warning", app, Log.WARN, null, `shadow IT warning for '${app?.hostname}'`)
 	}
