@@ -10,10 +10,10 @@ Shadow IT is the use of applications, services and tools that have not been sanc
 
 ## warn and block
 Citadel detects when the browser navigates to a known shadow IT application, and can then either:
-* **warn** : the user is shown a dismissable modal that explains the risk. The user can acknowledge the warning and continue, or request an exception. Acknowledging the warning is logged as a `WARN` event.
-* **block** : the page is blocked and the user is told why. 
+* **warn** : the user is shown a dismissable modal that explains the risk. Acknowledging the warning is logged as a `WARN` event.
+* **block** : the page is blocked, the user is told why, and can request an exception.
 
-If exceptions are allowed, the user can request one by giving a reason, after which they can access the application without further warnings or blocking. The exception is logged as a time-critical security event (`ERROR`).
+If exceptions are allowed, the user can request one by giving a reason, after which they can access the application. The exception is logged as a time-critical `ERROR` event.
 
 Applications on the `shadowit.warn` list are warned, and applications on the `shadowit.block` list are blocked.
 

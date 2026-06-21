@@ -782,7 +782,7 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 
 		const target = url.toURL()
 		if (ShadowIT.action(target) === Action.WARN) {
-			ShadowIT.showWarning(tabId, target)
+			ShadowIT.showWarning(tabId, target, false)
 		}
 	}
 
