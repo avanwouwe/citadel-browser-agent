@@ -638,3 +638,22 @@ function restartExtension() {
 }
 
 function isLocalLoopback(hostname) { return IPv4Range.isLoopback(hostname) || hostname.toLowerCase() === 'localhost'}
+
+/**
+ * Compares two semver strings.
+ * Returns -1 if a < b, 0 if a === b, 1 if a > b
+ */
+function compareSemver(a, b) {
+    const parse = v => v.split(".").map(Number)
+    const [aMajor, aMinor, aPatch] = parse(a)
+    const [bMajor, bMinor, bPatch] = parse(b)
+
+    if (aMajor !== bMajor) return aMajor < bMajor ? -1 : 1
+    if (aMinor !== bMinor) return aMinor < bMinor ? -1 : 1
+    if (aPatch !== bPatch) return aPatch < bPatch ? -1 : 1
+    return 0
+}
+
+function semverBefore(version, threshold) {
+    return compareSemver(version, threshold) === -1
+}

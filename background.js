@@ -104,8 +104,12 @@ chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {
 			await ExtensionAnalysis.Headless.ofAllInstalled(true)
 		}, 1 * ONE_MINUTE)
 	} else if (reason === "update" && previousVersion !== currentVersion) {
-		debug(`updating from version${previousVersion} to ${currentVersion}`)
-		await LocalStorage.clear()
+		debug(`updating from version ${previousVersion} to ${currentVersion}`)
+
+		if (previousVersion && semverBefore(previousVersion, "1.4.6" )) {
+			debug("clearing storage to prevent compatibility issues")
+			await LocalStorage.clear()
+		}
 	}
 })
 
