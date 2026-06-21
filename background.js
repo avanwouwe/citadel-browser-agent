@@ -83,7 +83,7 @@ function logInstall(reason) {
 
 chrome.runtime.onUpdateAvailable.addListener(async () => {
 	try {
-		logInstall("update")
+		logInstall("new version available")
 		reportDaily()
 		await Modal.removeFromDomain("*")
 	} catch (error) {
@@ -142,7 +142,7 @@ function evaluateRequest(details) {
 
 	const result = {
 		result: "allowed",
-	    description: isNavigate ? "web navigation in browser" : "web request in browser",
+		description: isNavigate ? "web navigation in browser" : "web request in browser",
 		level: isNavigate ? Log.DEBUG : Log.TRACE
 	}
 
@@ -337,7 +337,7 @@ chrome.downloads.onChanged.addListener((delta) => {
 				})
 				break
 			default:
-				// do nothing
+			// do nothing
 		}
 	}
 
@@ -348,11 +348,11 @@ chrome.downloads.onChanged.addListener((delta) => {
 const BROWSER_ERROR_ERROR = /_(BLOCKED_BY_ADMINISTRATOR|BLOCKED_BY_PRIVATE_NETWORK_ACCESS_CHECKS|KNOWN_INTERCEPTION_BLOCKED|UNWANTED|VIRUS|MALWARE|PHISHING|HARMFUL|CRYPTOMINING)/
 const BROWSER_ERROR_WARNING = /_(SSL|CERT|UNSAFE|BLOCKED|INSECUR|SECUR|TRUST|CMS_VERIFY)/
 function handleError(hook, eventType, filter) {
-    const listenerArgs = [
-        (details) => {
-            setInitiator(details)
+	const listenerArgs = [
+		(details) => {
+			setInitiator(details)
 
-            if (details.error) {
+			if (details.error) {
 				const config = Config.forURL(details.url)
 				const exception = config.errors.exceptions[details.error]
 
@@ -366,15 +366,15 @@ function handleError(hook, eventType, filter) {
 				if (level) {
 					logger.log(nowTimestamp(), eventType, `${eventType} error`, details.url, level, details.error, `browser error ${details.error} [${level}] for ${eventType} to @@URL@@`, details.initiator, details.tabId)
 				}
-            }
-        }
-    ]
+			}
+		}
+	]
 
-    if (filter) {
-        listenerArgs.push(filter)
-    }
+	if (filter) {
+		listenerArgs.push(filter)
+	}
 
-    hook.addListener(...listenerArgs)
+	hook.addListener(...listenerArgs)
 }
 
 handleError(chrome.webNavigation.onErrorOccurred, "navigate")
@@ -717,46 +717,80 @@ function registerAccountUsage(url, report) {
 }
 
 function patchNavigatorCredentials(encryptionKey) {
-	const originalCredentialsCreate = navigator.credentials.create
-	const originalCredentialsGet = navigator.credentials.get
+	const orig = window.navigator.credentials
+	if (!orig) return
 
-	navigator.credentials.create = async function(options) {
-		const credentials = await originalCredentialsCreate.apply(this, arguments)
+	const proxy = new Proxy(orig, {
+		// Absorb configurable:false locks from other extensions (e.g. 1Password)
+		// onto the underlying target — the get trap still fires regardless
+		defineProperty(target, prop, descriptor) {
+			return Reflect.defineProperty(target, prop, descriptor)
+		},
 
-		try {
-			if (typeof SecureMessage === 'undefined') {
-				console.error("error while intercepting credentials.create : SecureMessage not yet loaded")
-			} else if (options?.publicKey) {
-				await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
-			}
-		} catch (error) {
-			console.error("error while intercepting credentials.create", error)
-		}
+		get(target, prop, receiver) {
+			try {
+				const val = Reflect.get(target, prop, receiver)
 
-		return credentials
-	}
-
-	navigator.credentials.get = async function(options) {
-		const credentials = await originalCredentialsGet.apply(this, arguments)
-
-		try {
-			if (typeof SecureMessage === 'undefined') {
-				console.error("error while intercepting credentials.create : SecureMessage not yet loaded")
-			} else if (options?.password) {
-				if (credentials && credentials.type === "password" && credentials.id && credentials.password) {
-					await SecureMessage.sendMessage("AccountUsage",
-						{ subtype: "password", username: credentials.id, password: credentials.password },
-						encryptionKey,
-					)
+				if (prop === 'create' && typeof val === 'function') {
+					return async function(options) {
+						// WebAuthn call is outside the observation try/catch:
+						// our monitoring must never prevent the credential flow
+						const credentials = await val.apply(target, arguments)
+						try {
+							if (options?.publicKey) {
+								await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+							}
+						} catch (error) {
+							console.error("error intercepting credentials.create", error)
+						}
+						return credentials
+					}
 				}
-			} else if (options?.publicKey) {
-				await SecureMessage.sendMessage("account-usage", { subtype: "public-key" })
-			}
-		} catch (error) {
-			console.error("error while intercepting credentials.get", error)
-		}
 
-		return credentials
+				if (prop === 'get' && typeof val === 'function') {
+					return async function(options) {
+						const credentials = await val.apply(target, arguments)
+
+						try {
+							if (options?.password) {
+								if (credentials?.type === "password" && credentials.id && credentials.password) {
+									await SecureMessage.sendMessage(
+										"AccountUsage",
+										{ subtype: "password", username: credentials.id, password: credentials.password },
+										encryptionKey,
+									)
+								}
+							} else if (options?.publicKey) {
+								await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+							}
+						} catch (error) {
+							console.error("error intercepting credentials.get", error)
+						}
+						return credentials
+					}
+				}
+
+				return val
+			} catch (_) {
+				// Trap machinery failed — fall through transparently
+				return Reflect.get(target, prop, receiver)
+			}
+		},
+	})
+
+	try {
+		Object.defineProperty(window.navigator, 'credentials', {
+			get: () => proxy,
+			configurable: true,
+			enumerable: true,
+		});
+	} catch (_) {
+		// navigator own-property is not configurable — patch the prototype instead
+		const proto = Object.getPrototypeOf(window.navigator);
+		const desc = Object.getOwnPropertyDescriptor(proto, 'credentials');
+		if (desc?.configurable) {
+			Object.defineProperty(proto, 'credentials', { ...desc, get: () => proxy });
+		}
 	}
 }
 
