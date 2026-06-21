@@ -840,7 +840,18 @@ async function auditPassword(username, system, password) {
 		username,
 		password: PasswordCheck.analyzeAccount(username, password)
 	}
-	report.password.reuse = await PasswordVault.detectReuse(username, system, password)
+
+	// very poor quality passwords are still susceptible to a dictionary attack on the hash, so do not store them
+	if (report.password.length >= 8 &&
+		(
+			report.password.numberOfDigits > 0 ||
+			report.password.numberOfUpperCase > 0 ||
+			report.password.numberOfSymbols > 0
+		)
+	) {
+		report.password.reuse = await PasswordVault.detectReuse(username, system, password)
+	}
+
 	return report
 }
 
