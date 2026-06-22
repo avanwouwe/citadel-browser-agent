@@ -61,9 +61,9 @@
     /* ── Risk levels (extension analysis) ───────────────────────────── */
     --color-risk-unknown:  #adacac;
     --color-risk-low:      #218838;
-    --color-risk-medium:   #e67e22;
-    --color-risk-high:     #e74c3c;
-    --color-risk-critical: #c0392b;
+    --color-risk-medium:   #d4a017;
+    --color-risk-high:     #e67e22;
+    --color-risk-critical: #d10000;
 
     /* ── Accents (extension-analysis risk detail blocks) ────────────── */
     --color-accent:        #26507a;    /* section headers, table headers      */
@@ -120,11 +120,11 @@
         --color-input-border: #555555;
 
         /* ── Risk levels — lightened for dark backgrounds ───────────── */
-        --color-risk-unknown:  #b5b4b4;
-        --color-risk-low:      #3fb763;
-        --color-risk-medium:   #f0913f;
-        --color-risk-high:     #ff6b5e;
-        --color-risk-critical: #ff5a4d;
+        --color-risk-unknown:  #8a8a8a;
+        --color-risk-low:      #2ecc71;
+        --color-risk-medium:   #f1c40f;
+        --color-risk-high:     #f39c12;
+        --color-risk-critical: #ff4d4d;
 
         /* ── Accents ────────────────────────────────────────────────── */
         --color-accent:        #8ab4e8;
