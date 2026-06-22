@@ -675,10 +675,6 @@ class Config {
     static #loadResolve = null
 
     static ready() {
-        if (Context.isContentScript() || Context.isExtensionPage())  return callServiceWorker("GetConfig")
-
-        assert(Context.isServiceWorker(), "method cannot be called in this context")
-
         if (Config.#isLoaded) return Promise.resolve(config)
 
         if (!Config.#loadPromise) {

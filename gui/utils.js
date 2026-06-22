@@ -75,15 +75,16 @@ function html2dom(html) {
  *
  * @param {HTMLTextAreaElement} textarea - the reason input
  * @param {HTMLElement} counter - element used to display the remaining count
- * @param {number} maxLength - maximum number of characters allowed
  * @param {(remaining: number) => string} formatRemaining - builds the counter label
  */
-function attachReasonLimit(textarea, counter, maxLength, formatRemaining) {
-    textarea.maxLength = maxLength
-    const threshold = Math.max(10, Math.ceil(maxLength * 0.1))
+async function attachReasonLimit(textarea, counter, formatRemaining) {
+    const { maxReasonLength } = await callServiceWorker("GetConfig")
+
+    textarea.maxLength = maxReasonLength
+    const threshold = Math.max(10, Math.ceil(maxReasonLength * 0.1))
 
     const update = () => {
-        const remaining = maxLength - textarea.value.length
+        const remaining = maxReasonLength - textarea.value.length
         counter.textContent = formatRemaining(remaining)
         counter.classList.toggle('reason-counter-warning', remaining <= threshold)
     }

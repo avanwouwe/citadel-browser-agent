@@ -214,6 +214,12 @@ function proposeException() {
     const exceptionReasonInput = document.getElementById('exceptionReason')
     const exceptionButton = document.getElementById('submitException')
 
+    attachReasonLimit(
+        exceptionReasonInput,
+        document.getElementById('reasonCounter'),
+        remaining => t("extension-analysis.block-page.characters-remaining", { remaining })
+    )
+
     // Enable submit button only when text field is filled
     exceptionButton.disabled = true
     exceptionReasonInput.addEventListener('input', function() {

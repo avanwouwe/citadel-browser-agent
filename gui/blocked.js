@@ -38,10 +38,9 @@ async function renderPage(i18n) {
         const exceptionReasonInput = document.getElementById('exceptionReason')
         const submitButton = document.getElementById('submitException')
 
-        attachReasonLimit(
+        await attachReasonLimit(
             exceptionReasonInput,
             document.getElementById('reasonCounter'),
-            blocked.maxReasonLength,
             remaining => t("block-page.characters-remaining", { remaining })
         )
 

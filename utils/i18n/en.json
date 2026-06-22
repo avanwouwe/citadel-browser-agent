@@ -202,7 +202,8 @@
       "request-exception": "If you are <b><u>sure</u></b> the extension does not represent a security risk you can <span id=\"clickable\">request a temporary exception</span>",
       "request-exception-header": "Request an Exception",
       "provide-reason": "Please provide your reason for requesting an exception",
-      "submit-request": "Submit Request"
+      "submit-request": "Submit Request",
+      "characters-remaining": "{{remaining}} characters remaining"
     },
     "permissions": {
       "webRequestBlocking": {

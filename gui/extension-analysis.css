@@ -97,12 +97,18 @@
     cursor: pointer;
 }
 
-/* ── Exception textarea (sizing; appearance is in components.css) ───── */
+/* ── Exception textarea + counter (appearance is in components.css) ──── */
 #exceptionReason {
     width: 100%;
     max-width: 500px;
-    margin: 10px auto 16px auto;
+    margin: 10px auto 0 auto;
     display: block;
+}
+/* Keep the counter on the same (capped, centred) box as the textarea so its
+   right-aligned text lines up with the textarea's right edge. */
+#reasonCounter {
+    max-width: 500px;
+    margin: 4px auto 16px auto;
 }
 
 /* ── Primary button layout (appearance is in components.css) ────────── */
