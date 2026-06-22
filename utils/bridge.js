@@ -60,5 +60,7 @@ class Bridge {
         Bridge.listenTo("ShowExtensionPage", ({tabId, storePage}) => ExtensionAnalysis.showStorePage(tabId, storePage))
 
         Bridge.listenTo("GetEvents", () => events.get())
+
+        Bridge.listenTo("GetConfig", () => Config.ready())
     }
 }

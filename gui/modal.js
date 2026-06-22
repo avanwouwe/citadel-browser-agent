@@ -2,14 +2,14 @@ class Modal {
     static #HOST_ELEMENT_ID = "CitadelModalOverlayHost"
 
     static async createForDomain(domain, title, message, onAcknowledge, onException) {
-        const options = Modal.prepareOptions(title, message, onAcknowledge, onException)
+        const options = await Modal.prepareOptions(title, message, onAcknowledge, onException)
 
         await injectFilesIntoDomain(domain, ['/gui/utils.js', '/gui/modal.js'])
         await injectFuncIntoDomain(domain, async options => await Modal.create(options), [options])
     }
 
     static async createForTab(tabId, title, message, onAcknowledge, onException) {
-        const options = Modal.prepareOptions(title, message, onAcknowledge, onException)
+        const options = await Modal.prepareOptions(title, message, onAcknowledge, onException)
 
         await injectFilesIntoTab(tabId, ['/gui/utils.js', '/gui/modal.js']).catch(err => console.error(err))
         await injectFuncIntoTab(tabId, async options => await Modal.create(options), [options])
@@ -100,7 +100,9 @@ class Modal {
         })
     }
 
-    static prepareOptions(title, message, onAcknowledge, onException, showLogo = true) {
+    static async prepareOptions(title, message, onAcknowledge, onException, showLogo = true) {
+        const { maxReasonLength } = await Config.ready()
+
         const options = {
             logo: showLogo ? Logo.getLogo() : undefined,
             text: {
@@ -123,7 +125,7 @@ class Modal {
                     submitRequest: t("block-modal.submit-request"),
                     charactersRemaining: t("block-modal.characters-remaining"),
                 },
-                maxReasonLength: config.maxReasonLength,
+                maxReasonLength,
                 onException
             }
         }
