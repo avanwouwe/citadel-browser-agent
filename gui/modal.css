@@ -111,3 +111,55 @@ button {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* ── Dark mode ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    #CitadelModalOverlay {
+        color: #e8e8e8;
+    }
+    .modal {
+        background: #2a2a2a;
+        border: 1px solid #4a4a4a;
+        box-shadow: 0 5px 20px #000a;
+    }
+    button {
+        color: #e8e8e8;
+        background-color: #444;
+        border: 1px solid #666;
+    }
+    .clickable {
+        color: #4da3ff;
+    }
+    .exception-toggle:hover .clickable,
+    .exception-toggle:focus .clickable {
+        color: #7bbcff;
+    }
+    .exception-reason {
+        background-color: #1e1e1e;
+        color: #e8e8e8;
+        border: 1px solid #555;
+    }
+    .reason-counter {
+        color: #9a9a9a;
+    }
+    .reason-counter-warning {
+        color: #ff6b6b;
+    }
+    .exception-submit {
+        background-color: #007bff;
+        color: #fff;
+    }
+    .exception-submit:hover:not(:disabled) {
+        background-color: #4da3ff;
+    }
+    .exception-submit:disabled {
+        background-color: #3a3a3a;
+        color: #888;
+    }
+    .exception-success {
+        color: #5ad17e;
+    }
+    .exception-error {
+        color: #ff6b6b;
+    }
+}

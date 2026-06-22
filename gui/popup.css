@@ -32,3 +32,15 @@ body {
     text-align: left;
     overflow-wrap: break-word;
 }
+
+/* ── Dark mode ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e8e8e8;
+    }
+    .message-container {
+        background-color: #2a2a2a;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+}

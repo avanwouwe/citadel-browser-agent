@@ -97,3 +97,33 @@ button:disabled {
     color: #007bff;
     cursor: pointer;
 }
+
+/* ── Dark mode ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #1a1a1a;
+        color: #e8e8e8;
+    }
+    .content {
+        background-color: #2a2a2a;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+    #exceptionReason {
+        background-color: #1e1e1e;
+        color: #e8e8e8;
+        border: 1px solid #444;
+    }
+    .reason-counter {
+        color: #9a9a9a;
+    }
+    .reason-counter-warning {
+        color: #ff6b6b;
+    }
+    button:disabled {
+        background-color: #3a3a3a;
+        color: #888;
+    }
+    #exceptionSectionToggle #enableExceptionSection {
+        color: #4da3ff;
+    }
+}

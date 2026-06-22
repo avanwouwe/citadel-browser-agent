@@ -192,3 +192,66 @@ table tbody td {
     padding-top: 5px;
     padding-bottom: 5px;
 }
+
+/* ── Dark mode ──────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-risk-unknown: #b5b4b4;
+        --color-risk-low: #3fb763;
+        --color-risk-medium: #f0913f;
+        --color-risk-high: #ff6b5e;
+        --color-risk-critical: #ff5a4d;
+    }
+    body {
+        background-color: #1a1a1a;
+        color: #e8e8e8;
+    }
+    #content {
+        background-color: #2a2a2a;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
+    }
+    .risk-details-header {
+        color: #8ab4e8;
+        border-left: 3px solid #3a5a80;
+        background: #20303f;
+    }
+    .risk-details-label {
+        color: #9bb4d0;
+    }
+    .risk-details-value {
+        color: #8fd6b8;
+        background: #1d3329;
+    }
+    table th {
+        color: #8ab4e8;
+    }
+    table th,
+    table td {
+        border-bottom: 1px solid #3a3a3a;
+    }
+    .extension-logo-placeholder {
+        color: #888;
+    }
+    .reason-counter {
+        color: #9a9a9a;
+    }
+    .reason-counter-warning {
+        color: #ff6b6b;
+    }
+    #exceptionReason {
+        background-color: #1e1e1e;
+        color: #e8e8e8;
+        border: 1px solid #444;
+    }
+    button:disabled {
+        background-color: #3a3a3a;
+        color: #888;
+    }
+    #exceptionSectionToggle #clickable {
+        color: #4da3ff;
+    }
+    .spinner {
+        border: 2px solid #444;
+        border-top-color: #8ab4e8;
+    }
+}
