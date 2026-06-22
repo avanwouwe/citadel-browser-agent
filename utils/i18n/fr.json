@@ -14,7 +14,13 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard de Sécurité"
+    "title": "Dashboard de Sécurité",
+    "action": {
+      "detail": "Détail",
+      "delete": "Supprimer",
+      "update": "Mettre à jour",
+      "help": "Aide"
+    }
   },
   "devicetrust": {
     "dashboard": {

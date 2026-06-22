@@ -14,7 +14,13 @@
     }
   },
   "dashboard": {
-    "title": "Security Dashboard"
+    "title": "Security Dashboard",
+    "action": {
+      "detail": "Detail",
+      "delete": "Delete",
+      "update": "Update",
+      "help": "Help"
+    }
   },
   "devicetrust": {
     "dashboard": {

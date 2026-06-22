@@ -46,6 +46,12 @@ class I18n {
             }
         })
 
+        // Handle translated title attributes
+        document.querySelectorAll('[data-i18n-title]').forEach(el => {
+            const key = el.getAttribute('data-i18n-title')
+            el.setAttribute('title', this.t(key, values))
+        })
+
         // Handle rich text with safe markup
         document.querySelectorAll('[data-i18n-rich]').forEach(el => {
             const key = el.getAttribute('data-i18n-rich')

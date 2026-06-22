@@ -75,7 +75,7 @@ const renderDeviceDashboard = serialized(async function () {
             if (ctrl.report.errors.length > 30) {
                 errors += '\n...'
             }
-            errors = `<span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">${Icons.search}</span>`
+            errors = `<span class="has-errors" title="${t("dashboard.action.detail")}" data-tooltip="${errors.escapeHtmlEntities()}">${Icons.search}</span>`
         }
 
         const tr = document.createElement("tr")
@@ -101,7 +101,7 @@ const renderAccountDashboard = serialized(async function () {
         const next = acct.report.nextState
         let errors = acct.report.issues?.description ?? ''
         if (acct.report.issues?.count > 0) {
-            errors = `<span class="has-errors" data-tooltip="${errors.escapeHtmlEntities()}">${Icons.search}</span>`
+            errors = `<span class="has-errors" title="${t("dashboard.action.detail")}" data-tooltip="${errors.escapeHtmlEntities()}">${Icons.search}</span>`
         }
 
         const tr = document.createElement("tr")
@@ -112,7 +112,7 @@ const renderAccountDashboard = serialized(async function () {
             `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
             `<td class="days">${next?.days ?? ""}</td>` +
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
-            `<td><span class="delete-btn" title="${t("action.delete")}">${Icons.delete}</span></td>`
+            `<td><span class="delete-btn" title="${t("dashboard.action.delete")}">${Icons.delete}</span></td>`
 
         const userSpan = tr.cells[0].querySelector("span")
         userSpan.title = acct.username
@@ -148,7 +148,7 @@ const renderExtensionDashboard = serialized(async function () {
     for (const analysis of extensions) {
         let issues = ''
         if (analysis.issues) {
-            issues = `<span class="has-errors" data-tooltip="${analysis.issues.escapeHtmlEntities()}">${Icons.search}</span>`
+            issues = `<span class="has-errors" title="${t("dashboard.action.detail")}" data-tooltip="${analysis.issues.escapeHtmlEntities()}">${Icons.search}</span>`
         }
 
         const name = analysis.storeInfo?.name ?? ''
@@ -183,7 +183,7 @@ const renderExtensionDashboard = serialized(async function () {
 
         let actionCell
         if (!analysis.isInstalled) {
-            actionCell = `<span class="delete-btn" data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">${Icons.delete}</span>`
+            actionCell = `<span class="delete-btn" title="${t("dashboard.action.delete")}" data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">${Icons.delete}</span>`
         } else if (analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable) {
             actionCell = ''
         } else {
