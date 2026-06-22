@@ -138,6 +138,7 @@ function evaluateRequest(details) {
 	const url = details.url.toURL()
 	const ip = details.ip ?? IPv4Range.isIPV4(url.hostname) ? url.hostname : undefined
 	const isNavigate = details.method === undefined
+	const isMainFrame = details.parentFrameId >= 0
 
 	if (ignorelist?.find(details.url) ||
 		details.tabId < 0 ||
@@ -171,7 +172,7 @@ function evaluateRequest(details) {
 		}
 	}
 
-	if (isNavigate && ShadowIT.action(url) === Action.BLOCK) {
+	if (isNavigate && isMainFrame && ShadowIT.action(url) === Action.BLOCK) {
 		result.result = "shadow IT blocked"
 		result.level = Log.WARN
 		result.value = url.origin
@@ -818,13 +819,13 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 			debug("unable to inject into frame", details)
 		}
 
+		if (parentFrameId >= 0 || tabId < 0) return
+
 		const target = url.toURL()
 		if (ShadowIT.action(target) === Action.WARN) {
 			ShadowIT.showWarning(tabId, target, false)
 		}
 	}
-
-	if (parentFrameId >= 0 || tabId < 0) return
 
 	setInitiator(details)
 
