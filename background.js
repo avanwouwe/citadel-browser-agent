@@ -138,7 +138,7 @@ function evaluateRequest(details) {
 	const url = details.url.toURL()
 	const ip = details.ip ?? IPv4Range.isIPV4(url.hostname) ? url.hostname : undefined
 	const isNavigate = details.method === undefined
-	const isMainFrame = details.parentFrameId >= 0
+	const isMainFrame = details.parentFrameId < 0
 
 	if (ignorelist?.find(details.url) ||
 		details.tabId < 0 ||
