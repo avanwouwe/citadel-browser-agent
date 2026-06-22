@@ -1,0 +1,143 @@
+/* =============================================================================
+   theme.css — Design tokens (single source of truth for colours)
+   -----------------------------------------------------------------------------
+   Light values live in :root; the prefers-color-scheme media query simply
+   re-points the same tokens to their dark equivalents. As a result, individual
+   page stylesheets reference var(--token) only and never need their own
+   dark-mode block — switching theme is a token flip handled entirely here.
+
+   Linked (before the page's own stylesheet) by:
+     popup.html · dashboard.html · blocked.html · extension-analysis.html
+
+   The injected modal renders in a shadow DOM and cannot consume this file, so
+   it keeps its own copy of these tokens (same names) in gui/modal.css.
+   ============================================================================= */
+
+:root {
+    /* ── Surfaces ───────────────────────────────────────────────────── */
+    --color-bg:             #ffffff;   /* page background                     */
+    --color-bg-subtle:      #f0f0f0;   /* muted app background (popup)        */
+    --color-surface:        #ffffff;   /* raised card / active tab / panel    */
+    --color-surface-sunken: #f9f9f9;   /* recessed card (.content / #content) */
+    --color-surface-alt:    #f5f5f5;   /* table headers, inactive tabs        */
+
+    /* ── Text ───────────────────────────────────────────────────────── */
+    --color-text:        #1a1a1a;      /* primary text                        */
+    --color-text-soft:   #444444;      /* secondary text / icons              */
+    --color-text-muted:  #808080;      /* hints, counters, placeholders       */
+    --color-text-strong: #111111;      /* hover-emphasised text / icons       */
+    --color-on-state:    #1a1a1a;      /* label text on coloured state cells  */
+
+    /* ── Borders ────────────────────────────────────────────────────── */
+    --color-border:        #cccccc;
+    --color-border-subtle: #e0e0e0;    /* faint table row separators          */
+
+    /* ── Brand / interactive ────────────────────────────────────────── */
+    --color-primary:       #007bff;    /* filled button background            */
+    --color-primary-hover: #0056b3;
+    --color-on-primary:    #ffffff;
+    --color-link:          #007bff;    /* text links                          */
+    --color-link-hover:    #0056b3;
+    --color-disabled-bg:   #d3d3d3;
+    --color-disabled-text: #808080;
+    --color-control-track: #cccccc;    /* toggle / slider off state           */
+
+    /* ── Feedback ───────────────────────────────────────────────────── */
+    --color-danger:        #cc0000;
+    --color-danger-strong: #990000;
+    --color-success:       #008000;
+
+    /* ── Form controls ──────────────────────────────────────────────── */
+    --color-input-bg:     #ffffff;
+    --color-input-border: #cccccc;
+
+    /* ── State (device / account / extension status) ────────────────── */
+    --state-passing:  #33a25e;
+    --state-warning:  #d18a00;
+    --state-blocking: #b93030;
+    --state-failing:  #777777;
+    --state-unknown:  #cccccc;
+
+    /* ── Risk levels (extension analysis) ───────────────────────────── */
+    --color-risk-unknown:  #adacac;
+    --color-risk-low:      #218838;
+    --color-risk-medium:   #e67e22;
+    --color-risk-high:     #e74c3c;
+    --color-risk-critical: #c0392b;
+
+    /* ── Accents (extension-analysis risk detail blocks) ────────────── */
+    --color-accent:        #26507a;    /* section headers, table headers      */
+    --color-accent-soft:   #365675;    /* detail labels                       */
+    --color-accent-bg:     #f2f6fa;    /* header background                    */
+    --color-accent-border: #cddff6;    /* header rule / spinner track         */
+    --color-code-text:     #295d4b;    /* monospace detail values             */
+    --color-code-bg:       #e6f2ef;
+
+    /* ── Effects ────────────────────────────────────────────────────── */
+    --color-shadow:        rgba(0, 0, 0, 0.1);
+    --color-hover-overlay: rgba(0, 0, 0, 0.05);
+    --color-tooltip-bg:    #e3e3e3;
+    --color-tooltip-text:  #000000;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* ── Surfaces ───────────────────────────────────────────────── */
+        --color-bg:             #1a1a1a;
+        --color-bg-subtle:      #1a1a1a;
+        --color-surface:        #242424;
+        --color-surface-sunken: #2a2a2a;
+        --color-surface-alt:    #2a2a2a;
+
+        /* ── Text ───────────────────────────────────────────────────── */
+        --color-text:        #e8e8e8;
+        --color-text-soft:   #bbbbbb;
+        --color-text-muted:  #9a9a9a;
+        --color-text-strong: #ffffff;
+        --color-on-state:    #d0d0d0;
+
+        /* ── Borders ────────────────────────────────────────────────── */
+        --color-border:        #444444;
+        --color-border-subtle: #3a3a3a;
+
+        /* ── Brand / interactive ────────────────────────────────────── */
+        --color-primary:       #007bff;
+        --color-primary-hover: #4da3ff;
+        --color-on-primary:    #ffffff;
+        --color-link:          #4da3ff;
+        --color-link-hover:    #7bbcff;
+        --color-disabled-bg:   #3a3a3a;
+        --color-disabled-text: #888888;
+        --color-control-track: #555555;
+
+        /* ── Feedback ───────────────────────────────────────────────── */
+        --color-danger:        #ff6b6b;
+        --color-danger-strong: #ff6b6b;
+        --color-success:       #5ad17e;
+
+        /* ── Form controls ──────────────────────────────────────────── */
+        --color-input-bg:     #1e1e1e;
+        --color-input-border: #555555;
+
+        /* ── Risk levels — lightened for dark backgrounds ───────────── */
+        --color-risk-unknown:  #b5b4b4;
+        --color-risk-low:      #3fb763;
+        --color-risk-medium:   #f0913f;
+        --color-risk-high:     #ff6b5e;
+        --color-risk-critical: #ff5a4d;
+
+        /* ── Accents ────────────────────────────────────────────────── */
+        --color-accent:        #8ab4e8;
+        --color-accent-soft:   #9bb4d0;
+        --color-accent-bg:     #20303f;
+        --color-accent-border: #3a5a80;
+        --color-code-text:     #8fd6b8;
+        --color-code-bg:       #1d3329;
+
+        /* ── Effects ────────────────────────────────────────────────── */
+        --color-shadow:        rgba(0, 0, 0, 0.6);
+        --color-hover-overlay: rgba(255, 255, 255, 0.08);
+        --color-tooltip-bg:    #333333;
+        --color-tooltip-text:  #eeeeee;
+    }
+}

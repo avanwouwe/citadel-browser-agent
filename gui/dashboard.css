@@ -1,9 +1,14 @@
+/* Dashboard — colours come from theme.css tokens (no per-page dark block:
+   the tokens flip automatically with prefers-color-scheme). */
+
 /* ── Reset & base ───────────────────────────────────────────────── */
 body {
     font-family: sans-serif;
     margin: 6px;
     min-width: 420px;
     max-width: 800px;
+    background-color: var(--color-bg);
+    color: var(--color-text);
 }
 
 /* ── Inline SVG icons — global ──────────────────────────────────── */
@@ -23,20 +28,20 @@ svg[aria-hidden="true"] {
     margin-right: 6px;
 }
 
-.passing  { background: #33a25e; }
-.warning  { background: #d18a00; }
-.blocking { background: #b93030; }
-.failing  { background: #999;    }
-.unknown  { background: #ccc;    }
+.passing  { background: var(--state-passing);  }
+.warning  { background: var(--state-warning);  }
+.blocking { background: var(--state-blocking); }
+.failing  { background: var(--state-failing);  }
+.unknown  { background: var(--state-unknown);  }
 
 td.state, td.nextstate, td.days {
     text-align: center;
     font-weight: bold;
 }
-td.passing  { color: #33a25e;            }
-td.warning  { background-color: #d18a00; }
-td.blocking { background-color: #b93030; }
-td.failing  { background-color: #999;    }
+td.passing  { color: var(--state-passing); }
+td.warning  { background-color: var(--state-warning);  color: var(--color-on-state); }
+td.blocking { background-color: var(--state-blocking); color: var(--color-on-state); }
+td.failing  { background-color: var(--state-failing);  color: var(--color-on-state); }
 
 /* ── Table ──────────────────────────────────────────────────────── */
 table {
@@ -45,7 +50,7 @@ table {
     font-size: 95%;
 }
 th {
-    background: #f5f5f5;
+    background: var(--color-surface-alt);
 }
 td, th {
     padding: 4px 6px;
@@ -64,7 +69,7 @@ td.label a:focus {
 }
 td.label a:hover,
 td.label a:focus {
-    color: #0056b3;
+    color: var(--color-link-hover);
     text-decoration: underline;
 }
 
@@ -85,25 +90,25 @@ td.label a:focus {
 /* ── Error / tooltip icon ───────────────────────────────────────── */
 .has-errors {
     cursor: pointer;
-    color: #444;
+    color: var(--color-text-soft);
     margin-left: 5px;
     vertical-align: middle;
 }
 .has-errors:hover {
-    color: #111;
+    color: var(--color-text-strong);
 }
 
 .click-tooltip {
     position: absolute;
     z-index: 1000;
-    background: #e3e3e3;
-    color: #000;
+    background: var(--color-tooltip-bg);
+    color: var(--color-tooltip-text);
     border-radius: 6px;
     padding: 8px 12px;
     font-size: 92%;
     min-width: 160px;
     max-width: 600px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 2px 12px var(--color-shadow);
     white-space: pre-line;
     pointer-events: auto;
     user-select: text;
@@ -114,10 +119,10 @@ td.label a:focus {
 /* ── Delete button ──────────────────────────────────────────────── */
 .delete-btn {
     cursor: pointer;
-    color: #555;
+    color: var(--color-text-soft);
 }
 .delete-btn:hover {
-    color: #111;
+    color: var(--color-text-strong);
 }
 td:has(.delete-btn) {
     text-align: center;
@@ -127,35 +132,35 @@ td:has(.delete-btn) {
 /* ── Tabs ───────────────────────────────────────────────────────── */
 .tabs {
     display: flex;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid var(--color-border);
     margin-bottom: 0;
     padding-left: 0;
 }
 
 .tab {
-    background: #f5f5f5;
-    border: 1px solid #ccc;
+    background: var(--color-surface-alt);
+    border: 1px solid var(--color-border);
     border-bottom: none;
     padding: 9px 18px;
     cursor: pointer;
     margin-right: 1px;
     border-radius: 7px 7px 0 0;
     font-weight: 600;
-    color: #444;
+    color: var(--color-text-soft);
     transition: background 0.14s;
 }
 .tab.active,
 .tab:focus {
-    background: #fff;
-    color: #222;
-    border-bottom: 1px solid #fff;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-surface);
 }
 
 .tab-content {
     display: none;
     padding: 12px 4px;
-    background: #fff;
-    border: 1px solid #ccc;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
     border-radius: 0 0 7px 7px;
     min-height: 40px;
     margin-bottom: 16px;
@@ -174,15 +179,18 @@ td:has(.delete-btn) {
 }
 
 /* ── Refresh button ─────────────────────────────────────────────── */
+/* color drives the SVG (stroke="currentColor"); a <button> does not inherit
+   the body colour, so set it explicitly. */
 #update-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 2px;
     border-radius: 50%;
+    color: var(--color-text);
 }
 #update-button:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    background-color: var(--color-hover-overlay);
 }
 
 .refresh-icon { display: block;  }
@@ -214,15 +222,15 @@ td:has(.delete-btn) {
     padding: 9px 12px;
     display: flex;
     align-items: center;
-    color: #444;
+    color: var(--color-text-soft);
     text-decoration: none;
     border-radius: 7px 7px 0 0;
     transition: color 0.2s, background 0.14s;
     cursor: pointer;
 }
 .manual-link:hover {
-    color: #0056b3;
-    background: rgba(0, 0, 0, 0.03);
+    color: var(--color-link-hover);
+    background: var(--color-hover-overlay);
 }
 .help-icon {
     display: block;
@@ -246,7 +254,7 @@ td:has(.delete-btn) {
     font-size: 18px;
     vertical-align: middle;
     opacity: 0.6;
-    color: #888;
+    color: var(--color-text-muted);
 }
 td:has(.extension-logo),
 td:has(.extension-logo-placeholder) {
@@ -305,7 +313,7 @@ td.action-cell {
 .ext-toggle-slider {
     position: absolute;
     inset: 0;
-    background: #ccc;
+    background: var(--color-control-track);
     border-radius: 20px;
     transition: background 0.2s;
 }
@@ -322,103 +330,6 @@ td.action-cell {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 
-.ext-toggle-input:checked + .ext-toggle-slider             { background: #33a25e; }
+.ext-toggle-input:checked + .ext-toggle-slider             { background: var(--state-passing); }
 .ext-toggle-input:checked + .ext-toggle-slider::before     { transform: translateX(16px); }
 .ext-toggle-input:disabled + .ext-toggle-slider            { opacity: 0.45; cursor: not-allowed; }
-
-/* ── Dark mode ──────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #1e1e1e;
-        color: #e8e8e8;
-    }
-
-    /* Table */
-    th {
-        background: #2a2a2a;
-    }
-
-    /* State cells: soften the label text on coloured backgrounds, but keep it
-       light enough to stay readable on the light-grey FAILING cell (#999). */
-    td.warning,
-    td.blocking,
-    td.failing {
-        color: #d0d0d0;
-    }
-
-    td.label a:hover,
-    td.label a:focus {
-        color: #4da3ff;
-    }
-
-    /* Tooltip */
-    .click-tooltip {
-        background: #333;
-        color: #eee;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    /* Error / tooltip icon */
-    .has-errors {
-        color: #bbb;
-    }
-    .has-errors:hover {
-        color: #fff;
-    }
-
-    /* Delete button */
-    .delete-btn {
-        color: #aaa;
-    }
-    .delete-btn:hover {
-        color: #fff;
-    }
-
-    /* Tabs */
-    .tabs {
-        border-bottom: 1px solid #444;
-    }
-    .tab {
-        background: #2a2a2a;
-        border: 1px solid #444;
-        border-bottom: none;
-        color: #bbb;
-    }
-    .tab.active,
-    .tab:focus {
-        background: #242424;
-        color: #fff;
-        border-bottom: 1px solid #242424;
-    }
-    .tab-content {
-        background: #242424;
-        border: 1px solid #444;
-    }
-
-    /* Refresh button + spinner (a <button> does not inherit body color) */
-    #update-button {
-        color: #e8e8e8;
-    }
-    #update-button:hover {
-        background-color: rgba(255, 255, 255, 0.08);
-    }
-
-    /* Manual / help link */
-    .manual-link {
-        color: #bbb;
-    }
-    .manual-link:hover {
-        color: #4da3ff;
-        background: rgba(255, 255, 255, 0.06);
-    }
-
-    /* Extension logo placeholder */
-    .extension-logo-placeholder {
-        color: #888;
-    }
-
-    /* Extension toggle (off state) */
-    .ext-toggle-slider {
-        background: #555;
-    }
-}

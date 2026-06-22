@@ -1,35 +1,20 @@
-.logo-container {
-    margin-top: 32px;
-    margin-bottom: 24px;
-    text-align: center;
-}
+/* Page Blocked — base, logo, button and exception form live in theme.css +
+   components.css; only page-specific layout remains here. */
 
-#logo {
-    max-height: 72px;
-    object-fit: contain;
-    display: inline-block;
-}
-
+/* ── Exception request section ──────────────────────────────────────── */
 #exceptionSectionToggle {
     display: none;
 }
-
-.exception-request-header {
-    font-size: 1.25em;
-    font-weight: bold;
-}
-
 #exceptionSection {
     display: none;
     margin-top: 20px;
 }
-
-/* Styles from the head section */
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
+#exceptionSectionToggle #enableExceptionSection {
+    color: var(--color-link);
+    cursor: pointer;
 }
 
+/* ── Content card ───────────────────────────────────────────────────── */
 .content {
     display: block;
     width: 560px;
@@ -38,11 +23,10 @@ body {
     text-align: left;
     padding: 20px;
     box-sizing: border-box;
-    background-color: #f9f9f9;
+    background-color: var(--color-surface-sunken);
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px var(--color-shadow);
 }
-
 .content p {
     display: grid;
     grid-template-columns: max-content 1fr;
@@ -53,77 +37,15 @@ body {
     font-weight: bold;
 }
 
+/* ── Exception textarea (sizing; appearance is in components.css) ───── */
 #exceptionReason {
     width: 100%;
     height: 100px;
     margin-top: 10px;
 }
 
-.reason-counter {
-    margin-top: 4px;
-    font-size: 0.70em;
-    color: #808080;
-    text-align: right;
-}
-
-.reason-counter-warning {
-    color: #cc0000;
-    font-weight: bold;
-}
-
+/* ── Primary button layout (appearance is in components.css) ────────── */
 button {
-    margin: 10px auto 0;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
     display: block;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-button:disabled {
-    background-color: #d3d3d3;
-    color: #808080;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-
-#exceptionSectionToggle #enableExceptionSection {
-    color: #007bff;
-    cursor: pointer;
-}
-
-/* ── Dark mode ──────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #1a1a1a;
-        color: #e8e8e8;
-    }
-    .content {
-        background-color: #2a2a2a;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-    }
-    #exceptionReason {
-        background-color: #1e1e1e;
-        color: #e8e8e8;
-        border: 1px solid #444;
-    }
-    .reason-counter {
-        color: #9a9a9a;
-    }
-    .reason-counter-warning {
-        color: #ff6b6b;
-    }
-    button:disabled {
-        background-color: #3a3a3a;
-        color: #888;
-    }
-    #exceptionSectionToggle #enableExceptionSection {
-        color: #4da3ff;
-    }
+    margin: 10px auto 0;
 }

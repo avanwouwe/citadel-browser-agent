@@ -1,3 +1,5 @@
+/* Alert popup — colours come from theme.css tokens. */
+
 body {
     font-family: Arial, sans-serif;
     height: 100vh;
@@ -5,16 +7,17 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #f0f0f0;
+    background-color: var(--color-bg-subtle);
+    color: var(--color-text);
 }
 
 .message-container {
     display: flex;
     align-items: center;
     padding: 20px;
-    background-color: #fff;
+    background-color: var(--color-surface);
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px var(--color-shadow);
     max-width: 90%;
     box-sizing: border-box;
     overflow: hidden;
@@ -31,16 +34,4 @@ body {
     white-space: pre-wrap;
     text-align: left;
     overflow-wrap: break-word;
-}
-
-/* ── Dark mode ──────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-    body {
-        background-color: #1a1a1a;
-        color: #e8e8e8;
-    }
-    .message-container {
-        background-color: #2a2a2a;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-    }
 }

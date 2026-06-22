@@ -1,26 +1,79 @@
+/* =============================================================================
+   modal.css — Injected consent / exception modal.
+   -----------------------------------------------------------------------------
+   Rendered inside a shadow DOM (see gui/modal.js, adoptedStyleSheets), so it is
+   fully self-contained and cannot consume theme.css. It keeps its own copy of
+   the design tokens — using the same names — scoped to the overlay root, so its
+   rules read exactly like the rest of the codebase.
+
+   Note: `all: initial`/`all: unset` reset every property except custom ones,
+   so the tokens declared on the overlay still cascade into the modal.
+   ============================================================================= */
+
 #CitadelModalOverlay {
+    /* ── Design tokens (light) ──────────────────────────────────────── */
+    --color-surface:        #ffffff;
+    --color-card-border:    transparent;
+    --color-text:           #000000;
+    --color-text-muted:     #808080;
+    --color-primary:        #007bff;
+    --color-primary-hover:  #0056b3;
+    --color-on-primary:     #ffffff;
+    --color-link:           #007bff;
+    --color-link-hover:     #0056b3;
+    --color-button-bg:      #d3d3d3;
+    --color-button-border:  transparent;
+    --color-disabled-bg:    #d3d3d3;
+    --color-disabled-text:  #808080;
+    --color-input-bg:       #ffffff;
+    --color-input-border:   #cccccc;
+    --color-danger:         #cc0000;
+    --color-danger-strong:  #990000;
+    --color-success:        #008000;
+
     all: initial;
-    color: black;
-    position:fixed;
-    z-index:2147483647;
-    left:0; top:0; width:100vw; height:100vh;
-    background:rgba(0,0,0,0.7);
-    display:flex; justify-content:center; align-items:center;
+    color: var(--color-text);
+    position: fixed;
+    z-index: 2147483647;
+    left: 0; top: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex; justify-content: center; align-items: center;
 }
-button {
-    font-family: Arial, sans-serif;
-    color: black;
-    background-color: #d3d3d3;
-    border-color: black;
-    border-width: 1px;
-    border-radius: 3px;
+
+@media (prefers-color-scheme: dark) {
+    #CitadelModalOverlay {
+        --color-surface:       #2a2a2a;
+        --color-card-border:   #4a4a4a;
+        --color-text:          #e8e8e8;
+        --color-text-muted:    #9a9a9a;
+        --color-primary-hover: #4da3ff;
+        --color-link:          #4da3ff;
+        --color-link-hover:    #7bbcff;
+        --color-button-bg:     #444444;
+        --color-button-border: #666666;
+        --color-disabled-bg:   #3a3a3a;
+        --color-disabled-text: #888888;
+        --color-input-bg:      #1e1e1e;
+        --color-input-border:  #555555;
+        --color-danger:        #ff6b6b;
+        --color-danger-strong: #ff6b6b;
+        --color-success:       #5ad17e;
+    }
 }
+
 .modal {
     all: unset;
-    background:white; padding:2em 3em 2em 2em; border-radius:10px; text-align:left;
-    box-shadow:0 5px 20px #0004; display:flex; align-items:center; gap:1em;
-    min-width:280px;
-    min-height:120px;
+    background: var(--color-surface);
+    border: 1px solid var(--color-card-border);
+    padding: 2em 3em 2em 2em;
+    border-radius: 10px;
+    text-align: left;
+    box-shadow: 0 5px 20px #0004;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    min-width: 280px;
+    min-height: 120px;
     max-width: 480px;
     font-family: Arial, sans-serif;
     font-size: 16px;
@@ -36,73 +89,113 @@ button {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    min-width:220px;
+    min-width: 220px;
     flex: 1 1 0;
 }
-.column , .exceptionSection, #exceptionDiv {
+.column, .exceptionSection, #exceptionDiv {
     display: flex;
     flex-direction: column;
     gap: 1em;
 }
 .title {
-    line-height:1.4;
+    line-height: 1.4;
     font-weight: bold;
     text-align: center;
 }
 .message {
-    line-height:1.4;
+    line-height: 1.4;
     text-align: justify;
 }
+
+/* ── Buttons ────────────────────────────────────────────────────────── */
+button {
+    font-family: Arial, sans-serif;
+    color: var(--color-text);
+    background-color: var(--color-button-bg);
+    border: 1px solid var(--color-button-border);
+    border-radius: 3px;
+}
+
+/* ── Exception toggle / link ────────────────────────────────────────── */
 .exception-toggle {
     cursor: pointer;
     user-select: none;
 }
 .clickable {
-    color: #007bff;
+    color: var(--color-link);
     text-decoration: underline;
     transition: color .18s;
 }
 .exception-toggle:hover .clickable,
 .exception-toggle:focus .clickable {
-    color: #0056b3;
+    color: var(--color-link-hover);
 }
+
+/* ── Exception form ─────────────────────────────────────────────────── */
 .exception-section {
     display: none;
     flex-direction: column;
     align-items: stretch;
-    width:100%;
+    width: 100%;
 }
-.exception-title { font-size: 1.1em; font-weight: bold; margin-bottom: 1em}
+.exception-title {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 1em;
+}
 .exception-reason {
-    width:100%; min-width:210px; min-height: 70px;
-    padding: 0.4em; resize:vertical;
+    width: 100%;
+    min-width: 210px;
+    min-height: 70px;
+    padding: 0.4em;
+    resize: vertical;
+    background-color: var(--color-input-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-input-border);
 }
 .reason-counter {
     margin-top: 0.3em;
     font-size: 0.70em;
-    color: #808080;
+    color: var(--color-text-muted);
     text-align: right;
 }
 .reason-counter-warning {
-    color: #cc0000;
+    color: var(--color-danger);
     font-weight: bold;
 }
 .exception-submit {
-    padding: 0.5em 1.5em; background-color: #007bff; color: white; border: none;
-    cursor: pointer; border-radius: 4px; transition: background .2s;
-    margin-top: 1em
+    padding: 0.5em 1.5em;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background .2s;
+    margin-top: 1em;
 }
-.exception-submit:hover:not(:disabled) { background-color: #0056b3; }
+.exception-submit:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
 .exception-submit:disabled {
-    background-color: #d3d3d3;
-    color: #808080;
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
     cursor: not-allowed;
     opacity: 0.6;
 }
-.exception-success, .exception-error {
-    margin-top:0.5em; font-weight:bold; color: green; text-align: center;
+
+/* ── Result messages ────────────────────────────────────────────────── */
+.exception-success,
+.exception-error {
+    margin-top: 0.5em;
+    font-weight: bold;
+    color: var(--color-success);
+    text-align: center;
 }
-.exception-error { color: #990000; }
+.exception-error {
+    color: var(--color-danger-strong);
+}
+
+/* ── Centred action elements ────────────────────────────────────────── */
 .exception-title,
 .acknowledge-button,
 .exception-submit {
@@ -110,56 +203,4 @@ button {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-}
-
-/* ── Dark mode ──────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-    #CitadelModalOverlay {
-        color: #e8e8e8;
-    }
-    .modal {
-        background: #2a2a2a;
-        border: 1px solid #4a4a4a;
-        box-shadow: 0 5px 20px #000a;
-    }
-    button {
-        color: #e8e8e8;
-        background-color: #444;
-        border: 1px solid #666;
-    }
-    .clickable {
-        color: #4da3ff;
-    }
-    .exception-toggle:hover .clickable,
-    .exception-toggle:focus .clickable {
-        color: #7bbcff;
-    }
-    .exception-reason {
-        background-color: #1e1e1e;
-        color: #e8e8e8;
-        border: 1px solid #555;
-    }
-    .reason-counter {
-        color: #9a9a9a;
-    }
-    .reason-counter-warning {
-        color: #ff6b6b;
-    }
-    .exception-submit {
-        background-color: #007bff;
-        color: #fff;
-    }
-    .exception-submit:hover:not(:disabled) {
-        background-color: #4da3ff;
-    }
-    .exception-submit:disabled {
-        background-color: #3a3a3a;
-        color: #888;
-    }
-    .exception-success {
-        color: #5ad17e;
-    }
-    .exception-error {
-        color: #ff6b6b;
-    }
 }

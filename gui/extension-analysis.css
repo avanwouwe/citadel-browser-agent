@@ -1,98 +1,36 @@
-:root {
-    /* Risk level colors */
-    --color-risk-unknown: #adacac;
-    --color-risk-low: #218838;
-    --color-risk-medium: #e67e22;
-    --color-risk-high: #e74c3c;
-    --color-risk-critical: #c0392b;
-}
+/* Extension Analysis — base, logo, button and exception form live in
+   theme.css + components.css; risk-specific UI and layout remain here. */
+
 [hidden] {
     display: none !important;
 }
 
-/* Logo container styles */
-.logo-container {
-    margin-top: 32px;
-    margin-bottom: 24px;
-    text-align: center;
-}
-
-/* Company logo styles */
-#logo {
-    max-height: 72px;
-    object-fit: contain;
-    display: inline-block;
-}
-
-/* Exception request header */
-.exception-request-header {
-    font-size: 1.25em;
-    font-weight: bold;
-}
-
-/* Existing styles from the head section */
-body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-}
-
+/* ── Content card ───────────────────────────────────────────────────── */
 #content {
     display: inline-block;
     text-align: left;
     max-width: 600px;
     margin: 20px;
     padding: 20px;
-    background-color: #f9f9f9;
+    background-color: var(--color-surface-sunken);
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 10px var(--color-shadow);
 }
-
-.risk-details-header {
-    display: block;
-    font-size: 1.15em;
-    font-weight: 600;
-    color: #26507a;
-    margin: 1.3em 0 0.4em 0;
-    border-left: 3px solid #cddff6;
-    padding-left: 10px;
-    letter-spacing: 0.2px;
-    background: #f2f6fa;
-}
-
-.risk-details-label {
-    display: inline-block;
-    width: 150px;
-    font-weight: 500;
-    color: #365675;
-    letter-spacing: 0.1px;
-    vertical-align: top;
-}
-
-.risk-details-value {
-    color: #295d4b;
-    font-weight: 400;
-    background: #e6f2ef;
-    padding: 2px 7px;
-    margin-left: 0.3em;
-    border-radius: 4px;
-    font-family: Consolas, monospace;
-}
-
 .content p {
     margin: 0 0 0.5em 1.5em;
     padding: 0;
 }
+
+/* ── Extension header ───────────────────────────────────────────────── */
 .extension-header {
     display: flex;
     align-items: center;
     gap: 1em;
     margin-bottom: 1em;
 }
-
 #extension-logo {
     flex-shrink: 0;
 }
-
 .extension-name {
     font-weight: bold;
     font-size: 1.5em;
@@ -100,62 +38,86 @@ body {
     flex: 1;
 }
 
-.risk-unknown { color: var(--color-risk-unknown); font-weight: bold;}
-.risk-low    { color: var(--color-risk-low); font-weight: bold;}
-.risk-medium { color: var(--color-risk-medium); font-weight: bold;}
-.risk-high   { color: var(--color-risk-high); font-weight: bold;}
-.risk-critical { color: var(--color-risk-critical); font-weight: bold;}
+/* ── Risk detail blocks ─────────────────────────────────────────────── */
+.risk-details-header {
+    display: block;
+    font-size: 1.15em;
+    font-weight: 600;
+    color: var(--color-accent);
+    margin: 1.3em 0 0.4em 0;
+    border-left: 3px solid var(--color-accent-border);
+    padding-left: 10px;
+    letter-spacing: 0.2px;
+    background: var(--color-accent-bg);
+}
+.risk-details-label {
+    display: inline-block;
+    width: 150px;
+    font-weight: 500;
+    color: var(--color-accent-soft);
+    letter-spacing: 0.1px;
+    vertical-align: top;
+}
+.risk-details-value {
+    color: var(--color-code-text);
+    font-weight: 400;
+    background: var(--color-code-bg);
+    padding: 2px 7px;
+    margin-left: 0.3em;
+    border-radius: 4px;
+    font-family: Consolas, monospace;
+}
 
-#blockedSection { font-weight: bold; font-size: 1.2em}
+/* ── Risk level labels ──────────────────────────────────────────────── */
+.risk-unknown  { color: var(--color-risk-unknown);  font-weight: bold; }
+.risk-low      { color: var(--color-risk-low);      font-weight: bold; }
+.risk-medium   { color: var(--color-risk-medium);   font-weight: bold; }
+.risk-high     { color: var(--color-risk-high);     font-weight: bold; }
+.risk-critical { color: var(--color-risk-critical); font-weight: bold; }
+
+/* ── Blocked / exception / install sections ─────────────────────────── */
+#blockedSection {
+    font-weight: bold;
+    font-size: 1.2em;
+}
 #exceptionSection {
     margin: 30px auto 0 auto;
-    max-width: 600px;    /* matches #content - adjust as you wish */
-    text-align: center;  /* center label/button/text if needed */
-}
-
-#exceptionReason {
-    width: 100%;         /* fills section, but limited by section's max-width */
-    max-width: 500px;    /* actual limit for textarea, adjust as you like */
-    margin-top: 10px;
-    margin-bottom: 16px; /* space below for the button */
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
-}
-button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-}
-button:hover {
-    background-color: #0056b3;
-}
-button:disabled {
-    background-color: #d3d3d3;
-    color: #808080;
-    cursor: not-allowed;
-    opacity: 0.6;
-}
-#exceptionSectionToggle #clickable {
-    color: #007bff;
-    cursor: pointer;
-}
-#installSection,#exceptionSection {
+    max-width: 600px;
     text-align: center;
 }
-#installSection button { margin: 0 10px; }
+#installSection,
+#exceptionSection {
+    text-align: center;
+}
+#installSection button {
+    margin: 0 10px;
+}
+#exceptionSectionToggle #clickable {
+    color: var(--color-link);
+    cursor: pointer;
+}
 
+/* ── Exception textarea (sizing; appearance is in components.css) ───── */
+#exceptionReason {
+    width: 100%;
+    max-width: 500px;
+    margin: 10px auto 16px auto;
+    display: block;
+}
+
+/* ── Primary button layout (appearance is in components.css) ────────── */
+button {
+    margin-top: 10px;
+}
+
+/* ── Loading spinner ────────────────────────────────────────────────── */
 .spinner {
     display: inline-block;
     width: 1em;
     height: 1em;
-    border: 2px solid #cddff6;
+    border: 2px solid var(--color-accent-border);
     border-radius: 50%;
-    border-top-color: #26507a;
+    border-top-color: var(--color-accent);
     animation: spin 0.7s linear infinite;
     margin-right: 0.7em;
     vertical-align: middle;
@@ -164,94 +126,27 @@ button:disabled {
     to { transform: rotate(360deg); }
 }
 
-/* Table styles for Risk Impact section */
+/* ── Risk impact table ──────────────────────────────────────────────── */
 table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
     margin-top: 10px;
 }
-
 table th,
 table td {
     padding: 12px 20px;
     text-align: justify;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--color-border-subtle);
 }
-
 table th {
     font-weight: 600;
-    color: #26507a;
+    color: var(--color-accent);
 }
-
 table tbody tr {
     line-height: 1.4;
 }
-
 table tbody td {
     padding-top: 5px;
     padding-bottom: 5px;
-}
-
-/* ── Dark mode ──────────────────────────────────────────────────── */
-@media (prefers-color-scheme: dark) {
-    :root {
-        --color-risk-unknown: #b5b4b4;
-        --color-risk-low: #3fb763;
-        --color-risk-medium: #f0913f;
-        --color-risk-high: #ff6b5e;
-        --color-risk-critical: #ff5a4d;
-    }
-    body {
-        background-color: #1a1a1a;
-        color: #e8e8e8;
-    }
-    #content {
-        background-color: #2a2a2a;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.6);
-    }
-    .risk-details-header {
-        color: #8ab4e8;
-        border-left: 3px solid #3a5a80;
-        background: #20303f;
-    }
-    .risk-details-label {
-        color: #9bb4d0;
-    }
-    .risk-details-value {
-        color: #8fd6b8;
-        background: #1d3329;
-    }
-    table th {
-        color: #8ab4e8;
-    }
-    table th,
-    table td {
-        border-bottom: 1px solid #3a3a3a;
-    }
-    .extension-logo-placeholder {
-        color: #888;
-    }
-    .reason-counter {
-        color: #9a9a9a;
-    }
-    .reason-counter-warning {
-        color: #ff6b6b;
-    }
-    #exceptionReason {
-        background-color: #1e1e1e;
-        color: #e8e8e8;
-        border: 1px solid #444;
-    }
-    button:disabled {
-        background-color: #3a3a3a;
-        color: #888;
-    }
-    #exceptionSectionToggle #clickable {
-        color: #4da3ff;
-    }
-    .spinner {
-        border: 2px solid #444;
-        border-top-color: #8ab4e8;
-    }
 }

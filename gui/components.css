@@ -1,0 +1,69 @@
+/* =============================================================================
+   components.css — Shared UI for the full-page screens
+   -----------------------------------------------------------------------------
+   Linked by the two pages that share the same chrome (logo header, primary
+   button, exception form): blocked.html · extension-analysis.html.
+   Colours come from theme.css tokens; page-specific layout stays in each
+   page's own stylesheet.
+   ============================================================================= */
+
+/* ── Page base ──────────────────────────────────────────────────────── */
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: var(--color-bg);
+    color: var(--color-text);
+}
+
+/* ── Company logo header ────────────────────────────────────────────── */
+.logo-container {
+    margin-top: 32px;
+    margin-bottom: 24px;
+    text-align: center;
+}
+#logo {
+    max-height: 72px;
+    object-fit: contain;
+    display: inline-block;
+}
+.exception-request-header {
+    font-size: 1.25em;
+    font-weight: bold;
+}
+
+/* ── Primary button (visual only — pages own their layout/margins) ──── */
+button {
+    padding: 10px 20px;
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+button:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
+button:disabled {
+    background-color: var(--color-disabled-bg);
+    color: var(--color-disabled-text);
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* ── Exception textarea + character counter ─────────────────────────── */
+#exceptionReason {
+    background-color: var(--color-input-bg);
+    color: var(--color-text);
+    border: 1px solid var(--color-input-border);
+}
+.reason-counter {
+    margin-top: 4px;
+    font-size: 0.70em;
+    color: var(--color-text-muted);
+    text-align: right;
+}
+.reason-counter-warning {
+    color: var(--color-danger);
+    font-weight: bold;
+}
