@@ -60,7 +60,7 @@ async function renderPage(i18n) {
 
             alert(t("block-page.request-submitted-popup"))
 
-            history.go(-2)
+            window.location.replace(blocked.url)
         })
     }
 }
