@@ -363,26 +363,28 @@ class ExtensionStore {
      * contract shared by all stores. Logs a warning listing the absent fields
      *
      * Required strings  (truthy)  : name · description · downloadUrl
-     * Required numbers  (finite)  : rating · numRatings · numInstalls
+     * Default to 0                : rating · numRatings · numInstalls
      *
      * Fields that are optional in every store (extensionLogo, categories,
      * isVerified*) are intentionally left out of this check.
      */
     static #validateParsing(storeInfo, extensionId) {
-        const missing = [
-            ...['name', 'description', 'downloadUrl']
-                .filter(f => !storeInfo[f]),
-            ...['rating', 'numRatings', 'numInstalls']
-                .filter(f => typeof storeInfo[f] !== 'number' || !Number.isFinite(storeInfo[f])),
-        ]
+        const missing = ['name', 'description', 'downloadUrl']
+            .filter(f => !storeInfo[f])
 
         if (missing.length > 0) {
             console.warn('Store parse failed', { extensionId, missing })
             return null
         }
+
+        for (const f of ['rating', 'numRatings', 'numInstalls']) {
+            if (typeof storeInfo[f] !== 'number' || !Number.isFinite(storeInfo[f])) {
+                storeInfo[f] = 0
+            }
+        }
+
         return storeInfo
     }
-
     static Chrome = class {
         static pattern = new RegExp('^https://chromewebstore.google.com/detail/[^/]+/([^/?#]+)')
 
