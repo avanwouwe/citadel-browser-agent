@@ -697,7 +697,8 @@ function registerAccountIssues(config, report, siteUrl) {
 		numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
 		usernameInPassword: report.password.usernameInPassword ? 1 : null,
 		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
-		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null
+		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
+		reuse: null
 	}
 
 	AppStats.setIssues(appName, report.username, issues)
@@ -705,6 +706,29 @@ function registerAccountIssues(config, report, siteUrl) {
 	if (report.password.reuse) {
 		PasswordVault.updateReuse(appName, report.username)
 	}
+}
+
+function registerAccountAutofill(email, url) {
+	const config = Config.forURL(url)
+
+	const action = config.account.profileSeparation.action
+	if (action === Action.NOTHING || action === Action.SKIP) return
+
+	const appName = getSitename(url)
+	if (! appName || ! AccountTrust.checkFor(email, appName)) return
+
+	const emailDomain = PasswordCheck.getDomainFromUsername(email)
+	if (! emailDomain || ! matchDomain(emailDomain, config.company.domains)) return
+
+	if (! PROFILE_ADDRESS || matchDomain(PasswordCheck.getDomainFromUsername(PROFILE_ADDRESS), config.company.domains)) return
+
+	const app = AppStats.getOrCreateApp(appName)
+	AppStats.getAccount(app, email)
+
+	if (AppStats.getIssues(appName, email)?.profileSeparation) return        // already flagged for this account
+	AppStats.setIssues(appName, email, { profileSeparation: { profile: PROFILE_ADDRESS } })
+
+	logger.log(nowTimestamp(), "account trust", "profile separation issue", url, Log.WARN, email, `professional account '${email}' for '${appName}' is synced to personal browser profile '${PROFILE_ADDRESS}'`)
 }
 
 function registerAccountUsage(url, report) {
@@ -896,6 +920,8 @@ async function auditPassword(username, system, password) {
 
 SecureMessage.listenTo("AuditPassword", async ({ username, password }, { url: system }) => auditPassword(username, system, password))
 
+SecureMessage.listenTo("AccountAutofill", async ({ username }, { url }) => registerAccountAutofill(username, url))
+
 SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, { url, tab }) => {
 	const siteUrl = url.toURL()
 	const tabId = tab?.id
@@ -1007,7 +1033,7 @@ onMessage((request, sender) => {
 		const onException = allowException ? { type: 'allow-reuse', report } : undefined
 		Modal.createForTab(tabId, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", report.password.reuse), onAcknowledge, onException)
 
-		logger.log(nowTimestamp(), "password reuse", "password reuse warning", sender.origin, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
+		logger.log(nowTimestamp(), "account trust", "password reuse warning", sender.origin, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
 	}
 
 	if (request.type === "allow-reuse") {

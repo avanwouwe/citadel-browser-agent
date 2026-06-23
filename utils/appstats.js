@@ -84,14 +84,20 @@ class AppStats {
         return account ? account.issues ?? {} : undefined
     }
 
-    static setIssues(appName, username, issues = {}) {
+    // Merges the given updates into the account's existing issues. To remove an issue, pass it explicitly with a
+    // falsy value (e.g. null). The 'count' field is reserved: it is recomputed here and any value passed for it is ignored.
+    static setIssues(appName, username, updates = {}) {
         const account = AppStats.forAppName(appName)?.accounts[username]
         if (! account) return
 
-        issues = {...issues}
+        const issues = {...account.issues}
+        delete issues.count
 
-        Object.entries(issues).forEach(([key, value]) => {
-            if (key === 'count' || !value) {
+        Object.entries(updates).forEach(([key, value]) => {
+            if (key === 'count') return
+            if (value) {
+                issues[key] = value
+            } else {
                 delete issues[key]
             }
         })

@@ -33,6 +33,30 @@ window.addEventListener('beforeprint', safeHandler(function() {
     sendMessage("print-dialog")
 }), true)
 
+// Track which fields the browser has auto-filled. There is no dedicated DOM event for auto-fill, so we rely on a CSS
+// animation keyed to :-webkit-autofill (see citadel-content-script.css) that fires "animationstart". This lets us tell,
+// at login submission, whether a *saved* (and possibly synced) credential was used rather than one typed by hand.
+const autofilledFields = new WeakSet()
+document.addEventListener('animationstart', safeHandler(function(event) {
+    if (event.animationName === 'citadel-onautofill' && event.target instanceof HTMLElement) {
+        autofilledFields.add(event.target)
+    }
+}), true)
+
+function wasAutofilled(el) {
+    if (! el) return false
+    if (autofilledFields.has(el)) return true
+
+    // test each pseudo-class independently: matches() throws on a pseudo-class the engine does not support, and we
+    // must not let one unsupported selector mask the other (Chromium/Edge use :-webkit-autofill, Firefox :autofill)
+    for (const selector of [':-webkit-autofill', ':autofill']) {
+        try {
+            if (el.matches(selector)) return true
+        } catch { /* unsupported selector in this engine */ }
+    }
+    return false
+}
+
 document.addEventListener('change', safeHandler(function(event) {
     if (event.target?.type === 'file') {
         for (const file of event.target.files) {
@@ -256,6 +280,10 @@ checkLogin = async function(event, button) {
         try {
             const encryptionKey = await SecureMessage.getPublicKey()
             await SecureMessage.sendMessage("AccountUsage",{ subtype: "password", username: loginForm.username, password: loginForm.password }, encryptionKey)
+
+            if (loginForm.autofilled) {
+                await SecureMessage.sendMessage("AccountAutofill", { username: loginForm.username }, encryptionKey)
+            }
         } catch (error) {
             console.error('exception when analyzing login', error.stack)
         }
@@ -267,7 +295,7 @@ checkLogin = async function(event, button) {
 function analyzeForm(formElements, eventElement) {
     formElements = formElements.filter(elem => elem.value?.length < 100 && ! PasswordCheck.isCreditCard(elem.value))
 
-    let username, password, totp
+    let username, password, totp, passwordAutofilled
     const formHasPassword = formElements.some(elem => elem.type === 'password')
 
     for (let elem of formElements) {
@@ -287,6 +315,7 @@ function analyzeForm(formElements, eventElement) {
                 debug("found password")
 
                 password = elem.value
+                passwordAutofilled = wasAutofilled(elem)
                 continue
             }
         }
@@ -328,7 +357,8 @@ function analyzeForm(formElements, eventElement) {
     const login = {
         username: sessionState.auth.username,
         password,
-        totp: sessionState.auth.totp
+        totp: sessionState.auth.totp,
+        autofilled: passwordAutofilled === true
     }
 
     if (sessionState.auth.totp) {

@@ -92,6 +92,28 @@ Users can then ask for a temporary exception and continue. The account will be r
 
 ![Phishing alert](/img/screenshot/screenshot-issue-phishing.png)
 
+## professional accounts in personal profiles
+When a browser profile is signed into a *personal* cloud account (e.g. a personal Google account), the passwords it stores are synced to that account. Personal accounts are generally less protected, they propagate to non-enterprise devices, and survives offboarding.
+
+Citadel detects this when the browser auto-fills an e-mail address belonging to one of your `company.domains` while the browser profile is signed into an account that is *not* on one of those domains. The account is raised as an Account Trust issue, so it follows the same escalation logic as the other account issues, and the user can clear it from the Account Dashboard with the account *delete* button.
+
+Use`account.profileSeparation.action` to configure the escalation step to take when a professional account is auto-filled in a personal profile. Set to `"NOTHING"` to disable the check.
+
+> **Note**
+> * like the other account checks it honors your scope settings (e.g. `checkOnlyProtected`)
+> * Citadel cannot verify that the user actually removed the credential after deleting the account; if the credential is still present, the next auto-fill simply raises the issue again
+{: .note }
+
+```
+    ...
+    "account": {
+        "profileSeparation": {
+            "action": "WARN"
+        }
+    }
+    ...
+```
+
 ## Multi-Factor Authentication
 You can ensure that whenever users send a password, they *also* use another factor (e.g. TOTP, WebAuthn). If Citadel does not detect them providing one within `waitMinutes` they receive a warning. If they acknowledge the warning they are logged off. By default Citadel also allows them to request an exception. Once they have authenticated using MFA their session will remain valid for `maxSessionDays`.
 

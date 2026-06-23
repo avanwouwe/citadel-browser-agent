@@ -90,10 +90,19 @@ class AccountTrust {
         const apps = app ? [[appName, app]] : AppStats.allApps()
         for (const [system, app] of apps) {
             for (const [username, details] of AppStats.allAccounts(app)) {
+                // password reuse is a cross-site phishing signal, so it is flagged even on out-of-scope systems;
+                // every other issue (reuse, profile separation) honors the scope promise via checkFor()
                 if (! details.issues?.reuse && ! AccountTrust.checkFor(username, system)) continue
 
                 const report = structuredClone(details)
-                report.action = report?.issues?.reuse ? config.account.passwordReuse.action : Action.NOTHING
+
+                report.action = Action.NOTHING
+                const escalateTo = (action) => {
+                    if (action && Action.indexOf(action) > Action.indexOf(report.action)) report.action = action
+                }
+                if (report?.issues?.reuse) escalateTo(config.account.passwordReuse.action)
+                if (report?.issues?.profileSeparation) escalateTo(config.account.profileSeparation.action)
+
                 const issueCount = report.issues?.count ?? 0
                 for (const currAction of Action.values) {
                     if (issueCount >= config.account.actions[currAction] && Action.indexOf(currAction) > Action.indexOf(report.action)) {
@@ -113,6 +122,7 @@ class AccountTrust {
                         sequence:           t("accounttrust.password.quality.sequence"),
                         usernameInPassword: t("accounttrust.password.quality.username-password"),
                         reuse:              t("accounttrust.password.quality.reuse",            report.issues.reuse),
+                        profileSeparation:  t("accounttrust.password.quality.profile-separation", report.issues.profileSeparation),
                     }
 
                     const lines = Object.keys(report.issues)

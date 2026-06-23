@@ -164,11 +164,7 @@ class PasswordVault {
         const reusingAccounts = PasswordVault.#reusingAccounts(system, username)
 
         for (const reuse of Object.values(reusingAccounts)) {
-            const issues = AppStats.getIssues(reuse.system, reuse.username)
-            if (issues) {
-                issues.reuse = reuse.reuse
-                AppStats.setIssues(reuse.system, reuse.username, issues)
-            }
+            AppStats.setIssues(reuse.system, reuse.username, { reuse: reuse.reuse })
         }
     }
 

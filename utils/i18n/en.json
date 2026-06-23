@@ -55,7 +55,7 @@
         "message": "You are using the password of <b>{{username}}</b> for <b>{{system}}</b>, to connect to another site.<p>⚠\uFE0F This may be a phishing attack: verify that this is the site you think it is.<p>If it is; re-use of passwords is dangerous, and not allowed."
       },
       "quality": {
-        "title": "Password issue(s)",
+        "title": "Account issue(s)",
         "number-digits": "Must contain at least {{min}} digit(s)",
         "number-letters": "Must contain at least {{min}} letter(s)",
         "number-uppercase": "Must contain at least {{min}} uppercase letter(s)",
@@ -65,7 +65,8 @@
         "entropy": "Does not have enough different characters",
         "sequence": "Is too repetitive",
         "username-password": "Must not be based on the username",
-        "reuse": "Must not reuse the password of '{{label}}'"
+        "reuse": "Must not reuse the password of '{{label}}'",
+        "profile-separation": "Professional account must not be saved in a personal browser profile (synced to '{{profile}}')"
       }
     },
     "notification": {

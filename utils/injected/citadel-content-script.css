@@ -1,3 +1,21 @@
 body.citadel-busy * {
     cursor: wait !important;
 }
+
+/* Fires an "animationstart" event the moment the browser auto-fills a field, so the content script can detect
+   auto-fill (there is no dedicated DOM event for it). The animation is otherwise a no-op. */
+@keyframes citadel-onautofill {
+    from { /* no-op */ }
+    to { /* no-op */ }
+}
+
+/* kept as two separate rules on purpose: a selector list is non-forgiving, so if one engine does not understand one
+   of the pseudo-classes the whole rule (including the other selector) would be dropped */
+input:-webkit-autofill {
+    animation-name: citadel-onautofill;
+    animation-duration: 1ms;
+}
+input:autofill {
+    animation-name: citadel-onautofill;
+    animation-duration: 1ms;
+}

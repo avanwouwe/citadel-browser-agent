@@ -156,6 +156,9 @@ class Config {
                     groups: [ ]
                 }
             },
+            profileSeparation: {
+                action: "WARN"
+            },
             retentionDays: 90,
             checkOnlyInternal: false,
             checkOnlyProtected: true,
