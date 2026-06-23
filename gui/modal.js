@@ -49,6 +49,7 @@ class Modal {
 
         acknowledge.addEventListener('click', function () {
             try {
+                if (options.onAcknowledge.remove) host.remove()
                 sendMessage(options.onAcknowledge)
             } catch (e) {
                 if (e.message.startsWith("Extension context invalidated")) {
@@ -110,6 +111,7 @@ class Modal {
         }
 
         if (onAcknowledge) {
+            onAcknowledge.remove = onAcknowledge.remove ?? true
             options.onAcknowledge = onAcknowledge
         }
 

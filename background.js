@@ -1006,10 +1006,6 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "password reuse", "password reuse warning", sender.origin, Log.WARN, undefined, `password reuse warning for '${report.username}' on ${sender.origin}`)
 	}
 
-	if (request.type === "acknowledge-reuse") {
-		Modal.removeFromTab(tabId)
-	}
-
 	if (request.type === "allow-reuse") {
 		// register the account so that at the next click it will not be seen as the first time that it was used
 		registerAccountUsage(senderUrl, request.report)
