@@ -942,6 +942,8 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 	}
 })
 
+function truncateReason(reason) { return reason.truncate(config.maxReasonLength, 'end') }
+
 onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()
 	const tabId = sender?.tab?.id
@@ -984,16 +986,18 @@ onMessage((request, sender) => {
 
 		Notification.acknowledge(alertType, exceptionDuration)
 
-		logger.log(nowTimestamp(), "exception", `${alertType} exception used`, sender.url, Log.ERROR, request.exceptionReason, `user used ${alertType} exception`)
+		const reason = truncateReason(request.reason)
+		logger.log(nowTimestamp(), "exception", `${alertType} exception used`, sender.url, Log.ERROR, reason, `user used ${alertType} exception for reason '${reason}'`)
 	}
 
 	if (request.type === "allow-extension") {
 		const logObj = ExtensionAnalysis.toLogObject(request.analysis,  ExtensionAnalysis.ScanType.INTERACTIVE)
 		const exception = logObj.value
-		exception.exceptionReason = request.exceptionReason
+		exception.reason = truncateReason(request.reason)
+
 		ExtensionTrust.allow(request.analysis)
 		ExtensionAnalysis.showStorePage(tabId, request.storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason '${exception.exceptionReason}'`)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason '${exception.reason}'`)
 	}
 
 	if (request.type === "warn-reuse") {
@@ -1011,7 +1015,8 @@ onMessage((request, sender) => {
 		registerAccountUsage(senderUrl, request.report)
 
 		injectFuncIntoTab(tabId, () => location.reload())
-		logger.log(nowTimestamp(), "exception", "password reuse exception used", sender.origin, Log.ERROR, request.reason.truncate(config.maxReasonLength, 'end'), `password reuse exception for '${request.report.username}' on ${sender.origin}`)
+		const reason = truncateReason(request.reason)
+		logger.log(nowTimestamp(), "exception", "password reuse exception used", sender.origin, Log.ERROR, reason, `password reuse exception for '${request.report.username}' on ${sender.origin} for reason '${reason}'`)
 	}
 
 	if (request.type === "acknowledge-mfa") {
@@ -1025,13 +1030,15 @@ onMessage((request, sender) => {
 		AppStats.markDirty()
 
 		Modal.removeFromDomain(request.domain)
-		logger.log(nowTimestamp(), "exception", "MFA exception", senderUrl.origin, Log.ERROR, request.reason.truncate(config.maxReasonLength, 'end'), `MFA exception used for account '${app.lastAccount}' on '${request.domain}'`)
+		const reason = truncateReason(request.reason)
+		logger.log(nowTimestamp(), "exception", "MFA exception", senderUrl.origin, Log.ERROR, reason, `MFA exception used for account '${app.lastAccount}' on '${request.domain}' for reason '${reason}'`)
 	}
 
 	if (request.type === "allow-blacklist") {
 		exceptionList.add(request.url.toURL()?.hostname)
 
-		logger.log(nowTimestamp(), "exception", "blacklist exception", request.url, Log.ERROR, request.reason.truncate(config.maxReasonLength, 'end'), `blacklist exception used : ${request.description}`)
+		const reason = truncateReason(request.reason)
+		logger.log(nowTimestamp(), "exception", "blacklist exception", request.url, Log.ERROR, reason, `blacklist exception used : ${reason}`)
 	}
 
 	if (request.type === "acknowledge-shadow-it") {
@@ -1046,7 +1053,8 @@ onMessage((request, sender) => {
 		const app = request.url?.toURL()
 		ShadowIT.grant(app?.hostname, config.shadowit.exceptions.duration)
 
-		logger.log(nowTimestamp(), "exception", "shadow IT exception", app, Log.ERROR, request.reason?.truncate(config.maxReasonLength, 'end'), `shadow IT exception used for ${app?.hostname}`)
+		const reason = truncateReason(request.reason)
+		logger.log(nowTimestamp(), "exception", "shadow IT exception", app, Log.ERROR, reason, `shadow IT exception used for ${app?.hostname} for reason '${reason}'`)
 	}
 })
 
