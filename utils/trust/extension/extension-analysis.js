@@ -314,7 +314,7 @@ class ExtensionAnalysis {
 
             // otherwise, disable it
             await ExtensionTrust.block(currAnalysis)
-            riskIncrease.forEach(reason => logger.log(nowTimestamp(), "extension", "risk increase", storePage, Log.WARN, reason, `extension '${extensionInfo.id}' added risk ${reason}`))
+            riskIncrease.forEach(reason => logger.log(nowTimestamp(), "extension", "risk increase", currAnalysis.storeInfo.storePage, Log.WARN, reason, `extension '${extensionInfo.id}' added risk ${reason}`))
             ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
         }
     }
