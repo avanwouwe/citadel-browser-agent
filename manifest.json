@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Citadel browser agent",
-  "version": "1.4.7",
+  "version": "1.4.7.6",
   "description": "The Citadel browser agent manages IT policy enforcement and detection of malware & shadow IT, by analyzing & logging security events",
   "permissions": [
     "webNavigation",
@@ -115,6 +115,11 @@
       "run_at": "document_end"
     }
   ],
+  "icons": {
+    "16": "/gui/images/icon16.png",
+    "48": "/gui/images/icon48.png",
+    "128": "/gui/images/icon128.png"
+  },
   "action": {
     "default_title": "Click to see security report",
     "default_icon": {

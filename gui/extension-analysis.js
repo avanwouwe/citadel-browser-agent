@@ -233,7 +233,7 @@ function proposeException() {
         const exception = {
             storePage,
             analysis: { storeInfo, manifest, evaluation },
-            exceptionReason: exceptionReasonInput.value.trim()
+            reason: exceptionReasonInput.value.trim()
         }
 
         sendMessage('allow-extension', exception)
