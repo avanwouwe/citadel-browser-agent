@@ -37,6 +37,7 @@ importScripts('utils/blacklist/ignorelist.js');
 importScripts('utils/blacklist/exceptionlist.js');
 importScripts('utils/blacklist/ipv4range.js');
 importScripts('utils/trust/shadowit.js');
+importScripts('utils/trust/clipboard.js');
 importScripts('utils/trust/extension/extension.js');
 importScripts('utils/trust/extension/extension-store.js');
 importScripts('utils/trust/extension/extension-analysis.js');

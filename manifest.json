@@ -33,7 +33,6 @@
         "/gui/modal.css",
         "/gui/modal.html",
         "/utils/i18n/*.json",
-        "/utils/injected/bundle/citadel-bundle-start.js",
         "/utils/injected/bundle/citadel-bundle-idle.js"
       ],
       "matches": ["*://*/*"]
@@ -81,6 +80,7 @@
       "/utils/blacklist/exceptionlist.js",
       "/utils/blacklist/ipv4range.js",
       "/utils/trust/shadowit.js",
+      "/utils/trust/clipboard.js",
       "/utils/trust/extension/extension.js",
       "/utils/trust/extension/extension-store.js",
       "/utils/trust/extension/extension-analysis.js",

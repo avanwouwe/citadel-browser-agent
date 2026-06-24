@@ -136,6 +136,12 @@
       "message": "<b>{{hostname}}</b> est une application non autorisée (shadow IT). Veillez à ne pas y partager de données confidentielles ou d’entreprise, et contactez {{contact}} si vous avez besoin d’une alternative autorisée."
     }
   },
+  "clickfix": {
+    "warn": {
+      "title": "Arnaque possible détectée",
+      "message": "Un élément vient de copier une commande informatique dans votre presse-papiers. Les escrocs utilisent cette technique (« ClickFix ») pour vous faire coller et exécuter des commandes malveillantes, par exemple dans PowerShell, la boîte de dialogue Exécuter de Windows ou un terminal.<p><b>⚠\uFE0F Ne la collez pas</b> sauf si vous êtes certain qu’elle est sûre.<p>Clickez pour plus d'information, et contactez {{contact}} en cas de doute."
+    }
+  },
   "extension-analysis": {
     "levels": {
       "unknown": "Risque Inconnu",

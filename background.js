@@ -752,19 +752,19 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 	const { tabId, frameId, parentFrameId, url } = details
 
 	if (url.isWebURL()) {
-		try {
-			const secureMessageKey = await SecureMessage.getPublicKey()
-
-			await chrome.scripting.executeScript({
+		const inject = (func, args, what) =>
+			chrome.scripting.executeScript({
 				target: { tabId, frameIds: [frameId] },
 				world: 'MAIN',
 				injectImmediately: true,
-				func: patchNavigatorCredentials,
-				args: [secureMessageKey]
-			})
-		} catch (error) {
-			debug("unable to inject into frame", details)
-		}
+				func,
+				args
+			}).catch(() => debug(`unable to inject ${what}`, details))
+
+		inject(patchNavigatorClipboard, [], "clipboard hooks")
+
+		const key = await SecureMessage.getPublicKey().catch(() => null)
+		await inject(patchNavigatorCredentials, [key], "credentials hooks")
 
 		if (parentFrameId >= 0 || tabId < 0) return
 
@@ -988,6 +988,14 @@ onMessage((request, sender) => {
 
 		const reason = truncateReason(request.reason)
 		logger.log(nowTimestamp(), "exception", "blacklist exception", request.url, Log.ERROR, reason, `blacklist exception used : ${reason}`)
+	}
+
+	if (request.type === "analyze-clickfix") {
+		ClipboardCheck.checkClickFix(request.content, senderUrl, tabId)
+	}
+
+	if (request.type === "acknowledge-clickfix") {
+		openTab("https://citadelagent.org/control/ClickFix")
 	}
 
 	if (request.type === "acknowledge-shadow-it") {

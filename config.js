@@ -491,6 +491,12 @@ class Config {
             },
             warnInterval: 7         // re-show the warning after this many days once acknowledged
         },
+        clipboard: {
+            clickfix: {
+                action: "WARN",
+                threshold: 5
+            },
+        },
         extensions: {
             risk: {
                 maxLikelihood: 8.0,
