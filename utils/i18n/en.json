@@ -34,7 +34,7 @@
     "notification": {
       "title": "Device security issues",
       "failing": "Your device has security issues. Click to fix them or contact {{contact}}.",
-      "warning": "⚠\uFE0F Your device is not securely configured.<p/><u>In <b>{{days}} days</b> your access will be blocked</u>.<p/>Click to fix issues now or contact {{contact}}.",
+      "warning": "⚠\uFE0F Your device is not securely configured.<p><u>In <b>{{days}} days</b> your access will be blocked</u>.<p>Click to fix issues now or contact {{contact}}.",
       "blocking": "⚠\uFE0F Your device is insecure and your access has been blocked. Click to fix issues or contact {{contact}}.",
       "a-few": "a few"
     }
@@ -71,7 +71,7 @@
     "notification": {
       "title": "Account security issues",
       "failing": "One of your accounts has security issues. Click to fix them or contact {{contact}}.",
-      "warning": "⚠\uFE0F One of your accounts is not securely configured.<p/><u>In <b>{{days}} days</b> your access will be blocked</u>.<p/>Click to fix issues now or contact {{contact}}.",
+      "warning": "⚠\uFE0F One of your accounts is not securely configured.<p><u>In <b>{{days}} days</b> your access will be blocked</u>.<p>Click to fix issues now or contact {{contact}}.",
       "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your access has been blocked. Click to fix issues or contact {{contact}}."
     }
   },

@@ -19,7 +19,10 @@ class ShadowIT {
     //   WARN  -> warn the user with a dismissable modal
     //   null  -> do nothing
     static action(url) {
-        const hostname = url.hostname
+        const validUrl = url?.toURL()
+        assert(validUrl, `${url} is not a valid URL`)
+
+        const hostname = validUrl.hostname
 
         // never apply shadow-IT logic to the company's own applications and domains
         if (Config.isProtected(hostname)) return null
