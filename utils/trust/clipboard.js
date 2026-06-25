@@ -8,6 +8,7 @@ class ClipboardCheck {
 
     // shell tooling that has no business being on a clipboard the user is about to paste into a shell
     static #KEYWORDS = [
+        // --- Windows ---
         /powershell|pwsh/i,
         /\bcmd(?:\.exe)?\b/i,
         /\bmshta\b/i,
@@ -21,7 +22,22 @@ class ClipboardCheck {
         /\bwget\b/i,
         /\b(?:iwr|invoke-webrequest)\b/i,
         /\b(?:irm|invoke-restmethod)\b/i,
-        /\bbash\b|\bsh\s+-c\b|\/bin\/(?:ba)?sh/i,
+        /\bbash\b|\bsh\s+-c\b|\/bin\/(?:ba|z)?sh/i,   // + zsh path
+
+        // --- recent Windows LOLBins seen in ClickFix / FileFix (conhost --headless, finger, forfiles) ---
+        /\bconhost(?:\.exe)?\b/i,
+        /\bfinger(?:\.exe)?\b/i,
+        /\bforfiles(?:\.exe)?\b/i,
+
+        // --- macOS ---
+        /\bosascript\b/i,
+        /do\s+shell\s+script/i,
+        /\bzsh\b/i,
+        /\bhdiutil\b/i,
+        /\bxattr\b/i,
+        /\blaunchctl\b/i,
+        /\bdiskutil\b/i,
+        /\bbase64\s+-{1,2}[dD]\b/,                     // base64 -d / --decode (mac/linux decode step)
     ]
 
     // high-confidence execution patterns (download-and-run, encoded commands, hidden windows)
@@ -32,16 +48,32 @@ class ClipboardCheck {
         /frombase64string/i,
         /-w(?:indowstyle)?\s+hidden|-nop(?:rofile)?\b|-ep\s+bypass|-executionpolicy\s+bypass/i,
         /\bmshta\b\s+(?:https?:|javascript:|vbscript:)/i,
+
+        // FileFix: conhost.exe --headless used to run the real command with no visible window
+        /\bconhost(?:\.exe)?\b[^\r\n]*--?headless/i,
+
+        // FileFix: a real command hidden before a '#'-commented decoy file path
+        /(?:powershell|pwsh|cmd|conhost|mshta)\b[^\r\n]*#[^\r\n]*(?:\.(?:docx?|pdf|xlsx?|txt)\b|[a-z]:\\|\/)/i,
+
+        // macOS AMOS: do shell script ... with administrator privileges (forces a password prompt)
+        /with\s+administrator\s+privileges/i,
+
+        // macOS loader: curl|wget piped straight into a shell
+        /(?:curl|wget)\b[^\r\n]*\|\s*(?:zsh|bash|sh)\b/i,
+
+        // macOS Gatekeeper bypass: strip the quarantine xattr before launching
+        /xattr\s+-[a-z]*\s*com\.apple\.quarantine/i,
     ]
 
-    // a download (or anything) piped straight into a shell
-    static #PIPE_TO_SHELL = /[|;&]\s*(?:iex|invoke-expression|bash|sh|powershell|pwsh|cmd)\b/i
+// a download (or anything) piped straight into a shell  (+ zsh, osascript)
+    static #PIPE_TO_SHELL = /[|;&]\s*(?:iex|invoke-expression|bash|sh|zsh|powershell|pwsh|cmd|osascript)\b/i
 
     // a long base64 blob — suspicious on its own, decisive once it decodes to something shell-like
     static #BASE64_BLOB = /[A-Za-z0-9+/]{40,}={0,2}/
 
-    // looks like a file path / URL / environment-variable path (FileFix disguises a command as one of these)
-    static #PATH_LIKE = /^\s*(?:[a-z]:\\|\\\\|file:\/\/|\/(?:usr|bin|etc|tmp|opt|var)\/|~\/|%[a-z]+%)/i
+// looks like a file path / URL / env-var path (FileFix disguises a command as one of these)
+// + /Volumes/ for the DMG-mount macOS variant, + Ctrl+L-style Explorer paths already covered
+    static #PATH_LIKE = /^\s*(?:[a-z]:\\|\\\\|file:\/\/|\/(?:usr|bin|etc|tmp|opt|var|Volumes|Applications)\/|~\/|%[a-z]+%)/i
 
     // visible content, a long run of whitespace, then more content — used to push a command off-screen
     static #WHITESPACE_HIDE = /\S[ \t]{30,}\S/
