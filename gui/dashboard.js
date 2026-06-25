@@ -146,7 +146,7 @@ const renderExtensionDashboard = serialized(async function () {
         if (! analysis.isInstalled) continue
 
         let issues = ''
-        if (analysis.issues) {
+        if (! analysis.evaluation.allowed) {
             issues = `<span class="has-errors" title="${t("dashboard.action.detail")}" data-tooltip="${analysis.issues.escapeHtmlEntities()}">${Icons.search}</span>`
         }
 
