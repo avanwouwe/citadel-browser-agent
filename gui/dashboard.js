@@ -277,8 +277,14 @@ async function handleExtensionAction(event) {
         if (!rejection) return
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
+        const onAcknowledge = { label: t('global.cancel')}
         const onException = { type: 'allow-extension', analysis }
-        const options = Modal.prepareOptions(t('extension-analysis.disable-modal.title'), reason, {}, onException, false)
+        const options = Modal.prepareOptions(
+            t('extension-analysis.disable-modal.title'),
+            reason,
+            onAcknowledge,
+            onException,
+            false)
         await Modal.create(options)
     } else {
         await callServiceWorker("EnableExtension", { extensionId, enable })

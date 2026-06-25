@@ -2,6 +2,8 @@
   "global": {
     "yes": "Yes",
     "no": "No",
+    "ok": "OK",
+    "cancel": "Cancel",
     "contact": "your IT support"
   },
   "control": {
@@ -33,6 +35,7 @@
     },
     "notification": {
       "title": "Device security issues",
+      "acknowledge": "Fix",
       "failing": "Your device has security issues. Click to fix them or contact {{contact}}.",
       "warning": "⚠\uFE0F Your device is not securely configured.<p><u>In <b>{{days}} days</b> your access will be blocked</u>.<p>Click to fix issues now or contact {{contact}}.",
       "blocking": "⚠\uFE0F Your device is insecure and your access has been blocked. Click to fix issues or contact {{contact}}.",
@@ -70,6 +73,7 @@
     },
     "notification": {
       "title": "Account security issues",
+      "acknowledge": "Fix",
       "failing": "One of your accounts has security issues. Click to fix them or contact {{contact}}.",
       "warning": "⚠\uFE0F One of your accounts is not securely configured.<p><u>In <b>{{days}} days</b> your access will be blocked</u>.<p>Click to fix issues now or contact {{contact}}.",
       "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your access has been blocked. Click to fix issues or contact {{contact}}."
@@ -124,8 +128,7 @@
     "request-exception-header": "Request an Exception",
     "provide-reason": "Please provide your reason for requesting an exception",
     "submit-request": "Submit Request",
-    "characters-remaining": "{{remaining}} characters remaining",
-    "acknowledge": "OK"
+    "characters-remaining": "{{remaining}} characters remaining"
   },
   "shadow-it": {
     "block": {

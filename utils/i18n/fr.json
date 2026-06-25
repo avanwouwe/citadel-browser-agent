@@ -2,6 +2,8 @@
   "global": {
     "yes": "Oui",
     "no": "Non",
+    "ok": "OK",
+    "cancel": "Annuler",
     "contact": "votre support IT"
   },
   "control": {
@@ -33,6 +35,7 @@
     },
     "notification": {
       "title": "Problèmes de sécurité",
+      "acknowledge": "Corriger",
       "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
       "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée.<p><u>Dans <b>{{days}} jours</b> votre accès sera bloqué</u>.<p>Cliquez pour corriger les problèmes ou contactez {{contact}}.",
       "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et votre accès a été bloqué. Cliquez pour corriger les problèmes ou contactez {{contact}}.",
@@ -70,6 +73,7 @@
     },
     "notification": {
       "title": "Problèmes de sécurité",
+      "acknowledge": "Corriger",
       "failing": "Un de vos comptes présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
       "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisé.<p><u>Dans <b>{{days}} jours</b> votre accès sera bloqué</u>.<p>Cliquez pour corriger le compte ou contactez {{contact}}.",
       "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisé. Votre accès a été bloqué. Cliquez pour corriger le compte ou contactez {{contact}}."
@@ -124,9 +128,7 @@
     "request-exception-header": "Demander une exception",
     "provide-reason": "Veuillez fournir la raison de votre demande d’exception",
     "submit-request": "Envoyer la demande",
-    "characters-remaining": "{{remaining}} caractères restants",
-    "acknowledge": "OK",
-    "fix": "Corriger"
+    "characters-remaining": "{{remaining}} caractères restants"
   },
   "shadow-it": {
     "block": {

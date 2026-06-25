@@ -1003,7 +1003,7 @@ onMessage((request, sender) => {
 	if (request.type === "warn-reuse") {
 		const allowException = config.account.passwordReuse.exceptions.allowed
 		const report = request.report
-		const onAcknowledge = { type: 'acknowledge-reuse', username: report.username, system: sender.origin }
+		const onAcknowledge = { type: 'acknowledge-reuse', label: t('global.cancel')  ,username: report.username, system: sender.origin }
 		const onException = allowException ? { type: 'allow-reuse', report } : undefined
 		Modal.createForTab(tabId, t("accounttrust.password.reuse.title"), t("accounttrust.password.reuse.message", report.password.reuse), onAcknowledge, onException)
 
