@@ -217,7 +217,7 @@
       }
     },
     "WirelessNetworking": {
-      "query": "SELECT '\"' || network_name || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Enterprise');",
+      "query": "SELECT '\"' || interface || '\" uses insecure protocol: ' || security_type AS error FROM wifi_status WHERE security_type IN ('Personal', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Enterprise');",
       "text": {
         "en": {
           "label": "No insecure wireless networks",

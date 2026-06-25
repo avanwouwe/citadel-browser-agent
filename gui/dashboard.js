@@ -139,15 +139,14 @@ const renderExtensionDashboard = serialized(async function () {
     const tb = document.getElementById("extension-details")
     tb.innerHTML = ""
 
-    tb.removeEventListener('click', handleDeleteExtension)
-    tb.addEventListener('click', handleDeleteExtension)
-
     tb.removeEventListener('click', handleExtensionAction)
     tb.addEventListener('click', handleExtensionAction)
 
     for (const analysis of extensions) {
+        if (! analysis.isInstalled) continue
+
         let issues = ''
-        if (analysis.issues) {
+        if (! analysis.evaluation.allowed) {
             issues = `<span class="has-errors" title="${t("dashboard.action.detail")}" data-tooltip="${analysis.issues.escapeHtmlEntities()}">${Icons.search}</span>`
         }
 
@@ -180,21 +179,16 @@ const renderExtensionDashboard = serialized(async function () {
         }
 
         const isBlocked = analysis.state === State.BLOCKING
+        // force-installed extensions cannot be toggled: show their actual state with a greyed-out slider
+        const isLocked = analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable
+        const checked = analysis.isEnabled ? 'checked' : ''
 
-        let actionCell
-        if (!analysis.isInstalled) {
-            actionCell = `<span class="delete-btn" title="${t("dashboard.action.delete")}" data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">${Icons.delete}</span>`
-        } else if (analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable) {
-            actionCell = ''
-        } else {
-            const checked = analysis.isEnabled ? 'checked' : ''
-            actionCell =
-                `<label class="ext-toggle">` +
-                `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked' : ''}" ${checked}` +
-                ` data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">` +
-                `<span class="ext-toggle-slider"></span>` +
-                `</label>`
-        }
+        const actionCell =
+            `<label class="ext-toggle">` +
+            `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked' : ''}" ${checked}${isLocked ? ' disabled' : ''}` +
+            ` data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">` +
+            `<span class="ext-toggle-slider"></span>` +
+            `</label>`
 
         const tr = document.createElement("tr")
         tr.innerHTML =
@@ -283,18 +277,17 @@ async function handleExtensionAction(event) {
         if (!rejection) return
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
+        const onAcknowledge = { label: t('global.cancel')}
         const onException = { type: 'allow-extension', analysis }
-        const options = Modal.prepareOptions(t('extension-analysis.disable-modal.title'), reason, {}, onException, false)
+        const options = Modal.prepareOptions(
+            t('extension-analysis.disable-modal.title'),
+            reason,
+            onAcknowledge,
+            onException,
+            false)
         await Modal.create(options)
     } else {
         await callServiceWorker("EnableExtension", { extensionId, enable })
-    }
-}
-
-async function handleDeleteExtension(event) {
-    if (event.target.classList.contains('delete-btn')) {
-        const extensionId = event.target.dataset.extension
-        await callServiceWorker("DeleteExtension", { extensionId })
     }
 }
 

@@ -106,7 +106,7 @@ class Modal {
             text: {
                 title,
                 message,
-                acknowledge: t("block-modal.acknowledge"),
+                acknowledge: onAcknowledge?.label ?? t("global.ok"),
             },
         }
 

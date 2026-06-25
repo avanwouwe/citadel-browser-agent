@@ -53,8 +53,6 @@ class Bridge {
             await Extension.enable(extensionId, enable)
         })
 
-        Bridge.listenTo("DeleteExtension", async ({extensionId}) => await ExtensionTrust.delete(extensionId))
-
         Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))
 
         Bridge.listenTo("ShowExtensionPage", ({tabId, storePage}) => ExtensionAnalysis.showStorePage(tabId, storePage))

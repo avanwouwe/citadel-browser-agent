@@ -79,7 +79,7 @@ class ExtensionTrust {
         Dashboard.refreshExtension()
     }
 
-    static async delete(extensionId) {
+    static async forget(extensionId) {
         if (await Extension.isInstalled(extensionId)) return
 
         const storage = await ExtensionTrust.#storage.ready()

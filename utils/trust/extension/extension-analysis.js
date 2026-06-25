@@ -179,10 +179,10 @@ class ExtensionAnalysis {
                 await ExtensionAnalysis.Headless.ofExtension(ext, scanType)
             }
 
-            // if the extension is no longer installed, clear the state
+            // if the extension is no longer installed, remove its analysis
             for (const extensionId of Object.keys(await ExtensionTrust.getStatus())) {
                 if (! installed.some(inst => inst.id === extensionId)) {
-                    await ExtensionTrust.setState(extensionId, State.UNKNOWN)
+                    await ExtensionTrust.forget(extensionId)
                 }
             }
         }
