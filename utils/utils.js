@@ -323,6 +323,7 @@ function isDate(str) {
 
 /**
  * Checks if a hostname matches any domain in a given object of domain patterns
+ * Supports exact keys ("domain.com") and wildcard keys ("*.domain.com").
  * @param {string} hostname - The hostname to check (e.g., "host.domain.com")
  * @param {Object} domainPatterns - Object with domain patterns as keys
  * @returns {Object} - Returns value of matching domain key or null if no match
@@ -332,16 +333,27 @@ function matchDomain(hostname, domainPatterns) {
     domainPatterns = domainPatterns ?? {}
 
     let parts = hostname.split('.');
+    const isIP = IPv4Range.isIPV4(hostname)
 
-    if (IPv4Range.isIPV4(hostname)) {
+    if (isIP) {
         parts = parts.reverse()
     }
 
     for (let i = 0; i < parts.length; i++) {
-        const domainToCheck = parts.slice(i).join('.')
-        const match = domainPatterns[domainToCheck]
-        if (match) {
-            return match
+        const suffix = parts.slice(i).join('.')
+
+        if (isIP) {
+            if (domainPatterns[suffix]) return domainPatterns[suffix]
+            continue
+        }
+
+        // exact match, only against the full hostname
+        if (i === 0 && domainPatterns[hostname]) {
+            return domainPatterns[hostname]
+        }
+        // wildcard key matches the apex (i===0) AND any subdomain (i>0)
+        if (domainPatterns['*.' + suffix]) {
+            return domainPatterns['*.' + suffix]
         }
     }
 

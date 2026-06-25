@@ -20,8 +20,8 @@ Applications on the `shadowit.warn` list are warned, and applications on the `sh
 ```
     ...
     "shadowit": {
-        "warn": [ "chatgpt.com", "dropbox.com" ],
-        "block": [ "wetransfer.com" ]
+        "warn": [ "*.chatgpt.com", "*.dropbox.com" ],
+        "block": [ "*.wetransfer.com" ]
     }
     ...
 ```
@@ -35,12 +35,12 @@ An application is only considered shadow IT if it is not one of your own. Any ho
 ```
     ...
     "company": {
-        "applications": [ "your-crm.com", "your-mdm.com" ]
+        "applications": [ "*.your-crm.com", "*.your-mdm.com" ]
     }
     ...
 ```
 
-This is useful when one of the applications in the default list is in fact sanctioned in your organization. For example, if you have a company agreement for Dropbox, adding `dropbox.com` to `company.applications` stops it from being flagged.
+This is useful when one of the applications in the default list is in fact sanctioned in your organization. For example, if you have a company agreement for Dropbox, adding `*.dropbox.com` to `company.applications` stops it from being flagged.
 
 ## default applications
 Citadel ships with a list of typical shadow IT applications, all configured as `warn`. These cover categories such as public AI assistants and AI coding tools, personal cloud storage and file transfer, online document processing, tunneling services, unsanctioned messaging and collaboration tools, personal email, remote access tools, and no-code application builders. The intent is to give you a useful starting point that surfaces the most common cases without blocking anyone, so that you can observe what is actually used in your organization before hardening your stance.

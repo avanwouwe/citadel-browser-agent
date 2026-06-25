@@ -37,17 +37,23 @@ The following attributes specify lists of domains:
 * `account.mfa.required`
 * `account.mfa.exceptions`
 
-Where specifying `domain.com` matches:
+Specifying `*.domain.com` matches the domain *and* all of its subdomains:
 * `domain.com`
 * `host.domain.com`
 * `host.subdomain.com`
 
+Specifying `domain.com`, *without* the `*.` prefix, matches only that exact host, and none of its subdomains:
+* `domain.com`
+
+This lets you target a single host such as `chat.openai.com` without also matching everything else under `openai.com`.
+
 It is also possible to specify netmasks, for example:
 * `192.168.x.x`
 * `10.x.x.x`
+
 Netmasks can only be classful CIDR masks of type A,B or C. So `134.x.50.x` is not allowed.
 
-You can use `*` to specify "any domain", but not anywhere else, like `app-*.domain.com` or even `*.domain.com`.
+You can use `*` on its own to specify "any domain". The `*.` wildcard is only allowed as a prefix for an entire domain, so patterns like `app-*.domain.com` are not supported.
 
 ## exceptions
 You can override the global configuration for specific domains or netmasks. This is possible for the following configuration elements:
@@ -93,8 +99,8 @@ Any exceptions you defined are applied "on top of" the [default configuration](/
 
 For example, if you define a `logging.logLevel` in two exceptions :
 * default : `logging.logLevel` = `DEBUG`
-* exception 1 :`["domain-a.com", "domain-b.com"]` = `WARN`
-* exception 2 : `["domain-a.com"]` = `ERROR`
+* exception 1 :`["*.domain-a.com", "*.domain-b.com"]` = `WARN`
+* exception 2 : `["*.domain-a.com"]` = `ERROR`
 
 Then resulting `logging.logLevel` will depend on the domain involved:
 * www.randomdomain.com : `DEBUG` (default) 

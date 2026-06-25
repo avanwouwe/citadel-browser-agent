@@ -79,7 +79,7 @@ Users can then ask for a temporary exception and continue. The account will be r
             "action": "WARN",
             "exceptions": {
                 "allowed": true,
-                "groups": [ ["domain-a.com", "domain-b.com"] ]
+                "groups": [ ["*.domain-a.com", "*.domain-b.com"] ]
             }
         }
     }
@@ -124,14 +124,14 @@ Not all applications have MFA, so you have to enumerate the list of applications
           "waitMinutes": 10,
           "maxSessionDays": 30,
           "required": [
-            "yourcompany.com",
-            "1password.com",
-            "atlassian.com",
+            "*.yourcompany.com",
+            "*.1password.com",
+            "*.atlassian.com",
             "idmsa.apple.com",
-            "notion.so",
-            "openai.com",
-            "gitlab.com",
-            "github.com"
+            "*.notion.so",
+            "*.openai.com",
+            "*.gitlab.com",
+            "*.github.com"
           ],
           "exceptions": [
             "non-mfa-application.yourcompany.com"
@@ -150,7 +150,7 @@ The default settings is `30` days. You can list the domains to apply the rule to
     "session": {
         "maxSessionDays": 30,
         "domains": ["*"],
-        "exceptions": ["google.com","okta.com"]
+        "exceptions": ["*.google.com","*.okta.com"]
     }
     ...
 ```
