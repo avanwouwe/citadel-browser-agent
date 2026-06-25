@@ -80,7 +80,8 @@
       "title": "Extensions",
       "name": "Name",
       "id": "Id",
-      "allowed": "Allowed"
+      "allowed": "Allowed",
+      "enabled": "Enabled"
     }
   },
   "events": {

@@ -80,7 +80,8 @@
       "title": "Extensions",
       "name": "Nom",
       "id": "Id",
-      "allowed": "Permis"
+      "allowed": "Permis",
+      "enabled": "Activé"
     }
   },
   "events": {
@@ -124,7 +125,8 @@
     "provide-reason": "Veuillez fournir la raison de votre demande d’exception",
     "submit-request": "Envoyer la demande",
     "characters-remaining": "{{remaining}} caractères restants",
-    "acknowledge": "OK"
+    "acknowledge": "OK",
+    "fix": "Corriger"
   },
   "shadow-it": {
     "block": {
