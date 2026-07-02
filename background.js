@@ -862,10 +862,9 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 		registerAccountUsage(siteUrl, report)
 
 		// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
-		hasPathChanged(tabId, siteUrl, config.account.confirmLoginDelay).then(hasChanged => {
-			// if several logins were performed in rapid succession, only check the last one
-			issueRegistrationDebouncer.debounce(tabId, undefined, _ => {
-				if (MFACheck.findAuthPattern(siteUrl.pathname) && ! hasChanged) {
+		confirmLogin(tabId, siteUrl, config.account.confirmLoginDelay).then(confirmed => {
+			issueRegistrationDebouncer.debounce(tabId, undefined, () => {
+				if (!confirmed && MFACheck.findAuthPattern(siteUrl.pathname)) {
 					debug("tab was closed or location did not change, login assumed failed")
 					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
 					AccountTrust.deleteAccount(siteUrl.hostname, report.username, false)

@@ -62,14 +62,14 @@ class MFACheck {
         const domain = getDomain(getSitename(url))
         const session = MFACheck.#sessions.get(domain)
 
-        debug(`MFA detected using "${reason} at ${url}`)
-
         // Record cancel intent before early-return so a racing startTimer is also suppressed
         MFACheck.#sessions.set(domain, { state: 'cancelled', cancelledAt: Date.now() })
 
         if (session?.state !== 'waiting') {
             return
         }
+
+        debug(`MFA detected using "${reason} at ${url}`)
 
         const app = AppStats.forURL(url)
         const account = AppStats.getAccount(app, app.lastAccount)
@@ -80,6 +80,16 @@ class MFACheck {
         debug(`MFA timer for ${domain} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason}`)
 
         clearTimeout(session.timerId)
+    }
+
+    /**
+     * Returns true if an MFA session is currently awaiting completion for the URL's domain.
+     * @param {string} url - The URL to check
+     * @returns {boolean}
+     */
+    static isRunning(url) {
+        const domain = getDomain(getSitename(url))
+        return MFACheck.#sessions.get(domain)?.state === 'waiting'
     }
 
     static #sessions = new Map()   // domain -> { state: 'waiting'|'cancelled', ... }

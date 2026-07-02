@@ -585,20 +585,29 @@ function mergeArrays(...arrays) {
     return [...new Set(arrays.flat())]
 }
 
-async function hasPathChanged(tabId, url, seconds) {
-    return new Promise((resolve) => {
-        setTimeout(async () => {
-            try {
-                const tab = await chrome.tabs.get(tabId)
-                const prevUrl = url.toURL()
-                const currUrl = tab.url.toURL()
+async function confirmLogin(tabId, url, maxSeconds) {
+    const POLL = 2
+    let waited = 0
 
-                resolve(prevUrl.origin + prevUrl.pathname !== currUrl.origin + currUrl.pathname)
-            } catch (error) {
-                resolve(false)
-            }
-        }, seconds * ONE_SECOND)
-    })
+    while (true) {
+        await sleep(POLL * ONE_SECOND)
+        waited += POLL
+
+        // tab gone? trust MFA presence to tell us if the password was accepted
+        const tab = await chrome.tabs.get(tabId).catch(() => null)
+        if (!tab) return MFACheck.isRunning(url)
+
+        // path moved => server accepted the password
+        const prevPath = url.origin + url.pathname
+        const currPath = tab.url.origin + tab.url.pathname
+        if (prevPath !== currPath) return true
+
+        if (waited >= maxSeconds) {
+            // SPA case: no URL move, but an MFA challenge is live => password was accepted
+            return MFACheck.isRunning(url)
+
+        }
+    }
 }
 
 function sendMessage(type, message, handler) {
