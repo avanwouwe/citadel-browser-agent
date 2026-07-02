@@ -24,26 +24,31 @@ When overriding default settings in the JSON configuration file, the following r
 {: .note }
 
 ## specifying domains
-The following attributes specify lists of domains:
+The following attributes specify *lists of domains*:
 * `domain.unmask`
 * `company.domains`
 * `company.applications`
 * `session.domains`
-* `session.exceptions`
 * `domain.sensitive`
 * `domain.publicMail`
 * `device.exceptions.domains`
 * `account.exceptions.domains`
 * `account.mfa.required`
-* `account.mfa.exceptions`
 
 Specifying `*.domain.com` matches the domain *and* all of its subdomains:
 * `domain.com`
 * `host.domain.com`
 * `host.subdomain.com`
 
-Specifying `domain.com`, *without* the `*.` prefix, matches only that exact host, and none of its subdomains:
+Specifying `domain.com`, *without* the `*.` prefix, matches only that exact host, and none of its subdomains. For example:
 * `domain.com`
+
+Specifying `-host.domain.com` or `-*.subdomain.domain.com`, excludes that host or domain. This is useful for example to exclude hosts from a domain. So `*.google.com` + `-www.google.com` means:
+* `drive.google.com`
+* `sheets.google.com`
+* `mail.google.com`
+.. but not `www.google.com`
+
 
 This lets you target a single host such as `chat.openai.com` without also matching everything else under `openai.com`.
 

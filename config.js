@@ -2,11 +2,11 @@ class Config {
     static default = {
         maxReasonLength: 150,                   // max number of characters when users give a reason
         company: {
-            name: 'Your Organisation',          // name of your organisation
+            name: 'Your Organisation',          // name of your organization
             contact: undefined,                 // replace with the email address of your support
             logo: undefined,                    // replace with the URL of your logo (128 x 128 pixel, transparent)
-            domains: [ ],                       // replace with your domains, e.g. ["yourdomain.com","yourdomain.io"]
-            applications: [ ]                   // list your applications, e.g. ["your-crm.com", "your-mdm.com"]
+            domains: [ ],                       // replace with your domains, e.g. ["*.yourdomain.com","*.yourdomain.io"]
+            applications: [ ]                   // list your applications, e.g. ["*.your-crm.com", "*.your-mdm.com"]
         },
         logging: {
             reportFailure: true,
@@ -132,7 +132,6 @@ class Config {
         session: {
             maxSessionDays: 30,
             domains: [],
-            exceptions: [],
         },
         account: {
             confirmLoginDelay: 10,
@@ -176,7 +175,6 @@ class Config {
                 waitMinutes: 10,
                 maxSessionDays: 30,
                 required: [],
-                exceptions: []
             }
         },
         webfilter: {

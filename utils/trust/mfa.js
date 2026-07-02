@@ -2,9 +2,7 @@ class MFACheck {
 
     static isRequired(url, config) {
         const hostname = getSitename(url)
-        const isRequired = matchDomain(hostname, config.account.mfa.required)
-        const isExempted = matchDomain(hostname, config.account.mfa.exceptions)
-        return isRequired && !isExempted
+        return matchDomain(hostname, config.account.mfa.required)
     }
 
     /**

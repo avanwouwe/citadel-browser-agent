@@ -124,7 +124,7 @@ Not all applications have MFA, so you have to enumerate the list of applications
           "waitMinutes": 10,
           "maxSessionDays": 30,
           "required": [
-            "*.yourcompany.com",
+            "*.yourcompany.com", "-excluded-application.yourcompany.com"
             "*.1password.com",
             "*.atlassian.com",
             "idmsa.apple.com",
@@ -132,9 +132,6 @@ Not all applications have MFA, so you have to enumerate the list of applications
             "*.openai.com",
             "*.gitlab.com",
             "*.github.com"
-          ],
-          "exceptions": [
-            "non-mfa-application.yourcompany.com"
           ]
         }
     }
@@ -149,8 +146,11 @@ The default settings is `30` days. You can list the domains to apply the rule to
     ...
     "session": {
         "maxSessionDays": 30,
-        "domains": ["*"],
-        "exceptions": ["*.google.com","*.okta.com"]
+        "domains": [
+            "*",
+            "-*.google.com",
+            "-*.okta.com"
+            ],
     }
     ...
 ```

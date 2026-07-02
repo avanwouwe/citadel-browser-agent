@@ -332,7 +332,7 @@ function matchDomain(hostname, domainPatterns) {
     hostname = hostname ?? ""
     domainPatterns = domainPatterns ?? {}
 
-    let parts = hostname.split('.');
+    let parts = hostname.split(".")
     const isIP = IPv4Range.isIPV4(hostname)
 
     if (isIP) {
@@ -340,20 +340,22 @@ function matchDomain(hostname, domainPatterns) {
     }
 
     for (let i = 0; i < parts.length; i++) {
-        const suffix = parts.slice(i).join('.')
+        const suffix = parts.slice(i).join(".")
 
         if (isIP) {
-            if (domainPatterns[suffix]) return domainPatterns[suffix]
+            if (Object.hasOwn(domainPatterns, suffix)) return domainPatterns[suffix]
             continue
         }
 
         // exact match, only against the full hostname
-        if (i === 0 && domainPatterns[hostname]) {
+        if (i === 0 && Object.hasOwn(domainPatterns, hostname)) {
             return domainPatterns[hostname]
         }
+
         // wildcard key matches the apex (i===0) AND any subdomain (i>0)
-        if (domainPatterns['*.' + suffix]) {
-            return domainPatterns['*.' + suffix]
+        const wildcard = "*." + suffix
+        if (Object.hasOwn(domainPatterns, wildcard)) {
+            return domainPatterns[wildcard]
         }
     }
 

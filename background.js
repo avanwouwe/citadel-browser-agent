@@ -800,7 +800,7 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 	if (!cookie.expirationDate || cookie.expirationDate <= maxSessionExpirationTimestamp)
 		return
 
-	if (matchDomain(cookie.domain, config.session.domains) && ! matchDomain(cookie.domain, config.session.exceptions)) {
+	if (matchDomain(cookie.domain, config.session.domains)) {
 		const modifiedCookie = {
 			url: `https://${hostname}${cookie.path}`,
 			name: cookie.name,

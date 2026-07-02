@@ -42,6 +42,7 @@ Example:
           "yourcompany.net"
         ]
         "applications": [
+            "*.google.com", "-www.google.com",
             "www.your-crm.com",
             "www.your-hris.com",
             "login.your-iam-solution.com
