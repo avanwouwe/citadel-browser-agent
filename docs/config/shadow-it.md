@@ -25,6 +25,13 @@ Applications on the `shadowit.warn` list are warned, and applications on the `sh
     }
     ...
 ```
+> **Tip**
+>
+> Some applications have customer-specific sub-domains, such as `customer.slack.com` or `customer.atlassian.net`. In order to prevent warnings about shadow-IT, you must declare the top-level domain, and your tenant:
+> ```
+> "yourname.slack.com", "app.slack.com", "www.slack.com"
+> ```
+{: .tip }
 
 ## sensitive logging
 Shadow IT applications are considered sensitive, in the same way as the domains in `domain.sensitive`. This means that their URLs are not masked in the logs, even for events below the `maskUrlLevel`. Where a regular hostname, path and query string would be hashed to protect personal data, the URLs of shadow IT applications are logged in clear, so that your SOC can understand exactly which application was used and how. See [Logging & Reporting](/config/logging-reporting) for more on URL masking.

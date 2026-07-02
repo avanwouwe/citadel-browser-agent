@@ -65,3 +65,8 @@ Organisations with mature and robust security systems may decide to:
 * change the escalation schema in case of account- or device policy infringement
 * modify or add device controls (using [osquery](https://www.osquery.io/) requests)
 * adapt the extension policy
+
+> **Tip**
+>
+> During the initial testing period it may be easier to deploy the extension by manually installing it, instead of force-installing it. This will allow you to install / uninstall quickly, and has the advantage of allow you to see the console: `Extensions` > `Manage Extensions` > inspect the `service worker`. You may need to turn on **developer mode**.
+{: .tip }
