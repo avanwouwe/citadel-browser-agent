@@ -11,7 +11,7 @@ The extension is available on the web stores of Chrome, Firefox, Opera, Edge and
 Unless users go to the extension settings (`chrome://extensions/?id=anheildjmkfdkdpgbndmpjnmkfliefga`) and opt in, extensions are not enabled during Incognito browsing. It is possible to **require** the opt-in using the [MandatoryExtensionsForIncognitoNavigation key](https://chromeenterprise.google/policies/?policy=MandatoryExtensionsForIncognitoNavigation). This key will force the user to manually enable the extension for Incognito browsing, as part of the installation of the extension. The Firefox equivalent of this is the `private_browsing` [policy key](https://mozilla.github.io/policy-templates/).
 
 ## Windows
-For Chrome, Firefox, Edge and Brave the [Citadel installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) force-installs the plugin for you using registry entries (see below). Opera does not support forced installation of plugins and so the plugin has to be installed manually on the endpoint, using the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
+For Chrome, Firefox, Edge, Brave, Arc, Atlas (OpenAI) and Comet (Perplexity) the [Citadel installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) force-installs the plugin for you using registry entries (see below). Opera does not support forced installation of plugins and so the plugin has to be installed manually on the endpoint, using the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
 
 ```
 reg add "HKEY_LOCAL_MACHINE\Software\Policies\Google\Chrome\ExtensionInstallForcelist" /v "10" /t REG_SZ /d "anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" /f
@@ -26,9 +26,9 @@ reg add "HKEY_LOCAL_MACHINE\Software\Policies\BraveSoftware\Brave\ExtensionInsta
 
 
 ## macOS
-On macOS the plugin is force-installed via MDM-deployed configuration profiles. This works for Chrome, Firefox, Edge and Brave. Opera does not support automated installation, so on Opera the plugin has to be installed manually from the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
+On macOS the plugin is force-installed via MDM-deployed configuration profiles. This works for Chrome, Firefox, Edge, Brave, Arc, Atlas (OpenAI) and Comet (Perplexity. Opera does not support automated installation, so on Opera the plugin has to be installed manually from the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
 
-The browser-policy payloads for all four supported browsers are bundled into the same [citadel-agent.mobileconfig](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/mac/citadel-agent.mobileconfig), see the [macOS installation page](macos.md#mdm-configuration-profile) for upload instructions per MDM vendor.
+The browser-policy payloads for all supported browsers are bundled into the same [citadel-agent.mobileconfig](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/mac/citadel-agent.mobileconfig), see the [macOS installation page](macos.md#mdm-configuration-profile) for upload instructions per MDM vendor.
 
 > [!NOTE]  
 > If you have already force-installed another plugin via the Google Workspace admin, using profiles will override the Workspace list of force-installed extensions. If you add Citadel via the [Google Workspace admin](https://admin.google.com/ac/chrome/apps/) instead, you can also force the extension on in private sessions. In that case, delete the `com.google.Chrome` payload from the mobileconfig before uploading.

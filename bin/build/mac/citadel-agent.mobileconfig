@@ -127,6 +127,75 @@
 
         <dict>
             <key>PayloadType</key>
+            <string>company.thebrowser.Browser</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Arc Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.arc</string>
+            <key>PayloadUUID</key>
+            <string>49BDC99E-CDC9-44B9-88EE-E26D576E64EC</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>com.openai.atlas</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Atlas Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.atlas</string>
+            <key>PayloadUUID</key>
+            <string>771D4C37-79E5-4972-A7D3-18637BEC83C7</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
+            <string>ai.perplexity.comet</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Perplexity Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.perplexity</string>
+            <key>PayloadUUID</key>
+            <string>E7F68EE0-6E30-47FC-82C9-57236575AFDE</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
             <string>org.mozilla.firefox</string>
             <key>PayloadDisplayName</key>
             <string>Citadel Agent - Firefox Extension</string>

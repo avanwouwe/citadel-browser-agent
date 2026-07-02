@@ -37,7 +37,7 @@ Citadel has sensible defaults, but you can change the configuration of Citadel, 
 The configuration profile, [citadel-agent.mobileconfig](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/mac/citadel-agent.mobileconfig), bundles everything Citadel needs on macOS:
 
 * **Full Disk Access** for the agent binary (so Citadel can run [Device Trust queries](/config/device-trust/) that inspect directories considered 'sensitive' by macOS, like `~/Documents` or `~/Downloads`).
-* **Force-install of the browser extension** in Chrome, Edge, Brave and Firefox (see the [browser installation page](/install/browser) for the browser-side details).
+* **Force-install of the browser extension** in Chrome, Firefox, Edge, Brave, Arc, Atlas and Comet (see the [browser installation page](/install/browser) for the browser-side details).
 
 The TCC portion of the configuration profile is enforced **only** when it is pushed by an MDM. If a user installs the profile manually by double-clicking, macOS accepts it but TCC ignores its contents.
 
