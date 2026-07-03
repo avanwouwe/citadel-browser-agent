@@ -4,7 +4,10 @@ class Config {
         company: {
             name: 'Your Organisation',          // name of your organization
             contact: undefined,                 // replace with the email address of your support
-            logo: undefined,                    // replace with the URL of your logo (128 x 128 pixel, transparent)
+            logo: {
+                light: undefined,               // replace with the URL of your logo (128 x 128 pixel, transparent)
+                dark: undefined,                // .. and the dark version (optionally, otherwise the logo is just inverted)
+            },
             domains: [ ],                       // replace with your domains, e.g. ["*.yourdomain.com","*.yourdomain.io"]
             applications: [ ]                   // list your applications, e.g. ["*.your-crm.com", "*.your-mdm.com"]
         },

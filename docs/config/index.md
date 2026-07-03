@@ -35,7 +35,10 @@ Example:
     "company": {
         "contact": "it-support@yourcompany.com",
         "name": "Company",
-        "logo": "https://www.yourcompany.com/assets/images/company-logo.png",
+        "logo": {
+            "light": "https://www.yourcompany.com/assets/images/company-logo.png",
+            "dark": "https://www.yourcompany.com/assets/images/company-darkmode-logo.png",
+         },
         "domains": [
           "yourcompany.com",
           "yourcompany.io",
@@ -52,9 +55,9 @@ Example:
 ```
 
 > **Tip**
->
+
 > You can encode your company logo as a URL. That way you don't have to host it somewhere, and it will show correctly even if the endpoint is temporarily not connected to internet. You can use any [online encoding tool](https://elmah.io/tools/base64-image-encoder), but be sure to use a low-res 128x128 version, to stay under 2 Kb)
-{: .tip }
+>{: .tip }
 
 If you want to go further, you can define:
 * your password policy (if it differs from the Citadel default)

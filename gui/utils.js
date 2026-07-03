@@ -43,7 +43,10 @@ class Logo {
     static DEFAULT = chrome.runtime.getURL('/gui/images/icon128.png')
 
     static getLogo() {
-        return config.company.logo ?? Logo.DEFAULT
+        const lightLogo = config.company.logo.light ?? Logo.DEFAULT
+        const darkLogo = config.company.logo.dark ?? lightLogo
+
+        return ColorScheme.getScheme() === ColorScheme.DARK ? darkLogo : lightLogo
     }
 }
 

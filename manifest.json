@@ -67,6 +67,7 @@
       "/utils/ratethrottle.js",
       "/utils/logging.js",
       "/utils/browser.js",
+      "/gui/color-scheme/color-scheme.js",
       "/gui/interface.js",
       "/gui/modal.js",
       "/gui/notification.js",
