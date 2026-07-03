@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citadel · Extension Downloader</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .container {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline {
+            font-size: 1.1rem;
+            color: #666;
+            font-weight: 300;
+        }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        label {
+            display: block;
+            margin: 1.25rem 0 0.4rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #1a1a1a;
+        }
+
+        label:first-of-type { margin-top: 0; }
+
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            color: #333;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus { border-color: #1a1a1a; }
+
+        .hint {
+            color: #999;
+            font-size: 0.85rem;
+            margin-top: 0.4rem;
+        }
+
+        .btn {
+            display: inline-block;
+            width: 100%;
+            margin-top: 1.75rem;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-family: inherit;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #1a1a1a;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        #result {
+            display: none;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #f9fafb;
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        #result a {
+            color: #1a1a1a;
+            font-weight: 600;
+        }
+
+        #result code {
+            display: block;
+            margin-top: 0.6rem;
+            word-break: break-all;
+            color: #999;
+            font-size: 0.78rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2.5rem 0 1rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: #666;
+            text-decoration: none;
+        }
+
+        footer a:hover { color: #1a1a1a; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .tagline { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>Extension Downloader</h1>
+        <p class="tagline">Fetch a browser extension package directly from the vendor store.</p>
+    </header>
+
+    <div class="card">
+        <label for="store">Store</label>
+        <select id="store">
+            <option value="chrome">Chrome Web Store</option>
+            <option value="edge">Microsoft Edge Add-ons</option>
+            <option value="firefox">Firefox Add-ons</option>
+        </select>
+
+        <label for="extId">Extension ID</label>
+        <input id="extId" placeholder="cjpalhdlnbpafiamejdnhcphjbkeiagm" autofocus>
+        <p class="hint" id="idHint">Chrome/Edge IDs are 32 lowercase letters (a–p).</p>
+
+        <button class="btn btn-primary" id="dl">Download Extension</button>
+
+        <div id="result"></div>
+    </div>
+
+    <footer>
+        <a href="https://citadelagent.org">citadelagent.org</a>
+    </footer>
+</div>
+
+<script>
+    // Fallback only — used if we can't read the version from the browser.
+    const FALLBACK_VERSION = "149.0.7827.201";
+
+    function detectVersion() {
+        const m = navigator.userAgent.match(/Edg\/([\d.]+)/) ||
+            navigator.userAgent.match(/Chrome\/([\d.]+)/);
+        return m ? m[1] : FALLBACK_VERSION;
+    }
+
+    const CHROME_VERSION = detectVersion();
+
+    const storeSelect = document.getElementById("store");
+    const extInput    = document.getElementById("extId");
+    const idHint      = document.getElementById("idHint");
+    const result      = document.getElementById("result");
+    const dlButton    = document.getElementById("dl");
+
+    // Synchronous URL builders for Chrome/Edge (direct redirect endpoints).
+    function buildDirectUrl(store, extensionId) {
+        switch (store) {
+            case "chrome":
+                return "https://clients2.google.com/service/update2/crx" +
+                    "?response=redirect&acceptformat=crx2,crx3" +
+                    "&prodversion=" + encodeURIComponent(CHROME_VERSION) +
+                    "&x=id%3D" + encodeURIComponent(extensionId) + "%26uc";
+            case "edge":
+                return "https://edge.microsoft.com/extensionwebstorebase/v1/crx" +
+                    "?x=id%3D" + encodeURIComponent(extensionId) +
+                    "%26installsource%3Dondemand&response=redirect";
+        }
+    }
+
+    // Firefox: the AMO API returns metadata JSON; the real .xpi URL is nested inside.
+    async function resolveFirefoxUrl(extensionId) {
+        const metaUrl = "https://addons.mozilla.org/api/v5/addons/addon/" +
+            encodeURIComponent(extensionId) + "/";
+        const response = await fetch(metaUrl);
+        if (!response.ok) throw new Error("AMO returned HTTP " + response.status);
+        const data = await response.json();
+
+        const fileUrl = data?.current_version?.file?.url;
+        if (!fileUrl) throw new Error("No download URL found in AMO metadata.");
+        return fileUrl;
+    }
+
+    storeSelect.addEventListener("change", () => {
+        if (storeSelect.value === "firefox") {
+            idHint.textContent = "Firefox accepts the add-on slug or numeric ID (e.g. ublock-origin).";
+        } else {
+            idHint.textContent = "Chrome/Edge IDs are 32 lowercase letters (a–p).";
+        }
+    });
+
+    function validId(store, id) {
+        if (!id) return false;
+        if (store === "firefox") return true;
+        return /^[a-p]{32}$/.test(id);
+    }
+
+    function showResult(url) {
+        result.style.display = "block";
+        result.innerHTML =
+            'The extension is downloaded to your downloads folder. ' +
+            'Click <a href="' + url + '" target="_blank" rel="noopener">here</a> ' +
+            'if the download does not start.';
+    }
+
+    async function handleDownload() {
+        const store = storeSelect.value;
+        const extId = extInput.value.trim().toLowerCase();
+
+        if (!validId(store, extId)) {
+            alert("That doesn't look like a valid extension ID for the selected store.");
+            return;
+        }
+
+        try {
+            let url;
+            if (store === "firefox") {
+                dlButton.disabled = true;
+                dlButton.textContent = "Resolving…";
+                url = await resolveFirefoxUrl(extId);
+            } else {
+                url = buildDirectUrl(store, extId);
+            }
+
+            showResult(url);
+            window.open(url, "_blank", "noopener");
+        } catch (err) {
+            alert("Could not resolve the download: " + err.message);
+        } finally {
+            dlButton.disabled = false;
+            dlButton.textContent = "Download Extension";
+        }
+    }
+
+    dlButton.addEventListener("click", handleDownload);
+
+    extInput.addEventListener("keydown", e => {
+        if (e.key === "Enter") handleDownload();
+    });
+</script>
+</body>
+</html>
