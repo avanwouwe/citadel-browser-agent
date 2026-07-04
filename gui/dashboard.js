@@ -1,14 +1,10 @@
-window.addEventListener('DOMContentLoaded', function () {
-    const tabButtons = document.querySelectorAll('.tab')
-    tabButtons.forEach(btn => {
-        btn.addEventListener('click', function () {
-            selectTab(btn.id)
-        })
-    })
-})
-
 let t
+let port
 let config
+let updateBtn
+let currentTab
+
+// ── Entry point ───────────────────────────────────────────────────────────────
 
 I18n.loadPage('/utils/i18n', (i18n) => {
     t = i18n.getTranslator()
@@ -16,12 +12,33 @@ I18n.loadPage('/utils/i18n', (i18n) => {
 
     callServiceWorker("GetConfig").then(conf => config = conf)
 
+    init()
+
     const params = new URLSearchParams(window.location.search)
-    const tabName = params.get('tab') ?? 'device'
-    selectTab(tabName)
-})()
+    selectTab(params.get('tab') ?? 'device')
+})().catch(err => console.error('dashboard init failed', err))
+
+function init() {
+    wireTabs()
+    wireUpdateButton()
+    wireTooltip()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    connect()
+}
+
+// ── Tab handling ──────────────────────────────────────────────────────────────
+
+const renderTab = (tabId) => dashboards[tabId]?.()
+
+function wireTabs() {
+    document.querySelectorAll('.tab').forEach(btn => {
+        btn.addEventListener('click', () => selectTab(btn.id))
+    })
+}
 
 function selectTab(tabId) {
+    currentTab = tabId
+
     const tabButtons = document.querySelectorAll('.tab')
     const tabContents = document.querySelectorAll('.tab-content')
 
@@ -31,9 +48,7 @@ function selectTab(tabId) {
         tabContents[i].classList.toggle('active', isActive)
     }
 
-    renderDeviceDashboard()
-    renderAccountDashboard()
-    renderExtensionDashboard()
+    renderTab(tabId)
 
     const params = new URLSearchParams(window.location.search)
     params.set('tab', tabId)
@@ -46,6 +61,8 @@ function selectTab(tabId) {
         manualLink.href = `https://citadelagent.org/dashboard/${tabId}-dashboard`
     }
 }
+
+// ── Dashboards ────────────────────────────────────────────────────────────────
 
 const renderDeviceDashboard = serialized(async function () {
     const devicetrust = await callServiceWorker("GetDeviceStatus")
@@ -85,10 +102,10 @@ const renderDeviceDashboard = serialized(async function () {
         const tr = document.createElement("tr")
         tr.innerHTML =
             `<td ${explainPage ? "class='label'" : ''}>${label}</td>` +
-            `<td>${errors}</td>`+
+            `<td>${errors}</td>` +
             `<td class="state ${ctrl.state.toLowerCase()}">${t("control.state." + ctrl.state)}</td>` +
             `<td class="days">${next.days ?? ""}</td>` +
-            `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>`
+            `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state)}</td>`
         tb.appendChild(tr)
     }
 })
@@ -115,7 +132,7 @@ const renderAccountDashboard = serialized(async function () {
             `<td>${errors}</td>` +
             `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
             `<td class="days">${next?.days ?? ""}</td>` +
-            `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state) || "-"}</td>` +
+            `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state)}</td>` +
             `<td><span class="delete-btn" title="${t("dashboard.action.delete")}">${Icons.delete}</span></td>`
 
         const userSpan = tr.cells[0].querySelector("span")
@@ -221,10 +238,10 @@ const renderEventsDashboard = serialized(async function () {
     for (let i = log.length - 1; i >= 0; i--) {
         const entry = log[i]
         const tr = document.createElement('tr')
-        entry.timestamp = new Date(entry.timestamp)
-        const hours = String(entry.timestamp.getHours()).padStart(2, '0')
-        const minutes = String(entry.timestamp.getMinutes()).padStart(2, '0')
-        const seconds = String(entry.timestamp.getSeconds()).padStart(2, '0')
+        const timestamp = new Date(entry.timestamp)
+        const hours = String(timestamp.getHours()).padStart(2, '0')
+        const minutes = String(timestamp.getMinutes()).padStart(2, '0')
+        const seconds = String(timestamp.getSeconds()).padStart(2, '0')
         const shortTime = `${hours}:${minutes}:${seconds}`
 
         tr.innerHTML =
@@ -234,7 +251,7 @@ const renderEventsDashboard = serialized(async function () {
             `<td class="label ellipsis"></td>` +
             `<td class="ellipsis"></td>`
 
-        tr.cells[0].title = entry.timestamp.toISOString()
+        tr.cells[0].title = timestamp.toISOString()
         tr.cells[0].textContent = shortTime
         tr.cells[1].textContent = entry.browseragent.level
         tr.cells[2].textContent = entry.browseragent.result ?? entry.browseragent.event
@@ -257,19 +274,27 @@ const renderEventsDashboard = serialized(async function () {
     }
 })
 
+const dashboards = {
+    device: renderDeviceDashboard,
+    account: renderAccountDashboard,
+    extension: renderExtensionDashboard,
+}
+
+// ── Actions ───────────────────────────────────────────────────────────────────
+
 async function handleDeleteAccount(event) {
-    if (event.target.classList.contains('delete-btn')) {
-        const system = event.target.dataset.system
-        const username = event.target.dataset.username
-        await callServiceWorker("DeleteAccount", { system, username })
-    }
+    const btn = event.target.closest('.delete-btn')
+    if (!btn) return
+    const { system, username } = btn.dataset
+    await callServiceWorker("DeleteAccount", { system, username })
 }
 
 async function handleExtensionAction(event) {
     const input = event.target
+    if (!input.classList.contains('ext-toggle-input')) return
+
     const extensionId = input.dataset.extension
     const enable = input.checked
-    if (! input.classList.contains('ext-toggle-input')) return
 
     if (input.classList.contains('ext-blocked') && enable) {
         event.preventDefault()
@@ -279,12 +304,12 @@ async function handleExtensionAction(event) {
         const analysis = await ExtensionAnalysis.Headless.fetch(extensionInfo)
         setPointerBusy(false)
 
-        const error = analysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error"))
-        if (error.length > 0) {
-            const onCancel = { label: t('global.cancel')}
+        const errors = analysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error")) ?? []
+        if (errors.length > 0) {
+            const onCancel = { label: t('global.cancel') }
             const options = Modal.prepareOptions(
                 t('extension-analysis.disable-modal.title'),
-                `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${error}`)}`,
+                `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${errors[0]}`)}`,
                 undefined,
                 undefined,
                 onCancel,
@@ -300,7 +325,7 @@ async function handleExtensionAction(event) {
         }
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
-        const onCancel = { label: t('global.cancel')}
+        const onCancel = { label: t('global.cancel') }
         const onException = { type: 'allow-extension', analysis }
         const options = Modal.prepareOptions(
             t('extension-analysis.disable-modal.title'),
@@ -320,17 +345,29 @@ async function handleExtensionAction(event) {
 const REFRESH_TIMEOUT_MS = 60 * ONE_SECOND
 let refreshTimeout = null
 
+function wireUpdateButton() {
+    updateBtn = document.getElementById('update-button')
+    updateBtn.addEventListener('click', async () => {
+        if (updateBtn.classList.contains('refreshing')) return
+        updateBtn.classList.add('refreshing')
+        refreshTimeout = setTimeout(clearRefreshSpinner, REFRESH_TIMEOUT_MS)
+        await refreshDeviceStatus()
+    })
+}
+
 function clearRefreshSpinner() {
-    updateBtn.classList.remove('refreshing')
+    updateBtn?.classList.remove('refreshing')
     if (refreshTimeout) {
         clearTimeout(refreshTimeout)
         refreshTimeout = null
     }
 }
 
-// ── Port / service-worker connection ─────────────────────────────────────────
+async function refreshDeviceStatus() {
+    await callServiceWorker("RefreshDeviceStatus")
+}
 
-let port
+// ── Port / service-worker connection ─────────────────────────────────────────
 
 function connect() {
     port = chrome.runtime.connect({ name: "SecurityDashboard" })
@@ -352,25 +389,9 @@ function reconnect() {
     setTimeout(connect, 10 * ONE_SECOND)
 }
 
-connect()
-
-async function refreshDeviceStatus() {
-    await callServiceWorker("RefreshDeviceStatus")
-}
-
-const updateBtn = document.getElementById('update-button')
-updateBtn.addEventListener('click', async function () {
-    if (updateBtn.classList.contains('refreshing')) return
-
-    updateBtn.classList.add('refreshing')
-    refreshTimeout = setTimeout(clearRefreshSpinner, REFRESH_TIMEOUT_MS)
-
-    await refreshDeviceStatus()
-})
-
 // ── Tooltip ───────────────────────────────────────────────────────────────────
 
-;(function () {
+function wireTooltip() {
     let tooltip, hideHandler
 
     document.body.addEventListener('click', function (ev) {
@@ -406,15 +427,15 @@ updateBtn.addEventListener('click', async function () {
         }
         document.addEventListener('click', hideHandler, true)
     })
-})()
+}
 
 // ── Event tab auto-refresh ────────────────────────────────────────────────────
 
-document.addEventListener('visibilitychange', handleVisibilityChange)
+const EVENT_REFRESH_MS = 5 * ONE_SECOND
 let refreshInterval = null
 
 function handleVisibilityChange() {
-    if (!document.hidden) {
+    if (!document.hidden && currentTab === 'events') {
         startEventRefreshing()
     } else {
         stopEventRefreshing()
@@ -424,9 +445,7 @@ function handleVisibilityChange() {
 function startEventRefreshing() {
     if (refreshInterval) return
     renderEventsDashboard()
-    refreshInterval = setInterval(async () => {
-        await renderEventsDashboard()
-    }, 5 * ONE_SECOND)
+    refreshInterval = setInterval(renderEventsDashboard, EVENT_REFRESH_MS)
 }
 
 function stopEventRefreshing() {
