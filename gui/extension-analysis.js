@@ -208,7 +208,6 @@ function proposeException() {
     exceptionSectionToggle.addEventListener('click', function() {
         exceptionSectionToggle.hidden = true
         document.getElementById('exceptionSection').hidden = false
-        document.getElementById("backButton").hidden = true
     })
 
     const exceptionReasonInput = document.getElementById('exceptionReason')
