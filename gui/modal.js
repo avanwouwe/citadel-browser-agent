@@ -1,15 +1,15 @@
 class Modal {
     static #HOST_ELEMENT_ID = "CitadelModalOverlayHost"
 
-    static async createForDomain(domain, title, message, onAcknowledge, onException) {
-        const options = Modal.prepareOptions(title, message, onAcknowledge, onException)
+    static async createForDomain(domain, title, message, onAcknowledge, onException, onCancel) {
+        const options = Modal.prepareOptions(title, message, onAcknowledge, onException, onCancel)
 
         await injectFilesIntoDomain(domain, ['/gui/utils.js', '/gui/modal.js'])
         await injectFuncIntoDomain(domain, async options => await Modal.create(options), [options])
     }
 
-    static async createForTab(tabId, title, message, onAcknowledge, onException) {
-        const options = Modal.prepareOptions(title, message, onAcknowledge, onException)
+    static async createForTab(tabId, title, message, onAcknowledge, onException, onCancel) {
+        const options = Modal.prepareOptions(title, message, onAcknowledge, onException, onCancel)
 
         await injectFilesIntoTab(tabId, ['/gui/utils.js', '/gui/modal.js']).catch(err => console.error(err))
         await injectFuncIntoTab(tabId, async options => await Modal.create(options), [options])
@@ -51,6 +51,21 @@ class Modal {
             try {
                 if (options.onAcknowledge.remove) host.remove()
                 sendMessage(options.onAcknowledge)
+            } catch (e) {
+                if (e.message.startsWith("Extension context invalidated")) {
+                    host.remove()
+                }
+            }
+        })
+
+        const cancel = shadow.getElementById('cancelButton')
+        cancel.hidden = options.onCancel === undefined
+        cancel.textContent = options.text.cancel ?? ''
+
+        cancel.addEventListener('click', function () {
+            try {
+                if (options.onCancel.remove) host.remove()
+                sendMessage(options.onCancel)
             } catch (e) {
                 if (e.message.startsWith("Extension context invalidated")) {
                     host.remove()
@@ -100,19 +115,25 @@ class Modal {
         })
     }
 
-    static prepareOptions(title, message, onAcknowledge, onException, showLogo = true) {
+    static prepareOptions(title, message, onAcknowledge, onException, onCancel, showLogo = true) {
         const options = {
             logo: showLogo ? Logo.getLogo() : undefined,
             text: {
                 title,
                 message,
                 acknowledge: onAcknowledge?.label ?? t("global.ok"),
+                cancel: onCancel?.label ?? t("global.cancel")
             },
         }
 
         if (onAcknowledge) {
             onAcknowledge.remove = onAcknowledge.remove ?? true
             options.onAcknowledge = onAcknowledge
+        }
+
+        if (onCancel) {
+            onCancel.remove = onCancel.remove ?? true
+            options.onCancel = onCancel
         }
 
         if (onException) {

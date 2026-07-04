@@ -81,14 +81,18 @@ class Notification {
         }
 
         const exceptions = config[alert.type]?.exceptions
-        const onAcknowledge = { type: 'acknowledge-alert', alert, remove: alert.level !== State.BLOCKING }
+        const isBlocking = alert.level === State.BLOCKING
+        const onAcknowledge = { type: 'acknowledge-alert', alert, remove: !isBlocking, openDashboard: true }
+        const onCancel = !isBlocking ? { type: 'acknowledge-alert', alert } : undefined
 
         if (alert.type === AccountTrust.TYPE || alert.type === DeviceTrust.TYPE) {
             onAcknowledge.label = t(`${alert.type}trust.notification.acknowledge`)
+            if (onCancel) onCancel.label = t(`${alert.type}trust.notification.later`)
         }
-        const onException = (alert.level === State.BLOCKING && exceptions?.duration > 0 && matchDomain(hostname, exceptions?.domains)) ? { type: 'allow-alert', alert } : undefined
 
-        await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException)
+        const onException = (isBlocking && exceptions?.duration > 0 && matchDomain(hostname, exceptions?.domains)) ? { type: 'allow-alert', alert } : undefined
+
+        await Modal.createForTab(tabId, alert.notification.title, alert.notification.message, onAcknowledge, onException, onCancel)
         Notification.#tabs.add(tabId)
         return true
     }

@@ -287,6 +287,7 @@ async function handleExtensionAction(event) {
                 `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${error}`)}`,
                 onAcknowledge,
                 undefined,
+                undefined,
                 false)
             await Modal.create(options)
             return
@@ -306,6 +307,7 @@ async function handleExtensionAction(event) {
             reason,
             onAcknowledge,
             onException,
+            undefined,
             false)
         await Modal.create(options)
     } else {

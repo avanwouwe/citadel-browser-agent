@@ -197,8 +197,31 @@ button {
 
 /* ── Centred action elements ────────────────────────────────────────── */
 .exception-title,
-.acknowledge-button,
 .exception-submit {
+    max-width: 200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* ── Buttons ────────────────────────────────────────── */
+
+.button-row {
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    width: 100%;
+}
+
+.acknowledge-button,
+.cancel-button {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.button-row:has(.cancel-button[hidden]) .acknowledge-button {
+    flex: 0 1 auto;
     max-width: 200px;
     width: 100%;
     margin-left: auto;

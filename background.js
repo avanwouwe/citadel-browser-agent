@@ -921,7 +921,9 @@ onMessage((request, sender) => {
 			Notification.setAlert(Extension.TYPE, State.PASSING)
 		}
 
-		openDashboard(request.alert.type, true)
+		if (request.openDashboard) {
+			openDashboard(request.alert.type, true)
+		}
 
 		if (request.alert.level !== State.BLOCKING) {
 			Notification.acknowledge(request.alert.type)
