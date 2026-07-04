@@ -156,7 +156,9 @@
     },
     "disable-modal": {
       "title": "Dangerous Extension",
-      "message": "A potentially dangerous extension was found and has been deactivated."
+      "message-install": "A potentially dangerous extension was found and has been deactivated.",
+      "message-update": "An extension was deactivated because an update increased its risk. Do not reactivate it without understanding the risk.",
+      "message-error": "The extension could not be analyzed because"
     },
     "block-page": {
       "install": "Install",
@@ -166,11 +168,11 @@
         "analyze-store": "Analyzing store page",
         "analyze-manifest": "Analyzing manifest",
         "analyze-code": "Analyzing code",
-        "error": "An error occurred",
-        "error-network": "Network error",
-        "error-store": "Unable to analyze the extension store page",
-        "error-manifest": "Unable to analyze the manifest",
-        "error-evaluation": "Unable to evaluate the extension"
+        "error": "an error occurred",
+        "error-network": "network error",
+        "error-store": "unable to analyze the extension store page",
+        "error-manifest": "unable to analyze the manifest",
+        "error-evaluation": "unable to evaluate the extension"
       },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {

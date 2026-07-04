@@ -50,6 +50,8 @@ class Logo {
     }
 }
 
+const setPointerBusy = (isBusy = true) => document.documentElement.style.cursor = isBusy ? 'wait' : ''
+
 function navigateTo(tabId, url) {
     chrome.tabs.update(tabId, { url })
 }

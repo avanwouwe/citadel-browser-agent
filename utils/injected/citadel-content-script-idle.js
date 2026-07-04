@@ -243,10 +243,9 @@ function repeatEvent(event, target) {
     }
 }
 
-const setPointerBusy = () => document.body.classList.add('citadel-busy')
-const setPointerNormal = () => document.body.classList.remove('citadel-busy')
-
 checkLogin = async function(event, button) {
+    const setPointerBusy = (isBusy = true) => isBusy ? document.body.classList.add('citadel-busy') : document.body.classList.remove('citadel-busy')
+
     if (event.syntheticCitadelEvent) return
 
     const fields = findFormElements(button)
@@ -271,7 +270,7 @@ checkLogin = async function(event, button) {
             } catch (error) {
                 console.error('exception when analyzing login', error.stack)
             } finally {
-                setPointerNormal()
+                setPointerBusy(false)
             }
 
             repeatEvent(event, button)

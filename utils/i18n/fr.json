@@ -156,8 +156,8 @@
     },
     "disable-modal": {
       "title": "Extension Dangereuse",
-      "message": "Une extension potentiellement dangereuse a été détectée et désactivée."
-    },
+      "message-install": "Une extension potentiellement dangereuse a été détectée et désactivée.",
+      "message-update": "Une extension a été désactivée, car une mise à jour a augmenté le risque qu'elle présente. Ne la réactivez pas sans avoir compris ce risque."    },
     "block-page": {
       "install": "Installer",
       "back": "Retour",
@@ -166,11 +166,11 @@
         "analyze-store": "Analyse de la page d'extension",
         "analyze-manifest": "Analyse du manifeste",
         "analyze-code": "Analyse du code",
-        "error": "Une erreur est survenue",
-        "error-network": "Erreur réseau",
-        "error-store": "Impossible d’analyser la page de l'extension dans le store",
-        "error-manifest": "Impossible d’analyser le manifeste",
-        "error-evaluation": "Impossible d'évaluer l'extension"
+        "error": "une erreur est survenue",
+        "error-network": "erreur réseau",
+        "error-store": "impossible d’analyser la page de l'extension dans le store",
+        "error-manifest": "impossible d’analyser le manifeste",
+        "error-evaluation": "impossible d'évaluer l'extension"
       },
       "page-blocked-header": "Analyse de l’extension",
       "install-blocked": {

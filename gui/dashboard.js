@@ -8,9 +8,13 @@ window.addEventListener('DOMContentLoaded', function () {
 })
 
 let t
+let config
+
 I18n.loadPage('/utils/i18n', (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
+
+    callServiceWorker("GetConfig").then(conf => config = conf)
 
     const params = new URLSearchParams(window.location.search)
     const tabName = params.get('tab') ?? 'device'
@@ -270,11 +274,29 @@ async function handleExtensionAction(event) {
     if (input.classList.contains('ext-blocked') && enable) {
         event.preventDefault()
 
-        const extensionTrust = await callServiceWorker("GetExtensionStatus")
-        const analysis = extensionTrust[extensionId]
-        const rejection = analysis?.evaluation?.rejection
+        setPointerBusy()
+        const extensionInfo = await Extension.infoOf(extensionId)
+        const analysis = await ExtensionAnalysis.Headless.fetch(extensionInfo)
+        setPointerBusy(false)
 
-        if (!rejection) return
+        const error = analysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error"))
+        if (error.length > 0) {
+            const onAcknowledge = { label: t('global.cancel')}
+            const options = Modal.prepareOptions(
+                t('extension-analysis.disable-modal.title'),
+                `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${error}`)}`,
+                onAcknowledge,
+                undefined,
+                false)
+            await Modal.create(options)
+            return
+        }
+
+        const rejection = analysis?.evaluation?.rejection
+        if (!rejection) {
+            await ExtensionTrust.allow(analysis)
+            return
+        }
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
         const onAcknowledge = { label: t('global.cancel')}

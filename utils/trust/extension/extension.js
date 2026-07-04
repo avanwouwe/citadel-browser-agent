@@ -91,7 +91,8 @@ class Extension {
 
     static isSideloaded = extensionInfo => Extension.#SIDELOAD_TYPES.includes(extensionInfo.installType)
 
-    static #getExt = (extensionId, fn) => chrome.management.get(extensionId).then(fn, () => false)
+    static infoOf = async (extensionId) => await chrome.management.get(extensionId)
+    static #getExt = (extensionId, fn) => Extension.infoOf(extensionId).then(fn, () => false)
 
     static isInstalled = extensionId => Extension.#getExt(extensionId, () => true)
     static isEnabled   = extensionId => Extension.#getExt(extensionId, ext => ext.enabled)
