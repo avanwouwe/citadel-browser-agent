@@ -43,6 +43,11 @@ class Modal {
         shadow.getElementById('modalTitle').textContent = options.text.title ?? ''
         shadow.getElementById('modalMessage').safeInnerHTML(options.text.message ?? '')
 
+        let onKeyDown = null
+        const detachEsc = () => {
+            if (onKeyDown) document.removeEventListener('keydown', onKeyDown, true)
+        }
+
         const acknowledge = shadow.getElementById('acknowledgeButton')
         acknowledge.hidden = options.onAcknowledge === undefined
         acknowledge.textContent = options.text.acknowledge ?? ''
@@ -55,6 +60,8 @@ class Modal {
                 if (e.message.startsWith("Extension context invalidated")) {
                     host.remove()
                 }
+            } finally {
+                detachEsc()
             }
         })
 
@@ -62,7 +69,7 @@ class Modal {
         cancel.hidden = options.onCancel === undefined
         cancel.textContent = options.text.cancel ?? ''
 
-        cancel.addEventListener('click', function () {
+        const triggerCancel = function () {
             try {
                 if (options.onCancel.remove) host.remove()
                 sendMessage(options.onCancel)
@@ -70,8 +77,24 @@ class Modal {
                 if (e.message.startsWith("Extension context invalidated")) {
                     host.remove()
                 }
+            } finally {
+                detachEsc()
             }
-        })
+        }
+
+        cancel.addEventListener('click', triggerCancel)
+
+        if (options.onCancel) {
+            onKeyDown = function (e) {
+                if (e.key === 'Escape') {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    triggerCancel()
+                }
+            }
+
+            document.addEventListener('keydown', onKeyDown, true)
+        }
 
         if (!options.exception) {
             shadow.getElementById('exceptionDiv').hidden = true
@@ -112,6 +135,7 @@ class Modal {
 
             sendMessage(onException)
             host.remove()
+            detachEsc()
         })
     }
 

@@ -281,13 +281,13 @@ async function handleExtensionAction(event) {
 
         const error = analysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error"))
         if (error.length > 0) {
-            const onAcknowledge = { label: t('global.cancel')}
+            const onCancel = { label: t('global.cancel')}
             const options = Modal.prepareOptions(
                 t('extension-analysis.disable-modal.title'),
                 `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${error}`)}`,
-                onAcknowledge,
                 undefined,
                 undefined,
+                onCancel,
                 false)
             await Modal.create(options)
             return
@@ -300,14 +300,14 @@ async function handleExtensionAction(event) {
         }
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
-        const onAcknowledge = { label: t('global.cancel')}
+        const onCancel = { label: t('global.cancel')}
         const onException = { type: 'allow-extension', analysis }
         const options = Modal.prepareOptions(
             t('extension-analysis.disable-modal.title'),
             reason,
-            onAcknowledge,
-            onException,
             undefined,
+            onException,
+            onCancel,
             false)
         await Modal.create(options)
     } else {
