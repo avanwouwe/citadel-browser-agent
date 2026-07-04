@@ -138,11 +138,7 @@ class ExtensionAnalysis {
                         return await this.resolveAnalysis(analysis)
                     } else {
                         await this.#ensureOffscreen()
-                        return await sendMessagePromise('ANALYZE_EXTENSION', {
-                            storePage,
-                            logo: Logo.getLogo(),
-                            config
-                        })
+                        return await sendMessagePromise('ANALYZE_EXTENSION', { storePage, config })
                     }
                 } catch (error) {
                     console.error('Extension analysis failed:', error)
@@ -235,7 +231,7 @@ class ExtensionAnalysis {
                 } else {
                     evaluation.allowed = false
                     evaluation.rejection = { reasons: ['sideloaded'] }
-                    await ExtensionTrust.block(analysis)
+                    await ExtensionTrust.block(analysis, scanType)
                     ExtensionAnalysis.#log('extension disabled', 'sideloaded and therefore disabled', Log.WARN, extensionInfo, undefined, scanType)
                 }
                 return
@@ -295,7 +291,7 @@ class ExtensionAnalysis {
             // if we arrive here, the extension presence, installation or update was too high risk should be disabled
             // if it was disabled anyway, just leave it disabled
             if (!extensionInfo.enabled) {
-                await ExtensionTrust.block(currAnalysis)
+                await ExtensionTrust.block(currAnalysis, scanType)
                 ExtensionAnalysis.#log('extension left disabled', `already disabled`, Log.INFO, extensionInfo, currAnalysis, scanType)
                 return
             }
@@ -313,7 +309,7 @@ class ExtensionAnalysis {
             }
 
             // otherwise, disable it
-            await ExtensionTrust.block(currAnalysis)
+            await ExtensionTrust.block(currAnalysis, scanType)
             riskIncrease.forEach(reason => logger.log(nowTimestamp(), "extension", "risk increase", currAnalysis.storeInfo.storePage, Log.WARN, reason, `extension '${extensionInfo.id}' added risk ${reason}`))
             ExtensionAnalysis.#log('extension disabled', 'high risk and therefore disabled', Log.WARN, extensionInfo, currAnalysis, scanType)
         }

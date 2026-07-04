@@ -67,13 +67,18 @@ class ExtensionTrust {
         Dashboard.refreshExtension()
     }
 
-    static async block(analysis) {
+    static async block(analysis, scanType) {
         const prevAnalysis = await ExtensionTrust.#get(analysis.storeInfo.id)
         if (!prevAnalysis) await ExtensionTrust.#set(analysis)
 
         const disabled = await ExtensionTrust.setState(analysis.storeInfo.id, State.BLOCKING)
         if (disabled) {
-            Notification.setAlert(Extension.TYPE, State.FAILING, t('extension-analysis.disable-modal.title'), t('extension-analysis.disable-modal.message'))
+            const title = t('extension-analysis.disable-modal.title')
+            const message =
+                scanType === ExtensionAnalysis.ScanType.UPDATE
+                    ? t('extension-analysis.disable-modal.message-update')
+                    : t('extension-analysis.disable-modal.message-install')
+            Notification.setAlert(Extension.TYPE, State.FAILING, title, message)
         }
 
         Dashboard.refreshExtension()
