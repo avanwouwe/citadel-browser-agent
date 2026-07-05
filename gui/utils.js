@@ -87,7 +87,8 @@ function html2dom(html) {
  * @param {(remaining: number) => string} formatRemaining - builds the counter label
  */
 async function attachReasonLimit(textarea, counter, formatRemaining) {
-    const { maxReasonLength } = await callServiceWorker("GetConfig")
+    const config = await callServiceWorker("GetConfig")
+    const maxReasonLength = config.system.maxReasonLength
 
     textarea.maxLength = maxReasonLength
     const threshold = Math.max(10, Math.ceil(maxReasonLength * 0.1))
