@@ -289,6 +289,19 @@ async function handleDeleteAccount(event) {
     await callServiceWorker("DeleteAccount", { system, username })
 }
 
+async function showBlockExtensionModal(title, message, onException = undefined) {
+    const onAcknowledge = { label: t('global.cancel') }
+    const options = Modal.prepareOptions(
+        title,
+        message,
+        onAcknowledge,
+        onException,
+        undefined,
+        false
+    )
+    await Modal.create(options)
+}
+
 async function handleExtensionAction(event) {
     const input = event.target
     if (!input.classList.contains('ext-toggle-input')) return
@@ -306,15 +319,8 @@ async function handleExtensionAction(event) {
 
         const errors = analysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error")) ?? []
         if (errors.length > 0) {
-            const onAcknowledge = { label: t('global.cancel') }
-            const options = Modal.prepareOptions(
-                t('extension-analysis.disable-modal.title'),
-                `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${errors[0]}`)}`,
-                onAcknowledge,
-                undefined,
-                undefined,
-                false)
-            await Modal.create(options)
+            const message = `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${errors[0]}`)}`
+            await showBlockExtensionModal(t('extension-analysis.disable-modal.title'), message)
             return
         }
 
@@ -325,16 +331,8 @@ async function handleExtensionAction(event) {
         }
 
         const reason = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
-        const onAcknowledge = { label: t('global.cancel') }
         const onException = { type: 'allow-extension', analysis }
-        const options = Modal.prepareOptions(
-            t('extension-analysis.disable-modal.title'),
-            reason,
-            onAcknowledge,
-            onException,
-            undefined,
-            false)
-        await Modal.create(options)
+        await showBlockExtensionModal(t('extension-analysis.disable-modal.title'), reason, onException)
     } else {
         await callServiceWorker("EnableExtension", { extensionId, enable })
     }
