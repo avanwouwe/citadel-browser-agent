@@ -1,8 +1,8 @@
 class Config {
     static default = {
-        system: {
-            maxReasonLength: 150,                   // max number of characters when users give a reason
-            excludeInject: ["*.perplexity.ai", "chromewebstore.google.com", "*.stripe.com"]
+        system: {                               // N.B. NOT INTENDED FOR USER MODIFICATION
+            maxReasonLength: 150,               // max number of characters when users give a reason
+            excludeInject: ["chromewebstore.google.com"]
         },
         company: {
             name: 'Your Organisation',          // name of your organization
@@ -583,8 +583,11 @@ class Config {
     static #init(config) {
         applyPath(config, this.#domainPatterns, patterns => {
             return Object.fromEntries(
-                patterns.map(Config.#netmaskToDomain)
-                .map(domain => [domain, true])
+                patterns.map(pattern => {
+                    const exclude = pattern.startsWith('-')
+                    const domain = Config.#netmaskToDomain(exclude ? pattern.slice(1) : pattern)
+                    return [domain, !exclude]
+                })
             )
         })
 
