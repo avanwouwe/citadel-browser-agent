@@ -751,7 +751,9 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 
 	const { tabId, frameId, parentFrameId, url } = details
 
-	if (url.isWebURL()) {
+	const target = url.toURL()
+
+	if (target.isWebURL() && ! matchDomain(target.hostname, config.system.excludeInject)) {
 		const inject = (func, args, what) =>
 			chrome.scripting.executeScript({
 				target: { tabId, frameIds: [frameId] },
@@ -768,7 +770,6 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 
 		if (parentFrameId >= 0 || tabId < 0) return
 
-		const target = url.toURL()
 		if (ShadowIT.action(target) === Action.WARN) {
 			ShadowIT.showWarning(tabId, target, false)
 		}
@@ -896,7 +897,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 	}
 })
 
-function truncateReason(reason) { return reason.truncate(config.maxReasonLength, 'end') }
+function truncateReason(reason) { return reason.truncate(config.system.maxReasonLength, 'end') }
 
 onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()

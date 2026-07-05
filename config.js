@@ -1,6 +1,9 @@
 class Config {
     static default = {
-        maxReasonLength: 150,                   // max number of characters when users give a reason
+        system: {
+            maxReasonLength: 150,                   // max number of characters when users give a reason
+            excludeInject: ["*.perplexity.ai", "chromewebstore.google.com", "*.stripe.com"]
+        },
         company: {
             name: 'Your Organisation',          // name of your organization
             contact: undefined,                 // replace with the email address of your support
@@ -561,6 +564,7 @@ class Config {
     ]
 
     static #domainPatterns = [
+        "system.excludeInject",
         "domain.unmask",
         "company.domains",
         "company.applications",
