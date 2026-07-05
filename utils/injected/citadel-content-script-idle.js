@@ -262,7 +262,7 @@ checkLogin = async function(event, button) {
 
                 const encryptionKey = await SecureMessage.getPublicKey()
                 const report = await SecureMessage.sendMessage("AuditPassword", loginForm, encryptionKey)
-                if (report.password.reuse) {
+                if (report && report.password.reuse) {
                     await sendMessage("warn-reuse", { report })
                     await callServiceWorker("DeletePassword", { username: loginForm.username })
                     return

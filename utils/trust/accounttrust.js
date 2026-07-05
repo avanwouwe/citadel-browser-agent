@@ -13,11 +13,12 @@ class AccountTrust {
 
         const config = Config.forHostname(sitename)
 
-        const domain = PasswordCheck.getDomainFromUsername(username)
-        if (sitename === "accounts.google.com" && ! domain) username = username + "@gmail.com"
-
         if (config.account.checkOnlyProtected && ! Config.isProtected(sitename)) return false
         if (config.account.checkOnlyInternal && isExternalUser(config, username)) return false
+
+        // Many companies have Google in their protected scope, but Gmail is dual use.
+        // Do not consider logins to Google with @gmail.com as "protected scope".
+        if (config.account.checkOnlyProtected && sitename === "accounts.google.com" && username.endsWith("@gmail.com")) return false
 
         return true
     }

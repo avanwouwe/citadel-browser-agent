@@ -731,15 +731,15 @@ function registerAccountAutofill(email, url) {
 	logger.log(nowTimestamp(), "account trust", "profile separation issue", url, Log.WARN, email, `professional account '${email}' for '${appName}' is synced to personal browser profile '${PROFILE_ADDRESS}'`)
 }
 
-function registerAccountUsage(url, report) {
+function registerAccountUsage(url, username) {
 	const appName = getSitename(url)
 	const app = AppStats.getOrCreateApp(appName)
 	app.lastUsed = nowDatestamp()
 	app.lastConnected = nowDatestamp()
-	app.lastAccount = report.username
+	app.lastAccount = username
 	app.isAuthenticated = app.isAuthenticated ?? "auth form submit"
 
-	const account = AppStats.getAccount(app, report.username)
+	const account = AppStats.getAccount(app, username)
 	account.lastConnected = nowDatestamp()
 
 	AppStats.markDirty()
@@ -822,6 +822,8 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 })
 
 async function auditPassword(username, system, password) {
+	if (! AccountTrust.checkFor(username, system)) return null
+
 	const report = {
 		username,
 		password: PasswordCheck.analyzeAccount(username, password)
@@ -857,29 +859,33 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 		debug(`detected use of account '${username}' for ${siteUrl.hostname}`)
 
 		const config = Config.forURL(siteUrl)
-		const report = await auditPassword(username, siteUrl, password)
 
-		registerAccountUsage(siteUrl, report)
+		registerAccountUsage(siteUrl, username)
 
 		// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
 		confirmLogin(tabId, siteUrl, config.account.confirmLoginDelay).then(confirmed => {
-			issueRegistrationDebouncer.debounce(tabId, undefined, () => {
+			issueRegistrationDebouncer.debounce(tabId, undefined, async () => {
 				if (!confirmed && MFACheck.findAuthPattern(siteUrl.pathname)) {
 					debug("tab was closed or location did not change, login assumed failed")
 					MFACheck.cancelTimer(siteUrl, 'assumed failed login')
-					AccountTrust.deleteAccount(siteUrl.hostname, report.username, false)
+					await AccountTrust.deleteAccount(siteUrl.hostname, username, false)
 					return
 				}
 
+				const report = await auditPassword(username, siteUrl, password)
+				if (! report) {
+					debug(`did not test password policy on external account ${username} / ${siteUrl.hostname}`)
+					return
+				}
 				registerAccountIssues(config, report, siteUrl)
 			})
 		})
 
-		if (MFACheck.isRequired(siteUrl, config) && AccountTrust.checkFor(report.username, siteUrl)) {
-			debug(`MFA required for connection of '${report.username}' to ${siteUrl.hostname}`)
+		if (MFACheck.isRequired(siteUrl, config) && AccountTrust.checkFor(username, siteUrl)) {
+			debug(`MFA required for connection of '${username}' to ${siteUrl.hostname}`)
 
 			const app = AppStats.forURL(siteUrl)
-			const account = AppStats.getAccount(app, report.username)
+			const account = AppStats.getAccount(app, username)
 
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
 				const showModal = account.lastMFA === undefined
