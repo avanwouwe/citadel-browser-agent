@@ -56,7 +56,9 @@ Example:
 
 > **Tip**
 
-> You can [encode your company logo](/tools/logo-encode.html) **inside a URL**. That way you don't have to host it somewhere, and it will show correctly even if the endpoint is temporarily not connected to the internet. Be sure to stay under 2-3 Kb; if you have your logo as SVG that is likely easy.
+> You can [encode your company logo](/tools/logo-encode.html) **inside a URL**. That way you don't have to host it somewhere, and it will show correctly even if the endpoint is temporarily not connected to the internet. It is best to stay under 2-3 Kb.
+> 
+> **N.B.** SVG logos will render in the browser, but they will not work with OS notifications.
 >{: .tip }
 
 If you want to go further, you can define:
