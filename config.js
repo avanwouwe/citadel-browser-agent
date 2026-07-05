@@ -688,6 +688,8 @@ class Config {
         }
     }
 
+    static isLoaded = () => Config.#isLoaded
+
     static #loadPromise = null
     static #loadResolve = null
 
