@@ -56,7 +56,7 @@ Example:
 
 > **Tip**
 
-> You can encode your company logo as a URL. That way you don't have to host it somewhere, and it will show correctly even if the endpoint is temporarily not connected to internet. You can use any [online encoding tool](https://elmah.io/tools/base64-image-encoder), but be sure to use a low-res 128x128 version, to stay under 2 Kb)
+> You can [encode your company logo](/tools/logo-encode.html) **inside a URL**. That way you don't have to host it somewhere, and it will show correctly even if the endpoint is temporarily not connected to the internet. Be sure to stay under 2-3 Kb; if you have your logo as SVG that is likely easy.
 >{: .tip }
 
 If you want to go further, you can define:

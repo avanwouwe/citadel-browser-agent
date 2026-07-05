@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Citadel · Logo Encoder</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #fafafa;
+        }
+
+        .container { max-width: 560px; margin: 0 auto; padding: 3rem 2rem; }
+
+        header { text-align: center; margin-bottom: 2.5rem; }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .tagline { font-size: 1.1rem; color: #666; font-weight: 300; }
+
+        .card {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        label {
+            display: block;
+            margin: 1.25rem 0 0.4rem;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #1a1a1a;
+        }
+
+        label:first-of-type { margin-top: 0; }
+
+        input[type="file"], select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            color: #333;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="file"]:focus, select:focus { border-color: #1a1a1a; }
+
+        select:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+
+        .hint { color: #999; font-size: 0.85rem; margin-top: 0.4rem; }
+
+        /* SVG mode info banner */
+        .hint-svg {
+            display: none;
+            margin-top: 0.5rem;
+            padding: 0.45rem 0.7rem;
+            font-size: 0.85rem;
+            color: #1a6fa8;
+            background: #eaf4fb;
+            border-left: 3px solid #2980b9;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .hint-svg code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            font-size: 0.8rem;
+        }
+
+        /* Quality row */
+        .quality-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.6rem 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+            accent-color: #1a1a1a;
+        }
+
+        input[type="range"]:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .quality-value {
+            font-weight: 600;
+            color: #1a1a1a;
+            font-size: 1rem;
+            min-width: 2.2rem;
+            text-align: right;
+        }
+
+        /* Buttons */
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 0.85rem 2rem;
+            font-size: 1rem;
+            font-family: inherit;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #1a1a1a;
+            margin-top: 0.75rem;
+        }
+
+        .btn-secondary:hover { background: #e2e2e2; }
+
+        /* Result section */
+        #result { display: none; margin-top: 1.75rem; }
+
+        /* Checkerboard = transparent background */
+        .result-preview {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 150px;
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background:
+                    repeating-conic-gradient(#e0e0e0 0% 25%, #fff 0% 50%)
+                    0 0 / 14px 14px;
+            margin-bottom: 0.75rem;
+        }
+
+        #preview {
+            display: block;
+            max-width: 128px;
+            max-height: 128px;
+            image-rendering: crisp-edges;
+        }
+
+        /* Metadata table */
+        .result-meta {
+            padding: 1rem;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            background: #f9fafb;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 0.25rem 0;
+        }
+
+        .meta-row + .meta-row {
+            border-top: 1px solid #eee;
+            margin-top: 0.25rem;
+            padding-top: 0.4rem;
+        }
+
+        .meta-label { color: #999; font-size: 0.85rem; }
+        .meta-value { font-weight: 600; color: #1a1a1a; font-size: 0.9rem; }
+
+        .size-ok     { color: #27ae60; }
+        .size-warn   { color: #e67e22; }
+        .size-danger { color: #c0392b; }
+
+        /* Data URL textarea */
+        #dataUrlBox {
+            display: block;
+            width: 100%;
+            height: 76px;
+            margin-top: 0.75rem;
+            padding: 0.6rem 0.75rem;
+            font-size: 0.75rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+            color: #888;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            resize: none;
+            outline: none;
+            word-break: break-all;
+            white-space: pre-wrap;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2.5rem 0 1rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        footer a { color: #666; text-decoration: none; }
+        footer a:hover { color: #1a1a1a; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 1.8rem; }
+            .tagline { font-size: 1rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Logo Encoder</h1>
+        <p class="tagline">Scale any image to icon size and get an embeddable data: URL.</p>
+    </header>
+
+    <div class="card">
+
+        <label for="fileInput">Image</label>
+        <input type="file" id="fileInput" accept="image/*">
+        <p class="hint">Accepts PNG, JPEG, GIF, WebP, BMP, SVG…</p>
+
+        <label for="format">Output Format</label>
+        <select id="format">
+            <option value="image/webp">WebP – lossy with transparency, usually the smallest</option>
+            <option value="image/png">PNG – lossless, preserves transparency</option>
+            <option value="image/jpeg">JPEG – lossy, no transparency, smallest for photos</option>
+        </select>
+        <p class="hint-svg" id="svgHint">
+            SVG detected – will be encoded as a native <code>data:image/svg+xml</code> vector URL.
+            Format, size and quality settings are ignored.
+        </p>
+
+        <label for="size">Output Size</label>
+        <select id="size">
+            <option value="16">16 px – micro favicon</option>
+            <option value="32">32 px – favicon (retina)</option>
+            <option value="48">48 px – small icon</option>
+            <option value="64">64 px – medium icon</option>
+            <option value="128" selected>128 px – standard logo (default)</option>
+            <option value="192">192 px – PWA icon</option>
+            <option value="256">256 px – large icon</option>
+            <option value="512">512 px – app store / splash</option>
+        </select>
+
+        <label for="quality">Quality</label>
+        <div class="quality-row">
+            <input type="range" id="quality" min="1" max="100" value="85">
+            <span class="quality-value" id="qualityVal">85</span>
+        </div>
+        <p class="hint" id="qualityHint">Drag left to shrink the file size further.</p>
+
+        <div id="result">
+
+            <div class="result-preview">
+                <img id="preview" src="" alt="Preview">
+            </div>
+
+            <div class="result-meta">
+                <div class="meta-row">
+                    <span class="meta-label">Original dimensions</span>
+                    <span class="meta-value" id="origDims">–</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">Output dimensions</span>
+                    <span class="meta-value" id="outDims">–</span>
+                </div>
+                <div class="meta-row">
+                    <span class="meta-label">data: URL size</span>
+                    <span class="meta-value" id="urlSize">–</span>
+                </div>
+            </div>
+
+            <textarea id="dataUrlBox" readonly spellcheck="false"></textarea>
+            <button class="btn btn-secondary" id="copyBtn">Copy data: URL</button>
+
+        </div>
+    </div>
+
+    <footer>
+        <a href="https://citadelagent.org">citadelagent.org</a>
+    </footer>
+</div>
+
+<script>
+    const fileInput  = document.getElementById('fileInput');
+    const formatSel  = document.getElementById('format');
+    const sizeSel    = document.getElementById('size');
+    const qualSlider = document.getElementById('quality');
+    const qualVal    = document.getElementById('qualityVal');
+    const qualHint   = document.getElementById('qualityHint');
+    const svgHint    = document.getElementById('svgHint');
+    const result     = document.getElementById('result');
+    const preview    = document.getElementById('preview');
+    const origDims   = document.getElementById('origDims');
+    const outDims    = document.getElementById('outDims');
+    const urlSize    = document.getElementById('urlSize');
+    const dataUrlBox = document.getElementById('dataUrlBox');
+    const copyBtn    = document.getElementById('copyBtn');
+
+    let currentImage   = null;
+    let currentDataUrl = '';
+    let isSvgMode      = false;
+
+    /* ── helpers ────────────────────────────────────────────────── */
+
+    function formatBytes(n) {
+        if (n < 1024)         return n + ' B';
+        if (n < 1024 * 1024)  return (n / 1024).toFixed(1) + ' KB';
+        return (n / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+
+    function sizeClass(bytes) {
+        if (bytes < 10 * 1024) return 'size-ok';
+        if (bytes < 64 * 1024) return 'size-warn';
+        return 'size-danger';
+    }
+
+    // Parse intrinsic SVG dimensions from width/height attrs or viewBox
+    function parseSvgDimensions(svgText) {
+        try {
+            const doc = new DOMParser().parseFromString(svgText, 'image/svg+xml');
+            const svg = doc.querySelector('svg');
+            if (!svg) return null;
+
+            const w = parseFloat(svg.getAttribute('width'));
+            const h = parseFloat(svg.getAttribute('height'));
+            if (w > 0 && h > 0) return { w, h };
+
+            const vb = svg.getAttribute('viewBox');
+            if (vb) {
+                const p = vb.trim().split(/[\s,]+/);
+                if (p.length === 4) {
+                    const vw = parseFloat(p[2]), vh = parseFloat(p[3]);
+                    if (vw > 0 && vh > 0) return { w: vw, h: vh };
+                }
+            }
+        } catch (_) {}
+        return null;
+    }
+
+    function updateQualityUI() {
+        if (isSvgMode) {
+            qualSlider.disabled = true;
+            qualVal.textContent  = '–';
+            qualHint.textContent = 'SVG is vector – quality does not apply.';
+            return;
+        }
+        const lossy = formatSel.value !== 'image/png';
+        qualSlider.disabled  = !lossy;
+        qualVal.textContent  = lossy ? qualSlider.value : '–';
+        qualHint.textContent = lossy
+            ? 'Drag left to shrink the file size further.'
+            : 'PNG is lossless – no quality setting applies.';
+    }
+
+    /* ── SVG mode ────────────────────────────────────────────────── */
+
+    function enterSvgMode() {
+        isSvgMode          = true;
+        formatSel.disabled = true;
+        sizeSel.disabled   = true;
+        svgHint.style.display = 'block';
+        updateQualityUI();
+    }
+
+    function exitSvgMode() {
+        isSvgMode          = false;
+        formatSel.disabled = false;
+        sizeSel.disabled   = false;
+        svgHint.style.display = 'none';
+        updateQualityUI();
+    }
+
+    function handleSvg(file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const svgText = e.target.result;
+
+            // Encode as a URL-safe SVG data URL (no base64 – keeps it readable)
+            currentDataUrl = 'data:image/svg+xml,' + encodeURIComponent(svgText);
+
+            const dims = parseSvgDimensions(svgText);
+            enterSvgMode();
+            currentImage = null;
+
+            preview.src          = currentDataUrl;
+            origDims.textContent = dims ? `${dims.w} × ${dims.h} px` : 'Vector (scalable)';
+            outDims.textContent  = 'Vector (scalable)';
+
+            const bytes = currentDataUrl.length;
+            urlSize.className   = `meta-value ${sizeClass(bytes)}`;
+            urlSize.textContent = formatBytes(bytes);
+
+            dataUrlBox.value     = currentDataUrl;
+            result.style.display = 'block';
+        };
+        reader.readAsText(file);
+    }
+
+    /* ── raster render ───────────────────────────────────────────── */
+
+    function render() {
+        if (!currentImage || isSvgMode) return;
+
+        const img     = currentImage;
+        const fmt     = formatSel.value;
+        const quality = parseInt(qualSlider.value, 10) / 100;
+        const maxDim  = parseInt(sizeSel.value, 10);
+
+        // Scale so the largest side hits maxDim; never upscale
+        const ratio = Math.min(maxDim / img.naturalWidth, maxDim / img.naturalHeight, 1);
+        const w = Math.max(1, Math.round(img.naturalWidth  * ratio));
+        const h = Math.max(1, Math.round(img.naturalHeight * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width  = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+
+        // JPEG has no alpha – fill white first
+        if (fmt === 'image/jpeg') {
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, w, h);
+        }
+
+        ctx.drawImage(img, 0, 0, w, h);
+
+        currentDataUrl = (fmt === 'image/png')
+            ? canvas.toDataURL('image/png')
+            : canvas.toDataURL(fmt, quality);
+
+        const bytes = currentDataUrl.length;
+        const cls   = sizeClass(bytes);
+
+        preview.src          = currentDataUrl;
+        origDims.textContent = `${img.naturalWidth} × ${img.naturalHeight} px`;
+        outDims.textContent  = `${w} × ${h} px`;
+
+        urlSize.className   = `meta-value ${cls}`;
+        urlSize.textContent = formatBytes(bytes);
+
+        dataUrlBox.value     = currentDataUrl;
+        result.style.display = 'block';
+    }
+
+    /* ── event listeners ─────────────────────────────────────────── */
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+
+        // SVG: pass-through as vector data URL, skip canvas entirely
+        if (file.type === 'image/svg+xml' || file.name.toLowerCase().endsWith('.svg')) {
+            handleSvg(file);
+            return;
+        }
+
+        exitSvgMode();
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = new Image();
+            img.onload = () => { currentImage = img; render(); };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+
+    formatSel.addEventListener('change', () => { updateQualityUI(); render(); });
+    sizeSel.addEventListener('change',   () => { render(); });
+    qualSlider.addEventListener('input',  () => { qualVal.textContent = qualSlider.value; render(); });
+
+    copyBtn.addEventListener('click', () => {
+        if (!currentDataUrl) return;
+        navigator.clipboard.writeText(currentDataUrl)
+            .catch(() => { dataUrlBox.select(); document.execCommand('copy'); })
+            .finally(() => {
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => { copyBtn.textContent = 'Copy data: URL'; }, 2000);
+            });
+    });
+
+    // Initialise – WebP is first so quality slider starts enabled
+    updateQualityUI();
+</script>
+
+</body>
+</html>
