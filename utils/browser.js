@@ -4,6 +4,7 @@ class Browser {
     static Edge = 'Microsoft Edge'
     static Opera = 'Opera'
     static Brave = 'Brave'
+    static Comet = 'Comet'
     static Safari = 'Safari'
     static Unknown = 'Unknown'
 
@@ -25,7 +26,7 @@ class Browser {
             brand = Browser.Edge
         } else if (/Opera/i.test(version.brand)) {
             brand = Browser.Opera
-        } else if (/Chrome/i.test(version.brand)) {
+        } else if (/Chrome|Chromium/i.test(version.brand)) {
             brand = Browser.Chrome
         }
 
@@ -44,12 +45,17 @@ class Browser {
             for (const i of versions) {
                 if (this.#normalizeVersion(i)?.brand !== Browser.Unknown) {
                     version = i
+                    break
                 }
             }
         }
 
         Browser.version = this.#normalizeVersion(version)
+
+        if (Browser.isComet()) Browser.version.brand = Browser.Comet
     })()
+
+    static isComet = () => chrome.management.get("mjdcklhepheaaemphcopihnmjlmjpcnh").then(() => true).catch(() => false)
 
     static platform = (() => {
         if (/Mac|MacIntel|MacPPC/i.test(navigator.platform)) {
