@@ -49,3 +49,7 @@ button {
     display: block;
     margin: 10px auto 0;
 }
+
+a:visited {
+    color: var(--color-link);
+}
