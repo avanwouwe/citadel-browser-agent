@@ -5,6 +5,7 @@ class ColorScheme {
 
     static #hasDom = typeof self !== 'undefined' && typeof self.matchMedia === 'function'
     static #cache = null
+    static #ready = null
 
     static #initOffscreen() {
         if (!ColorScheme.#hasDom) return
@@ -45,8 +46,22 @@ class ColorScheme {
         return scheme
     }
 
-    static {
-        if (ColorScheme.#hasDom) ColorScheme.#initOffscreen()
-        else setTimeout(() => ColorScheme.refresh().catch(() => {}), 10 * ONE_SECOND)
+    static async ready() {
+        if (! ColorScheme.#ready && ! ColorScheme.#hasDom) {
+            ColorScheme.#ready = ColorScheme.refresh().catch((e) => {
+                debug('error getting color scheme', e)
+                return ColorScheme.LIGHT
+            })
+        }
+
+        return ColorScheme.#ready
     }
+
+    static {
+        if (ColorScheme.#hasDom) {
+            ColorScheme.#initOffscreen()
+            ColorScheme.#ready = Promise.resolve()
+        }
+    }
+
 }

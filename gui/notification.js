@@ -5,6 +5,8 @@ class Notification {
     static #persistence
 
     static async init() {
+        await ColorScheme.ready()
+
         Notification.#persistence = Notification.#persistence ?? new HydratedObject(
             'notifications',
             Notification,
