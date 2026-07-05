@@ -41,7 +41,6 @@ class Log {
 
         if (throttle && Log.#throttles?.[levelValue]?.throttle()) { return }
 
-        url = this.removeBlobPrefix(url)
         url = this.maskUrl(url, level, config)
         initiator = this.maskUrl(initiator, level, config)
 
@@ -106,16 +105,6 @@ class Log {
              }
         }
 
-    }
-
-    removeBlobPrefix(url) {
-        if (typeof url === 'string') {
-            return url.startsWith('blob:') ? url.slice(5) : url
-        } else if (url instanceof URL) {
-            return url.href.startsWith('blob:') ? url.href.slice(5) : url.href
-        } else {
-            return url
-        }
     }
 
     maskUrl(url, level, config) {
