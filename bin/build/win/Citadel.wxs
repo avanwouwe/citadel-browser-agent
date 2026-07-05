@@ -2,7 +2,7 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
     <Package Name="Citadel" 
              Language="1033" 
-             Version="1.4.7.0"
+             Version="1.5.0.0"
              Manufacturer="Arno van Wouwe" 
              UpgradeCode="529e989c-4563-48d0-b46d-952631849b75"
              Scope="perMachine">
@@ -164,7 +164,14 @@
                          Key="SOFTWARE\Policies\BraveSoftware\Brave\ExtensionInstallForcelist">
                 <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
             </RegistryKey>
-
+            <RegistryKey Root="HKLM"
+                         Key="SOFTWARE\Policies\Perplexity\Comet\ExtensionInstallForcelist">
+                <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
+            </RegistryKey>
+            <RegistryKey Root="HKLM"
+                         Key="SOFTWARE\Policies\TheBrowserCompany\Arc\ExtensionInstallForcelist">
+                <RegistryValue Type="string" Name="10" Value="anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx" />
+            </RegistryKey>
         </Component>
     </Fragment>
 </Wix>
