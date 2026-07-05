@@ -25,10 +25,9 @@ class ShadowIT {
         if (! Config.isLoaded()) return
 
         const validUrl = url?.toURL()
-        assert(validUrl, `${url} is not a valid URL`)
+        if(!validUrl?.isWebURL()) return
 
         const hostname = validUrl.hostname
-
         // never apply shadow-IT logic to the company's own applications and domains
         if (Config.isProtected(hostname)) return null
 
