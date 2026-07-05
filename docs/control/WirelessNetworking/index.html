@@ -51,8 +51,8 @@
             <div class="importance-item">
                 <div class="icon">🔓</div>
                 <h3>Automatic Connection Risk</h3>
-                <p>If saved, your device may automatically connect to these insecure networks without
-                    warning, exposing you to attacks whenever you're in range.</p>
+                <p>If saved, your device may automatically connect to these insecure networks without warning,
+                    exposing you to attacks whenever you're in range.</p>
             </div>
         </div>
     </section>
@@ -61,19 +61,15 @@
         <h2>How to fix this</h2>
 
         <div class="platform-tabs">
-            <button class="tab-button active" data-platform="macos">
-                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS Tahoe
-            </button>
-            <button class="tab-button" data-platform="windows">
-                <img src="../../img/windows-logo.png" alt="Windows" class="platform-icon" width="64" height="64"> Windows 11
+            <button class="tab-button" data-platform="macos">
+                <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
         </div>
 
         <div class="platform-content">
-
-            <!-- macOS Tahoe Instructions -->
-            <div class="platform-panel active" id="macos">
-                <h3>Removing Insecure Wireless Networks on macOS Tahoe</h3>
+            <!-- macOS Instructions -->
+            <div class="platform-panel" id="macos">
+                <h3>Removing Insecure Wireless Networks on macOS</h3>
 
                 <div class="method">
                     <h4>Forget the insecure network:</h4>
@@ -113,60 +109,6 @@
                     </ul>
                 </div>
             </div>
-
-            <!-- Windows 11 Instructions -->
-            <div class="platform-panel" id="windows">
-                <h3>Removing Insecure Wireless Networks on Windows 11</h3>
-
-                <div class="method">
-                    <h4>Forget the insecure network via Settings:</h4>
-                    <ol>
-                        <li>Press <strong>Windows + I</strong> to open <strong>Settings</strong></li>
-                        <li>Click <strong>Network &amp; internet</strong> in the left sidebar</li>
-                        <li>Click <strong>Wi-Fi</strong></li>
-                        <li>Click <strong>Manage known networks</strong></li>
-                        <li>Find the insecure network in the list (Citadel told you the name)</li>
-                        <li>Click the network name to expand it</li>
-                        <li>Click <strong>Forget</strong></li>
-                    </ol>
-                </div>
-
-                <div class="method">
-                    <h4>Alternatively, forget the network from the taskbar:</h4>
-                    <ol>
-                        <li>Click the <strong>Wi-Fi icon</strong> in the taskbar (bottom-right corner)</li>
-                        <li>Click the <strong>&gt;</strong> arrow next to the Wi-Fi toggle to see available networks</li>
-                        <li>Right-click the insecure network name</li>
-                        <li>Select <strong>Forget</strong></li>
-                    </ol>
-                </div>
-
-                <div class="method">
-                    <h4>If this is your home network:</h4>
-                    <p>If the insecure network is your home WiFi, you should upgrade your router's security:</p>
-                    <ol>
-                        <li>Access your router's admin panel (usually <code>http://192.168.1.1</code> or <code>http://192.168.0.1</code>)</li>
-                        <li>Log in with your router's admin credentials</li>
-                        <li>Find the <strong>Wireless Security</strong> or <strong>WiFi Security</strong> settings</li>
-                        <li>Change the security type to <strong>WPA3</strong> (best) or <strong>WPA2</strong> (acceptable)</li>
-                        <li>Save the settings and reconnect your PC using the updated security</li>
-                    </ol>
-                    <p><strong>Need help?</strong> Contact your internet service provider or IT support if you're unsure how to update your router settings.</p>
-                </div>
-
-                <div class="warning-box">
-                    <strong>⚠️ Important notes:</strong>
-                    <ul>
-                        <li>Avoid connecting to open/unencrypted public WiFi networks when possible</li>
-                        <li>If you must use public WiFi, use a VPN to encrypt your traffic</li>
-                        <li>WPA3 is the most secure — upgrade your home router if it only supports WPA2 or older</li>
-                        <li>WEP encryption is completely broken and provides no real security</li>
-                        <li>After forgetting a network, Windows won't automatically reconnect to it</li>
-                        <li>Windows 11 supports WPA3 natively — ensure your wireless adapter drivers are up to date</li>
-                    </ul>
-                </div>
-            </div>
-
         </div>
     </section>
 
@@ -174,15 +116,9 @@
         <h2>Verifying the fix</h2>
         <p>After removing the insecure network, Citadel will automatically verify this control during its next check.</p>
 
-        <div class="platform-tabs">
-            <button class="tab-button active" data-platform="macos-verify">macOS Tahoe</button>
-            <button class="tab-button" data-platform="windows-verify">Windows 11</button>
-        </div>
-
         <div class="platform-content">
-
-            <!-- macOS Tahoe Verification -->
-            <div class="platform-panel active" id="macos-verify">
+            <!-- macOS Verification -->
+            <div class="platform-panel" id="macos-verify">
                 <div class="method">
                     <h4>To verify the insecure network is removed:</h4>
                     <ol>
@@ -194,21 +130,6 @@
                     <p class="note"><strong>What's secure?</strong> Look for networks showing "WPA2" or "WPA3" security. Avoid networks showing "WEP", "Open", or "None".</p>
                 </div>
             </div>
-
-            <!-- Windows 11 Verification -->
-            <div class="platform-panel" id="windows-verify">
-                <div class="method">
-                    <h4>To verify the insecure network is removed:</h4>
-                    <ol>
-                        <li>Open <strong>Settings</strong> → <strong>Network &amp; internet</strong> → <strong>Wi-Fi</strong></li>
-                        <li>Click <strong>Manage known networks</strong></li>
-                        <li>The insecure network should no longer appear in the list</li>
-                        <li>If you're currently connected to it, click <strong>Disconnect</strong> and connect to a secure network</li>
-                    </ol>
-                    <p class="note"><strong>What's secure?</strong> Look for networks showing "WPA2" or "WPA3" security in their properties. Avoid networks showing "WEP", "Open", or "Unsecured".</p>
-                </div>
-            </div>
-
         </div>
     </section>
 
