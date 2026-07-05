@@ -90,6 +90,8 @@ There are a lot of moving parts. Citadel needs to be installed in the browser, o
 ### who is Citadel meant for?
 The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. Citadel does check for injection vulnerabilities but competent adversarial users or sites may be able to render compliance verifications ineffective.
 
+Regular users can gain some benefit from Citadel (web filtering, detection of copy-paste attacks, endpoint controls, etc). They can manually install [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest). MacOS users must also manually install the extension from the store.
+
 ### what about the privacy of my staff?
 Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. By default:
 * shadow IT detection only logs the name of the site (not the duration or amount of usage)
@@ -100,7 +102,7 @@ Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) 
 A [Data Protection Transparency statement](/docs/privacy/transparency.md) is available that can be used to perform Data Privacy Impact Analysis (DPIA)
 
 ### which browsers are supported?
-Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Mozilla, Opera, Edge and Brave. Other Chromium-based browsers may work. However, this has not been tested so it is unlikely to work out of the box. Also, the deployment of the Native Messaging is (slightly) different for different browsers. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
+Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Firefox, Opera, Edge, Brave, Arc, Dia, Atlas (OpenAI) and Comet (Perplexity). Other Chromium-based browsers may work. However, this has not been tested. It is likely that the only thing left to do is to update the forced-installation of the extension. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
 
 ### I don't want to install external software
 Of course, you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/build/win/build.ps1) and [macOS](/bin/build/mac/build.sh). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browsers). Or you can even take the locally built plugin and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).

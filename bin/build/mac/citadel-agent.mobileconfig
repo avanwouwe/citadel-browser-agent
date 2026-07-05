@@ -150,6 +150,29 @@
 
         <dict>
             <key>PayloadType</key>
+            <string>company.thebrowser.dia</string>
+            <key>PayloadDisplayName</key>
+            <string>Citadel Agent - Dia Extension</string>
+            <key>PayloadIdentifier</key>
+            <string>org.citadelagent.extension.dia</string>
+            <key>PayloadUUID</key>
+            <string>97331B2F-A1F3-47B1-83BF-484873088ABB</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+            <key>PayloadOrganization</key>
+            <string>citadelagent.org</string>
+            <key>ExtensionInstallForcelist</key>
+            <array>
+                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+            </array>
+            <key>NativeMessagingAllowlist</key>
+            <array>
+                <string>citadel.browser.agent</string>
+            </array>
+        </dict>
+
+        <dict>
+            <key>PayloadType</key>
             <string>com.openai.atlas</string>
             <key>PayloadDisplayName</key>
             <string>Citadel Agent - Atlas Extension</string>
