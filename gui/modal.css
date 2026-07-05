@@ -107,13 +107,66 @@
     text-align: justify;
 }
 
-/* ── Buttons ────────────────────────────────────────────────────────── */
+/* ── Buttons ────────────────────────────────────────── */
+
 button {
     font-family: Arial, sans-serif;
     color: var(--color-text);
     background-color: var(--color-button-bg);
     border: 1px solid var(--color-button-border);
     border-radius: 3px;
+}
+
+.button-row {
+    display: flex;
+    gap: 1em;
+    justify-content: center;
+    width: 100%;
+}
+
+.acknowledge-button,
+.cancel-button {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.acknowledge-button {
+    background-color: var(--color-primary);
+    color: var(--color-on-primary);
+    border: none;
+    border-radius: 3px;
+    transition: background .2s;
+}
+.acknowledge-button:hover:not(:disabled) {
+    background-color: var(--color-primary-hover);
+}
+
+.cancel-button {
+    background-color: transparent;
+    border: 1px solid var(--color-input-border);
+    color: var(--color-text);
+    transition: background .2s;
+}
+.cancel-button:hover:not(:disabled) {
+    background-color: var(--color-button-bg);
+}
+
+.button-row:has(.cancel-button[hidden]) .acknowledge-button {
+    flex: 0 1 auto;
+    max-width: 200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.button-row:has(.acknowledge-button[hidden]) .cancel-button {
+    flex: 0 1 auto;
+    max-width: 200px;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* ── Exception toggle / link ────────────────────────────────────────── */

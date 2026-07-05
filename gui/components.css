@@ -51,6 +51,16 @@ button:disabled {
     opacity: 0.6;
 }
 
+/* ── Secondary / ghost button ───────────────────────────────────────── */
+button.secondary-button {
+    background-color: transparent;
+    color: var(--color-text);
+    border: 1px solid var(--color-input-border);
+}
+button.secondary-button:hover:not(:disabled) {
+    background-color: var(--color-button-bg);
+}
+
 /* ── Exception textarea + character counter ─────────────────────────── */
 #exceptionReason {
     background-color: var(--color-input-bg);

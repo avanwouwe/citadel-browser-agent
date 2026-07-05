@@ -67,6 +67,7 @@ function showInstall(allowed) {
     } else {
         const rejection = evaluation?.rejection
         document.getElementById("blockedSection").textContent = `${t('extension-analysis.block-page.install-blocked.blocked')} ${t('extension-analysis.block-page.install-blocked.' + rejection.reasons[0], rejection)}.`
+        document.getElementById("backButton").classList.remove("secondary-button")
         if (config.extensions.exceptions.allowed) proposeException()
     }
 }
