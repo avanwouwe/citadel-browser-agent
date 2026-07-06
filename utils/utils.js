@@ -445,47 +445,37 @@ function onMessage(type, listener, once= false) {
 
 async function logOffDomain(domain) {
     // Remove cookies
-    await chrome.cookies.getAll({ domain }, (cookies) => {
-        cookies.forEach((cookie) => {
-            const cookieDetails = {
-                url: `http${cookie.secure ? 's' : ''}://${cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain}${cookie.path}`,
-                name: cookie.name
-            }
-
-            chrome.cookies.remove(cookieDetails, () => {
-                if (chrome.runtime.lastError) {
-                    console.error(`Error removing cookie ${cookie.name}:`, chrome.runtime.lastError)
-                }
-            })
+    const cookies = await chrome.cookies.getAll({ domain })
+    await Promise.all(cookies.map(cookie =>
+        chrome.cookies.remove({
+            url: `http${cookie.secure ? 's' : ''}://${cookie.domain.startsWith('.') ? cookie.domain.substring(1) : cookie.domain}${cookie.path}`,
+            name: cookie.name
         })
-    })
+    ))
 
     // Clear storage, unregister service workers and clear cache
-    await injectFuncIntoDomain(domain, () => {
+    await injectFuncIntoDomain(domain, async () => {
         try {
             localStorage.clear()
             sessionStorage.clear()
-            indexedDB?.databases()?.then(dbs => {
-                dbs.forEach(db => {
-                    indexedDB.deleteDatabase(db.name)
+
+            const dbs = await indexedDB.databases()
+            await Promise.all(dbs.map(db => {
+                const req = indexedDB.deleteDatabase(db.name)
+                return new Promise((res, rej) => {
+                    req.onsuccess = res
+                    req.onerror = rej
                 })
-            })
+            }))
         } catch (e) {
             console.error('Error clearing storage:', e)
         }
 
-        navigator?.serviceWorker.getRegistrations()
-            .then(registrations => {
-                for (let registration of registrations) {
-                    registration.unregister()
-                }
-            })
+        const registrations = await navigator.serviceWorker.getRegistrations()
+        await Promise.all(registrations.map(r => r.unregister()))
 
-        caches?.keys().then(names => {
-            for (let name of names) {
-                caches.delete(name)
-            }
-        })
+        const names = await caches.keys()
+        await Promise.all(names.map(name => caches.delete(name)))
     })
 }
 
