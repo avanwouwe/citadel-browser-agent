@@ -263,7 +263,11 @@ const renderEventsDashboard = serialized(async function () {
 
         tr.cells[0].title = timestamp.toLocaleString()
         tr.cells[0].textContent = shortTime
+
+        const levelLower = entry.browseragent.level.toLowerCase()
+        tr.cells[1].classList.add(`alert-${levelLower}`)
         tr.cells[1].textContent = entry.browseragent.level
+
         tr.cells[2].textContent = entry.browseragent.result ?? entry.browseragent.event
         tr.cells[3].title = entry.url ?? ''
         const href = safeHref(entry.url)

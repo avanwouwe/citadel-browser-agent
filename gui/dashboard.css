@@ -291,6 +291,18 @@ td:has(.extension-logo-placeholder) {
     white-space: nowrap;
 }
 
+/* Alert level severity styling  */
+td.alert-warn {
+    color: var(--state-warning);
+    font-weight: 600;
+}
+
+td.alert-error,
+td.alert-alert {
+    color: var(--state-blocking);
+    font-weight: 600;
+}
+
 /* ── Extension enable / disable toggle ──────────────────────────── */
 td.action-cell {
     text-align: center;
