@@ -77,8 +77,10 @@ const renderDeviceDashboard = serialized(async function () {
 
     if (state === State.UNKNOWN) return
 
+    const anyFailing = controls.some(ctrl => !ctrl.report.passing)
     const tb = document.getElementById("devicetrust-issues")
     tb.innerHTML = ""
+    tb.classList.toggle('has-failures', anyFailing)
 
     for (const ctrl of controls) {
         const next = ctrl.nextState
@@ -87,7 +89,13 @@ const renderDeviceDashboard = serialized(async function () {
         let label = ctrlText("label") ?? ctrl.name
         const explainPage = ctrlText("explain")
         if (explainPage) {
-            label = `<a href="${(safeHref(explainPage) ?? '').escapeHtmlEntities()}" target="_blank">${label.escapeHtmlEntities()}</a>`
+            label = `<a href="${(safeHref(explainPage) ?? '').escapeHtmlEntities()}" target="_blank">${label.escapeHtmlEntities()}`
+
+            if (! ctrl.report.passing) {
+                label += '&nbsp&nbsp' + Icons.outgoingLink
+            }
+
+            label += '</a>'
         }
 
         let errors = ''

@@ -56,19 +56,24 @@ td, th {
     padding: 4px 6px;
 }
 
-td.label a,
-td.label a:link,
-td.label a:visited,
-td.label a:hover,
-td.label a:active,
-td.label a:focus {
+td.label a {
     color: inherit;
     text-decoration: none;
     cursor: pointer;
     transition: color 0.2s;
 }
+
+/* Grey out passing links only when something fails */
+.has-failures td.label a:not(:has(.outgoing-link-icon)) {
+    color: var(--color-disabled-text);
+}
+
+td.label a .outgoing-link-icon {
+    color: var(--color-link);
+}
+
 td.label a:hover,
-td.label a:focus {
+td.label a:focus-visible {
     color: var(--color-link-hover);
     text-decoration: underline;
 }
