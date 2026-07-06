@@ -12,7 +12,8 @@ class MFACheck {
      * @param {boolean} showModal - Should a modal window be shown
      */
     static startTimer(url, minutes, showModal) {
-        const domain = getDomain(getSitename(url))
+        const hostname = getSitename(url)
+        const domain = getDomain(hostname)
         const session = MFACheck.#sessions.get(domain)
 
         if (session?.state === 'cancelled' && (Date.now() - session.cancelledAt) < MFACheck.#CANCEL_GRACE) {
@@ -37,7 +38,7 @@ class MFACheck {
 
             if (showModal) {
                 const title = t("mfa.title")
-                const message = t("mfa.disconnected", { contact: config.company.contact })
+                const message = t("mfa.disconnected", { domain, hostname, contact: config.company.contact })
                 const onAcknowledge = { type: 'acknowledge-mfa', domain }
                 const onException = { type: 'allow-mfa', domain }
 
