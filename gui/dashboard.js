@@ -261,7 +261,7 @@ const renderEventsDashboard = serialized(async function () {
             `<td class="label ellipsis"></td>` +
             `<td class="ellipsis"></td>`
 
-        tr.cells[0].title = timestamp.toISOString()
+        tr.cells[0].title = timestamp.toLocaleString()
         tr.cells[0].textContent = shortTime
         tr.cells[1].textContent = entry.browseragent.level
         tr.cells[2].textContent = entry.browseragent.result ?? entry.browseragent.event
