@@ -13,7 +13,38 @@ class Icons {
     static outgoingLink = `<svg xmlns="http://www.w3.org/2000/svg" class="outgoing-link-icon" aria-hidden="true" width="1em" height="1em" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M 5 3 C 3.9069372 3 3 3.9069372 3 5 L 3 19 C 3 20.093063 3.9069372 21 5 21 L 19 21 C 20.093063 21 21 20.093063 21 19 L 21 12 L 19 12 L 19 19 L 5 19 L 5 5 L 12 5 L 12 3 L 5 3 z M 14 3 L 14 5 L 17.585938 5 L 8.2929688 14.292969 L 9.7070312 15.707031 L 19 6.4140625 L 19 10 L 21 10 L 21 3 L 14 3 z"></path>
                                 </svg>`
-}
+
+    static extension = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                        width="18" height="18" fill="none" stroke="currentColor"
+                        stroke-width="1.5" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20.5,11H19V7c0-1.1-.9-2-2-2h-4V3.5C13,2.12,11.88,1,10.5,1S8,2.12,8,3.5V5H4c-1.1,0-1.99.9-1.99,2v3.8H3.5c1.49,0,2.7,1.21,2.7,2.7s-1.21,2.7-2.7,2.7H2V20c0,1.1.9,2,2,2h3.8v-1.5c0-1.49,1.21-2.7,2.7-2.7s2.7,1.21,2.7,2.7V22H17c1.1,0,2-.9,2-2v-4h1.5c1.38,0,2.5-1.12,2.5-2.5S21.88,11,20.5,11z"/>
+                    </svg>`
+
+    static #values = new Set(
+        Object.values(Icons).filter(v => typeof v === "string")
+    )
+
+    /**
+     * Parse a trusted Icons SVG string into a DOM node.
+     * Throws if the string isn't one of the Icons constants.
+     */
+    static nodeOf(svgString, size) {
+        if (!Icons.#values.has(svgString)) {
+            throw new Error("Icons.node: input is not a known Icons constant")
+        }
+        const svg = new DOMParser()
+            .parseFromString(svgString, "image/svg+xml")
+            .documentElement
+
+        if (size != null) {
+            const { width, height } = typeof size === "number"
+                ? { width: size, height: size }
+                : size
+            if (width  != null) svg.setAttribute("width",  width)
+            if (height != null) svg.setAttribute("height", height)
+        }
+        return svg
+    }}
 
 async function readJsonFile(path) {
     const response = await fetch(path)

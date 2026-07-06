@@ -191,7 +191,7 @@ const renderExtensionDashboard = serialized(async function () {
         } else {
             logoEl = document.createElement("span")
             logoEl.className = "extension-logo-placeholder"
-            logoEl.textContent = "🧩"
+            logoEl.appendChild(Icons.nodeOf(Icons.extension, 25))
         }
 
         const storePage = safeHref(analysis.storeInfo?.storePage)
@@ -202,6 +202,8 @@ const renderExtensionDashboard = serialized(async function () {
             nameEl.target = "_blank"
             nameEl.rel = "noopener noreferrer"
             nameEl.textContent = name
+            nameEl.appendChild(document.createTextNode(' '))
+            nameEl.appendChild(Icons.nodeOf(Icons.outgoingLink))
         } else {
             nameEl = document.createElement("span")
             nameEl.textContent = name
