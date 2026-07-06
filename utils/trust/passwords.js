@@ -301,7 +301,7 @@ function patchNavigatorCredentials(encryptionKey) {
                         const credentials = await val.apply(target, arguments)
                         try {
                             if (options?.publicKey) {
-                                await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+                                await SecureMessage.sendMessage("AccountUsage", { subtype: "public-key" }, encryptionKey)
                             }
                         } catch (error) {
                             console.error("error intercepting credentials.create", error)
@@ -324,7 +324,7 @@ function patchNavigatorCredentials(encryptionKey) {
                                     )
                                 }
                             } else if (options?.publicKey) {
-                                await SecureMessage.sendMessage("account-usage", { subtype: "public-key" }, encryptionKey)
+                                await SecureMessage.sendMessage("AccountUsage", { subtype: "public-key" }, encryptionKey)
                             }
                         } catch (error) {
                             console.error("error intercepting credentials.get", error)

@@ -853,8 +853,6 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 	const tabId = tab?.id
 
 	if (subtype === "public-key") {
-		debug("detected use of navigator.credentials API to get public key")
-
 		MFACheck.cancelTimer(siteUrl, "public key auth")
 	} else if (subtype === "password") {
 		debug(`detected use of account '${username}' for ${siteUrl.hostname}`)
