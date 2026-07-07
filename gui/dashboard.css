@@ -6,7 +6,7 @@ body {
     font-family: sans-serif;
     margin: 6px;
     min-width: 420px;
-    max-width: 800px;
+    max-width: 1000px;
     background-color: var(--color-bg);
     color: var(--color-text);
 }
@@ -278,18 +278,16 @@ td:has(.extension-logo-placeholder) {
 }
 
 /* ── Event log ──────────────────────────────────────────────────── */
-#eventlog td:nth-child(4) {
-    max-width: 150px;
+#eventlog td {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-#eventlog td:nth-child(5) {
-    max-width: 370px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+
+#eventlog td:nth-child(2) { max-width: 10px; }
+#eventlog td:nth-child(3) { max-width: 120px; }
+#eventlog td:nth-child(4) { max-width: 150px; }
+#eventlog td:nth-child(5) { max-width: 370px; }
 
 /* Alert level severity styling  */
 td.alert-warn {
