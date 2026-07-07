@@ -63,8 +63,6 @@ Protecting enterprise and employee data is critical to business continuity, norm
 | Operations | Greater severity / cost of incidents, more complex forensics |
 | User Trust | Erosion of user / evidence trust, post-incident damage |
 
-### 
-
 ### 1.6 Legal Framework Compliance
 
 To the best of our knowledge, Citadel complies (or facilitates the compliance of organisations) with the following relevant legal and normative rules.
