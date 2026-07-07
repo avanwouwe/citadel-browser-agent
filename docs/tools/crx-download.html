@@ -5,17 +5,56 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Citadel · Extension Downloader</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* ── Citadel design tokens ───────────────────────────────────── */
+        :root {
+            --color-bg-subtle:      #f0f0f0;
+            --color-surface:        #ffffff;
+            --color-text:           #1a1a1a;
+            --color-text-soft:      #444444;
+            --color-text-muted:     #808080;
+            --color-text-strong:    #111111;
+            --color-border-subtle:  #e0e0e0;
+            --color-primary:        #007bff;
+            --color-primary-hover:  #0056b3;
+            --color-on-primary:     #ffffff;
+            --color-disabled-bg:    #d3d3d3;
+            --color-disabled-text:  #808080;
+            --color-input-bg:       #ffffff;
+            --color-input-border:   #cccccc;
+            --color-shadow:         rgba(0,0,0,0.10);
+            --color-success:        #33a25e;
         }
 
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --color-bg-subtle:      #1a1a1a;
+                --color-surface:        #242424;
+                --color-text:           #e8e8e8;
+                --color-text-soft:      #bbbbbb;
+                --color-text-muted:     #9a9a9a;
+                --color-text-strong:    #ffffff;
+                --color-border-subtle:  #3a3a3a;
+                --color-primary:        #007bff;
+                --color-primary-hover:  #4da3ff;
+                --color-on-primary:     #ffffff;
+                --color-disabled-bg:    #3a3a3a;
+                --color-disabled-text:  #888888;
+                --color-input-bg:       #1e1e1e;
+                --color-input-border:   #555555;
+                --color-shadow:         rgba(0,0,0,0.60);
+                --color-success:        #5ad17e;
+            }
+        }
+
+        /* ── Reset & base ────────────────────────────────────────────── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+            Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: #fafafa;
+            color: var(--color-text);
+            background: var(--color-bg-subtle);
         }
 
         .container {
@@ -24,129 +63,126 @@
             padding: 3rem 2rem;
         }
 
+        /* ── Header ──────────────────────────────────────────────────── */
         header {
             text-align: center;
             margin-bottom: 2.5rem;
         }
 
+        .logo {
+            height: 44px;
+            width: auto;
+            margin-bottom: 1rem;
+        }
+
         h1 {
             font-size: 2.2rem;
             font-weight: 700;
-            color: #1a1a1a;
+            color: var(--color-text-strong);
             margin-bottom: 0.5rem;
             letter-spacing: -0.02em;
         }
 
         .tagline {
             font-size: 1.1rem;
-            color: #666;
+            color: var(--color-text-muted);
             font-weight: 300;
         }
 
+        /* ── Card ────────────────────────────────────────────────────── */
         .card {
-            background: white;
+            background: var(--color-surface);
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border: 1px solid var(--color-border-subtle);
+            box-shadow: 0 2px 8px var(--color-shadow);
         }
 
+        /* ── Form controls ───────────────────────────────────────────── */
         label {
             display: block;
             margin: 1.25rem 0 0.4rem;
             font-weight: 500;
             font-size: 0.95rem;
-            color: #1a1a1a;
+            color: var(--color-text);
         }
-
         label:first-of-type { margin-top: 0; }
 
         input, select {
             width: 100%;
             padding: 0.75rem;
             font-size: 1rem;
-            color: #333;
-            background: #fff;
-            border: 1px solid #ddd;
+            color: var(--color-text);
+            background: var(--color-input-bg);
+            border: 1px solid var(--color-input-border);
             border-radius: 6px;
             outline: none;
             transition: border-color 0.2s;
         }
+        input:focus, select:focus { border-color: var(--color-primary); }
 
-        input:focus, select:focus { border-color: #1a1a1a; }
+        select option {
+            background: var(--color-input-bg);
+            color: var(--color-text);
+        }
 
         .hint {
-            color: #999;
+            color: var(--color-text-muted);
             font-size: 0.85rem;
             margin-top: 0.4rem;
         }
 
+        /* ── Button ──────────────────────────────────────────────────── */
         .btn {
-            display: inline-block;
+            display: block;
             width: 100%;
             margin-top: 1.75rem;
             padding: 1rem 2rem;
             font-size: 1.1rem;
             font-family: inherit;
-            text-decoration: none;
             text-align: center;
             border: none;
             border-radius: 6px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
         }
 
         .btn-primary {
-            background: #1a1a1a;
-            color: white;
+            background: var(--color-primary);
+            color: var(--color-on-primary);
         }
-
-        .btn-primary:hover {
-            background: #333;
+        .btn-primary:hover:not(:disabled) {
+            background: var(--color-primary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px var(--color-shadow);
+        }
+        .btn-primary:disabled {
+            background: var(--color-disabled-bg);
+            color: var(--color-disabled-text);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        /* Transient success state */
+        .btn-primary.done {
+            background: var(--color-success);
+            color: #fff;
+            transform: none;
+            box-shadow: none;
         }
 
-        #result {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 1rem;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            background: #f9fafb;
-            font-size: 0.95rem;
-            color: #555;
-        }
-
-        #result a {
-            color: #1a1a1a;
-            font-weight: 600;
-        }
-
-        #result code {
-            display: block;
-            margin-top: 0.6rem;
-            word-break: break-all;
-            color: #999;
-            font-size: 0.78rem;
-            font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-        }
-
+        /* ── Footer ──────────────────────────────────────────────────── */
         footer {
             text-align: center;
             padding: 2.5rem 0 1rem;
-            color: #999;
+            color: var(--color-text-muted);
             font-size: 0.9rem;
         }
+        footer a { color: var(--color-text-soft); text-decoration: none; }
+        footer a:hover { color: var(--color-text-strong); }
 
-        footer a {
-            color: #666;
-            text-decoration: none;
-        }
-
-        footer a:hover { color: #1a1a1a; }
-
-        @media (max-width: 768px) {
+        @media (max-width: 480px) {
             h1 { font-size: 1.8rem; }
             .tagline { font-size: 1rem; }
         }
@@ -154,7 +190,9 @@
 </head>
 <body>
 <div class="container">
+
     <header>
+        <img src="https://www.citadelagent.org/img/logo.png" alt="Citadel" class="logo">
         <h1>Extension Downloader</h1>
         <p class="tagline">Fetch a browser extension package directly from the vendor store.</p>
     </header>
@@ -172,117 +210,169 @@
         <p class="hint" id="idHint">Chrome/Edge IDs are 32 lowercase letters (a–p).</p>
 
         <button class="btn btn-primary" id="dl">Download Extension</button>
-
-        <div id="result"></div>
     </div>
 
     <footer>
         <a href="https://citadelagent.org">citadelagent.org</a>
     </footer>
-</div>
 
+</div>
 <script>
-    // Fallback only — used if we can't read the version from the browser.
     const FALLBACK_VERSION = "149.0.7827.201";
 
-    function detectVersion() {
+    function detectChromeVersion() {
         const m = navigator.userAgent.match(/Edg\/([\d.]+)/) ||
             navigator.userAgent.match(/Chrome\/([\d.]+)/);
         return m ? m[1] : FALLBACK_VERSION;
     }
 
-    const CHROME_VERSION = detectVersion();
+    const CHROME_VERSION = detectChromeVersion();
 
     const storeSelect = document.getElementById("store");
     const extInput    = document.getElementById("extId");
     const idHint      = document.getElementById("idHint");
-    const result      = document.getElementById("result");
     const dlButton    = document.getElementById("dl");
 
-    // Synchronous URL builders for Chrome/Edge (direct redirect endpoints).
-    function buildDirectUrl(store, extensionId) {
-        switch (store) {
-            case "chrome":
-                return "https://clients2.google.com/service/update2/crx" +
-                    "?response=redirect&acceptformat=crx2,crx3" +
-                    "&prodversion=" + encodeURIComponent(CHROME_VERSION) +
-                    "&x=id%3D" + encodeURIComponent(extensionId) + "%26uc";
-            case "edge":
-                return "https://edge.microsoft.com/extensionwebstorebase/v1/crx" +
-                    "?x=id%3D" + encodeURIComponent(extensionId) +
-                    "%26installsource%3Dondemand&response=redirect";
-        }
+    // ── URL builders ──────────────────────────────────────────────────
+
+    function buildDirectUrl(store, id) {
+        if (store === "chrome")
+            return "https://clients2.google.com/service/update2/crx" +
+                "?response=redirect&acceptformat=crx2,crx3" +
+                "&prodversion=" + encodeURIComponent(CHROME_VERSION) +
+                "&x=id%3D" + encodeURIComponent(id) + "%26uc";
+
+        if (store === "edge")
+            return "https://edge.microsoft.com/extensionwebstorebase/v1/crx" +
+                "?x=id%3D" + encodeURIComponent(id) +
+                "%26installsource%3Dondemand&response=redirect";
     }
 
-    // Firefox: the AMO API returns metadata JSON; the real .xpi URL is nested inside.
-    async function resolveFirefoxUrl(extensionId) {
-        const metaUrl = "https://addons.mozilla.org/api/v5/addons/addon/" +
-            encodeURIComponent(extensionId) + "/";
-        const response = await fetch(metaUrl);
-        if (!response.ok) throw new Error("AMO returned HTTP " + response.status);
-        const data = await response.json();
-
-        const fileUrl = data?.current_version?.file?.url;
-        if (!fileUrl) throw new Error("No download URL found in AMO metadata.");
-        return fileUrl;
+    async function resolveFirefoxUrl(id) {
+        const r = await fetch("https://addons.mozilla.org/api/v5/addons/addon/" +
+            encodeURIComponent(id) + "/");
+        if (!r.ok) throw new Error("AMO returned HTTP " + r.status);
+        const data = await r.json();
+        const url  = data?.current_version?.file?.url;
+        if (!url) throw new Error("No download URL found in AMO metadata.");
+        return url;
     }
 
-    storeSelect.addEventListener("change", () => {
-        if (storeSelect.value === "firefox") {
-            idHint.textContent = "Firefox accepts the add-on slug or numeric ID (e.g. ublock-origin).";
-        } else {
-            idHint.textContent = "Chrome/Edge IDs are 32 lowercase letters (a–p).";
+    // ── ?url= query-param pre-fill ────────────────────────────────────
+    //
+    // Pass the full store listing URL, e.g.:
+    //   ?url=https://chromewebstore.google.com/detail/ublock-origin/cjpalhdlnbpafiamejdnhcphjbkeiagm
+    //   ?url=https://microsoftedge.microsoft.com/addons/detail/ublock-origin/odfafepnkmbhccpbejgmiehpchacaeak
+    //   ?url=https://addons.mozilla.org/en-US/firefox/addon/ublock-origin/
+
+    function parseStoreUrl(raw) {
+        let u;
+        try { u = new URL(raw); } catch { return null; }
+
+        const host = u.hostname;
+        const path = u.pathname;
+
+        if (host === "chromewebstore.google.com" ||
+            (host === "chrome.google.com" && path.startsWith("/webstore"))) {
+            const m = path.match(/\/detail\/(?:[^/]+\/)?([a-p]{32})/);
+            if (m) return { store: "chrome", id: m[1] };
         }
-    });
+
+        if (host === "microsoftedge.microsoft.com") {
+            const m = path.match(/\/addons\/detail\/(?:[^/]+\/)?([a-p]{32})/);
+            if (m) return { store: "edge", id: m[1] };
+        }
+
+        if (host === "addons.mozilla.org") {
+            const m = path.match(/\/addon\/([^/?#]+)/);
+            if (m) return { store: "firefox", id: m[1] };
+        }
+
+        return null;
+    }
+
+    function applyQueryParams() {
+        const raw = new URLSearchParams(location.search).get("url");
+        if (!raw) return;
+        const parsed = parseStoreUrl(raw);
+        if (!parsed) return;
+        storeSelect.value = parsed.store;
+        extInput.value    = parsed.id;
+        updateHint();
+    }
+
+    // ── UI helpers ────────────────────────────────────────────────────
+
+    function updateHint() {
+        idHint.textContent = storeSelect.value === "firefox"
+            ? "Firefox accepts the add-on slug or numeric ID (e.g. ublock-origin)."
+            : "Chrome/Edge IDs are 32 lowercase letters (a–p).";
+    }
 
     function validId(store, id) {
         if (!id) return false;
-        if (store === "firefox") return true;
-        return /^[a-p]{32}$/.test(id);
+        return store === "firefox" || /^[a-p]{32}$/.test(id);
     }
 
-    function showResult(url) {
-        result.style.display = "block";
-        result.innerHTML =
-            'The extension is downloaded to your downloads folder. ' +
-            'Click <a href="' + url + '" target="_blank" rel="noopener">here</a> ' +
-            'if the download does not start.';
+    function triggerDownload(url, filename) {
+        const a = document.createElement("a");
+        a.href     = url;
+        a.download = filename;
+        a.rel      = "noopener";
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
     }
+
+    function flashDone() {
+        dlButton.classList.add("done");
+        dlButton.textContent = "✓ Downloading…";
+        setTimeout(() => {
+            dlButton.classList.remove("done");
+            dlButton.textContent = "Download Extension";
+        }, 2000);
+    }
+
+    // ── Download handler ──────────────────────────────────────────────
 
     async function handleDownload() {
         const store = storeSelect.value;
-        const extId = extInput.value.trim().toLowerCase();
+        const id    = extInput.value.trim().toLowerCase();
 
-        if (!validId(store, extId)) {
+        if (!validId(store, id)) {
             alert("That doesn't look like a valid extension ID for the selected store.");
             return;
         }
 
-        try {
-            let url;
-            if (store === "firefox") {
-                dlButton.disabled = true;
-                dlButton.textContent = "Resolving…";
-                url = await resolveFirefoxUrl(extId);
-            } else {
-                url = buildDirectUrl(store, extId);
-            }
+        dlButton.disabled    = true;
+        dlButton.textContent = store === "firefox" ? "Resolving…" : "Downloading…";
 
-            showResult(url);
-            window.open(url, "_blank", "noopener");
+        try {
+            let url, filename;
+            if (store === "firefox") {
+                url      = await resolveFirefoxUrl(id);
+                filename = id + ".xpi";
+            } else {
+                url      = buildDirectUrl(store, id);
+                filename = id + ".crx";
+            }
+            triggerDownload(url, filename);
+            flashDone();
         } catch (err) {
             alert("Could not resolve the download: " + err.message);
         } finally {
             dlButton.disabled = false;
-            dlButton.textContent = "Download Extension";
         }
     }
 
-    dlButton.addEventListener("click", handleDownload);
+    // ── Wire up ───────────────────────────────────────────────────────
 
-    extInput.addEventListener("keydown", e => {
-        if (e.key === "Enter") handleDownload();
-    });
+    storeSelect.addEventListener("change", updateHint);
+    dlButton.addEventListener("click", handleDownload);
+    extInput.addEventListener("keydown", e => { if (e.key === "Enter") handleDownload(); });
+
+    applyQueryParams();
 </script>
 </body>
 </html>
