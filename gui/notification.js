@@ -173,7 +173,7 @@ class Notification {
                 message: collapseWhitespace(htmlToPlainText(alert.notification.message)),
             }
 
-            if (Browser.version.brand !== Browser.Firefox) {
+            if (! Browser.isFirefox) {
                 notification.requireInteraction = true
             }
 

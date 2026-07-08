@@ -98,6 +98,7 @@ class Extension {
     static isEnabled   = extensionId => Extension.#getExt(extensionId, ext => ext.enabled)
     static mayDisable  = extensionId => Extension.#getExt(extensionId, ext => !!ext.mayDisable)
     static mayEnable   = extensionId => Extension.#getExt(extensionId, ext => !!ext.mayEnable)
+    static isAdminInstalled = () => Extension.#getExt(chrome.runtime.id, ext => ext.installType === "admin")
 
     static async enable(extensionId, enabled) {
         try {
@@ -111,7 +112,7 @@ class Extension {
             const action = enabled ? 'enable' : 'disable'
 
             // Firefox does not allow enterprise-installed plugins to disable other plugins
-            const errorLevel = Browser.version.brand === Browser.Firefox ? Log.WARN : Log.ERROR
+            const errorLevel = Browser.isFirefox() ? Log.WARN : Log.ERROR
             const reason =
                 err?.message ??
                 chrome.runtime.lastError?.message ??

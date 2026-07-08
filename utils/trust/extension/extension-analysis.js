@@ -125,7 +125,7 @@ class ExtensionAnalysis {
             this.queue = this.queue.then(async () => {
                 try {
                     const store = ExtensionStore.of(extensionInfo.updateUrl) ??
-                        (Browser.version.brand === Browser.Firefox ? ExtensionStore.Firefox : undefined)
+                        (Browser.isFirefox() ? ExtensionStore.Firefox : undefined)
 
                     if (!store) return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error-unknown-store")
 
@@ -133,7 +133,7 @@ class ExtensionAnalysis {
 
                     if (!storePage) return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error-unknown-storepage")
 
-                    if (Browser.version.brand === Browser.Firefox) {
+                    if (Browser.isFirefox()) {
                         const analysis = ExtensionAnalysis.promiseOf(storePage, config)
                         return await this.resolveAnalysis(analysis)
                     } else {
@@ -299,7 +299,7 @@ class ExtensionAnalysis {
             let unableDisableReason
             if (!extensionInfo.installType === "admin") unableDisableReason = 'admin installed'
             else if (!extensionInfo.mayDisable) unableDisableReason = 'cannot disable'
-            else if (Browser.version.brand === Browser.Firefox) unableDisableReason = 'browser is Firefox'
+            else if (Browser.isFirefox()) unableDisableReason = 'browser is Firefox'
 
             if (unableDisableReason) {
                 await ExtensionTrust.allow(currAnalysis)
