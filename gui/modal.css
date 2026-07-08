@@ -115,8 +115,11 @@ button {
     background-color: var(--color-button-bg);
     border: 1px solid var(--color-button-border);
     border-radius: 3px;
+    min-height: 20px;
+    padding: 8px 15px;
+    box-sizing: border-box;
+    line-height: 1;
 }
-
 .button-row {
     display: flex;
     gap: 1em;

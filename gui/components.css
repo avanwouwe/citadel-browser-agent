@@ -33,7 +33,10 @@ body {
 
 /* ── Primary button (visual only — pages own their layout/margins) ──── */
 button {
-    padding: 10px 20px;
+    min-height: 20px;
+    padding: 8px 15px;
+    box-sizing: border-box;
+    line-height: 1;
     background-color: var(--color-primary);
     color: var(--color-on-primary);
     border: none;

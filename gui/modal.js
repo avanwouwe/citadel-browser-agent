@@ -57,9 +57,7 @@ class Modal {
                 if (options.onAcknowledge.remove) host.remove()
                 sendMessage(options.onAcknowledge)
             } catch (e) {
-                if (e.message.startsWith("Extension context invalidated")) {
-                    host.remove()
-                }
+                if (e.message.startsWith("Extension context invalidated")) host.remove()
             } finally {
                 detachEsc()
             }
@@ -69,37 +67,37 @@ class Modal {
         cancel.hidden = options.onCancel === undefined
         cancel.textContent = options.text.cancel ?? ''
 
+        // Only valid to call when options.onCancel is defined
         const triggerCancel = function () {
             try {
                 if (options.onCancel.remove) host.remove()
                 sendMessage(options.onCancel)
             } catch (e) {
-                if (e.message.startsWith("Extension context invalidated")) {
-                    host.remove()
-                }
+                if (e.message.startsWith("Extension context invalidated")) host.remove()
             } finally {
                 detachEsc()
             }
         }
 
-        cancel.addEventListener('click', triggerCancel)
+        if (!options.exception) {
+            cancel.addEventListener('click', triggerCancel)
 
-        if (options.onCancel) {
-            onKeyDown = function (e) {
-                if (e.key === 'Escape') {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    triggerCancel()
+            if (options.onCancel) {
+                onKeyDown = function (e) {
+                    if (e.key === 'Escape') {
+                        e.preventDefault()
+                        e.stopPropagation()
+                        triggerCancel()
+                    }
                 }
+                document.addEventListener('keydown', onKeyDown, true)
             }
 
-            document.addEventListener('keydown', onKeyDown, true)
-        }
-
-        if (!options.exception) {
             shadow.getElementById('exceptionDiv').hidden = true
             return
         }
+
+        // --- Exception setup ---
 
         shadow.getElementById('exceptionEnabler').innerHTML = options.exception.text.request ?? ''
         shadow.getElementById('exceptionTitle').innerText = options.exception.text.requestHeader ?? ''
@@ -108,12 +106,50 @@ class Modal {
 
         const exceptionEnabler = shadow.getElementById('exceptionEnabler')
         const exceptionSection = shadow.getElementById('exceptionSection')
-        exceptionEnabler.onclick = () => {
+
+        let exceptionOpen = false
+
+        const collapseException = () => {
+            exceptionOpen = false
+            acknowledge.hidden = options.onAcknowledge === undefined
+            exceptionEnabler.hidden = false
+            exceptionSection.style.display = 'none'
+            // Restore cancel button to its original state
+            cancel.hidden = options.onCancel === undefined
+            cancel.textContent = options.text.cancel ?? ''
+        }
+
+        exceptionEnabler.addEventListener('click', () => {
+            exceptionOpen = true
             acknowledge.hidden = true
             exceptionEnabler.hidden = true
             exceptionSection.style.display = 'flex'
+            // Repurpose cancel as "back" regardless of whether onCancel was defined
+            cancel.hidden = false
+            cancel.textContent = options.exception.text.back ?? ''
             shadow.getElementById('exceptionTextarea').focus()
+        })
+
+        cancel.addEventListener('click', function () {
+            if (exceptionOpen) {
+                collapseException()    // Step back, don't dismiss
+            } else if (options.onCancel) {
+                triggerCancel()        // Dismiss (original cancel behaviour)
+            }
+        })
+
+        onKeyDown = function (e) {
+            if (e.key === 'Escape') {
+                e.preventDefault()
+                e.stopPropagation()
+                if (exceptionOpen) {
+                    collapseException()
+                } else if (options.onCancel) {
+                    triggerCancel()
+                }
+            }
         }
+        document.addEventListener('keydown', onKeyDown, true)
 
         const textarea = shadow.getElementById('exceptionTextarea')
         const submit = shadow.getElementById('exceptionSubmit')
@@ -129,7 +165,7 @@ class Modal {
             submit.disabled = !textarea.value.trim()
         })
 
-        submit.addEventListener('click', function() {
+        submit.addEventListener('click', function () {
             const onException = options.exception.onException ?? {}
             onException.reason = textarea.value.trim()
 
@@ -168,6 +204,7 @@ class Modal {
                     provideReason: t("block-modal.provide-reason"),
                     submitRequest: t("block-modal.submit-request"),
                     charactersRemaining: t("block-modal.characters-remaining"),
+                    back: t("global.back"),
                 },
                 onException
             }
