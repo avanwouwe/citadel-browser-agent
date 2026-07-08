@@ -19,4 +19,4 @@ cp -r "$SOURCE_DIR"/* "/Library/Scripts/Citadel/"
 rm -rf "$SOURCE_DIR"
 rm -rf "$UNUSED_DIR"
 
-chmod -R 755 "/Library/Scripts/Citadel"
+chmod -R og-w "/Library/Scripts/Citadel"
