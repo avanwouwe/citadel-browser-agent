@@ -41,8 +41,8 @@ class Log {
 
         if (throttle && Log.#throttles?.[levelValue]?.throttle()) { return }
 
-        url = this.maskUrl(url, level, config)
-        initiator = this.maskUrl(initiator, level, config)
+        url = this.maskUrl(url, initiator, level, config)
+        initiator = this.maskUrl(initiator, undefined, level, config)
 
         description = description.replace("@@URL@@", url?.truncate(50, 'end', '…') ?? '??')
         url = url?.truncate(config.logging.maxUrlLength)
@@ -107,20 +107,19 @@ class Log {
 
     }
 
-    maskUrl(url, level, config) {
+    maskUrl(url, initiator, level, config) {
         if (!url) return url
 
         const urlObj = url.toURL()
+        const initiatorObj = initiator?.toURL()
         if (! urlObj) return url    // if we can't parse the URL, we can't mask it
         url = urlObj
 
+        const isSensitive = Config.isSensitive(url.hostname) || Config.isSensitive(initiatorObj?.hostname)
         const maskedHostname = url.hostname?.hashDJB2()
         const isUnmask = maskedHostname && config.domain.unmask.hasOwnProperty(maskedHostname) || matchDomain(url.hostname, config.domain.unmask)
 
-        if (! Config.isSensitive(url.hostname) &&
-            ! isUnmask &&
-            Log.#levelValue[level] < config.logging.maskUrlLevel
-        ) {
+        if (! isSensitive && ! isUnmask && Log.#levelValue[level] < config.logging.maskUrlLevel) {
             url.hostname ? url.hostname = maskedHostname : undefined
             url.username ? url.username = url.username.hashDJB2() : undefined
             url.pathname && url.pathname !== "/" ? url.pathname = url.pathname.hashDJB2() : undefined
