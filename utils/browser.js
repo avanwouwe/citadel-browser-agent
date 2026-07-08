@@ -55,7 +55,8 @@ class Browser {
         if (Browser.isComet()) Browser.version.brand = Browser.Comet
     })()
 
-    static isComet = () => chrome.management.get("mjdcklhepheaaemphcopihnmjlmjpcnh").then(() => true).catch(() => false)
+    static isFirefox = () => Browser.version.brand !== Browser.Firefox
+    static isComet = () => ! Browser.isFirefox && chrome.management.get("mjdcklhepheaaemphcopihnmjlmjpcnh").then(() => true).catch(() => false)
 
     static platform = (() => {
         if (/Mac|MacIntel|MacPPC/i.test(navigator.platform)) {
