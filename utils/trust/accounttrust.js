@@ -8,6 +8,18 @@ class AccountTrust {
         await AccountTrust.#audit.ready()
     }
 
+    static #FREE_IDP = new Set([
+        // Google
+        "accounts.google.com",
+        // Microsoft (all dual-use, personal + corp flows)
+        "login.microsoftonline.com",
+        "login.microsoft.com",
+        "login.live.com",
+        "login.windows.net",
+    ])
+
+    static #FREE_MAIL = /@(gmail\.com|outlook\.com|hotmail\.[a-z.]+|live\.[a-z.]+|msn\.com|passport\.com)$/i
+
     static checkFor(username, sitename) {
         if (sitename.isURL()) sitename = getSitename(sitename)
 
@@ -16,9 +28,9 @@ class AccountTrust {
         if (config.account.checkOnlyProtected && ! Config.isProtected(sitename)) return false
         if (config.account.checkOnlyInternal && isExternalUser(config, username)) return false
 
-        // Many companies have Google in their protected scope, but Gmail is dual use.
-        // Do not consider logins to Google with @gmail.com as "protected scope".
-        if (config.account.checkOnlyProtected && sitename === "accounts.google.com" && username.endsWith("@gmail.com")) return false
+        // Dual-use identity providers only: a free-mail address is not "protected scope".
+        // Gated on the host so a personal address on a *corp app* is still protected.
+        if (config.account.checkOnlyProtected && AccountTrust.#FREE_IDP.has(sitename) && AccountTrust.#FREE_MAIL.test(username)) return false
 
         return true
     }
