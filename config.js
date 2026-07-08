@@ -677,8 +677,12 @@ class Config {
         }
 
         config = newConfig
-        Config.#isLoaded = true
-        Config.#loadResolve?.(config)
+
+        if (localConfig) {
+            Config.#loadResolve?.(config)
+            Config.#isLoaded = true
+        }
+        
         Log.start()
     }
 
