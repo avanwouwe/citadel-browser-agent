@@ -6,8 +6,8 @@
             <div class="message" id="modalMessage"></div>
 
             <div class="button-row">
-                <button class="acknowledge-button" id="acknowledgeButton">OK</button>
                 <button class="cancel-button" id="cancelButton">Cancel</button>
+                <button class="acknowledge-button" id="acknowledgeButton">OK</button>
             </div>
 
             <div id="exceptionDiv">
@@ -16,7 +16,10 @@
                     <label class="exception-title" id="exceptionTitle" for="exceptionTextarea"></label>
                     <textarea class="exception-reason" id="exceptionTextarea"></textarea>
                     <div class="reason-counter" id="exceptionCounter"></div>
-                    <button class="exception-submit" id="exceptionSubmit" disabled>Submit</button>
+                    <div class="button-row exception-button-row">
+                        <button class="cancel-button exception-cancel" id="exceptionCancel">Cancel</button>
+                        <button class="exception-submit" id="exceptionSubmit" disabled>Submit</button>
+                    </div>
                 </div>
             </div>
         </div>

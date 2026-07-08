@@ -239,6 +239,20 @@ button {
     opacity: 0.6;
 }
 
+/* ── Exception form action row (Cancel | Submit) ─────────────────────── */
+.exception-button-row {
+    margin-top: 1em;
+}
+.exception-button-row .exception-cancel,
+.exception-button-row .exception-submit {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: none;
+    margin: 0;                /* override the centering rule below */
+    white-space: nowrap;
+    cursor: pointer;
+}
+
 /* ── Result messages ────────────────────────────────────────────────── */
 .exception-success,
 .exception-error {
@@ -254,38 +268,6 @@ button {
 /* ── Centred action elements ────────────────────────────────────────── */
 .exception-title,
 .exception-submit {
-    max-width: 200px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-/* ── Buttons ────────────────────────────────────────── */
-
-.button-row {
-    display: flex;
-    gap: 1em;
-    justify-content: center;
-    width: 100%;
-}
-
-.acknowledge-button,
-.cancel-button {
-    flex: 1 1 0;
-    min-width: 0;
-    white-space: nowrap;
-}
-
-.button-row:has(.cancel-button[hidden]) .acknowledge-button {
-    flex: 0 1 auto;
-    max-width: 200px;
-    width: 100%;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.button-row:has(.acknowledge-button[hidden]) .cancel-button {
-    flex: 0 1 auto;
     max-width: 200px;
     width: 100%;
     margin-left: auto;
