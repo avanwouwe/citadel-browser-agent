@@ -111,3 +111,21 @@ Then resulting `logging.logLevel` will depend on the domain involved:
 * www.randomdomain.com : `DEBUG` (default) 
 * www.domain-a.com : `ERROR` (exception 2)
 * www.domain-b.com : `WARN` (exception 1)
+
+## comments
+You can add JSON5-style comments to your configuration files:
+```
+  "extensions": {
+    "whitelist": {
+      "allowInstall": [
+        "jpodanhbbpcdfgpafdjhkojjbagbcmno",   // Usetiful
+        "jcemocpiapkpjilbpenbfbnelddkgolm",   // Tokenbear
+        "mpobacholfblmnpnfbiomjkecoojakah",   // Silktide Accessibility Checker
+      ],
+      "allowAlways": [
+        "nfhnknijidlahaoemjlbpfpgpheakoph",   // Synthesia
+        "flacajjkcnlngpeapmnmignmjgddamah",   // Jira Product Discovery
+        ]
+    }
+  },
+```

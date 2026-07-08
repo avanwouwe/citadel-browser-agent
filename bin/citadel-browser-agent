@@ -43,7 +43,7 @@ def log(event):
     event['id'] = str(event['id'])
     event['user'] = username
     level = event.get('browseragent', { }).get('level') or "ERROR"
-    message = MESSAGE_PREFIX + json5.dumps(event)
+    message = MESSAGE_PREFIX + json.dumps(event)
 
     if level == "DEBUG" or level == "TRACE":
         logger.debug(message)
@@ -267,7 +267,7 @@ def readJsonFile(path):
     try:
         checkFileRights(path)
         with open(path, 'r', encoding='utf-8') as file:
-            return json.load(file)
+            return json5.load(file)
     except FileNotFoundError:
         return None
     except json.JSONDecodeError as e:

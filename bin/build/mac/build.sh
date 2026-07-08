@@ -64,6 +64,7 @@ build_for_arch() {
     # Install PyInstaller and build
     $ARCH_CMD pip install --upgrade pip
     $ARCH_CMD pip install --upgrade pyinstaller
+    $ARCH_CMD pip install --upgrade json5
 
     # Build the package using the correct architecture
     $ARCH_CMD pyinstaller --clean --strip --optimize 2 \
