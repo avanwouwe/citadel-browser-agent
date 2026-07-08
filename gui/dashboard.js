@@ -165,7 +165,7 @@ const renderExtensionDashboard = serialized(async function () {
     const extensions = Object.values(extensionTrust)
         .sort((a, b) => a.storeInfo.id.localeCompare(b.storeInfo.id))
 
-    const hideStatusColumn = Browser.isFirefox() && ! await Extension.isAdminInstalled()
+    const lockStatusColumn = Browser.isFirefox() && ! await Extension.isAdminInstalled()
 
     const tb = document.getElementById("extension-details")
     tb.innerHTML = ""
@@ -211,22 +211,18 @@ const renderExtensionDashboard = serialized(async function () {
             nameEl.textContent = name
         }
 
-        // force-installed extensions cannot be toggled: show their actual state with a greyed-out slider
-        const isLocked = analysis.isEnabled && ! analysis.mayDisable || ! analysis.isEnabled && ! analysis.mayEnable
-        const isBlocked = analysis.state === State.BLOCKING
         const checked = analysis.isEnabled ? 'checked' : ''
+        const isBlocked = analysis.state === State.BLOCKING
+        const isLocked = analysis.isEnabled && ! analysis.mayDisable ||
+            ! analysis.isEnabled && ! analysis.mayEnable ||
+            lockStatusColumn
 
-        let actionCell = ''
-        if (! hideStatusColumn) {
-            actionCell =
-                `<td class="action-cell">` +
-                `<label class="ext-toggle">` +
-                `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked' : ''}" ${checked}${isLocked ? ' disabled' : ''}` +
-                ` data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">` +
-                `<span class="ext-toggle-slider"></span>` +
-                `</label>` +
-                `</td>`
-        }
+        const actionCell =
+            `<label class="ext-toggle">` +
+            `<input type="checkbox" class="ext-toggle-input ${isBlocked ? 'ext-blocked' : ''}" ${checked}${isLocked ? ' disabled' : ''}` +
+            ` data-extension="${analysis.storeInfo.id.escapeHtmlEntities()}">` +
+            `<span class="ext-toggle-slider"></span>` +
+            `</label>`
 
         const tr = document.createElement("tr")
         tr.innerHTML =
@@ -235,7 +231,7 @@ const renderExtensionDashboard = serialized(async function () {
             `<td><span class="ellipsis"></span></td>` +
             `<td>${issues}</td>` +
             `<td class="state ${analysis.state.toLowerCase()}">${t("control.state." + analysis.state)}</td>` +
-            actionCell
+            `<td class="action-cell">${actionCell}</td>`
 
         tr.cells[0].appendChild(logoEl)
         tr.cells[1].title = name
