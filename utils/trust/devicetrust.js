@@ -38,7 +38,6 @@ class DeviceTrust {
         }
 
         DeviceTrust.#audit.save()
-        DeviceTrust.#audit.notify()
     }
 
     static #createControl(name) {
