@@ -5,7 +5,7 @@ import random
 from datetime import datetime
 import logging
 import platform
-import json
+import json5, json
 import struct
 import getpass
 import traceback
@@ -43,7 +43,7 @@ def log(event):
     event['id'] = str(event['id'])
     event['user'] = username
     level = event.get('browseragent', { }).get('level') or "ERROR"
-    message = MESSAGE_PREFIX + json.dumps(event)
+    message = MESSAGE_PREFIX + json5.dumps(event)
 
     if level == "DEBUG" or level == "TRACE":
         logger.debug(message)
