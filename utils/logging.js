@@ -61,7 +61,7 @@ class Log {
         if (url) logEntry.url = url
         if (initiator) logEntry.browseragent.initiator = initiator
         if (result) logEntry.browseragent.result = result
-        if (PROFILE_ADDRESS) logEntry.browseragent.profile = PROFILE_ADDRESS
+        if (BROWSER_PROFILE) logEntry.browseragent.profile = BROWSER_PROFILE
 
         // add a specific 'numvalue' if the value is numeric
         const numvalue = Number(value ?? "null")

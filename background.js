@@ -1,10 +1,10 @@
 console.log("service worker starting")
 
-let PROFILE_ADDRESS
+let BROWSER_PROFILE
 if (chrome.identity?.getProfileUserInfo) {
 	chrome.identity.getProfileUserInfo(async (userInfo) => {
 		if (! userInfo?.email) {
-			PROFILE_ADDRESS = userInfo?.id
+			BROWSER_PROFILE = userInfo?.id
 			return
 		}
 
@@ -12,11 +12,11 @@ if (chrome.identity?.getProfileUserInfo) {
 
 		let { username, domain } = PasswordCheck.parseUsername(userInfo?.email)
 
-		if (! AccountTrust.checkFor(username, domain)) {
+		if (! matchDomain(domain, config.company.domains)) {
 			username = PasswordCheck.maskSecret(username, '*', 3, 3)
 		}
 
-		PROFILE_ADDRESS = `${username}@${domain}`
+		BROWSER_PROFILE = `${username}@${domain}`
 	})
 }
 
@@ -733,15 +733,15 @@ function registerAccountAutofill(email, url) {
 	const emailDomain = PasswordCheck.getDomainFromUsername(email)
 	if (! emailDomain || ! matchDomain(emailDomain, config.company.domains)) return
 
-	if (! PROFILE_ADDRESS || matchDomain(PasswordCheck.getDomainFromUsername(PROFILE_ADDRESS), config.company.domains)) return
+	if (! BROWSER_PROFILE || matchDomain(PasswordCheck.getDomainFromUsername(BROWSER_PROFILE), config.company.domains)) return
 
 	const app = AppStats.getOrCreateApp(appName)
 	AppStats.getAccount(app, email)
 
 	if (AppStats.getIssues(appName, email)?.profileSeparation) return        // already flagged for this account
-	AppStats.setIssues(appName, email, { profileSeparation: { profile: PROFILE_ADDRESS } })
+	AppStats.setIssues(appName, email, { profileSeparation: { profile: BROWSER_PROFILE } })
 
-	logger.log(nowTimestamp(), "account trust", "profile separation issue", url, Log.WARN, email, `professional account '${email}' for '${appName}' is synced to personal browser profile '${PROFILE_ADDRESS}'`)
+	logger.log(nowTimestamp(), "account trust", "profile separation issue", url, Log.WARN, email, `professional account '${email}' for '${appName}' is synced to personal browser profile '${BROWSER_PROFILE}'`)
 }
 
 function registerAccountUsage(url, username) {
@@ -965,7 +965,7 @@ onMessage((request, sender) => {
 
 		ExtensionTrust.allow(request.analysis)
 		ExtensionAnalysis.showStorePage(tabId, request.storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) ${PROFILE_ADDRESS ? `into profile ${PROFILE_ADDRESS} ` : ''} for reason '${exception.reason}'`)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) ${BROWSER_PROFILE ? `into profile ${BROWSER_PROFILE} ` : ''} for reason '${exception.reason}'`)
 	}
 
 	if (request.type === "warn-reuse") {
