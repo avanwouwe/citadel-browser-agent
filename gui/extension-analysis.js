@@ -80,6 +80,8 @@ function renderStoreInfo() {
     document.getElementById('extension-id').textContent = storeInfo.id
     document.getElementById('extension-category').textContent = storeInfo.categories.map(c => c.secondary).join(", ")
 
+    AltNav.register(document.getElementById('extension-name'), `https://citadelagent.org/tools/crx-download.html?url=${storePage}`)
+
     renderVerified('risk-value-verified-extension', storeInfo.isVerifiedExtension)
     renderVerified('risk-value-verified-publisher', storeInfo.isVerifiedPublisher)
 

@@ -20,6 +20,14 @@ class Icons {
                         <path d="M20.5,11H19V7c0-1.1-.9-2-2-2h-4V3.5C13,2.12,11.88,1,10.5,1S8,2.12,8,3.5V5H4c-1.1,0-1.99.9-1.99,2v3.8H3.5c1.49,0,2.7,1.21,2.7,2.7s-1.21,2.7-2.7,2.7H2V20c0,1.1.9,2,2,2h3.8v-1.5c0-1.49,1.21-2.7,2.7-2.7s2.7,1.21,2.7,2.7V22H17c1.1,0,2-.9,2-2v-4h1.5c1.38,0,2.5-1.12,2.5-2.5S21.88,11,20.5,11z"/>
                     </svg>`
 
+    static download = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                        width="18" height="18" fill="none" stroke="currentColor"
+                        stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12,3v10"/>
+                        <path d="M8,9l4,4,4-4"/>
+                        <path d="M4,15v3c0,.55.45,1,1,1h14c.55,0,1-.45,1-1v-3"/>
+                    </svg>`
+    
     static #values = new Set(
         Object.values(Icons).filter(v => typeof v === "string")
     )
@@ -272,4 +280,46 @@ if (typeof HTMLElement !== 'undefined') {
 
         this.appendChild(container)
     }
+}
+
+// --- Power-user Alt+click navigation (documented feature, intentionally hidden) ---
+
+class AltNav {
+    static #targets = [] // { el, url, icon }
+
+    static register(el, url) {
+        if (!el) return
+
+        el.classList.add('alt-navigable')
+
+        const icon = document.createElement('span')
+        icon.className = 'alt-nav-icon'
+        icon.innerHTML = Icons.download
+        el.appendChild(icon)
+
+        el.addEventListener('click', (e) => {
+            if (!e.altKey) return          // normal users: no-op
+            e.preventDefault()
+            e.stopPropagation()
+            window.open(url, '_blank')      // or: window.location.href = url
+        })
+
+        AltNav.#targets.push({ el, url, icon })
+    }
+
+    static #setArmed(armed) {
+        document.body.classList.toggle('alt-armed', armed)
+    }
+
+    static {
+        if (typeof window !== 'undefined') {
+            // Global modifier tracking
+            window.addEventListener('keydown', (e) => { if (e.key === 'Alt') AltNav.#setArmed(true) })
+            window.addEventListener('keyup',   (e) => { if (e.key === 'Alt') AltNav.#setArmed(false) })
+            // keyup can be missed if focus leaves the window while Alt is held
+            window.addEventListener('blur', () => AltNav.#setArmed(false))
+            document.addEventListener('visibilitychange', () => { if (document.hidden) AltNav.#setArmed(false) })
+        }
+    }
+
 }

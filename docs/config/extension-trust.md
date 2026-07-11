@@ -124,9 +124,12 @@ Contrary to the "allow anytime" cases, these exceptions will continue to be moni
 ### daily use
 When you get notified that a user wants to install an extension, use the following steps to decide what to do:
 * open the extension store page and check the risk analysis
-
 * check for brand impersonations (the extension is called "Microsoft Suchandsuch Tool", and has the Microsoft logo, but does it really belong to Microsoft?)
-* 
+* if you want to download the extension to inspect it : press `Alt` or `Option` and click on the name of the extension (you can then use Claude Code or the likes to analyse the extension)
+
+Then add the extension to the whitelist and redeploy the configuration:
+* if your reason to allow it is that it looks benign in its current form, add to `allowInstall` (i.e. block if risk profile changes)
+* if your reason to allow is that it belongs to a big company that you trust, add to `allowAlways` (i.e. never block)
 
 ```
   "extensions": {
@@ -143,6 +146,9 @@ When you get notified that a user wants to install an extension, use the followi
     }
   },
 ```
+> **Tip**
+> You can use comments in the configuration file
+>{: .tip }
 
 ## categories
 When blacklisting based on categories, categories can be specified at the first level (e.g. `productivity`) to match all extensions in that category, or at the second level (e.g. `communication`) to match only extensions in that specific subcategory.

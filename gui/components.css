@@ -80,3 +80,20 @@ button.secondary-button:hover:not(:disabled) {
     color: var(--color-danger);
     font-weight: bold;
 }
+
+/* ── AltNav ─────────────────────────── */
+.alt-nav-icon {
+    /* Always occupies space so revealing it never shifts layout */
+    visibility: hidden;
+    margin-left: 4px;
+    vertical-align: middle;
+    display: inline-flex;
+}
+
+/* only revealed while Alt is held (feature is doc-taught, never ambient) */
+body.alt-armed .alt-navigable {
+    cursor: pointer;
+}
+body.alt-armed .alt-navigable .alt-nav-icon {
+    visibility: visible;
+}
