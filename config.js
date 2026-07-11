@@ -2,7 +2,7 @@ class Config {
     static default = {
         system: {                               // N.B. NOT INTENDED FOR USER MODIFICATION
             maxReasonLength: 150,               // max number of characters when users give a reason
-            excludeInject: ["chromewebstore.google.com"]
+            excludeInject: ["chromewebstore.google.com", "docs.google.com"]
         },
         company: {
             name: 'Your Organisation',          // name of your organization
