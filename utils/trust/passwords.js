@@ -106,10 +106,17 @@ class PasswordCheck {
         return (sum % 10 === 0)
     }
 
-    static getDomainFromUsername(username) {
-        const matches = username?.match(/@([a-zA-Z0-9.-]+)$/);
-        return matches ? matches[1] : null
+    static parseUsername(login) {
+        if (!login) return { username: null, domain: null }
+
+        const matches = login.match(/^([^@]+)@([a-zA-Z0-9.-]+)$/);
+        if (!matches) return { username: login, domain: null }
+
+        return { username: matches[1], domain: matches[2] }
     }
+
+    static getUserfromUsername = login => PasswordCheck.parseUsername(login).username
+    static getDomainFromUsername = login => PasswordCheck.parseUsername(login).domain
 
     // returns a value between 0 and 1, where 0 is "sequence" and 1 is not
     static #analyzeSequence(password, reference) {

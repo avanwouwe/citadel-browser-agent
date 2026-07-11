@@ -2,8 +2,21 @@ console.log("service worker starting")
 
 let PROFILE_ADDRESS
 if (chrome.identity?.getProfileUserInfo) {
-	chrome.identity.getProfileUserInfo((userInfo) => {
-		PROFILE_ADDRESS = userInfo?.email
+	chrome.identity.getProfileUserInfo(async (userInfo) => {
+		if (! userInfo?.email) {
+			PROFILE_ADDRESS = userInfo?.id
+			return
+		}
+
+		await Config.ready()
+
+		let { username, domain } = PasswordCheck.parseUsername(userInfo?.email)
+
+		if (! AccountTrust.checkFor(username, domain)) {
+			username = PasswordCheck.maskSecret(username, '*', 3, 3)
+		}
+
+		PROFILE_ADDRESS = `${username}@${domain}`
 	})
 }
 
@@ -952,7 +965,7 @@ onMessage((request, sender) => {
 
 		ExtensionTrust.allow(request.analysis)
 		ExtensionAnalysis.showStorePage(tabId, request.storePage)
-		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) for reason '${exception.reason}'`)
+		logger.log(nowTimestamp(), "exception", `extension exception used`, request.storePage, Log.ERROR, logObj, `user used exception to install extension '${exception.name}' (${exception.id}) ${PROFILE_ADDRESS ? `into profile ${PROFILE_ADDRESS} ` : ''} for reason '${exception.reason}'`)
 	}
 
 	if (request.type === "warn-reuse") {
