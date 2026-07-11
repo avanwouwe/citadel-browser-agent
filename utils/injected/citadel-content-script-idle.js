@@ -340,7 +340,9 @@ function analyzeForm(formElements, eventElement) {
         username = findUsernameInAncestors(eventElement)
     }
 
-    username = PasswordCheck.maskIfSecret(username)
+    if (PasswordCheck.isSecret(username)) {
+        username = PasswordCheck.maskSecret(username)
+    }
 
     debug("form username is ", username)
     debug("form password is ", password ? "<masked>" : undefined)
