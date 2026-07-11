@@ -4,13 +4,22 @@ let BROWSER_PROFILE
 if (chrome.identity?.getProfileUserInfo) {
 	chrome.identity.getProfileUserInfo(async (userInfo) => {
 		if (! userInfo?.email) {
-			BROWSER_PROFILE = userInfo?.id
+			const { id } = await chrome.storage.local.get('BrowserProfile')
+			if (id) {
+				BROWSER_PROFILE = id
+				return
+			}
+
+			const newId = nowDatestamp().hashDJB2()
+			await chrome.storage.local.set({ BrowserProfile: newId })
+
+			BROWSER_PROFILE = newId
 			return
 		}
 
 		await Config.ready()
 
-		let { username, domain } = PasswordCheck.parseUsername(userInfo?.email)
+		let { username, domain } = PasswordCheck.parseUsername(userInfo.email)
 
 		if (! matchDomain(domain, config.company.domains)) {
 			username = PasswordCheck.maskSecret(username, '*', 3, 3)
