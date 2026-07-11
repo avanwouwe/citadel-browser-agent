@@ -103,7 +103,8 @@ You can of course also reject based on the permissions requested by the extensio
 
 Extensions rejected based on these criteria can still be installed through a user-requested exception or by adding them to the whitelist.
 
-## whitelist : allow anytime
+## whitelist
+### allow anytime
 The following criteria can be used to ignore the above-mentioned reasons for rejection:
 * `extensions.verified.allowed` : always allow extensions if they or their publisher are verified
 * `extensions.installations.allowed` : allways allow extensions if they have more than N installations
@@ -112,13 +113,36 @@ Extensions allowed in this manner will always be allowed, irrespective of potent
 
 You should use these mechanisms for extensions that you are very confident of, and where the inadvertent sudden disabling of the extension would generate severe or widespread issues (e.g. your company-wide password manager)
 
-## whitelist : only allow installation
+### only allow installation
 If an extension exceeds the risk level defined in your policies, it is still possible to allow the installation and accept the risk that an extension poses, but to then continue to monitor their risk profile:
 * `extensions.allowExisting` : allow at current risk level, since they were already existing when Citadel was installed
 * `extensions.whitelist.allowInstall` : allow at their current risk level the following extensions, based on their id
 * manually, when te user requests an exception.
 
 Contrary to the "allow anytime" cases, these exceptions will continue to be monitored. If their risk profile degrades, for example because they require supplementary forbidden permissions or because their rating or popularity reduces, then they are disabled. If you want to re-evaluate
+
+### daily use
+When you get notified that a user wants to install an extension, use the following steps to decide what to do:
+* open the extension store page and check the risk analysis
+
+* check for brand impersonations (the extension is called "Microsoft Suchandsuch Tool", and has the Microsoft logo, but does it really belong to Microsoft?)
+* 
+
+```
+  "extensions": {
+    "whitelist": {
+      "allowInstall": [
+        "jpodanhbbpcdfgpafdjhkojjbagbcmno",   // Usetiful
+        "jcemocpiapkpjilbpenbfbnelddkgolm",   // Tokenbear
+        "mpobacholfblmnpnfbiomjkecoojakah",   // Silktide Accessibility Checker
+      ],
+      "allowAlways": [
+        "nfhnknijidlahaoemjlbpfpgpheakoph",   // Synthesia
+        "flacajjkcnlngpeapmnmignmjgddamah",   // Jira Product Discovery
+        ]
+    }
+  },
+```
 
 ## categories
 When blacklisting based on categories, categories can be specified at the first level (e.g. `productivity`) to match all extensions in that category, or at the second level (e.g. `communication`) to match only extensions in that specific subcategory.

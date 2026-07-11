@@ -315,14 +315,20 @@
     }
 
     function triggerDownload(url, filename) {
+        if (/^http:\/\//i.test(url) || url.includes("edge.microsoft.com")) {
+            window.open(url, "_blank", "noopener");   // or: location.href = url;
+            return;
+        }
+
+        // https / same-origin path keeps the nice filename behaviour
         const a = document.createElement("a");
-        a.href     = url;
-        a.download = filename;
-        a.rel      = "noopener";
-        a.style.display = "none";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        a.href = url
+        a.download = filename
+        a.rel = "noopener"
+        a.style.display = "none"
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
     }
 
     function flashDone() {
@@ -349,6 +355,17 @@
         dlButton.textContent = store === "firefox" ? "Resolving…" : "Downloading…";
 
         try {
+            if (store === "edge") {
+                // Edge's CRX endpoint 302s to an http:// CDN, which the
+                // mixed-content blocker kills for <a download>. A top-level
+                // navigation is allowed; the CDN sends Content-Disposition
+                // so the download still happens (user must click "Keep").
+                const url = buildDirectUrl(store, id);
+                window.open(url, "_blank", "noopener");
+                flashDone();
+                return;
+            }
+
             let url, filename;
             if (store === "firefox") {
                 url      = await resolveFirefoxUrl(id);
