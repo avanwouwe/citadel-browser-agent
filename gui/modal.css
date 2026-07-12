@@ -141,6 +141,7 @@ button {
     border: none;
     border-radius: 3px;
     transition: background .2s;
+    font-weight: bold;
 }
 .acknowledge-button:hover:not(:disabled) {
     background-color: var(--color-primary-hover);
