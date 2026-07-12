@@ -12,7 +12,7 @@ document.addEventListener('keydown', (e) => listeners.keyListener(e), true)
 // relay the clipboard buffer captured by the MAIN-world hooks to the service worker, which scores it.
 window.addEventListener("message", (event) => {
     if (event.source !== window || event.origin !== window.location.origin) return
-    if (event.data?.channel !== "CitadelClickFix") return
+    if (!event?.data || event.data.channel !== "CitadelClipboardGuard") return
 
-    sendMessage("analyze-clickfix", { content: event.data.content })
+    if (event.data.type === "ClipboardChange") sendMessage("clipboard-change", { content: event.data.content })
 }, true)

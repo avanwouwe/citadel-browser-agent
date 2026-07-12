@@ -268,7 +268,7 @@
     async function copyWriteText(id, text) {
         try {
             await navigator.clipboard.writeText(text)
-            setStatus(id, '✓ copied — Citadel should warn you now', true)
+            setStatus(id, '✓ copied — Citadel should warn not you now', true)
         } catch (e) {
             setStatus(id, '✗ clipboard blocked by the browser (' + e.message + ')', false)
         }

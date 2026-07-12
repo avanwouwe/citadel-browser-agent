@@ -497,9 +497,13 @@ class Config {
         },
         clipboard: {
             clickfix: {
-                action: "WARN",
+                level: Log.ERROR,
                 threshold: 5
             },
+            leaking: {
+                level: Log.WARN,
+            },
+
         },
         extensions: {
             risk: {

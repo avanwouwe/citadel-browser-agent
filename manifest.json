@@ -42,6 +42,7 @@
     "service_worker": "serviceworker.js",
     "scripts": [
       "/utils/utils.js",
+      "/utils/logging.js",
       "/config.js",
       "/utils/shim-node-to-browser.js",
       "/utils/definitions.js",
@@ -65,7 +66,6 @@
       "/utils/messaging.js",
       "/utils/fetch.js",
       "/utils/ratethrottle.js",
-      "/utils/logging.js",
       "/utils/browser.js",
       "/gui/color-scheme/color-scheme.js",
       "/gui/interface.js",

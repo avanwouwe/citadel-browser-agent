@@ -1018,13 +1018,9 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "exception", "blacklist exception", request.url, Log.ERROR, reason, `blacklist exception used : ${reason}`)
 	}
 
-	if (request.type === "analyze-clickfix") {
-		ClipboardCheck.checkClickFix(request.content, senderUrl, tabId)
-	}
+	if (request.type === "clipboard-change") Clipboard.checkClickFix(request.content, senderUrl, tabId)
 
-	if (request.type === "acknowledge-clickfix") {
-		openTab("https://citadelagent.org/control/ClickFix")
-	}
+	if (request.type === "explain-clickfix") openTab("https://citadelagent.org/control/ClickFix")
 
 	if (request.type === "acknowledge-shadow-it") {
 		const app = request.url?.toURL()

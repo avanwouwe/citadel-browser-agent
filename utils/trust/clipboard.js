@@ -1,6 +1,6 @@
 // Detects ClickFix / FileFix / pastejacking attacks, where a page places a shell command on the clipboard
 // for the user to paste into PowerShell, the Win+R run dialog or the Explorer address bar.
-class ClipboardCheck {
+class Clipboard {
 
     // leading-edge debounce keyed on clipboard content: the first sighting of a payload warns, the duplicate
     // relays a single copy produces (setData + the copy event, etc.) are swallowed for the window's duration
@@ -65,14 +65,14 @@ class ClipboardCheck {
         /xattr\s+-[a-z]*\s*com\.apple\.quarantine/i,
     ]
 
-// a download (or anything) piped straight into a shell  (+ zsh, osascript)
+    // a download (or anything) piped straight into a shell  (+ zsh, osascript)
     static #PIPE_TO_SHELL = /[|;&]\s*(?:iex|invoke-expression|bash|sh|zsh|powershell|pwsh|cmd|osascript)\b/i
 
     // a long base64 blob — suspicious on its own, decisive once it decodes to something shell-like
     static #BASE64_BLOB = /[A-Za-z0-9+/]{40,}={0,2}/
 
-// looks like a file path / URL / env-var path (FileFix disguises a command as one of these)
-// + /Volumes/ for the DMG-mount macOS variant, + Ctrl+L-style Explorer paths already covered
+    // looks like a file path / URL / env-var path (FileFix disguises a command as one of these)
+    // + /Volumes/ for the DMG-mount macOS variant, + Ctrl+L-style Explorer paths already covered
     static #PATH_LIKE = /^\s*(?:[a-z]:\\|\\\\|file:\/\/|\/(?:usr|bin|etc|tmp|opt|var|Volumes|Applications)\/|~\/|%[a-z]+%)/i
 
     // visible content, a long run of whitespace, then more content — used to push a command off-screen
@@ -91,12 +91,12 @@ class ClipboardCheck {
         const signals = []
         let score = 0
 
-        const decoded = ClipboardCheck.#decodeBase64(text)
+        const decoded = Clipboard.#decodeBase64(text)
         const haystacks = decoded ? [text, decoded] : [text]
         const matchesAny = (re) => haystacks.some(h => re.test(h))
 
         let keywords = 0
-        for (const re of ClipboardCheck.#KEYWORDS) {
+        for (const re of Clipboard.#KEYWORDS) {
             if (matchesAny(re)) keywords++
         }
         if (keywords > 0) {
@@ -105,7 +105,7 @@ class ClipboardCheck {
         }
 
         let strong = 0
-        for (const re of ClipboardCheck.#STRONG) {
+        for (const re of Clipboard.#STRONG) {
             if (matchesAny(re)) strong++
         }
         if (strong > 0) {
@@ -113,53 +113,58 @@ class ClipboardCheck {
             signals.push("execution-pattern")
         }
 
-        if (matchesAny(ClipboardCheck.#PIPE_TO_SHELL)) {
+        if (matchesAny(Clipboard.#PIPE_TO_SHELL)) {
             score += 3
             signals.push("pipe-to-shell")
         }
 
-        if (decoded && ClipboardCheck.#KEYWORDS.some(re => re.test(decoded))) {
+        if (decoded && Clipboard.#KEYWORDS.some(re => re.test(decoded))) {
             score += 3
             signals.push("encoded-command")
-        } else if (ClipboardCheck.#BASE64_BLOB.test(text)) {
+        } else if (Clipboard.#BASE64_BLOB.test(text)) {
             score += 1
             signals.push("base64-blob")
         }
 
-        if (ClipboardCheck.#PATH_LIKE.test(text) && (keywords > 0 || strong > 0)) {
+        if (Clipboard.#PATH_LIKE.test(text) && (keywords > 0 || strong > 0)) {
             score += 3
             signals.push("path-disguise")
         }
 
-        if (ClipboardCheck.#WHITESPACE_HIDE.test(text)) {
+        if (Clipboard.#WHITESPACE_HIDE.test(text)) {
             score += 2
             signals.push("whitespace-padding")
         }
 
-        if (ClipboardCheck.#TRAILING_EXEC.test(text)) {
+        if (Clipboard.#TRAILING_EXEC.test(text)) {
             score += 3
             signals.push("auto-execute")
-        } else if (ClipboardCheck.#CONTROL_CHARS.test(text)) {
+        } else if (Clipboard.#CONTROL_CHARS.test(text)) {
             score += 2
             signals.push("control-chars")
         }
 
-        if (score < config.clipboard.clickfix.threshold) return null
+        const report = { score, signals }
 
-        return { score, signals }
+        debug('performed clickfix scoring', report)
+
+        if (score >= config.clipboard.clickfix.threshold) return report
     }
 
     static checkClickFix(content, url, tabId) {
-        if (config.clipboard.clickfix.action === Action.NOTHING || config.clipboard.clickfix.action === Action.SKIP) return
-        if (! ClipboardCheck.scoreClickFix(content)) return
+        const eventLevel = config.clipboard.clickfix.level
+        assert(Log.levels.includes(eventLevel), `invalid config.clipboard.clickfix.level : ${eventLevel}`)
+
+        if (eventLevel === Log.NEVER || !Clipboard.scoreClickFix(content)) return
 
         // leading-edge debounce: warns on the first sighting, swallows the duplicate relays that follow
-        ClipboardCheck.#dedup.debounce(content, null, () => {
+        Clipboard.#dedup.debounce(content, null, () => {
             const contact = config.company.contact.embedTag('nowrap')
-            const onAcknowledge = { type: "acknowledge-clickfix" }
-            Modal.createForTab(tabId, t("clickfix.warn.title"), t("clickfix.warn.message", { contact }), onAcknowledge)
+            const onAcknowledge = { type: "explain-clickfix", label: t('clipboard.explain') }
+            const onCancel = { label: t('global.ok') }
+            Modal.createForTab(tabId, t("clipboard.clickfix.title"), t("clipboard.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
 
-            logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, Log.ERROR,
+            logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel,
                 content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)
         })
     }
@@ -167,8 +172,8 @@ class ClipboardCheck {
     // decodes the base64 blobs found in the text so the keyword scan also sees encoded payloads
     // (PowerShell -EncodedCommand is base64 of UTF-16LE, hence the null-byte stripping)
     static #decodeBase64(text) {
-        const matches = text.match(new RegExp(ClipboardCheck.#BASE64_BLOB, "g"))
-        if (! matches) return ""
+        const matches = text.match(new RegExp(Clipboard.#BASE64_BLOB, "g"))
+        if (!matches) return ""
 
         let out = ""
         for (const blob of matches.slice(0, 5)) {
@@ -181,74 +186,87 @@ class ClipboardCheck {
 }
 
 // Minimal clipboard hooks: capture whatever lands on the clipboard (ClickFix / FileFix / pastejacking) and
-// relay it to the service worker, which does the scoring. No analysis happens here, by design.
+// relay it to the service worker, which does the scoring.
 function patchNavigatorClipboard() {
+    const trySafe = (fn) => { try { fn() } catch (e) {} }
+
     const report = (text) => {
         if (typeof text !== "string" || text.length === 0) return
-        try { window.postMessage({ channel: "CitadelClickFix", content: text }, window.location.origin) } catch (e) {}
+        trySafe(() => {
+            window.postMessage({
+                channel: "CitadelClipboardGuard",
+                type: "ClipboardChange",
+                content: text
+            }, window.location.origin)
+        })
     }
 
     // write-side: programmatic writes via the async Clipboard API
-    try {
+    trySafe(() => {
         const clipboard = navigator.clipboard
         if (clipboard?.writeText) {
             const original = clipboard.writeText.bind(clipboard)
             clipboard.writeText = function(text) {
-                try { report(text) } catch (e) {}
+                trySafe(() => report(text))
                 return original(text)
             }
         }
         if (clipboard?.write) {
             const originalWrite = clipboard.write.bind(clipboard)
             clipboard.write = function(items) {
-                try {
+                trySafe(() => {
                     for (const item of items || []) {
                         if (item?.types?.includes?.("text/plain") && item.getType) {
-                            item.getType("text/plain").then(blob => blob.text()).then(report).catch(() => {})
+                            item.getType("text/plain")
+                                .then(blob => blob.text())
+                                .then(report)
+                                .catch(() => {})
                         }
                     }
-                } catch (e) {}
+                })
                 return originalWrite(items)
             }
         }
-    } catch (e) {}
+    })
 
     // write-side: DataTransfer.setData, the classic pastejacking vector on a copy/cut handler
-    try {
+    trySafe(() => {
         const proto = window.DataTransfer?.prototype
         if (proto?.setData) {
             const originalSetData = proto.setData
             proto.setData = function(type, data) {
-                try { if (/text/i.test(type)) report(data) } catch (e) {}
+                trySafe(() => {
+                    if (/text/i.test(type)) report(data)
+                })
                 return originalSetData.apply(this, arguments)
             }
         }
-    } catch (e) {}
+    })
 
     // write-side: document.execCommand('copy'|'cut')
-    try {
+    trySafe(() => {
         const proto = window.Document?.prototype
         if (proto?.execCommand) {
             const originalExec = proto.execCommand
             proto.execCommand = function(command) {
-                try {
+                trySafe(() => {
                     if (typeof command === "string" && /^(?:copy|cut)$/i.test(command)) {
                         report(window.getSelection?.().toString())
                     }
-                } catch (e) {}
+                })
                 return originalExec.apply(this, arguments)
             }
         }
-    } catch (e) {}
+    })
 
     // read-side: provenance-agnostic. On a plain user copy clipboardData is empty, so fall back to the
     // current selection — this covers the user manually copying a command the page only displays.
     const onCopy = (event) => {
-        try {
+        trySafe(() => {
             const data = event.clipboardData
-            const text = (data && data.getData && data.getData("text/plain")) || window.getSelection?.().toString() || ""
+            const text = (data?.getData?.("text/plain")) || window.getSelection?.().toString() || ""
             report(text)
-        } catch (e) {}
+        })
     }
     document.addEventListener("copy", onCopy, true)
     document.addEventListener("cut", onCopy, true)

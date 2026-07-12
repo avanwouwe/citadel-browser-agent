@@ -1,4 +1,5 @@
 importScripts('utils/utils.js');
+importScripts('utils/logging.js');
 importScripts('config.js');
 importScripts('utils/shim-node-to-browser.js');
 importScripts('utils/definitions.js');
@@ -22,7 +23,6 @@ importScripts('utils/appstats.js');
 importScripts('utils/messaging.js');
 importScripts('utils/fetch.js');
 importScripts('utils/ratethrottle.js');
-importScripts('utils/logging.js');
 importScripts('utils/browser.js');
 importScripts('gui/color-scheme/color-scheme.js');
 importScripts('gui/interface.js');
