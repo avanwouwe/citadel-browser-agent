@@ -83,6 +83,7 @@ class Modal {
         }
 
         cancel.addEventListener('click', triggerCancel)
+        ;(acknowledge.hidden ? cancel : acknowledge)?.focus({ preventScroll: true })
 
         // Exception element refs (present in HTML even when unused)
         const exceptionEnabler = shadow.getElementById('exceptionEnabler')
