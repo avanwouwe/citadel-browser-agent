@@ -8,6 +8,8 @@ class Log {
     static ERROR = "ERROR"
     static ALERT = "ALERT"
 
+    static levels = [Log.NEVER, Log.TRACE, Log.DEBUG, Log.INFO, Log.WARN, Log.ERROR, Log.ALERT]
+
     static #levelValue = {
         NEVER: 0,
         TRACE: 1,
