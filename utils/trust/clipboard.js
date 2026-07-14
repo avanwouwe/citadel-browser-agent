@@ -2,10 +2,9 @@
 // for the user to paste into PowerShell, the Win+R run dialog or the Explorer address bar.
 class Clipboard {
 
-    // leading-edge debounce keyed on clipboard content: the first sighting of a payload warns, the duplicate
-    // relays a single copy produces (setData + the copy event, etc.) are swallowed for the window's duration
-    static #changeDedup = new Debouncer(3 * ONE_SECOND, null, true)
-    static #pasteDedup = new Debouncer(3 * ONE_SECOND, null, true)
+    // debounce copy/paste events with the same clipboard content
+    static #copyDedup = new Debouncer(3 * ONE_SECOND, null, true)
+    static #pasteDedup  = new Debouncer(3 * ONE_SECOND, null, true)
 
     // shell tooling that has no business being on a clipboard the user is about to paste into a shell
     static #KEYWORDS = [
@@ -127,6 +126,11 @@ class Clipboard {
             signals.push("base64-blob")
         }
 
+        // The checks below deliberately run against the raw `text` only, never the decoded base64.
+        // They detect structural obfuscation of the payload *as it will be pasted* (auto-exec newline,
+        // off-screen padding, control chars, leading path-disguise) — properties of the literal clipboard
+        // bytes. The decoded blob is a synthetic string that never reaches the paste target, so testing it
+        // here would only manufacture false positives.
         if (Clipboard.#PATH_LIKE.test(text) && (keywords > 0 || strong > 0)) {
             score += 3
             signals.push("path-disguise")
@@ -154,8 +158,14 @@ class Clipboard {
 
     // called from background message handler on every forwarded event
     static onEvent(event, senderUrl, tabId) {
-        if (event.subtype === 'ClipboardPaste') Clipboard.checkLeaking(event.content, senderUrl, tabId)
-        if (event.subtype === 'ClipboardCopy') Clipboard.checkClickFix(event.content, senderUrl, tabId)
+        const { subtype, content } = event
+
+        if (subtype === 'ClipboardPaste')
+            Clipboard.#pasteDedup.debounce(content, null, () => Clipboard.checkLeaking(content, senderUrl, tabId))
+
+        else if (subtype === 'ClipboardCopy') {
+            Clipboard.#copyDedup.debounce(content, null, () => Clipboard.checkClickFix(content, senderUrl, tabId))
+        }
     }
 
     static checkClickFix(content, url, tabId) {
@@ -164,16 +174,13 @@ class Clipboard {
 
         if (eventLevel === Log.NEVER || !Clipboard.scoreClickFix(content)) return
 
-        // leading-edge debounce: warns on the first sighting, swallows the duplicate relays that follow
-        Clipboard.#changeDedup.debounce(content, null, () => {
-            const contact = config.company.contact.embedTag('nowrap')
-            const onAcknowledge = { type: "explain-clickfix", label: t('clipboard.explain') }
-            const onCancel = { label: t('global.ok') }
-            Modal.createForTab(tabId, t("clipboard.clickfix.title"), t("clipboard.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
+        const contact = config.company.contact.embedTag('nowrap')
+        const onAcknowledge = { type: "explain-clickfix", label: t('clipboard.explain') }
+        const onCancel = { label: t('global.ok') }
+        Modal.createForTab(tabId, t("clipboard.clickfix.title"), t("clipboard.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
 
-            logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel,
-                content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)
-        })
+        logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel,
+            content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)
     }
 
     static checkLeaking(content, url, tabId) {
@@ -184,24 +191,23 @@ class Clipboard {
         const findings = Gitleaks.scan(content)
         if (!findings.length) return
 
-        Clipboard.#changeDedup.debounce(content, null, () => {
-            const contact = config.company.contact.embedTag('nowrap')
-            const onAcknowledge = { type: "explain-leaking", label: t('clipboard.explain') }
-            const onCancel = { label: t('global.ok') }
-            Modal.createForTab(tabId, t("clipboard.leaking.title"),
-                t("clipboard.leaking.message", { contact }), onAcknowledge, undefined, onCancel)
+        const contact = config.company.contact.embedTag('nowrap')
+        const onAcknowledge = { type: "explain-leaking", label: t('clipboard.explain') }
+        const onCancel = { label: t('global.ok') }
+        Modal.createForTab(tabId, t("clipboard.leaking.title"),
+            t("clipboard.leaking.message", { contact }), onAcknowledge, undefined, onCancel)
 
-            // redacted: rule ids + masked fingerprints ONLY — never the secret, never the full text
-            const summary = findings.map(f => `${f.id}(${f.masked},len=${f.len})`).join(", ")
-            logger.log(nowTimestamp(), "leak detected", "clipboard secret leak", url, eventLevel,
-                summary, `clipboard secret-leak on ${url?.hostname}: ${summary}`)
-        })
+        const summary = findings.map(f => `${f.id}(${f.masked},len=${f.len})`).join(", ")
+        logger.log(nowTimestamp(), "leak detected", "clipboard secret leak", url, eventLevel,
+            summary, `clipboard secret-leak on ${url?.hostname}: ${summary}`)
     }
 
     // decodes the base64 blobs found in the text so the keyword scan also sees encoded payloads
     // (PowerShell -EncodedCommand is base64 of UTF-16LE, hence the null-byte stripping)
+    static #BASE64_BLOB_G = /[A-Za-z0-9+/]{40,}={0,2}/g
+
     static #decodeBase64(text) {
-        const matches = text.match(new RegExp(Clipboard.#BASE64_BLOB, "g"))
+        const matches = text.match(Clipboard.#BASE64_BLOB_G)
         if (!matches) return ""
 
         let out = ""
@@ -233,33 +239,44 @@ function patchNavigatorClipboard() {
     const reportCopy = (text) => report(text, "ClipboardCopy")
     const reportPaste = (text) => report(text, "ClipboardPaste")
 
-// write-side: programmatic writes via the async Clipboard API
-    trySafe(() => {
-        const clipboard = navigator.clipboard
-        if (clipboard?.writeText) {
-            const original = clipboard.writeText.bind(clipboard)
-            clipboard.writeText = function(text) {
-                trySafe(() => reportCopy(text))
-                return original(text)
-            }
+    const wrapTextArg = (obj, method, sink) => {
+        if (!obj?.[method]) return
+        const original = obj[method].bind(obj)
+        obj[method] = function (text, ...rest) {
+            trySafe(() => sink(text))
+            return original(text, ...rest)
         }
-        if (clipboard?.write) {
-            const originalWrite = clipboard.write.bind(clipboard)
-            clipboard.write = function(items) {
-                trySafe(() => {
-                    for (const item of items || []) {
-                        if (item?.types?.includes?.("text/plain") && item.getType) {
-                            item.getType("text/plain")
-                                .then(blob => blob.text())
-                                .then(reportCopy)
-                                .catch(() => {})
-                        }
-                    }
-                })
-                return originalWrite(items)
-            }
+    }
+
+    const wrapTextResult = (obj, method, sink) => {
+        if (!obj?.[method]) return
+        const original = obj[method].bind(obj)
+        obj[method] = function (...args) {
+            const p = original(...args)
+            trySafe(() => p.then(sink).catch(() => {}))
+            return p
         }
-    })
+    }
+    const wrapItemsPromise = (obj, method, sink) => {
+        if (!obj?.[method]) return
+        const original = obj[method].bind(obj)
+        obj[method] = function (...args) {
+            const p = original(...args)
+            trySafe(() => p.then(items => {
+                for (const item of items || []) {
+                    if (item?.types?.includes?.("text/plain") && item.getType)
+                        item.getType("text/plain").then(b => b.text()).then(sink).catch(() => {})
+                }
+            }).catch(() => {}))
+            return p
+        }
+    }
+
+    const clipboard = navigator.clipboard
+    trySafe(() => wrapTextArg(clipboard, "writeText", reportCopy))
+    trySafe(() => wrapItemsPromise(clipboard, "write", reportCopy))
+    trySafe(() => wrapTextResult(clipboard, "readText", reportPaste))
+    trySafe(() => wrapItemsPromise(clipboard, "read", reportPaste))
 
 // write-side: DataTransfer.setData, the classic pastejacking vector on a copy/cut handler
     trySafe(() => {
@@ -303,34 +320,6 @@ function patchNavigatorClipboard() {
     document.addEventListener("copy", onCopy, true)
     document.addEventListener("cut", onCopy, true)
 
-// page pulling the clipboard programmatically — treat as paste
-    trySafe(() => {
-        const clipboard = navigator.clipboard
-        if (clipboard?.readText) {
-            const originalRead = clipboard.readText.bind(clipboard)
-            clipboard.readText = function() {
-                const p = originalRead()
-                trySafe(() => p.then(reportPaste).catch(() => {}))
-                return p
-            }
-        }
-        if (clipboard?.read) {
-            const originalRead = clipboard.read.bind(clipboard)
-            clipboard.read = function() {
-                const p = originalRead()
-                trySafe(() => p.then(items => {
-                    for (const item of items || []) {
-                        if (item?.types?.includes?.("text/plain") && item.getType) {
-                            item.getType("text/plain").then(b => b.text()).then(reportPaste).catch(() => {})
-                        }
-                    }
-                }).catch(() => {}))
-                return p
-            }
-        }
-    })
-
-// user pasting into the page — treat as paste
     document.addEventListener("paste", (event) => {
         trySafe(() => {
             const text = event.clipboardData?.getData?.("text/plain") || ""
@@ -338,40 +327,6 @@ function patchNavigatorClipboard() {
         })
     }, true)
 
-// read-side: programmatic reads via the async Clipboard API (page pulling the clipboard)
-    trySafe(() => {
-        const clipboard = navigator.clipboard
-        if (clipboard?.readText) {
-            const originalRead = clipboard.readText.bind(clipboard)
-            clipboard.readText = function() {
-                const p = originalRead()
-                trySafe(() => p.then(text => reportPaste(text)).catch(() => {}))
-                return p
-            }
-        }
-        if (clipboard?.read) {
-            const originalRead = clipboard.read.bind(clipboard)
-            clipboard.read = function() {
-                const p = originalRead()
-                trySafe(() => p.then(items => {
-                    for (const item of items || []) {
-                        if (item?.types?.includes?.("text/plain") && item.getType) {
-                            item.getType("text/plain").then(b => b.text()).then(t => reportPaste(t)).catch(() => {})
-                        }
-                    }
-                }).catch(() => {}))
-                return p
-            }
-        }
-    })
-
-// read-side: user pastes into the page
-    document.addEventListener("paste", (event) => {
-        trySafe(() => {
-            const text = event.clipboardData?.getData?.("text/plain") || ""
-            reportPaste(text, "paste")
-        })
-    }, true)
 }
 
 class Gitleaks {
