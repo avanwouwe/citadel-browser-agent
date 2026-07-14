@@ -70,6 +70,33 @@ async function getCached(url, replace = true) {
     }
 }
 
+function cachedCall(ttl, fn) {
+    let value
+    let expiry = 0
+    let inflight = null
+
+    return async function (...args) {
+        const now = Date.now()
+
+        // Fresh cached value → return immediately
+        if (now < expiry) return value
+
+        // A refresh is already running → await it (avoids parallel calls)
+        if (inflight) return inflight
+
+        inflight = (async () => {
+            try {
+                value  = await fn(...args)
+                expiry = Date.now() + ttl
+                return value
+            } finally {
+                inflight = null
+            }
+        })()
+
+        return inflight
+    }
+}
 
 const CCTLD_WITH_SLD = [
     "uk",
