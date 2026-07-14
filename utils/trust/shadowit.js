@@ -19,9 +19,7 @@ class ShadowIT {
     //   WARN  -> warn the user with a dismissable modal
     //   null  -> do nothing
     static action(url) {
-        // macOS deploments use profiles to force install, which are deployed allmost immediately. This may be before
-        // the binary and local config are ready. As a result, users may get (false) "shadow IT warnings" since the configuration
-        // of config.company.applications is not available. TL;DR do not show shadow IT warnings if the config is not ready
+        // do not show shadow IT warnings if the config is not ready, since this will result in false positives
         if (! Config.isLoaded()) return
 
         const validUrl = url?.toURL()
