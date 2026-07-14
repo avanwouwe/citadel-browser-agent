@@ -68,7 +68,7 @@ When specifying the logging level you can use the following log levels:
 
 The special log level `NEVER` is used to disable logging.
 
-# URL masking
+# masking
 In order to minimize the amount of personal data, Citadel masks URLs of events unless the information is strictly necessary, such as:
 * if the host is part of the protected scope
 * if the event is of `maskUrlevel` or higher (by default set to `WARN`)
@@ -76,7 +76,9 @@ In order to minimize the amount of personal data, Citadel masks URLs of events u
 
 When masking the URL the hostname, username, pathname, hash and search components of the URL are separately hashed. This allows SOC analysis some level of understanding of a click-stream, without unduly exposing sensitive personal information.
 
-If present, the password component is always masked.
+If present, the password component of a URL is always masked.
+
+Citadel will also mask the profile address if it does not belong to the protected scope.
 
 # log rate throttling
 Citadel performs rate throttling on logging to ensure that one issue does not overwhelm the storage of the local machine or your SIEM. Throttling is triggered if more than the specified number of events arrive within a `windowDuration` minutes, and on a per-level basis. Throttling stopped if no more events arrive during the window.

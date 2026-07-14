@@ -21,7 +21,7 @@ if (chrome.identity?.getProfileUserInfo) {
 
 		let { username, domain } = PasswordCheck.parseUsername(userInfo.email)
 
-		if (! matchDomain(domain, config.company.domains)) {
+		if (config.company.domains.length > 0 && ! matchDomain(domain, config.company.domains)) {
 			username = PasswordCheck.maskSecret(username, '*', 3, 3)
 		}
 

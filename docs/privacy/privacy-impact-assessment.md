@@ -62,7 +62,7 @@ nav_order: 3
 | :---- |:--------------------------------------------------------------------------------------------------------------------------------------| :---- |
 | Local data collection | Citadel agent collects events and status from browsers and endpoints                                                                  | Local browser storage, device storage |
 | Event reporting | Significant security events for protected systems or urgent security events (e.g. virus, phishing, blocked pages) shipped to SIEM/XDR | SIEM / XDR integration (existing org infrastructure) |
-| Data minimization | Storage of only summary / status or non-identifiable data where possible (e.g. hashes, aggregate use); URL and secret masking         | Local storage, SIEM / XDR |
+| Data minimization | Storage of only summary / status or non-identifiable data where possible (e.g. hashes, aggregate use); URL, e-mail and secret masking | Local storage, SIEM / XDR |
 | User transparency | Real-time dashboard showing which events are transmitted to SIEM                                                                      | Local agent interface |
 | Endpoint control/status checks | Checks for forbidden apps, extensions, security compliance                                                                            | Only summary control status stored |
 
@@ -261,12 +261,12 @@ If third-party data recipients (e.g., SIEM/XDR or incident responders):
 
 ### Risk Analysis and Estimation
 
-| Risk | Main Sources of Risk | Main Threats | Main Potential Impacts | Main Measures Reducing Severity and Likelihood | Severity | Likelihood |
-| :---- | :---- | :---- | :---- | :---- | :---- | :---- |
-| Unauthorized access to data | Insider threat, endpoint compromise, SIEM/XDR misconfig | Unauthorized staff access, exfiltration | Disclosure of sensitive activity, regulatory penalty | Access control, audit trail, SIEM/XDR encryption, URL and secret masking, transparency dashboard | Moderate | Low |
-| Purpose deviation | Poor governance, training | Staff harassment, illegality | Staff happiness negatively impacted, regulatory penalty | Data limitation by design, URL masking for non-protected systems, transparency dashboard | Low | Low |
-| Unintended modification of data | SIEM/XDR config error, agent failure | False alerts, loss of data integrity | Misleading response or investigation | Audit logs, input validation, limited retention | Low | Low |
-| Data loss | Device loss, SIEM/XDR failure | Loss of evidence / traces, incident under-reporting | Reduced security, possibly missed incidents | Data backup & retention, centralization via SIEM/XDR | Moderate | Low |
+| Risk | Main Sources of Risk | Main Threats | Main Potential Impacts | Main Measures Reducing Severity and Likelihood                                                           | Severity | Likelihood |
+| :---- | :---- | :---- | :---- |:---------------------------------------------------------------------------------------------------------| :---- | :---- |
+| Unauthorized access to data | Insider threat, endpoint compromise, SIEM/XDR misconfig | Unauthorized staff access, exfiltration | Disclosure of sensitive activity, regulatory penalty | Access control, audit trail, SIEM/XDR encryption, URL, e-mail and secret masking, transparency dashboard | Moderate | Low |
+| Purpose deviation | Poor governance, training | Staff harassment, illegality | Staff happiness negatively impacted, regulatory penalty | Data limitation by design, URL masking for non-protected systems, transparency dashboard                 | Low | Low |
+| Unintended modification of data | SIEM/XDR config error, agent failure | False alerts, loss of data integrity | Misleading response or investigation | Audit logs, input validation, limited retention                                                          | Low | Low |
+| Data loss | Device loss, SIEM/XDR failure | Loss of evidence / traces, incident under-reporting | Reduced security, possibly missed incidents | Data backup & retention, centralization via SIEM/XDR                                                     | Moderate | Low |
 
 ### Risk Assessment
 

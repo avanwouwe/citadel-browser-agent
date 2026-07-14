@@ -151,7 +151,7 @@ The following alternatives have been evaluated, to establish their impact on the
 
 As a result the following privacy-preserving technical controls have been implemented:
 
-- URL masking: only events related to protected systems, or that have a direct and urgent security impact (e.g. virus detected, page blocked, possible phishing) are logged un-masked
+- URL and e-mail masking: only events related to protected systems, or that have a direct and urgent security impact (e.g. virus detected, page blocked, possible phishing) are logged un-masked
 - Transparency dashboard: users can view which events are transmitted to the SIEM in real-time
 - Secret masking: passwords, API keys and credit cards that are masked when they appear by accident in the log events
 - Hashing URLs for non-critical / forensic events
@@ -205,12 +205,12 @@ The expectations of data subjects have been evaluated as follows.
 
 ### 3.3 Likely Impact on Individuals
 
-| Impact Area | Assessment                                                                                                                     | Safeguards                                                                                                  |
-| :---- |:-------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------|
-| Privacy | Minimal; URL masking ensures only security-relevant data for protected systems or critical security events is logged           | Data minimisation, transparency dashboard, local hashing, masking of URLs and secrets, SIEM access controls |
-| Objection / Control | Employee discomfort possible                                                                                                   | Opt-out / configuration options, internal helpdesk process, training / transparency.                        |
-| Intrusiveness | Very low: URL masking prevents logging of non-protected systems; no content captured; masking of passwords and secrets in logs | Only protected systems monitored; usage is logged as Yes / No                                               |
-| Misuse | Strict RBAC for SIEM / forensic data                                                                                           | Role-based access, limited audit trail                                                                      |
+| Impact Area | Assessment                                                                                                                | Safeguards                                                                                                  |
+| :---- |:--------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------|
+| Privacy | Minimal; URL masking ensures only security-relevant data for protected systems or critical security events is logged      | Data minimisation, transparency dashboard, local hashing, masking of URLs and secrets, SIEM access controls |
+| Objection / Control | Employee discomfort possible                                                                                              | Opt-out / configuration options, internal helpdesk process, training / transparency.                        |
+| Intrusiveness | Very low: masking reduces logging of non-protected systems; no content captured; masking of passwords and secrets in logs | Only protected systems monitored; usage is logged as Yes / No                                               |
+| Misuse | Strict RBAC for SIEM / forensic data                                                                                      | Role-based access, limited audit trail                                                                      |
 
 **Opt-out available:**  
 Yes, via configuration or organisational process in special situations.
@@ -219,12 +219,12 @@ Yes, via configuration or organisational process in special situations.
 
 ## 4\. Decision and Action
 
-| Assessment Area | Result | Comment                                                                                                                                              |
-| :---- | :---- |:-----------------------------------------------------------------------------------------------------------------------------------------------------|
-| Legitimate Interest | Yes | Organisation, user and public protection. Compliance, risk mitigation, and required investigation.                                                   |
-| Processing necessary | Yes | Less intrusive means would impair security, detection or compliance.                                                                                 |
-| Balancing outcome | Acceptable | Secret and URL masking mechanism, no detailed usage stats, minimisation, hashing, transparency, and "need to know" controls address risks.           |
-| Lawful basis | Art. 6(1)(f) GDPR – Legitimate Interest | Users are informed; DPIA / LIA documented and actively maintained.                                                                                   |
+| Assessment Area | Result | Comment                                                                                                                                            |
+| :---- | :---- |:---------------------------------------------------------------------------------------------------------------------------------------------------|
+| Legitimate Interest | Yes | Organisation, user and public protection. Compliance, risk mitigation, and required investigation.                                                 |
+| Processing necessary | Yes | Less intrusive means would impair security, detection or compliance.                                                                               |
+| Balancing outcome | Acceptable | Secret, URL and e-mail masking mechanism, no detailed usage stats, minimisation, hashing, transparency, and "need to know" controls address risks. |
+| Lawful basis | Art. 6(1)(f) GDPR – Legitimate Interest | Users are informed; DPIA / LIA documented and actively maintained.                                                                                 |
 
 ---
 
