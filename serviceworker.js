@@ -7,7 +7,7 @@ importScripts('utils/context.js');
 importScripts('utils/bridge.js');
 importScripts('utils/dashboard.js');
 importScripts('utils/storage.js');
-importScripts('utils/debouncer.js');
+importScripts('utils/concurrency.js');
 importScripts('utils/encryption/bcrypt.js');
 importScripts('utils/encryption/secure-message.js');
 importScripts('utils/trust/password-vault.js');
