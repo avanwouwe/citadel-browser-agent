@@ -1,3 +1,25 @@
+class DoNotDisturb {
+
+    static #MAX_DURATION = 24 * ONE_HOUR    // if the user is DND for more than this period, ignore the DND
+
+    static #nativeDND = cachedFor(ONE_MINUTE, () => Port.request("dnd"))
+
+    static #activeSince = null
+
+    static async isActive() {
+        const isDND = await DoNotDisturb.#nativeDND() || Screensharing.isActive
+
+        if (!isDND) {
+            DoNotDisturb.#activeSince = null
+            return false
+        }
+
+        DoNotDisturb.#activeSince ??= Date.now()
+
+        return Date.now() - DoNotDisturb.#activeSince < DoNotDisturb.#MAX_DURATION
+    }
+}
+
 class Screensharing {
     // Tracks active share sessions keyed by tabId -> count of live tracks.
     // A tab can host >1 concurrent share; ref-count so we only go inactive at 0.

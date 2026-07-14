@@ -144,6 +144,76 @@ if SYSTEM_OS == 'macos':
     syslog_handler.setFormatter(formatter)
     logger.addHandler(syslog_handler)
 
+    # ------------------------------------------------------------------
+    # macOS "do not disturb / do not interrupt" detection. Covers:
+    #   1. manually toggled Focus / DND (Assertions.json)
+    #   2. display mirroring (AirPlay / duplicated display)
+    #   3. a new display attached since startup (projector / external screen)
+    # ------------------------------------------------------------------
+    import ctypes
+
+    _cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+
+    _MAX_DISPLAYS = 16
+
+    # CGError CGGetActiveDisplayList(uint32 maxDisplays,
+    #                                CGDirectDisplayID *activeDisplays,
+    #                                uint32 *displayCount)
+    _cg.CGGetActiveDisplayList.argtypes = [
+        ctypes.c_uint32,
+        ctypes.POINTER(ctypes.c_uint32),
+        ctypes.POINTER(ctypes.c_uint32),
+    ]
+    _cg.CGGetActiveDisplayList.restype = ctypes.c_int32
+
+    # boolean_t CGDisplayIsInMirrorSet(CGDirectDisplayID display)
+    _cg.CGDisplayIsInMirrorSet.argtypes = [ctypes.c_uint32]
+    _cg.CGDisplayIsInMirrorSet.restype = ctypes.c_int
+
+
+    def _current_display_ids():
+        ids = (ctypes.c_uint32 * _MAX_DISPLAYS)()
+        count = ctypes.c_uint32(0)
+        err = _cg.CGGetActiveDisplayList(_MAX_DISPLAYS, ids, ctypes.byref(count))
+        if err != 0:
+            raise OSError(f"CGGetActiveDisplayList err={err}")
+        return set(ids[:count.value])
+
+    # captured ONCE at process start (browser launch): a display already
+    # attached at launch is baselined out; one that appears later is likely
+    # a projector / shared screen rather than a permanent monitor.
+    try:
+        _BASELINE_DISPLAYS = _current_display_ids()
+    except Exception:
+        _BASELINE_DISPLAYS = set()
+
+    def shouldStayQuiet():
+        try:
+            # 1. manually toggled Focus / DND
+            p = os.path.expanduser("~/Library/DoNotDisturb/DB/Assertions.json")
+            try:
+                with open(p, "r", encoding="utf-8") as f:
+                    data = json.load(f).get("data", [])
+                if data and data[0].get("storeAssertionRecords"):
+                    return True
+            except (FileNotFoundError, json.JSONDecodeError, IndexError):
+                pass  # no manual assertion; fall through to presentation checks
+
+            current = _current_display_ids()
+
+            # 2. mirroring (AirPlay / duplicated display)
+            if any(_cg.CGDisplayIsInMirrorSet(d) for d in current):
+                return True
+
+            # 3. a new display appeared since startup (projector / external screen)
+            if current - _BASELINE_DISPLAYS:
+                return True
+
+            return False
+        except Exception as e:
+            exception("macOS DND query failed", e)
+            return False   # fail-open
+
 elif SYSTEM_OS == 'windows':
     from logging.handlers import NTEventLogHandler
 
@@ -189,6 +259,40 @@ elif SYSTEM_OS == 'windows':
     formatter = logging.Formatter('%(message)s')
     event_log_handler.setFormatter(formatter)
     logger.addHandler(event_log_handler)
+
+    # ------------------------------------------------------------------
+    # Windows "do not disturb / do not interrupt" detection.
+    #
+    # Uses SHQueryUserNotificationState. We suppress modals whenever the
+    # shell reports a state that means the user is busy or "others are
+    # watching" (fullscreen, presentation, exclusive app) as well as when
+    # Focus Assist / quiet hours is active.
+    # ------------------------------------------------------------------
+    import ctypes
+
+    # QUERY_USER_NOTIFICATION_STATE values that mean "stay quiet"
+    _QUNS_SUPPRESS = {
+        2,  # QUNS_BUSY
+        4,  # QUNS_PRESENTATION_MODE
+        6,  # QUNS_QUIET_TIME   (Focus Assist active)
+        7,  # QUNS_APP
+    }
+
+    ctypes.windll.shell32.SHQueryUserNotificationState.argtypes = [
+        ctypes.POINTER(ctypes.c_int)]
+    ctypes.windll.shell32.SHQueryUserNotificationState.restype = ctypes.c_long
+
+    def shouldStayQuiet():
+        try:
+            state = ctypes.c_int(0)
+            hr = ctypes.windll.shell32.SHQueryUserNotificationState(
+                ctypes.byref(state))
+            if hr != 0:
+                raise OSError(f"SHQueryUserNotificationState hr={hr & 0xFFFFFFFF:#010x}")
+            return state.value in _QUNS_SUPPRESS
+        except Exception as e:
+            exception("SHQueryUserNotificationState failed", e)
+            return False   # fail-open
 
 else:
     error("unsupported OS")
@@ -509,6 +613,16 @@ def fetch(url):
     except Exception as e:
         fetchError(url, f"agent fetch of {url} failed: {str(e)}")
 
+
+def handleDnd():
+    try:
+        quiet = shouldStayQuiet() if SYSTEM_OS != "unsupported" else False
+        sendMessage("dnd", quiet)
+    except Exception as e:
+        exception("failed to compute DND state", e)
+        sendMessage("dnd", False)
+
+
 def main():
     loadConfig()
 
@@ -527,6 +641,8 @@ def main():
                 case 'fetch':
                     url = message.get('message', { }).get('url')
                     threading.Thread(target=fetch, args=(url,), daemon=True).start()
+                case 'dnd':
+                    threading.Thread(target=handleDnd, daemon=True).start()
                 case _:
                     warning(f"agent sent unexpected message type '{messageType}'")
 

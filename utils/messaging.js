@@ -7,7 +7,7 @@ class Port {
 
     static #port
     static #messageHandlers = { }
-
+    static #pendingReplies = { }
     static #hasReceivedMessage = false      // used to only start counting errors once we have received at least one message
 
     static #retryDelay
@@ -44,9 +44,30 @@ class Port {
         })
     }
 
+    static request(sendType, message = undefined, replyType = sendType) {
+        const reply = Port.#waitForNext(replyType)
+        Port.postMessage(sendType, message)
+        return reply
+    }
+
+    static #waitForNext(type) {
+        return new Promise((resolve) => {
+            (Port.#pendingReplies[type] ??= []).push(resolve)
+        })
+    }
+
     static #connect() {
         Port.#port = chrome.runtime.connectNative(EXTENSION_NAME)
 
+        Port.#port.onMessage.addListener((message) => {
+            this.#hasReceivedMessage = true
+
+            const waiters = Port.#pendingReplies[message.type]
+            if (waiters?.length) {
+                Port.#pendingReplies[message.type] = []
+                waiters.forEach((resolve) => resolve(message.message))
+            }
+        })
 
         Port.#port.onDisconnect.addListener(function () {
             Port.#lastError = chrome.runtime.lastError?.message

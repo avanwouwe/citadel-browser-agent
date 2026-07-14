@@ -82,6 +82,9 @@ class Notification {
             if (blockedOverPassword) return false
         }
 
+        // if the user is busy do not interrupt with modals for alerts that are not time-critical
+        if (alert.level === State.FAILING && await DoNotDisturb.isActive()) return false
+
         const exceptions = config[alert.type]?.exceptions
         const isBlocking = alert.level === State.BLOCKING
         const onAcknowledge = { type: 'acknowledge-alert', alert, remove: !isBlocking, openDashboard: true }
