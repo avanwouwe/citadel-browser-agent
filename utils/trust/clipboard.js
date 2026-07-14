@@ -155,7 +155,7 @@ class Clipboard {
     // called from background message handler on every forwarded event
     static onEvent(event, senderUrl, tabId) {
         if (event.subtype === 'ClipboardPaste') Clipboard.checkLeaking(event.content, senderUrl, tabId)
-        if (event.subtype === 'ClipboardChange') Clipboard.checkClickFix(event.content, senderUrl, tabId)
+        if (event.subtype === 'ClipboardCopy') Clipboard.checkClickFix(event.content, senderUrl, tabId)
     }
 
     static checkClickFix(content, url, tabId) {
@@ -214,8 +214,7 @@ class Clipboard {
     }
 }
 
-// Minimal clipboard hooks: capture whatever lands on the clipboard (ClickFix / FileFix / pastejacking) and
-// relay it to the service worker, which does the scoring.
+// minimal clipboard hooks: capture whatever copy or paste action, and relay it to the background process for analysis
 function patchNavigatorClipboard() {
     const trySafe = (fn) => { try { fn() } catch (e) {} }
 
@@ -231,10 +230,80 @@ function patchNavigatorClipboard() {
         })
     }
 
-    const reportChange = (text) => report(text, "ClipboardChange")
+    const reportCopy = (text) => report(text, "ClipboardCopy")
     const reportPaste = (text) => report(text, "ClipboardPaste")
 
-// read-side: page pulling the clipboard programmatically — treat as paste
+// write-side: programmatic writes via the async Clipboard API
+    trySafe(() => {
+        const clipboard = navigator.clipboard
+        if (clipboard?.writeText) {
+            const original = clipboard.writeText.bind(clipboard)
+            clipboard.writeText = function(text) {
+                trySafe(() => reportCopy(text))
+                return original(text)
+            }
+        }
+        if (clipboard?.write) {
+            const originalWrite = clipboard.write.bind(clipboard)
+            clipboard.write = function(items) {
+                trySafe(() => {
+                    for (const item of items || []) {
+                        if (item?.types?.includes?.("text/plain") && item.getType) {
+                            item.getType("text/plain")
+                                .then(blob => blob.text())
+                                .then(reportCopy)
+                                .catch(() => {})
+                        }
+                    }
+                })
+                return originalWrite(items)
+            }
+        }
+    })
+
+// write-side: DataTransfer.setData, the classic pastejacking vector on a copy/cut handler
+    trySafe(() => {
+        const proto = window.DataTransfer?.prototype
+        if (proto?.setData) {
+            const originalSetData = proto.setData
+            proto.setData = function(type, data) {
+                trySafe(() => {
+                    if (/text/i.test(type)) reportCopy(data)
+                })
+                return originalSetData.apply(this, arguments)
+            }
+        }
+    })
+
+// write-side: document.execCommand('copy'|'cut')
+    trySafe(() => {
+        const proto = window.Document?.prototype
+        if (proto?.execCommand) {
+            const originalExec = proto.execCommand
+            proto.execCommand = function(command) {
+                trySafe(() => {
+                    if (typeof command === "string" && /^(?:copy|cut)$/i.test(command)) {
+                        reportCopy(window.getSelection?.().toString())
+                    }
+                })
+                return originalExec.apply(this, arguments)
+            }
+        }
+    })
+
+// read-side: provenance-agnostic. On a plain user copy clipboardData is empty, so fall back to the
+// current selection — this covers the user manually copying a command the page only displays.
+    const onCopy = (event) => {
+        trySafe(() => {
+            const data = event.clipboardData
+            const text = (data?.getData?.("text/plain")) || window.getSelection?.().toString() || ""
+            reportCopy(text)
+        })
+    }
+    document.addEventListener("copy", onCopy, true)
+    document.addEventListener("cut", onCopy, true)
+
+// page pulling the clipboard programmatically — treat as paste
     trySafe(() => {
         const clipboard = navigator.clipboard
         if (clipboard?.readText) {
@@ -269,73 +338,153 @@ function patchNavigatorClipboard() {
         })
     }, true)
 
-    // write-side: programmatic writes via the async Clipboard API
+// read-side: programmatic reads via the async Clipboard API (page pulling the clipboard)
     trySafe(() => {
         const clipboard = navigator.clipboard
-        if (clipboard?.writeText) {
-            const original = clipboard.writeText.bind(clipboard)
-            clipboard.writeText = function(text) {
-                trySafe(() => reportChange(text))
-                return original(text)
+        if (clipboard?.readText) {
+            const originalRead = clipboard.readText.bind(clipboard)
+            clipboard.readText = function() {
+                const p = originalRead()
+                trySafe(() => p.then(text => reportPaste(text)).catch(() => {}))
+                return p
             }
         }
-        if (clipboard?.write) {
-            const originalWrite = clipboard.write.bind(clipboard)
-            clipboard.write = function(items) {
-                trySafe(() => {
+        if (clipboard?.read) {
+            const originalRead = clipboard.read.bind(clipboard)
+            clipboard.read = function() {
+                const p = originalRead()
+                trySafe(() => p.then(items => {
                     for (const item of items || []) {
                         if (item?.types?.includes?.("text/plain") && item.getType) {
-                            item.getType("text/plain")
-                                .then(blob => blob.text())
-                                .then(reportChange)
-                                .catch(() => {})
+                            item.getType("text/plain").then(b => b.text()).then(t => reportPaste(t)).catch(() => {})
                         }
                     }
-                })
-                return originalWrite(items)
+                }).catch(() => {}))
+                return p
             }
         }
     })
 
-    // write-side: DataTransfer.setData, the classic pastejacking vector on a copy/cut handler
-    trySafe(() => {
-        const proto = window.DataTransfer?.prototype
-        if (proto?.setData) {
-            const originalSetData = proto.setData
-            proto.setData = function(type, data) {
-                trySafe(() => {
-                    if (/text/i.test(type)) reportChange(data)
-                })
-                return originalSetData.apply(this, arguments)
-            }
-        }
-    })
-
-    // write-side: document.execCommand('copy'|'cut')
-    trySafe(() => {
-        const proto = window.Document?.prototype
-        if (proto?.execCommand) {
-            const originalExec = proto.execCommand
-            proto.execCommand = function(command) {
-                trySafe(() => {
-                    if (typeof command === "string" && /^(?:copy|cut)$/i.test(command)) {
-                        reportChange(window.getSelection?.().toString())
-                    }
-                })
-                return originalExec.apply(this, arguments)
-            }
-        }
-    })
-
-    // read-side: provenance-agnostic. On a plain user copy clipboardData is empty, so fall back to the
-    // current selection — this covers the user manually copying a command the page only displays.
-    const onCopy = (event) => {
+// read-side: user pastes into the page
+    document.addEventListener("paste", (event) => {
         trySafe(() => {
-            const data = event.clipboardData
-            const text = (data?.getData?.("text/plain")) || window.getSelection?.().toString() || ""
-            reportChange(text)
+            const text = event.clipboardData?.getData?.("text/plain") || ""
+            reportPaste(text, "paste")
         })
+    }, true)
+}
+
+class Gitleaks {
+
+    static #rules = []
+    static #globalAllowRe = []
+    static #globalStopwords = []
+    static #loaded = false
+
+    static get loaded() { return this.#loaded }
+
+    // Fetch + (re)compile. Call on worker startup and on the periodic defs refresh.
+    static async load(url) {
+        const toml = await getCached(url).then(res => res.text())
+        const parsed = Gitleaks.#parseToml(toml)
+        console.log("parsed", parsed)
+
+        let compiled = 0, dropped = 0
+        const rules = []
+        for (const r of parsed.rules) {
+            try {
+                rules.push({
+                    id: r.id,
+                    re: new RE2(r.regex),                       // wasm RE2 — throws on RE2-incompatible rule
+                    keywords: (r.keywords || []).map(k => k.toLowerCase()),
+                    entropy: typeof r.entropy === "number" ? r.entropy : null,
+                    allowRe: (r.allowlist?.regexes || []).map(x => new RE2(x)),
+                    allowStopwords: (r.allowlist?.stopwords || []).map(s => s.toLowerCase()),
+                })
+                compiled++
+            } catch (e) {
+                dropped++                                        // one bad upstream rule can't nuke the set
+                debug("dropped incompatible gitleaks rule", r.id, e?.message)
+            }
+        }
+
+        Gitleaks.#rules = rules
+        Gitleaks.#globalAllowRe = (parsed.allowlist?.regexes || []).map(x => new RE2(x))
+        Gitleaks.#globalStopwords = (parsed.allowlist?.stopwords || []).map(s => s.toLowerCase())
+        Gitleaks.#loaded = true
+
+        debug("loaded gitleaks rules", { compiled, dropped })
+        return { compiled, dropped }
     }
-    document.addEventListener("copy", onCopy, true)
-    document.addEventListener("cut", onCopy, true)
+
+    // gitleaks pipeline. Returns [{ id, masked, len }, ...] — redacted, never the raw secret.
+    static scan(text) {
+        if (!Gitleaks.#loaded || typeof text !== "string" || text.length === 0) return []
+
+        const lower = text.toLowerCase()
+        const findings = []
+
+        for (const rule of Gitleaks.#rules) {
+            // 1. keyword pre-filter (cheap substring scan) — skip regex unless a keyword is present
+            if (rule.keywords.length && !rule.keywords.some(k => lower.includes(k))) continue
+
+            // 2. regex — RE2, linear time, safe on page-controlled input
+            const m = rule.re.exec(text)
+            if (!m) continue
+
+            const secret = Gitleaks.#extractSecret(m)
+
+            // 3. entropy gate (on the matched secret, as gitleaks does)
+            if (rule.entropy !== null && Gitleaks.#shannon(secret) < rule.entropy) continue
+
+            // 4. allowlist: rule stopwords -> rule regexes -> global
+            const sLower = secret.toLowerCase()
+            if (rule.allowStopwords.some(w => sLower.includes(w))) continue
+            if (rule.allowRe.some(re => re.test(secret))) continue
+            if (Gitleaks.#globallyAllowed(secret, sLower)) continue
+
+            findings.push({ id: rule.id, ...Gitleaks.#fingerprint(secret) })
+        }
+        return findings
+    }
+
+    // --- gitleaks internals ---
+
+    static #globallyAllowed(secret, sLower) {
+        if (Gitleaks.#globalStopwords.some(w => sLower.includes(w))) return true
+        if (Gitleaks.#globalAllowRe.some(re => re.test(secret))) return true
+        return false
+    }
+
+    // secret = highest non-empty capture group, else whole match
+    static #extractSecret(match) {
+        for (let i = match.length - 1; i >= 1; i--) {
+            if (match[i]) return match[i]
+        }
+        return match[0]
+    }
+
+    static #shannon(str) {
+        if (!str) return 0
+        const freq = new Map()
+        for (const ch of str) freq.set(ch, (freq.get(ch) || 0) + 1)
+        let h = 0
+        const n = str.length
+        for (const c of freq.values()) {
+            const p = c / n
+            h -= p * Math.log2(p)
+        }
+        return h
+    }
+
+    // redacted fingerprint — NEVER the raw secret
+    static #fingerprint(secret) {
+        return { masked: `${secret.slice(0, 3)}…${secret.slice(-2)}`, len: secret.length }
+    }
+
+    // minimal parser for the [[rules]] + [allowlist] subset of gitleaks.toml
+    static #parseToml(toml) {
+        // TODO: hand-rolled subset parser or tiny TOML lib
+        // -> { rules: [{ id, regex, keywords, entropy, allowlist:{regexes,stopwords} }], allowlist:{regexes,stopwords} }
+    }
 }
