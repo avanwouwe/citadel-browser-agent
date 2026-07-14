@@ -383,34 +383,55 @@ class Gitleaks {
 
     static get loaded() { return this.#loaded }
 
-    // Fetch + (re)compile. Call on worker startup and on the periodic defs refresh.
+// Fetch + (re)compile. Call on worker startup and on the periodic defs refresh.
     static async load(url) {
-        const toml = await getCached(url).then(res => res.text())
-        const parsed = Gitleaks.#parseToml(toml)
-        console.log("parsed", parsed)
+        let parsed
+        try {
+            const toml = await getCached(url).then(res => res.text())
+            parsed = Gitleaks.#parseToml(toml)
+        } catch (e) {
+            debug("gitleaks load failed, keeping existing rules", e?.message)
+            return { compiled: Gitleaks.#rules.length, dropped: 0, failed: true }
+        }
 
-        let compiled = 0, dropped = 0
+        // compile into LOCAL arrays first, then swap in atomically only on success
         const rules = []
+        let compiled = 0, dropped = 0
         for (const r of parsed.rules) {
             try {
+                if (typeof r.regex !== "string" || !r.regex) {
+                    debug("skipping path-only gitleaks rule (no regex)", r.id)
+                    continue
+                }
+
                 rules.push({
                     id: r.id,
-                    re: new RE2(r.regex),                       // wasm RE2 — throws on RE2-incompatible rule
+                    re: Gitleaks.#compile(r.regex),
                     keywords: (r.keywords || []).map(k => k.toLowerCase()),
                     entropy: typeof r.entropy === "number" ? r.entropy : null,
-                    allowRe: (r.allowlist?.regexes || []).map(x => new RE2(x)),
+                    allowRe: (r.allowlist?.regexes || []).map(x => Gitleaks.#compile(x)),
                     allowStopwords: (r.allowlist?.stopwords || []).map(s => s.toLowerCase()),
                 })
                 compiled++
             } catch (e) {
-                dropped++                                        // one bad upstream rule can't nuke the set
+                dropped++
                 debug("dropped incompatible gitleaks rule", r.id, e?.message)
             }
         }
 
+        // compile the global allowlist locally too (so a bad global regex can't throw mid-swap)
+        let globalAllowRe = []
+        try {
+            globalAllowRe = parsed.allowlist.regexes.map(x => Gitleaks.#compile(x))
+        } catch (e) {
+            debug("gitleaks global allowlist compile issue", e?.message)
+        }
+        const globalStopwords = parsed.allowlist.stopwords.map(s => s.toLowerCase())
+
+        // atomic swap — live state only changes once everything above succeeded
         Gitleaks.#rules = rules
-        Gitleaks.#globalAllowRe = (parsed.allowlist?.regexes || []).map(x => new RE2(x))
-        Gitleaks.#globalStopwords = (parsed.allowlist?.stopwords || []).map(s => s.toLowerCase())
+        Gitleaks.#globalAllowRe = globalAllowRe
+        Gitleaks.#globalStopwords = globalStopwords
         Gitleaks.#loaded = true
 
         debug("loaded gitleaks rules", { compiled, dropped })
@@ -482,9 +503,61 @@ class Gitleaks {
         return { masked: `${secret.slice(0, 3)}…${secret.slice(-2)}`, len: secret.length }
     }
 
-    // minimal parser for the [[rules]] + [allowlist] subset of gitleaks.toml
-    static #parseToml(toml) {
-        // TODO: hand-rolled subset parser or tiny TOML lib
-        // -> { rules: [{ id, regex, keywords, entropy, allowlist:{regexes,stopwords} }], allowlist:{regexes,stopwords} }
+    // Adapts a parsed gitleaks.toml into { rules, allowlist } for Gitleaks.load.
+    // Tolerant of both allowlist schemas: older [rules.allowlist] / [allowlist] (single table)
+    // and newer [[rules.allowlists]] / [[allowlists]] (array of tables).
+    static #parseToml(src) {
+        let doc
+        try {
+            doc = TOML.parse(src)                       // throws TomlError on malformed input
+        } catch (e) {
+            // fail loud, fail empty — never run with a half-parsed ruleset
+            debug("gitleaks TOML parse failed", e?.message, e?.line, e?.column)
+            throw e
+        }
+
+        // normalize one-or-many allowlists into { regexes, stopwords }
+        const collectAllow = (single, many) => {
+            const lists = many ?? (single ? [single] : [])
+            const regexes = [], stopwords = []
+            for (const a of lists) {
+                if (!a) continue
+                if (Array.isArray(a.regexes)) regexes.push(...a.regexes)
+                if (Array.isArray(a.stopwords)) stopwords.push(...a.stopwords)
+                // note: a.regexTarget / a.condition / a.paths are ignored — see caveats
+            }
+            return { regexes, stopwords }
+        }
+
+        const rules = (doc.rules || []).map(r => ({
+            id: r.id,
+            regex: r.regex,
+            keywords: Array.isArray(r.keywords) ? r.keywords : [],
+            entropy: typeof r.entropy === "number" ? r.entropy : null,
+            allowlist: collectAllow(r.allowlist, r.allowlists),
+        }))
+
+        return {
+            rules,
+            allowlist: collectAllow(doc.allowlist, doc.allowlists),
+        }
+    }
+
+    static #compile(pattern) {
+        const re = RE2.RE2JS.compile(pattern)          // throws RE2JSSyntaxException on incompatible/invalid rule
+        return {
+            // returns [full, g1, g2, ...] (non-participating groups are null), or null on no match
+            exec(text) {
+                const m = re.matcher(text)
+                if (!m.find()) return null
+                const out = [m.group(0)]
+                const n = m.groupCount()
+                for (let i = 1; i <= n; i++) out.push(m.group(i))   // group(i) is null if it didn't participate
+                return out
+            },
+            test(text) {
+                return re.matcher(text).find()
+            },
+        }
     }
 }
