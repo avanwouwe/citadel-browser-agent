@@ -10,6 +10,14 @@ function safeHandler(fn) {
     }
 }
 
+// relay the clipboard buffer capture and screen sharing events in the MAIN-world hooks to the service worker
+window.addEventListener("message", (event) => {
+    if (event.source !== window || event.origin !== window.location.origin) return
+    if (! event?.data?.type) return
+
+    if (event.data.type === "clipboard-event" || event.data.type === "screenshare-event") sendMessage(event.data)
+}, true)
+
 listeners.clickListener = safeHandler(async function(event) {
     sendMessage("user-interaction")
 

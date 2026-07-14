@@ -24,6 +24,7 @@ importScripts('utils/messaging.js');
 importScripts('utils/fetch.js');
 importScripts('utils/ratethrottle.js');
 importScripts('utils/browser.js');
+importScripts('utils/dnd.js');
 importScripts('gui/color-scheme/color-scheme.js');
 importScripts('gui/interface.js');
 importScripts('gui/modal.js');

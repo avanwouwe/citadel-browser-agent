@@ -785,12 +785,13 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 				args
 			}).catch(() => debug(`unable to inject ${what}`, details))
 
+		const key = await SecureMessage.getPublicKey().catch(() => null)
+		inject(patchNavigatorCredentials, [key], "credentials hooks")
 		inject(patchNavigatorClipboard, [], "clipboard hooks")
 
-		const key = await SecureMessage.getPublicKey().catch(() => null)
-		await inject(patchNavigatorCredentials, [key], "credentials hooks")
-
 		if (parentFrameId >= 0 || tabId < 0) return
+
+		inject(patchNavigatorScreenShare, [], "screenshare hooks")
 
 		if (ShadowIT.action(target) === Action.WARN) {
 			ShadowIT.showWarning(tabId, target, false)
@@ -1018,7 +1019,8 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "exception", "blacklist exception", request.url, Log.ERROR, reason, `blacklist exception used : ${reason}`)
 	}
 
-	if (request.type === "clipboard-change") Clipboard.checkClickFix(request.content, senderUrl, tabId)
+	if (request.type === "screenshare-event") Screensharing.onEvent(request, tabId)
+	if (request.type === "clipboard-event") Clipboard.onEvent(request, senderUrl, tabId)
 
 	if (request.type === "explain-clickfix") openTab("https://citadelagent.org/control/ClickFix")
 

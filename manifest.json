@@ -67,6 +67,7 @@
       "/utils/fetch.js",
       "/utils/ratethrottle.js",
       "/utils/browser.js",
+      "/utils/dnd.js",
       "/gui/color-scheme/color-scheme.js",
       "/gui/interface.js",
       "/gui/modal.js",

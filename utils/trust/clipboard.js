@@ -4,7 +4,8 @@ class Clipboard {
 
     // leading-edge debounce keyed on clipboard content: the first sighting of a payload warns, the duplicate
     // relays a single copy produces (setData + the copy event, etc.) are swallowed for the window's duration
-    static #dedup = new Debouncer(3 * ONE_SECOND, null, true)
+    static #changeDedup = new Debouncer(3 * ONE_SECOND, null, true)
+    static #pasteDedup = new Debouncer(3 * ONE_SECOND, null, true)
 
     // shell tooling that has no business being on a clipboard the user is about to paste into a shell
     static #KEYWORDS = [
@@ -151,6 +152,12 @@ class Clipboard {
         if (score >= config.clipboard.clickfix.threshold) return report
     }
 
+    // called from background message handler on every forwarded event
+    static onEvent(event, senderUrl, tabId) {
+        if (event.subtype === 'ClipboardPaste') Clipboard.checkLeaking(event.content, senderUrl, tabId)
+        if (event.subtype === 'ClipboardChange') Clipboard.checkClickFix(event.content, senderUrl, tabId)
+    }
+
     static checkClickFix(content, url, tabId) {
         const eventLevel = config.clipboard.clickfix.level
         assert(Log.levels.includes(eventLevel), `invalid config.clipboard.clickfix.level : ${eventLevel}`)
@@ -158,7 +165,7 @@ class Clipboard {
         if (eventLevel === Log.NEVER || !Clipboard.scoreClickFix(content)) return
 
         // leading-edge debounce: warns on the first sighting, swallows the duplicate relays that follow
-        Clipboard.#dedup.debounce(content, null, () => {
+        Clipboard.#changeDedup.debounce(content, null, () => {
             const contact = config.company.contact.embedTag('nowrap')
             const onAcknowledge = { type: "explain-clickfix", label: t('clipboard.explain') }
             const onCancel = { label: t('global.ok') }
@@ -166,6 +173,28 @@ class Clipboard {
 
             logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel,
                 content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)
+        })
+    }
+
+    static checkLeaking(content, url, tabId) {
+        const eventLevel = config.clipboard.leaking.level
+        assert(Log.levels.includes(eventLevel), `invalid config.clipboard.leaking.level : ${eventLevel}`)
+        if (eventLevel === Log.NEVER) return
+
+        const findings = Gitleaks.scan(content)
+        if (!findings.length) return
+
+        Clipboard.#changeDedup.debounce(content, null, () => {
+            const contact = config.company.contact.embedTag('nowrap')
+            const onAcknowledge = { type: "explain-leaking", label: t('clipboard.explain') }
+            const onCancel = { label: t('global.ok') }
+            Modal.createForTab(tabId, t("clipboard.leaking.title"),
+                t("clipboard.leaking.message", { contact }), onAcknowledge, undefined, onCancel)
+
+            // redacted: rule ids + masked fingerprints ONLY — never the secret, never the full text
+            const summary = findings.map(f => `${f.id}(${f.masked},len=${f.len})`).join(", ")
+            logger.log(nowTimestamp(), "leak detected", "clipboard secret leak", url, eventLevel,
+                summary, `clipboard secret-leak on ${url?.hostname}: ${summary}`)
         })
     }
 
@@ -190,16 +219,55 @@ class Clipboard {
 function patchNavigatorClipboard() {
     const trySafe = (fn) => { try { fn() } catch (e) {} }
 
-    const report = (text) => {
+    const report = (text, subtype) => {
         if (typeof text !== "string" || text.length === 0) return
+
         trySafe(() => {
             window.postMessage({
-                channel: "CitadelClipboardGuard",
-                type: "ClipboardChange",
+                type: "clipboard-event",
+                subtype,
                 content: text
             }, window.location.origin)
         })
     }
+
+    const reportChange = (text) => report(text, "ClipboardChange")
+    const reportPaste = (text) => report(text, "ClipboardPaste")
+
+// read-side: page pulling the clipboard programmatically — treat as paste
+    trySafe(() => {
+        const clipboard = navigator.clipboard
+        if (clipboard?.readText) {
+            const originalRead = clipboard.readText.bind(clipboard)
+            clipboard.readText = function() {
+                const p = originalRead()
+                trySafe(() => p.then(reportPaste).catch(() => {}))
+                return p
+            }
+        }
+        if (clipboard?.read) {
+            const originalRead = clipboard.read.bind(clipboard)
+            clipboard.read = function() {
+                const p = originalRead()
+                trySafe(() => p.then(items => {
+                    for (const item of items || []) {
+                        if (item?.types?.includes?.("text/plain") && item.getType) {
+                            item.getType("text/plain").then(b => b.text()).then(reportPaste).catch(() => {})
+                        }
+                    }
+                }).catch(() => {}))
+                return p
+            }
+        }
+    })
+
+// user pasting into the page — treat as paste
+    document.addEventListener("paste", (event) => {
+        trySafe(() => {
+            const text = event.clipboardData?.getData?.("text/plain") || ""
+            reportPaste(text)
+        })
+    }, true)
 
     // write-side: programmatic writes via the async Clipboard API
     trySafe(() => {
@@ -207,7 +275,7 @@ function patchNavigatorClipboard() {
         if (clipboard?.writeText) {
             const original = clipboard.writeText.bind(clipboard)
             clipboard.writeText = function(text) {
-                trySafe(() => report(text))
+                trySafe(() => reportChange(text))
                 return original(text)
             }
         }
@@ -219,7 +287,7 @@ function patchNavigatorClipboard() {
                         if (item?.types?.includes?.("text/plain") && item.getType) {
                             item.getType("text/plain")
                                 .then(blob => blob.text())
-                                .then(report)
+                                .then(reportChange)
                                 .catch(() => {})
                         }
                     }
@@ -236,7 +304,7 @@ function patchNavigatorClipboard() {
             const originalSetData = proto.setData
             proto.setData = function(type, data) {
                 trySafe(() => {
-                    if (/text/i.test(type)) report(data)
+                    if (/text/i.test(type)) reportChange(data)
                 })
                 return originalSetData.apply(this, arguments)
             }
@@ -251,7 +319,7 @@ function patchNavigatorClipboard() {
             proto.execCommand = function(command) {
                 trySafe(() => {
                     if (typeof command === "string" && /^(?:copy|cut)$/i.test(command)) {
-                        report(window.getSelection?.().toString())
+                        reportChange(window.getSelection?.().toString())
                     }
                 })
                 return originalExec.apply(this, arguments)
@@ -265,7 +333,7 @@ function patchNavigatorClipboard() {
         trySafe(() => {
             const data = event.clipboardData
             const text = (data?.getData?.("text/plain")) || window.getSelection?.().toString() || ""
-            report(text)
+            reportChange(text)
         })
     }
     document.addEventListener("copy", onCopy, true)
