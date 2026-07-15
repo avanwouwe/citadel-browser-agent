@@ -148,9 +148,9 @@
       "title": "Arnaque possible détectée",
       "message": "Un élément vient de copier une commande informatique dans votre presse-papiers. Les escrocs utilisent cette technique (« ClickFix ») pour vous faire coller et exécuter des commandes malveillantes, par exemple dans PowerShell, la boîte de dialogue Exécuter de Windows ou un terminal.<p><b>⚠\uFE0F Ne la collez pas</b> sauf si vous êtes certain qu’elle est sûre.<p>Clickez pour plus d'information, et contactez {{contact}} en cas de doute."
     },
-    "snooping": {
+    "leaking": {
       "title": "Fuite de secret possible",
-      "message": "Vous êtes sur le point de coller quelque chose qui ressemble à un secret (par exemple un mot de passe, une clé d'API ou un jeton d'accès).<p><b>⚠\uFE0F Ne le collez pas</b> à moins d'être certain qu'il s'agit du bon endroit.<p>Cliquez pour plus d'informations et contactez {{contact}} en cas de doute."
+      "message": "Vous êtes sur le point de coller quelque chose qui ressemble à un secret (par exemple un mot de passe, une clé d'API ou un jeton d'accès).<p>{{examples}}<p><b>⚠\uFE0F Ne le collez pas</b> à moins d'être certain qu'il s'agit du bon endroit.<p>Cliquez pour plus d'informations et contactez {{contact}} en cas de doute."
     }
   },
   "extension-analysis": {

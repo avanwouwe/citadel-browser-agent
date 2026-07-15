@@ -191,11 +191,14 @@ class Clipboard {
         const findings = Gitleaks.scan(content)
         if (!findings.length) return
 
+        const examples = findings.slice(0, 3)
+            .map(f => `• ${f.id} : ${f.masked}`)
+            .join("\n")
         const contact = config.company.contact.embedTag('nowrap')
         const onAcknowledge = { type: "explain-leaking", label: t('clipboard.explain') }
         const onCancel = { label: t('global.ok') }
         Modal.createForTab(tabId, t("clipboard.leaking.title"),
-            t("clipboard.leaking.message", { contact }), onAcknowledge, undefined, onCancel)
+            t("clipboard.leaking.message", { contact, examples }), onAcknowledge, undefined, onCancel)
 
         const summary = findings.map(f => `${f.id}(${f.masked},len=${f.len})`).join(", ")
         logger.log(nowTimestamp(), "leak detected", "clipboard secret leak", url, eventLevel,
@@ -336,26 +339,36 @@ class Gitleaks {
     static #globalStopwords = []
     static #loaded = false
 
-    static get loaded() { return this.#loaded }
+    static get isLoaded() { return this.#loaded }
+
+    static #DOWNLOAD_ERRORS_KEY = "gitleaks-download-errors"
+
+    static async init() {
+        const { rules, freq } = config.clipboard.leaking
+
+        return scheduleReload({
+            errorKey: Gitleaks.#DOWNLOAD_ERRORS_KEY,
+            errorTag: "gitleaks download error",
+            label: "gitleaks rules",
+            url: rules,
+            freqMin: freq,
+            getStatus: () => Gitleaks.isLoaded ? "loaded" : "failed",
+            load: () => Gitleaks.load(rules),
+        })
+    }
+
 
 // Fetch + (re)compile. Call on worker startup and on the periodic defs refresh.
     static async load(url) {
-        let parsed
-        try {
-            const toml = await getCached(url).then(res => res.text())
-            parsed = Gitleaks.#parseToml(toml)
-        } catch (e) {
-            debug("gitleaks load failed, keeping existing rules", e?.message)
-            return { compiled: Gitleaks.#rules.length, dropped: 0, failed: true }
-        }
+        const toml = await getCached(url).then(res => res.text())
+        const parsed = Gitleaks.#parseToml(toml)
 
-        // compile into LOCAL arrays first, then swap in atomically only on success
         const rules = []
         let compiled = 0, dropped = 0
         for (const r of parsed.rules) {
             try {
                 if (typeof r.regex !== "string" || !r.regex) {
-                    debug("skipping path-only gitleaks rule (no regex)", r.id)
+                    debug(" - gitleaks : skipping path-only rule (no regex)", r.id)
                     continue
                 }
 
@@ -370,20 +383,19 @@ class Gitleaks {
                 compiled++
             } catch (e) {
                 dropped++
-                debug("dropped incompatible gitleaks rule", r.id, e?.message)
+                debug(" - gitleaks : dropped incompatible rule", r.id, e?.message)
             }
         }
 
-        // compile the global allowlist locally too (so a bad global regex can't throw mid-swap)
         let globalAllowRe = []
         try {
             globalAllowRe = parsed.allowlist.regexes.map(x => Gitleaks.#compile(x))
         } catch (e) {
-            debug("gitleaks global allowlist compile issue", e?.message)
+            debug(" - gitleaks : global allowlist compile issue", e?.message)
         }
         const globalStopwords = parsed.allowlist.stopwords.map(s => s.toLowerCase())
 
-        // atomic swap — live state only changes once everything above succeeded
+        // atomic swap
         Gitleaks.#rules = rules
         Gitleaks.#globalAllowRe = globalAllowRe
         Gitleaks.#globalStopwords = globalStopwords
@@ -394,34 +406,88 @@ class Gitleaks {
     }
 
     // gitleaks pipeline. Returns [{ id, masked, len }, ...] — redacted, never the raw secret.
-    static scan(text) {
-        if (!Gitleaks.#loaded || typeof text !== "string" || text.length === 0) return []
+    static scan(text, maxFindings = 1000) {
+        const findings = []
+        for (const { rule, secret } of Gitleaks.#matches(text, { all: false })) {
+            findings.push({ id: rule.id, ...Gitleaks.#fingerprint(secret) })
+            if (findings.length >= maxFindings) break
+        }
+
+        return findings
+    }
+
+    static maskSecrets(content) {
+        if (typeof content !== "string" || content.length === 0) return content
+
+        const spans = []
+        for (const { match, secret } of Gitleaks.#matches(content, { all: true })) {
+            const off = match[0].indexOf(secret)
+            const start = match.index + (off >= 0 ? off : 0)
+            spans.push({ start, end: start + secret.length })
+        }
+        if (spans.length === 0) return content
+
+        // merge overlapping spans
+        spans.sort((a, b) => a.start - b.start)
+        const merged = []
+        for (const s of spans) {
+            const last = merged[merged.length - 1]
+            if (last && s.start <= last.end) last.end = Math.max(last.end, s.end)
+            else merged.push({ ...s })
+        }
+
+        // apply replacements right-to-left
+        let out = content
+        for (let i = merged.length - 1; i >= 0; i--) {
+            const { start, end } = merged[i]
+            out = out.slice(0, start) + '<XXXXXX>' + out.slice(end)
+        }
+        return out
+    }
+
+    // Core matching pipeline, shared by scan() and maskSecrets().
+    // Yields { rule, match, secret } for every valid, non-allowlisted secret.
+    // `all` controls whether we find every match per rule or just the first.
+    static *#matches(text, { all }) {
+        if (!Gitleaks.#loaded || typeof text !== "string" || text.length === 0) return
 
         const lower = text.toLowerCase()
-        const findings = []
 
         for (const rule of Gitleaks.#rules) {
-            // 1. keyword pre-filter (cheap substring scan) — skip regex unless a keyword is present
+            // 1. keyword pre-filter (cheap substring scan)
             if (rule.keywords.length && !rule.keywords.some(k => lower.includes(k))) continue
 
             // 2. regex — RE2, linear time, safe on page-controlled input
-            const m = rule.re.exec(text)
-            if (!m) continue
+            const re = all && !rule.re.global
+                ? new RegExp(rule.re.source, rule.re.flags + "g")
+                : rule.re
+            re.lastIndex = 0
 
-            const secret = Gitleaks.#extractSecret(m)
+            let m
+            while ((m = re.exec(text)) !== null) {
+                if (all && m.index === re.lastIndex) re.lastIndex++ // guard zero-width
 
-            // 3. entropy gate (on the matched secret, as gitleaks does)
-            if (rule.entropy !== null && Gitleaks.#shannon(secret) < rule.entropy) continue
+                const secret = Gitleaks.#extractSecret(m)
+                if (!secret) { if (!all) break; else continue }
 
-            // 4. allowlist: rule stopwords -> rule regexes -> global
-            const sLower = secret.toLowerCase()
-            if (rule.allowStopwords.some(w => sLower.includes(w))) continue
-            if (rule.allowRe.some(re => re.test(secret))) continue
-            if (Gitleaks.#globallyAllowed(secret, sLower)) continue
+                // 3. entropy gate
+                if (rule.entropy !== null && Gitleaks.#shannon(secret) < rule.entropy) {
+                    if (!all) break; else continue
+                }
 
-            findings.push({ id: rule.id, ...Gitleaks.#fingerprint(secret) })
+                // 4. allowlist: rule stopwords -> rule regexes -> global
+                const sLower = secret.toLowerCase()
+                const allowed =
+                    rule.allowStopwords.some(w => sLower.includes(w)) ||
+                    rule.allowRe.some(r => r.test(secret)) ||
+                    Gitleaks.#globallyAllowed(secret, sLower)
+                if (allowed) { if (!all) break; else continue }
+
+                yield { rule, match: m, secret }
+
+                if (!all) break
+            }
         }
-        return findings
     }
 
     // --- gitleaks internals ---
@@ -455,7 +521,7 @@ class Gitleaks {
 
     // redacted fingerprint — NEVER the raw secret
     static #fingerprint(secret) {
-        return { masked: `${secret.slice(0, 3)}…${secret.slice(-2)}`, len: secret.length }
+        return { masked: PasswordCheck.maskSecret(secret), len: secret.length }
     }
 
     // Adapts a parsed gitleaks.toml into { rules, allowlist } for Gitleaks.load.
@@ -499,6 +565,29 @@ class Gitleaks {
     }
 
     static #compile(pattern) {
+        try {
+            return Gitleaks.#compileWith(pattern)
+        } catch (e) {
+            // Only a stack overflow gets the clamp-retry; genuine syntax errors must still propagate.
+            if (e instanceof RangeError) {
+                debug(" - gitleaks : overflowed compile stack (retrying clamped)")
+                return Gitleaks.#compileClamped(pattern)
+            }
+            throw e
+        }
+    }
+
+    static #MAX_QUANTIFIER = 255
+
+    static #compileClamped(pattern) {
+        const clamped = pattern.replace(/\{(\d+),(\d+)\}/g, (m, lo, hi) =>
+            Number(hi) > Gitleaks.#MAX_QUANTIFIER ? `{${lo},${Gitleaks.#MAX_QUANTIFIER}}` : m
+        )
+        if (clamped === pattern) throw new Error("no large quantifier to clamp")
+        return Gitleaks.#compileWith(clamped)
+    }
+
+    static #compileWith(pattern) {
         const re = RE2.RE2JS.compile(pattern)          // throws RE2JSSyntaxException on incompatible/invalid rule
         return {
             // returns [full, g1, g2, ...] (non-participating groups are null), or null on no match
@@ -514,5 +603,4 @@ class Gitleaks {
                 return re.matcher(text).find()
             },
         }
-    }
-}
+    }}

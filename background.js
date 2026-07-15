@@ -51,7 +51,8 @@ Port.onMessage("config", async (newConfig) => {
 	await Promise.all([
 		AccountTrust.init(),
 		DeviceTrust.init(),
-		ShadowIT.init()
+		ShadowIT.init(),
+		Gitleaks.init()
 	]);
 
 	[blacklistIP, blacklistURL] = await Promise.all([
@@ -1023,6 +1024,7 @@ onMessage((request, sender) => {
 	if (request.type === "clipboard-event") Clipboard.onEvent(request, senderUrl, tabId)
 
 	if (request.type === "explain-clickfix") openTab("https://citadelagent.org/control/ClickFix")
+	if (request.type === "sanitize-clipboard") Clipboard.sanitizeClipboard(request, senderUrl, tabId)
 
 	if (request.type === "acknowledge-shadow-it") {
 		const app = request.url?.toURL()

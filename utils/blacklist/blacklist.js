@@ -3,55 +3,37 @@ class CombinedBlacklist {
 	#downloadStatus = { }
 
 	static #BLACKLIST_DOWNLOAD_ERRORS = 'blacklist-download-statistics-'
-	static #ERROR_REPORTING_FREQ = 20		// perform error reporting only once we've had N downloads
-
 
 	static TEST_BLACKLIST = '192.0.2.1'
 
-	async load (configs, blacklistClass) {
-		async function download(blacklists, filename, url, freq, status) {
-			setTimeout(() => { download(blacklists, filename, url, freq, status) }, freq * ONE_MINUTE)
-			const failureEvents = new EventAccumulator(
-				CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + filename,
-				CombinedBlacklist.#ERROR_REPORTING_FREQ * freq * ONE_MINUTE,
-				(eventCount) => {
-					const currStatus = status[filename]
-					const isLoaded = currStatus === "loaded"
-					const errorRate = eventCount / CombinedBlacklist.#ERROR_REPORTING_FREQ
+	async load(configs, blacklistClass) {
+		const tasks = Object.entries(configs).flatMap(([blacklistName, conf]) =>
+			conf.urls.map((url, i) => {
+				const fileCnt = conf.urls.length
+				const filename = fileCnt > 1 ? `${blacklistName} [${i + 1} / ${fileCnt}]` : blacklistName
 
-					let level
-					if (isLoaded || errorRate <= 0.1) level = Log.TRACE
-					else if (errorRate <= 0.25) level = Log.INFO
-					else if (errorRate <= 0.75) level = Log.WARN
-					else level = Log.ERROR
+				return scheduleReload({
+					errorKey: CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + filename,
+					errorTag: "blacklist download error",
+					label: `blacklist '${filename}'`,
+					url,
+					freqMin: conf.freq,
+					getStatus: () => this.#downloadStatus[filename],
+					onError: () => { this.#downloadStatus[filename] = "failed" },
+					load: async () => {
+						const blacklist = await new blacklistClass().load(url)
+						this.#blacklists[filename] = blacklist
+						this.#downloadStatus[filename] = "loaded"
 
-					logger.log(nowTimestamp(), "report", "blacklist download error", url, level, eventCount, `blacklist '${filename} could not be downloaded ${eventCount} times, current state is '${currStatus}'`)
+						const size = blacklist.size()
+						logger.log(nowTimestamp(), "report", "blacklist downloaded", url, Log.TRACE, size,
+							`blacklist '${filename}' was loaded with ${size} entries`)
+					},
 				})
-
-			try {
-				blacklists[filename] = await new blacklistClass().load(url)
-				status[filename] = "loaded"
-
-				const blacklistSize = blacklists[filename].size()
-				logger.log(nowTimestamp(), "report", "blacklist downloaded", url, Log.TRACE, blacklistSize, `blacklist '${filename} was loaded with ${blacklistSize} entries`);
-			} catch (error) {
-				status[filename] = "failed"
-				failureEvents.increment()
-			}
-
-			failureEvents.report()
-		}
-
-		await Promise.allSettled(
-			Object.entries(configs).map(([blacklistName, conf]) =>
-				conf.urls.map(async (url, i) => {
-					const fileCnt = conf.urls.length
-					const filename = fileCnt > 1 ? `${blacklistName} [${i+1} / ${fileCnt}]` : blacklistName
-					await download(this.#blacklists, filename, url, conf.freq, this.#downloadStatus)
-				})
-			).flat()
+			})
 		)
 
+		await Promise.allSettled(tasks)
 		return this
 	}
 

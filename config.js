@@ -2,7 +2,11 @@ class Config {
     static default = {
         system: {                               // N.B. NOT INTENDED FOR USER MODIFICATION
             maxReasonLength: 150,               // max number of characters when users give a reason
-            excludeInject: ["chromewebstore.google.com", "docs.google.com"]
+            downloadReportingFreq: 20,          // perform error reporting every N downloads
+            excludeInject: [                    // cannot inject in these, no point in trying
+                "chromewebstore.google.com",
+                "docs.google.com"
+            ]
         },
         company: {
             name: 'Your Organisation',          // name of your organization
@@ -502,6 +506,8 @@ class Config {
             },
             leaking: {
                 level: Log.WARN,
+                rules: 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
+                freq: 24,
             },
 
         },

@@ -70,6 +70,41 @@ async function getCached(url, replace = true) {
     }
 }
 
+// load() must throw on failure; success side-effects live inside load()
+async function scheduleReload({ errorKey, errorTag, label, url, freqMin, getStatus, load, onError }) {
+    async function tick() {
+        setTimeout(tick, freqMin * ONE_MINUTE)
+
+        const failureEvents = new EventAccumulator(
+            errorKey,
+            config.system.downloadReportingFreq * freqMin * ONE_MINUTE,
+            (eventCount) => {
+                const status = getStatus()
+                const isLoaded = status === "loaded"
+                const errorRate = eventCount / config.system.downloadReportingFreq
+
+                let level
+                if (isLoaded || errorRate <= 0.1) level = Log.TRACE
+                else if (errorRate <= 0.25) level = Log.INFO
+                else if (errorRate <= 0.75) level = Log.WARN
+                else level = Log.ERROR
+
+                logger.log(nowTimestamp(), "report", errorTag, url, level, eventCount,
+                    `${label} could not be downloaded ${eventCount} times, current state is '${status}'`)
+            })
+
+        try {
+            await load()
+        } catch (error) {
+            onError?.(error)
+            failureEvents.increment()
+        }
+        failureEvents.report()
+    }
+
+    return tick()
+}
+
 function cachedCall(ttl, fn) {
     let value
     let expiry = 0
