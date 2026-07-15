@@ -68,7 +68,7 @@ class PasswordCheck {
             analysis.numberOfSymbols >= 2 && analysis.numberOfUpperCase >= 2 && analysis.numberOfDigits >= 2 && analysis.numberOfLowerCase >= 0 && analysis.entropy > 3.2
     }
 
-    static maskSecret(str, maskChar = '•', visibleStart = 4, visibleEnd = 6) {
+    static maskSecret(str, maskChar = '•', visibleStart = 3, visibleEnd = 2) {
         const len = str?.length || 0
         if (len <= visibleStart + visibleEnd) {
             // too short, just mask everything
