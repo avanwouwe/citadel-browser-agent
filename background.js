@@ -788,7 +788,7 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 
 		const key = await SecureMessage.getPublicKey().catch(() => null)
 		inject(patchNavigatorCredentials, [key], "credentials hooks")
-		inject(patchNavigatorClipboard, [], "clipboard hooks")
+		inject(patchNavigatorTransfer, [], "data transfer hooks")
 
 		if (parentFrameId >= 0 || tabId < 0) return
 
@@ -935,12 +935,6 @@ onMessage((request, sender) => {
 		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, null, "user opened print dialog", null, tabId)
 	}
 
-	if (request.type === "file-select") {
-		registerInteraction(senderUrl, sender)
-
-		logger.log(nowTimestamp(), "file select", request.subtype, sender.url, Log.INFO, { type: "file select", value: request.file }, `user selected file "${request.file.name}"`, null, tabId)
-	}
-
 	if (request.type === "receive-totp") {
 		MFACheck.cancelTimer(senderUrl, 'TOTP in form')
 	}
@@ -1021,7 +1015,35 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "screenshare-event") Screensharing.onEvent(request, tabId)
-	if (request.type === "clipboard-event") Clipboard.onEvent(request, senderUrl, tabId)
+
+	if (request.type === "transfer-event") {
+		debug(`transfer event of type ${request.subtype}`)
+
+		registerInteraction(senderUrl, sender)
+
+		// if a file was selected, log it
+		if (request.subtype.startsWith('file')) {
+			const operation = request.subtype.replaceAll('-', ' ')
+			for (let file of request.items) {
+				file = { name: file.name, type: file.type, size: file.size, lastModified: file.lastModified }
+				logger.log(nowTimestamp(), "file select", operation, sender.url, Log.INFO, { type: "file select", value: file }, `user selected file "${file.name}"`, null, tabId)
+			}
+		}
+
+		// if clipboard was filled, check for ClickFix attack
+		if (request.subtype.startsWith('clipboard-write') || request.subtype.startsWith('clipboard-c') || request.subtype === "datatransfer-set") {
+			for (const item of request.items) {
+				if (item.kind === "text" && item.type === "text/plain" && item.data) {
+					if (ClickFix.check(item.data.substring(0,1000), senderUrl, tabId)) break
+				}
+			}
+		}
+
+		// if transfer involved pasting, or selecting / dropping files, check for secrets
+		if (request.subtype.startsWith('clipboard-read') || request.subtype === 'clipboard-paste' || request.subtype.startsWith('file-')) {
+			DLP.check(request, senderUrl, tabId)
+		}
+	}
 
 	if (request.type === "explain-clickfix") openTab("https://citadelagent.org/control/ClickFix")
 	if (request.type === "sanitize-clipboard") Clipboard.sanitizeClipboard(request, senderUrl, tabId)

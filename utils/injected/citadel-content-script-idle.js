@@ -1,5 +1,13 @@
 injectPageScript('/utils/injected/bundle/citadel-bundle-idle.js')
 
+function trySafe(fn, ...args) {
+    try {
+        return fn(...args)
+    } catch (err) {
+        return undefined
+    }
+}
+
 function safeHandler(fn) {
     return async function (...args) {
         try {
@@ -10,12 +18,121 @@ function safeHandler(fn) {
     }
 }
 
-// relay the clipboard buffer capture and screen sharing events in the MAIN-world hooks to the service worker
-window.addEventListener("message", (event) => {
-    if (event.source !== window || event.origin !== window.location.origin) return
-    if (! event?.data?.type) return
+const MAX_TRANSFER_ANALYSIS_LENGTH       = 1_000_000
+const TEXT_MIME = /^text\//i
+const TEXT_EXT  = /\.(env|txt|cfg|conf|ini|ya?ml|json|toml|xml|csv|log|md|key|pem|pfx|sh|bash|zsh|py|rb|[jt]s|go|rs|java|c|cpp|h|php|sql|npmrc|htpasswd|gitconfig)$/i
+const uid       = () => crypto.randomUUID?.() ?? Math.random().toString(36).slice(2)
 
-    if (event.data.type === "clipboard-event" || event.data.type === "screenshare-event") sendMessage(event.data)
+const reportTransfer = (source, items, timestamp = Date.now()) => {
+    items = items.filter(Boolean)
+    if (!items.length) return
+
+    trySafe(() => {
+        chrome.runtime.sendMessage({
+            type: 'transfer-event',
+            subtype: source,
+            eventId: uid(),
+            timestamp,
+            items,
+        })
+    })
+}
+
+const textItem = (data, type = 'text/plain') => {
+    if (typeof data !== 'string' || !data) return null
+    const truncated = data.length > MAX_TRANSFER_ANALYSIS_LENGTH
+    return {
+        kind: 'text',
+        type,
+        size: data.length,
+        truncated,
+        data: truncated ? data.slice(0, MAX_TRANSFER_ANALYSIS_LENGTH) : data
+    }
+}
+
+const fileItem = async file => {
+    const f = {
+        kind: 'file',
+        type: file.type || 'application/octet-stream',
+        name: file.name ?? '',
+        size: file.size,
+        lastModified: trySafe(() => new Date(file.lastModified).toISOString()),
+    }
+
+    if (!TEXT_MIME.test(file.type) && !TEXT_EXT.test(file.name)) return f
+
+    try {
+        f.truncated = file.size > MAX_TRANSFER_ANALYSIS_LENGTH
+        f.data = await (f.truncated ? file.slice(0, MAX_TRANSFER_ANALYSIS_LENGTH) : file).text()
+    } catch (e) {
+        f.truncated = false
+        f.captureError = String(e)
+    }
+
+    return f
+}
+
+// ── MAIN world relay ──────────────────────────────────────────────────────
+
+window.addEventListener('message', ev => {
+    if (ev.source !== window || ev.origin !== location.origin) return
+    const { type } = ev.data ?? {}
+    if (!type) return
+    if (type === 'screenshare-event') sendMessage(ev.data)
+    if (type === 'transfer-main') {
+        const { source, text, mime, timestamp } = ev.data
+        reportTransfer(source, [textItem(text, mime)], timestamp)
+    }
+}, true)
+
+// ── copy / cut ────────────────────────────────────────────────────────────
+
+const onCopyCut = ev => {
+    const text = ev.clipboardData?.getData?.('text/plain')
+        || getSelection?.()?.toString() || ''
+    reportTransfer('clipboard-' + ev.type, [textItem(text)])
+}
+document.addEventListener('copy', onCopyCut, true)
+document.addEventListener('cut',  onCopyCut, true)
+
+// ── paste ─────────────────────────────────────────────────────────────────
+
+document.addEventListener('paste', ev => {
+    const cd = ev.clipboardData
+    if (!cd) return
+    const text  = cd.getData('text/plain')
+    const files = Array.from(cd.files ?? [])
+    ;(async () => {
+        reportTransfer('clipboard-paste', [
+            textItem(text),
+            ...(await Promise.all(files.map(fileItem))).filter(Boolean)
+        ])
+    })().catch(() => {})
+}, true)
+
+// ── file input ────────────────────────────────────────────────────────────
+
+document.addEventListener('change', ev => {
+    const t = ev.target
+    if (t?.tagName !== 'INPUT' || t.type !== 'file' || !t.files?.length) return
+        ;(async () => {
+        reportTransfer('file-input', (await Promise.all(Array.from(t.files).map(fileItem))).filter(Boolean))
+    })().catch(() => {})
+}, true)
+
+// ── drop ──────────────────────────────────────────────────────────────────
+
+document.addEventListener('drop', ev => {
+    const dt = ev.dataTransfer
+    if (!dt) return
+    const text  = dt.getData('text/plain')
+    const files = Array.from(dt.files ?? [])
+    ;(async () => {
+        reportTransfer('file-drop', [
+            textItem(text),
+            ...(await Promise.all(files.map(fileItem))).filter(Boolean)
+        ])
+    })().catch(() => {})
 }, true)
 
 listeners.clickListener = safeHandler(async function(event) {
@@ -58,50 +175,14 @@ function wasAutofilled(el) {
     // test each pseudo-class independently: matches() throws on a pseudo-class the engine does not support, and we
     // must not let one unsupported selector mask the other (Chromium/Edge use :-webkit-autofill, Firefox :autofill)
     for (const selector of [':-webkit-autofill', ':autofill']) {
-        try {
-            if (el.matches(selector)) return true
-        } catch { /* unsupported selector in this engine */ }
+        trySafe(() => { if (el.matches(selector)) return true })
     }
     return false
 }
 
-document.addEventListener('change', safeHandler(function(event) {
-    if (event.target?.type === 'file') {
-        for (const file of event.target.files) {
-            sendMessage('file-select', { subtype: 'picked file', file: cloneFile(file) })
-        }
-    }
-}), true)
-
-document.addEventListener('drop', safeHandler(function(event) {
-    Array.from(event.dataTransfer.files).forEach(file => {
-        sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
-    })
-
-    Array.from(event.dataTransfer.items).forEach(item => {
-        if (item.kind === 'file') {
-            const file = item.getAsFile();
-            sendMessage('file-select', { subtype: 'dropped file', file: cloneFile(file) })
-        }
-    })
-}), true)
-
 const system = window.location.origin
 let sessionState
 new SessionState(system).load().then(obj => sessionState = obj)
-
-function cloneFile(file) {
-    const clone = shallowClone(file)
-    delete clone.lastModifiedDate
-
-    try {
-        clone.lastModified = new Date(clone.lastModified).toISOString()
-    } catch {
-        delete clone.lastModified
-    }
-
-    return clone
-}
 
 function findFormElements(element) {
     if (element.form) {
