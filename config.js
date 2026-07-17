@@ -5,6 +5,7 @@ class Config {
             downloadReportingFreq: 20,          // perform error reporting every N downloads
             excludeInject: [                    // cannot inject in these, no point in trying
                 "chromewebstore.google.com",
+                "services.google.com",
                 "docs.google.com"
             ]
         },
