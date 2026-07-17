@@ -7,7 +7,7 @@ class DoNotDisturb {
     static #activeSince = null
 
     static async isActive() {
-        const isDND = await DoNotDisturb.#nativeDND() || Screensharing.isActive
+        const isDND = await DoNotDisturb.#nativeDND().catch(() => false) || Screensharing.isActive
 
         if (!isDND) {
             DoNotDisturb.#activeSince = null

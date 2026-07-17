@@ -1,4 +1,5 @@
 class Port {
+    static #REQUEST_TIMEOUT = 5 * ONE_SECOND
     static #MIN_RETRY_DELAY = ONE_SECOND
     static #MAX_RETRY_DELAY = 10 * ONE_MINUTE
     static #LOST_EVENTS_FREQ = ONE_DAY
@@ -45,14 +46,16 @@ class Port {
     }
 
     static request(sendType, message = undefined, replyType = sendType) {
-        const reply = Port.#waitForNext(replyType)
-        Port.postMessage(sendType, message)
-        return reply
-    }
+        return new Promise((resolve, reject) => {
+            const entry = { resolve, reject }
+            Port.#addWaiter(replyType, entry)
 
-    static #waitForNext(type) {
-        return new Promise((resolve) => {
-            (Port.#pendingReplies[type] ??= []).push(resolve)
+            setTimeout(() => {
+                Port.#removeWaiter(replyType, entry)
+                reject(new Error(`request timed out waiting for "${replyType}"`))
+            }, Port.#REQUEST_TIMEOUT)
+
+            Port.postMessage(sendType, message)
         })
     }
 
@@ -62,14 +65,12 @@ class Port {
         Port.#port.onMessage.addListener((message) => {
             this.#hasReceivedMessage = true
 
-            const waiters = Port.#pendingReplies[message.type]
-            if (waiters?.length) {
-                Port.#pendingReplies[message.type] = []
-                waiters.forEach((resolve) => resolve(message.message))
-            }
+            Port.#takeWaiters(message.type).forEach(({ resolve }) => resolve(message.message))
         })
 
-        Port.#port.onDisconnect.addListener(function () {
+        Port.#port.onDisconnect.addListener(() => {
+            Port.#rejectAllWaiters(new Error("port disconnected"))
+
             Port.#lastError = chrome.runtime.lastError?.message
 
             if (Port.#retryDelay < Port.#MAX_RETRY_DELAY) {
@@ -79,7 +80,6 @@ class Port {
             setTimeout(() => {
                 Port.#connect()
             }, Port.#retryDelay)
-
 
             const error = isString(Port.#lastError) ? " " + t("errors.messaging.with-error", { error: Port.#lastError.embedTag('mono') }) : ""
             const message = t("errors.messaging.please-contact", { contact: config.company.contact.embedTag('nowrap') })
@@ -94,6 +94,28 @@ class Port {
         Object.entries(Port.#messageHandlers).forEach(([type, handler]) => { Port.onMessage(type, handler) })
     }
 
+    static #addWaiter(type, entry) {
+        (Port.#pendingReplies[type] ??= []).push(entry)
+    }
+
+    static #removeWaiter(type, entry) {
+        const waiters = Port.#pendingReplies[type]
+        const i = waiters?.indexOf(entry) ?? -1
+        if (i !== -1) waiters.splice(i, 1)
+    }
+
+    static #takeWaiters(type) {
+        const waiters = Port.#pendingReplies[type] ?? []
+        Port.#pendingReplies[type] = []
+        return waiters
+    }
+
+    static #rejectAllWaiters(error) {
+        for (const type of Object.keys(Port.#pendingReplies)) {
+            Port.#takeWaiters(type).forEach(({ reject }) => reject(error))
+        }
+    }
+
     static #resetRetryDelay() {
         if (Port.#retryDelay !== Port.#MIN_RETRY_DELAY) {
             rateLimitReset(Port.#LOST_EVENTS_POPUP)
@@ -102,7 +124,7 @@ class Port {
     }
 
     static {
-        assert(Context.isServiceWorker(), "must load class in service worker")
+        assert(Context.isServiceWorker(), "must load class in background process")
         Port.#resetRetryDelay()
         Port.#connect()
     }
