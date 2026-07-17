@@ -14,27 +14,35 @@ class Debouncer {
         const existing = this.#pending.get(key)
 
         if (this.#leading) {
-            if (existing) return                            // within window → swallow
+            if (existing) return existing.promise          // share the in-flight promise
+            const promise = (async () => {
+                try { return await callback(data) }
+                catch (error) { console.error(`debounced callback error:`, error) }
+            })()
             const timeout = setTimeout(() => this.#pending.delete(key), this.#delay)
-            this.#pending.set(key, { timeout, data })
-            try {
-                callback(data)
-            } catch (error) {
-                console.error(`Debounced callback error:`, error)
-            }
-            return
+            this.#pending.set(key, { timeout, data, promise })
+            return promise
         }
 
         if (existing) {
             clearTimeout(existing.timeout)
             data = this.#mergeFn ? this.#mergeFn(existing.data, data) : data
         }
+
+        // reuse the existing deferred so all callers in the window resolve together
+        const deferred = existing?.deferred ?? Promise.withResolvers()
+
         const timeout = setTimeout(async () => {
             this.#pending.delete(key)
-            try { await callback(data) }
-            catch (error) { console.error(`Debounced callback error:`, error) }
+            try { deferred.resolve(await callback(data)) }
+            catch (error) {
+                console.error(`debounced callback error:`, error)
+                deferred.reject(error)
+            }
         }, this.#delay)
-        this.#pending.set(key, { timeout, data })
+
+        this.#pending.set(key, { timeout, data, deferred })
+        return deferred.promise
     }
 
     clear(key) {
@@ -52,7 +60,6 @@ class Debouncer {
         this.#pending.clear()
     }
 }
-
 
 function serialized(fn) {
     let current = null
