@@ -196,7 +196,7 @@ async function sha256Hash(str) {
 
 if (typeof HTMLElement !== 'undefined') {
     HTMLElement.prototype.safeInnerHTML = function(text, handlers = {}) {
-        const allowedTags = ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'code', 'link', 'nowrap', 'mono']
+        const allowedTags = ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'code', 'link', 'nowrap', 'mono', 'small', 'del', 's', 'sub', 'sup', 'kbd', 'q', 'ul', 'ol', 'li', 'blockquote', 'pre', 'div']
         const container = document.createDocumentFragment()
         const stack = [container]
 
@@ -210,6 +210,7 @@ if (typeof HTMLElement !== 'undefined') {
                 if (tagMatch) {
                     const [fullMatch, isClosing, rawTagName, id, href] = tagMatch
                     const tagName = rawTagName.toLowerCase()
+                    const safeHref = href && /^https?:\/\//i.test(href) ? href : undefined
 
                     if (allowedTags.includes(tagName)) {
                         if (currentText) {
@@ -229,9 +230,9 @@ if (typeof HTMLElement !== 'undefined') {
                                 i += fullMatch.length
                                 continue
                             } else if (tagName === 'link') {
-                                if (href) {
+                                if (safeHref) {
                                     el = document.createElement('a')
-                                    el.href = href
+                                    el.href = safeHref
                                     el.target = '_blank'
                                     el.rel = 'noopener noreferrer'
                                 } else {
