@@ -5,6 +5,7 @@ parent: Configuration
 nav_order: 4
 ---
 
+# Device Trust
 As a CISO / CIO you will have put in place policies and mechanisms to ensure the information security, such as:
 * hard disks encryption
 * software updates
