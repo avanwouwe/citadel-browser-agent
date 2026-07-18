@@ -424,6 +424,13 @@ function matchDomain(hostname, domainPatterns) {
     return domainPatterns["*"]
 }
 
+String.prototype.replaceWords = function (dictionary) {
+    return this
+        .split(/(\s+)/)
+        .map(token => dictionary[token] ?? token)
+        .join('')
+}
+
 function isExternalUser(config, username) {
     const domain = PasswordCheck.getDomainFromUsername(username)
 

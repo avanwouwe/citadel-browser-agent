@@ -1046,7 +1046,7 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "explain-clickfix") openTab("https://citadelagent.org/control/ClickFix")
-	if (request.type === "sanitize-clipboard") Clipboard.sanitizeClipboard(request, senderUrl, tabId)
+	if (request.type === "sanitize-clipboard") DLP.sanitizeClipboard()
 
 	if (request.type === "acknowledge-shadow-it") {
 		const app = request.url?.toURL()

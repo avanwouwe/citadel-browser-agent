@@ -500,17 +500,20 @@ class Config {
             },
             warnInterval: 7         // re-show the warning after this many days once acknowledged
         },
-        clipboard: {
+        attack: {
             clickfix: {
                 level: Log.ERROR,
                 threshold: 5
             },
+        },
+        dlp: {
             leaking: {
                 level: Log.WARN,
+                warnProtected: true,
+                domains: [],
                 rules: 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
                 freq: 24,
             },
-
         },
         extensions: {
             risk: {
@@ -589,6 +592,7 @@ class Config {
         "account.mfa.exceptions",
         "shadowit.warn",
         "shadowit.block",
+        "dlp.leaking.domains",
     ]
 
     static #init(config) {

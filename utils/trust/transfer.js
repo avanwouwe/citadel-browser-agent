@@ -1,10 +1,82 @@
 // checks for secrets in transfers (copy / paste, file select / drop)
 class DLP {
 
+    static MAX_EXAMPLES = 3
+
     // debounce copy/paste events with the same clipboard content
+
     static #debouncer = new Debouncer(3 * ONE_SECOND, null, true)
 
+    static canSanitize(items) {
+        return Gitleaks.isLoaded && ! items.some(item => item.truncated || item.kind !== 'text' || ! item.type.startsWith('text/'))
+    }
+
+    static async sanitizeClipboard() {
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
+        if (!tab?.id) return false
+
+        let items
+        try {
+            [{ result: items }] = await chrome.scripting.executeScript({
+                target: { tabId: tab?.id },
+                func: async () => {
+                    const cis = await navigator.clipboard.read()
+                    const out = []
+                    for (const ci of cis) {
+                        const types = ci.types.filter(t => t.startsWith('text/'))
+                        if (!types.length) continue
+                        const variants = []
+                        for (const mime of types) {
+                            try {
+                                const data = await (await ci.getType(mime)).text()
+                                variants.push({ type: mime, data })
+                            } catch(_) {}
+                        }
+                        if (variants.length) out.push(variants)
+                    }
+                    return out  // [ [{ type, data }, ...], ... ]  — one array per ClipboardItem
+                },
+            })
+        } catch (e) {
+            debug('sanitizeClipboard: read failed', e?.message)
+            return false
+        }
+
+        if (!items?.length) return false
+
+        const sanitized = items.map(variants =>
+            variants.map(v => ({ type: v.type, data: Gitleaks.maskSecrets(v.data) }))
+        )
+
+        if (sanitized.every((variants, i) =>
+            variants.every((s, j) => s.data === items[i][j].data))) return false
+
+        await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: (items) => {
+                // single plain-text fast path
+                if (items.length === 1 && items[0].length === 1 && items[0][0].type === 'text/plain')
+                    return navigator.clipboard.writeText(items[0][0].data)
+                // general case: one ClipboardItem per original item, all variants restored
+                return navigator.clipboard.write(
+                    items.map(variants =>
+                        new ClipboardItem(
+                            Object.fromEntries(
+                                variants.map(({ type, data }) => [type, new Blob([data], { type })])
+                            )
+                        )
+                    )
+                )
+            },
+            args: [sanitized],
+        })
+    }
+
     static async check(request, senderUrl, tabId) {
+        if (! Config.isLoaded()) return false
+        if (! config.dlp.leaking.warnProtected && config.isProtected(senderUrl.hostname)) return false
+        if (matchDomain(senderUrl.hostname, config.dlp.leaking.domains) === false) return false
+
         const eventType = request.subtype.replaceAll('-', ' ')
         const findings = await Promise.all(
             request.items.map(item =>
@@ -12,29 +84,58 @@ class DLP {
             )
         )
 
-        const dedupeKey = f => `${f.id}|${f.masked}|${f.len}`;
+        const dedupeKey = f => `${f.id}|${f.masked}|${f.len}`
         const seen = new Set()
         const uniqueFindings = findings
             .flat()
-            .filter(f => f && !seen.has(dedupeKey(f)) && seen.add(dedupeKey(f)));
+            .filter(f => f && !seen.has(dedupeKey(f)) && seen.add(dedupeKey(f)))
 
+        const canSanitize = DLP.canSanitize(request.items)
 
-        if (uniqueFindings.length > 0) DLP.#warn(eventType, uniqueFindings, senderUrl, tabId)
+        if (uniqueFindings.length > 0) DLP.#warn(eventType, uniqueFindings, canSanitize, senderUrl, tabId)
     }
 
-    static #warn(eventType, findings, url, tabId) {
-        const eventLevel = config.clipboard.leaking.level
-        assert(Log.levels.includes(eventLevel), `invalid config.clipboard.leaking.level : ${eventLevel}`)
+    static #recapitalize = {
+        oauth: "OAuth",
+        api: "API",
+        aws: "AWS",
+        gcp: "GCP",
+        pat: "PAT",
+    }
+
+    static #warn(eventType, findings, proposeSanitize, url, tabId) {
+        if (! Config.isLoaded()) return
+        const eventLevel = config.dlp.leaking.level
+        assert(Log.levels.includes(eventLevel), `invalid config.dlp.leaking.level : ${eventLevel}`)
         if (eventLevel === Log.NEVER) return
 
-        const examples = findings.slice(0, 3)
-            .map(f => `• ${f.id} : ${f.masked}`)
-            .join("\n")
+        // Prefer one example per type before repeating any type
+        const seen = new Set()
+        const diverse = [], rest = []
+        for (const f of findings) {
+            seen.has(f.id) ? rest.push(f) : (seen.add(f.id), diverse.push(f))
+        }
+        const exampleFindings = [...diverse, ...rest].slice(0, DLP.MAX_EXAMPLES)
+
+        let examples = exampleFindings
+            .map(f => `• ${f.id.replaceAll('-', ' ').replaceWords(DLP.#recapitalize)} : <mono>${f.masked}</mono>`)
+            .join("<br>\n")
+
+        const remaining = findings.length - DLP.MAX_EXAMPLES
+        if (remaining > 0) examples += '<br>' + t('dlp.leaking.and-more', { remaining })
+
         const contact = config.company.contact.embedTag('nowrap')
-        const onAcknowledge = { type: "explain-leaking", label: t('clipboard.explain') }
-        const onCancel = { label: t('global.ok') }
-        Modal.createForTab(tabId, t("clipboard.leaking.title"),
-            t("clipboard.leaking.message", { contact, examples }), onAcknowledge, undefined, onCancel)
+        let sanitizeMode, onAcknowledge, onCancel
+        if (proposeSanitize) {
+            sanitizeMode = t('dlp.leaking.automated-sanitize')
+            onAcknowledge = { type: "sanitize-clipboard", label: t('dlp.leaking.sanitize') }
+            onCancel = { label: t('global.ok') }
+        } else {
+            sanitizeMode = t('dlp.leaking.manual-sanitize')
+            onAcknowledge = { label: t('global.ok') }
+            onCancel = undefined
+        }
+        Modal.createForTab(tabId, t("dlp.leaking.title"), t("dlp.leaking.message", { contact, examples, sanitizeMode }), onAcknowledge, undefined, onCancel)
 
         const exampleSecretType = findings[0].id
         logger.log(nowTimestamp(), "dlp", eventType, url, eventLevel, exampleSecretType, `found ${exampleSecretType} during '${eventType}' on ${url?.hostname}`)
@@ -190,19 +291,19 @@ class ClickFix {
 
         debug('performed clickfix scoring', report)
 
-        if (score >= config.clipboard.clickfix.threshold) return report
+        if (score >= config.attack.clickfix.threshold) return report
     }
 
     static check(content, url, tabId) {
-        const eventLevel = config.clipboard.clickfix.level
-        assert(Log.levels.includes(eventLevel), `invalid config.clipboard.clickfix.level : ${eventLevel}`)
+        const eventLevel = config.attack.clickfix.level
+        assert(Log.levels.includes(eventLevel), `invalid config.attack.clickfix.level : ${eventLevel}`)
 
         if (eventLevel === Log.NEVER || ! ClickFix.score(content)) return false
 
         const contact = config.company.contact.embedTag('nowrap')
-        const onAcknowledge = { type: "explain-clickfix", label: t('clipboard.explain') }
+        const onAcknowledge = { type: "explain-clickfix", label: t('attack.clickfix.explain') }
         const onCancel = { label: t('global.ok') }
-        Modal.createForTab(tabId, t("clipboard.clickfix.title"), t("clipboard.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
+        Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
 
         logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)
 
@@ -281,7 +382,7 @@ class Gitleaks {
     static #DOWNLOAD_ERRORS_KEY = "gitleaks-download-errors"
 
     static async init() {
-        const { rules, freq } = config.clipboard.leaking
+        const { rules, freq } = config.dlp.leaking
 
         return scheduleReload({
             errorKey: Gitleaks.#DOWNLOAD_ERRORS_KEY,
@@ -391,38 +492,24 @@ class Gitleaks {
         const lower = text.toLowerCase()
 
         for (const rule of Gitleaks.#rules) {
-            // 1. keyword pre-filter (cheap substring scan)
             if (rule.keywords.length && !rule.keywords.some(k => lower.includes(k))) continue
 
-            // 2. regex — RE2, linear time, safe on page-controlled input
-            const re = all && !rule.re.global
-                ? new RegExp(rule.re.source, rule.re.flags + "g")
-                : rule.re
-            re.lastIndex = 0
+            const matches = all ? rule.re.execAll(text) : [rule.re.exec(text)].filter(Boolean)
 
-            let m
-            while ((m = re.exec(text)) !== null) {
-                if (all && m.index === re.lastIndex) re.lastIndex++ // guard zero-width
-
+            for (const m of matches) {
                 const secret = Gitleaks.#extractSecret(m)
-                if (!secret) { if (!all) break; else continue }
+                if (!secret) continue
 
-                // 3. entropy gate
-                if (rule.entropy !== null && Gitleaks.#shannon(secret) < rule.entropy) {
-                    if (!all) break; else continue
-                }
+                if (rule.entropy !== null && Gitleaks.#shannon(secret) < rule.entropy) continue
 
-                // 4. allowlist: rule stopwords -> rule regexes -> global
                 const sLower = secret.toLowerCase()
                 const allowed =
                     rule.allowStopwords.some(w => sLower.includes(w)) ||
                     rule.allowRe.some(r => r.test(secret)) ||
                     Gitleaks.#globallyAllowed(secret, sLower)
-                if (allowed) { if (!all) break; else continue }
+                if (allowed) continue
 
                 yield { rule, match: m, secret }
-
-                if (!all) break
             }
         }
     }
@@ -525,20 +612,28 @@ class Gitleaks {
     }
 
     static #compileWith(pattern) {
-        const re = RE2.RE2JS.compile(pattern)          // throws RE2JSSyntaxException on incompatible/invalid rule
+        const re = RE2.RE2JS.compile(pattern)
+
+        const makeMatch = (m) => {
+            const out = Object.assign([m.group(0)], { index: m.start() })
+            const n = m.groupCount()
+            for (let i = 1; i <= n; i++) out.push(m.group(i))
+            return out
+        }
+
         return {
-            // returns [full, g1, g2, ...] (non-participating groups are null), or null on no match
             exec(text) {
                 const m = re.matcher(text)
-                if (!m.find()) return null
-                const out = [m.group(0)]
-                const n = m.groupCount()
-                for (let i = 1; i <= n; i++) out.push(m.group(i))   // group(i) is null if it didn't participate
+                return m.find() ? makeMatch(m) : null
+            },
+            execAll(text) {
+                const m = re.matcher(text)
+                const out = []
+                while (m.find()) out.push(makeMatch(m))
                 return out
             },
             test(text) {
                 return re.matcher(text).find()
             },
         }
-    }
-}
+    }}
