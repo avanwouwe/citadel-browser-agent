@@ -119,6 +119,13 @@
         --color-input-bg:     #1e1e1e;
         --color-input-border: #555555;
 
+        /* ── State ──────────────────────────────────────────────────── */
+        --state-passing:  #28925a;
+        --state-warning:  #a06e00;
+        --state-blocking: #a02828;
+        --state-failing:  #4a4a4a;
+        --state-unknown:  #6b6b6b;
+
         /* ── Risk levels — lightened for dark backgrounds ───────────── */
         --color-risk-unknown:  #8a8a8a;
         --color-risk-low:      #2ecc71;
