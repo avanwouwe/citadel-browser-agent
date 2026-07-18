@@ -157,7 +157,7 @@
       "message": "Vous avez transféré des informations qui ressemblent à un secret (par exemple un mot de passe ou une clé d'API) :<p>{{examples}}<p>{{sanitizeMode}}",
       "and-more": ".. et {{remaining}} autres.",
       "manual-sanitize": "Si c'était une erreur, supprimez les secrets et recommencez l'opération.",
-      "automated-sanitize": "Si c'était une erreur, purgez le presse-papiers et collez à nouveau."
+      "automated-sanitize": "Si c'était une erreur, cliquez pour purger le presse-papiers et ensuite collez à nouveau."
     }
   },
   "extension-analysis": {

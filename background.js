@@ -1041,7 +1041,7 @@ onMessage((request, sender) => {
 
 		// if transfer involved pasting, or selecting / dropping files, check for secrets
 		if (request.subtype.startsWith('clipboard-read') || request.subtype === 'clipboard-paste' || request.subtype.startsWith('file-')) {
-			DLP.check(request, senderUrl, tabId)
+			DLP.checkLeaking(request, senderUrl, tabId)
 		}
 	}
 

@@ -2,9 +2,6 @@
 class DLP {
 
     static MAX_EXAMPLES = 3
-
-    // debounce copy/paste events with the same clipboard content
-
     static #debouncer = new Debouncer(3 * ONE_SECOND, null, true)
 
     static canSanitize(items) {
@@ -72,7 +69,7 @@ class DLP {
         })
     }
 
-    static async check(request, senderUrl, tabId) {
+    static async checkLeaking(request, senderUrl, tabId) {
         if (! Config.isLoaded()) return false
         if (! config.dlp.leaking.warnProtected && config.isProtected(senderUrl.hostname)) return false
         if (matchDomain(senderUrl.hostname, config.dlp.leaking.domains) === false) return false
@@ -91,8 +88,7 @@ class DLP {
             .filter(f => f && !seen.has(dedupeKey(f)) && seen.add(dedupeKey(f)))
 
         const canSanitize = DLP.canSanitize(request.items)
-
-        if (uniqueFindings.length > 0) DLP.#warn(eventType, uniqueFindings, canSanitize, senderUrl, tabId)
+        if (uniqueFindings.length > 0) DLP.#warnLeaking(eventType, uniqueFindings, canSanitize, senderUrl, tabId)
     }
 
     static #recapitalize = {
@@ -103,7 +99,7 @@ class DLP {
         pat: "PAT",
     }
 
-    static #warn(eventType, findings, proposeSanitize, url, tabId) {
+    static #warnLeaking(eventType, findings, proposeSanitize, url, tabId) {
         if (! Config.isLoaded()) return
         const eventLevel = config.dlp.leaking.level
         assert(Log.levels.includes(eventLevel), `invalid config.dlp.leaking.level : ${eventLevel}`)
@@ -636,4 +632,5 @@ class Gitleaks {
                 return re.matcher(text).find()
             },
         }
-    }}
+    }
+}

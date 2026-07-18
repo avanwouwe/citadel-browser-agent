@@ -157,7 +157,7 @@
       "message": "You have transferred information that looks like a secret (such as a password or API key):<p>{{examples}}<p>{{sanitizeMode}}",
       "and-more": ".. and {{remaining}} more.",
       "manual-sanitize": "If this was an accident, remove the secrets and perform the operation again.",
-      "automated-sanitize": "If this was an accident, sanitize the clipboard and paste again."
+      "automated-sanitize": "If this was an accident, click to sanitize the clipboard and then paste again."
     }
   },
   "extension-analysis": {
