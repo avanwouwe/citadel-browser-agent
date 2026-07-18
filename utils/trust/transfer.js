@@ -10,12 +10,12 @@ class DLP {
 
     static async sanitizeClipboard() {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true })
-        if (!tab?.id) return false
+        if (!tab?.id) return
 
         let items
-        try {
+        trySafe(async () => {
             [{ result: items }] = await chrome.scripting.executeScript({
-                target: { tabId: tab?.id },
+                target: { tabId: tab.id },
                 func: async () => {
                     const cis = await navigator.clipboard.read()
                     const out = []
@@ -34,38 +34,37 @@ class DLP {
                     return out  // [ [{ type, data }, ...], ... ]  — one array per ClipboardItem
                 },
             })
-        } catch (e) {
-            debug('sanitizeClipboard: read failed', e?.message)
-            return false
-        }
+        })
 
-        if (!items?.length) return false
+        if (!items?.length) return
 
         const sanitized = items.map(variants =>
             variants.map(v => ({ type: v.type, data: Gitleaks.maskSecrets(v.data) }))
         )
 
         if (sanitized.every((variants, i) =>
-            variants.every((s, j) => s.data === items[i][j].data))) return false
+            variants.every((s, j) => s.data === items[i][j].data))) return
 
-        await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            func: (items) => {
-                // single plain-text fast path
-                if (items.length === 1 && items[0].length === 1 && items[0][0].type === 'text/plain')
-                    return navigator.clipboard.writeText(items[0][0].data)
-                // general case: one ClipboardItem per original item, all variants restored
-                return navigator.clipboard.write(
-                    items.map(variants =>
-                        new ClipboardItem(
-                            Object.fromEntries(
-                                variants.map(({ type, data }) => [type, new Blob([data], { type })])
+        trySafe(async () => {
+            await chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: (items) => {
+                    // single plain-text fast path
+                    if (items.length === 1 && items[0].length === 1 && items[0][0].type === 'text/plain')
+                        return navigator.clipboard.writeText(items[0][0].data)
+                    // general case: one ClipboardItem per original item, all variants restored
+                    return navigator.clipboard.write(
+                        items.map(variants =>
+                            new ClipboardItem(
+                                Object.fromEntries(
+                                    variants.map(({ type, data }) => [type, new Blob([data], { type })])
+                                )
                             )
                         )
                     )
-                )
-            },
-            args: [sanitized],
+                },
+                args: [sanitized],
+            })
         })
     }
 
@@ -275,19 +274,22 @@ class ClickFix {
             signals.push("whitespace-padding")
         }
 
-        if (ClickFix.#TRAILING_EXEC.test(text)) {
-            score += 3
-            signals.push("auto-execute")
-        } else if (ClickFix.#CONTROL_CHARS.test(text)) {
+        if (ClickFix.#CONTROL_CHARS.test(text)) {
             score += 2
             signals.push("control-chars")
+        }
+
+        // virtually every block of web-copied text ends with \n so the signal is meaningless in isolation.
+        if (ClickFix.#TRAILING_EXEC.test(text) && score > 0) {
+            score += 3
+            signals.push("auto-execute")
         }
 
         const report = { score, signals }
 
         debug('performed clickfix scoring', report)
 
-        if (score >= config.attack.clickfix.threshold) return report
+        return score >= config.attack.clickfix.threshold ? report : null
     }
 
     static check(content, url, tabId) {
@@ -334,19 +336,19 @@ function patchNavigatorTransfer() {
 
     try {
         const preferredText = ci => {
-            const mt = ci?.types?.find(t => t === 'text/plain')
-                ?? ci?.types?.find(t => /^text\//.test(t))
-            return mt ? ci.getType(mt).then(b => b.text()).then(t => ({ t, mt })) : null
+            const mime = ci?.types?.find(type => type === 'text/plain')
+                ?? ci?.types?.find(type => /^text\//.test(type))
+            return mime ? ci.getType(mime).then(b => b.text()).then(text => ({ text, mime })) : null
         }
 
         const cb = navigator.clipboard
         ;[
             ['writeText', ([t], _) => report('clipboard-writeText', t)],
-            ['readText',  (_, p)   => p?.then?.(t => report('clipboard-readText', t))],
+            ['readText',  (_, p)   => p?.then?.(text => report('clipboard-readText', text))],
             ['write',     ([is])   => is?.forEach?.(ci =>
-                preferredText(ci)?.then(({ t, mt }) => report('clipboard-write', t, mt))?.catch(() => {}))],
+                preferredText(ci)?.then(({ text, mime }) => report('clipboard-write', text, mime))?.catch(() => {}))],
             ['read',      (_, p)   => p?.then?.(is => is?.forEach?.(ci =>
-                preferredText(ci)?.then(({ t, mt }) => report('clipboard-read', t, mt))?.catch(() => {})))],
+                preferredText(ci)?.then(({ text, mime }) => report('clipboard-read', text, mime))?.catch(() => {})))],
         ].forEach(([m, fn]) => {
             if (!cb?.[m]) return
             const o = cb[m].bind(cb)
@@ -392,7 +394,7 @@ class Gitleaks {
     }
 
 
-// Fetch + (re)compile. Call on worker startup and on the periodic defs refresh.
+    // Fetch + (re)compile. Call on worker startup and on the periodic defs refresh.
     static async load(url) {
         const toml = await getCached(url).then(res => res.text())
         const parsed = Gitleaks.#parseToml(toml)
@@ -600,9 +602,13 @@ class Gitleaks {
     static #MAX_QUANTIFIER = 255
 
     static #compileClamped(pattern) {
-        const clamped = pattern.replace(/\{(\d+),(\d+)\}/g, (m, lo, hi) =>
-            Number(hi) > Gitleaks.#MAX_QUANTIFIER ? `{${lo},${Gitleaks.#MAX_QUANTIFIER}}` : m
-        )
+        const clamped = pattern
+            .replace(/{(\d+),(\d+)}/g, (m, lo, hi) =>
+                Number(hi) > Gitleaks.#MAX_QUANTIFIER ? `{${lo},${Gitleaks.#MAX_QUANTIFIER}}` : m
+            )
+            .replace(/{(\d+),}/g, (_m, lo) =>
+                `{${lo},${Gitleaks.#MAX_QUANTIFIER}}`
+            )
         if (clamped === pattern) throw new Error("no large quantifier to clamp")
         return Gitleaks.#compileWith(clamped)
     }
