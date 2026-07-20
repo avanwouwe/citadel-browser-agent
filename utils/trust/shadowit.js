@@ -43,7 +43,7 @@ class ShadowIT {
     static showWarning(tabId, url, allowException) {
         const hostname = url.hostname
         const contact = config.company.contact.embedTag('nowrap')
-        const onAcknowledge = { type: "acknowledge-shadow-it", url: url.origin }
+        const onAcknowledge = { type: "acknowledge-shadow-it", label: t("shadow-it.warn.acknowledge"), url: url.origin }
         const onException = allowException ? { type: "allow-shadow-it", url: url.origin } : undefined
 
         Modal.createForTab(tabId, t("shadow-it.warn.title"), t("shadow-it.warn.message", { hostname, contact }), onAcknowledge, onException)

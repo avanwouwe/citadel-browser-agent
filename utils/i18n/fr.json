@@ -139,8 +139,9 @@
       "reason": "application non autorisée (shadow IT)"
     },
     "warn": {
-      "title": "Application non autorisée",
-      "message": "<b>{{hostname}}</b> est une application non autorisée (shadow IT). Veillez à ne pas y partager de données confidentielles ou d’entreprise, et contactez {{contact}} si vous avez besoin d’une alternative autorisée."
+      "title": "Application non autorisée (shadow IT)",
+      "message": "Veillez à ne pas partager de données confidentielles ou d’entreprise avec <b>{{hostname}}</b>, et contactez {{contact}} si vous avez besoin d’une alternative autorisée.",
+      "acknowledge": "Compris"
     }
   },
   "attack": {
