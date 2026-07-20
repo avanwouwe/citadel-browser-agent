@@ -1,12 +1,17 @@
 /* Dashboard — colours come from theme.css tokens (no per-page dark block:
    the tokens flip automatically with prefers-color-scheme). */
 
+@supports not (-moz-appearance: none) {
+    html {
+        font-size: 21px;
+    }
+}
+
 /* ── Reset & base ───────────────────────────────────────────────── */
 body {
     font-family: sans-serif;
-    margin: 6px;
-    min-width: 420px;
-    max-width: 1000px;
+    margin: 6px auto;
+    min-width: 26.25em;
     background-color: var(--color-bg);
     color: var(--color-text);
 }
@@ -269,9 +274,10 @@ td:has(.extension-logo-placeholder) {
 }
 
 /* ── Extension name column ──────────────────────────────────────── */
-#extensions td:nth-child(2),
-#extensions th:nth-child(2) {
-    max-width: 300px;
+#extensions td:nth-child(2), #extensions th:nth-child(2),
+#extensions td:nth-child(2), #extensions th:nth-child(2) {
+    min-width: 10em;
+    max-width: 18.75em;
     white-space: normal;
     word-break: break-word;
     overflow-wrap: break-word;
@@ -283,11 +289,11 @@ td:has(.extension-logo-placeholder) {
     text-overflow: ellipsis;
     white-space: nowrap;
 }
-
-#eventlog td:nth-child(2) { max-width: 10px; }
-#eventlog td:nth-child(3) { max-width: 120px; }
-#eventlog td:nth-child(4) { max-width: 150px; }
-#eventlog td:nth-child(5) { max-width: 370px; }
+#eventlog td:nth-child(1) { width: 3.5em; }
+#eventlog td:nth-child(2) { width: 3.5em; }
+#eventlog td:nth-child(3) { max-width: 8em; }
+#eventlog td:nth-child(4) { max-width: 10em; }
+#eventlog td:nth-child(5) { min-width: 20em; }
 
 /* Alert level severity styling  */
 td.alert-warn {

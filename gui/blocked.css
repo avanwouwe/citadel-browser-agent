@@ -50,6 +50,6 @@ button {
     margin: 10px auto 0;
 }
 
-a:visited {
+a:link, a:visited {
     color: var(--color-link);
 }

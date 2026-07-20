@@ -33,14 +33,14 @@
     --color-border-subtle: #e0e0e0;    /* faint table row separators          */
 
     /* ── Brand / interactive ────────────────────────────────────────── */
-    --color-primary:       #007bff;    /* filled button background            */
+    --color-primary:       #007bff;
     --color-primary-hover: #0056b3;
     --color-on-primary:    #ffffff;
-    --color-link:          #007bff;    /* text links                          */
+    --color-link:          #007bff;
     --color-link-hover:    #0056b3;
-    --color-disabled-bg:   #d3d3d3;
-    --color-disabled-text: #808080;
-    --color-control-track: #cccccc;    /* toggle / slider off state           */
+    --color-disabled-bg:   #bebebe;
+    --color-disabled-text: #6b6b6b;
+    --color-control-track: #b7b7b7;
 
     /* ── Feedback ───────────────────────────────────────────────────── */
     --color-danger:        #cc0000;
@@ -106,9 +106,9 @@
         --color-on-primary:    #ffffff;
         --color-link:          #4da3ff;
         --color-link-hover:    #7bbcff;
-        --color-disabled-bg:   #3a3a3a;
-        --color-disabled-text: #888888;
-        --color-control-track: #555555;
+        --color-disabled-bg:   #4d4d4d;
+        --color-disabled-text: #9e9e9e;
+        --color-control-track: #6a6a6a;
 
         /* ── Feedback ───────────────────────────────────────────────── */
         --color-danger:        #ff6b6b;

@@ -92,7 +92,7 @@ const renderDeviceDashboard = serialized(async function () {
             label = `<a href="${(safeHref(explainPage) ?? '').escapeHtmlEntities()}" target="_blank">${label.escapeHtmlEntities()}`
 
             if (! ctrl.report.passing) {
-                label += '&nbsp&nbsp' + Icons.outgoingLink
+                label += '&nbsp' + Icons.outgoingLink
             }
 
             label += '</a>'
@@ -204,7 +204,7 @@ const renderExtensionDashboard = serialized(async function () {
             nameEl.target = "_blank"
             nameEl.rel = "noopener noreferrer"
             nameEl.textContent = name
-            nameEl.appendChild(document.createTextNode(' '))
+            nameEl.appendChild(document.createTextNode('\xA0'))
             nameEl.appendChild(Icons.nodeOf(Icons.outgoingLink))
         } else {
             nameEl = document.createElement("span")
@@ -271,7 +271,10 @@ const renderEventsDashboard = serialized(async function () {
         tr.cells[1].classList.add(`alert-${levelLower}`)
         tr.cells[1].textContent = entry.browseragent.level
 
-        tr.cells[2].textContent = entry.browseragent.result ?? entry.browseragent.event
+        const eventText = entry.browseragent.result ?? entry.browseragent.event
+        tr.cells[2].textContent = eventText
+        tr.cells[2].title = eventText
+
         tr.cells[3].title = entry.url ?? ''
         const href = safeHref(entry.url)
         if (href) {
