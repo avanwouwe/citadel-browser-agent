@@ -299,8 +299,8 @@ class ClickFix {
         if (eventLevel === Log.NEVER || ! ClickFix.score(content)) return false
 
         const contact = config.company.contact.embedTag('nowrap')
-        const onAcknowledge = { type: "explain-clickfix", label: t('attack.clickfix.explain') }
-        const onCancel = { label: t('global.ok') }
+        const onAcknowledge = { type: "explain-clickfix", label: t('attack.explain') }
+        const onCancel = { label: t('attack.trust') }
         Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
 
         logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)

@@ -42,6 +42,99 @@ async function processTextStream(stream, callback) {
   reader.releaseLock();
 }
 
+class LRUCache {
+
+    #map
+    #maxSize
+
+    constructor(maxSize) {
+        this.#maxSize = maxSize
+        this.#map = new Map()
+    }
+
+    get(key) {
+        if (!this.#map.has(key)) return undefined
+
+        // Refresh: move to end (= most recently used)
+        const value = this.#map.get(key)
+        this.#map.delete(key)
+        this.#map.set(key, value)
+        return value
+    }
+
+    set(key, value) {
+        if (this.#map.has(key)) {
+            this.#map.delete(key)          // refresh position
+        } else if (this.#map.size >= this.#maxSize) {
+            // First key = least recently used → evict it
+            this.#map.delete(this.#map.keys().next().value)
+        }
+        this.#map.set(key, value)
+    }
+
+    /**
+     * Returns the cached value for `key`.
+     * If missing, calls `fn(key)`, caches, and returns the result.
+     *
+     * `fn` must be synchronous. For async factories use `getOrSetAsync()`.
+     *
+     * @param {*}            key
+     * @param {function(*):*} fn  - Factory, receives `key` as argument
+     * @returns {*}
+     */
+    getOrSet(key, fn) {
+        if (this.#map.has(key)) return this.get(key)
+
+        const value = fn(key)
+
+        if (value instanceof Promise) throw new TypeError('getOrSet(): factory returned a Promise — use getOrSetAsync() instead')
+
+        this.set(key, value)
+        return value
+    }
+
+    /**
+     * Async variant of `getOrSet()`.
+     * Always returns a Promise. Stampede-safe: concurrent calls for the
+     * same missing key share one in-flight Promise instead of firing
+     * the factory multiple times.
+     *
+     * Failed promises are not cached — the next call will retry.
+     *
+     * @param {*}                      key
+     * @param {function(*):Promise<*>} fn  - Factory, may be async or return a plain value
+     * @returns {Promise<*>}
+     */
+    getOrSetAsync(key, fn) {
+        if (this.#map.has(key)) return Promise.resolve(this.get(key))
+
+        // Cache the promise immediately — any concurrent call hitting this
+        // key before the factory resolves will get the same promise
+        const promise = Promise.resolve(fn(key))
+            .then(value => {
+                // Only replace if this promise is still the cached one —
+                // a delete() or clear() in the meantime should not re-insert
+                if (this.get(key) === promise) {
+                    this.set(key, value)
+                }
+                return value
+            })
+            .catch(err => {
+                if (this.get(key) === promise) {
+                    this.delete(key)    // don't cache failures
+                }
+                throw err
+            })
+
+        this.set(key, promise)
+        return promise
+    }
+
+    has(key)    { return this.#map.has(key) }
+    delete(key) { return this.#map.delete(key) }
+    get size()  { return this.#map.size }
+    clear()     { this.#map.clear() }
+}
 
 async function getCached(url, replace = true) {
     const CACHE_NAME = 'http-cache'

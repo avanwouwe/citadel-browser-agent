@@ -144,8 +144,9 @@
     }
   },
   "attack": {
+    "explain": "Explain",
+    "trust": "Trust",
     "clickfix": {
-      "explain": "Explain",
       "title": "Possible scam detected",
       "message": "Something just copied a computer command to your clipboard. Scammers use this trick (\"ClickFix\") to get you to paste and run harmful commands, for example in PowerShell, the Windows Run dialog, or a terminal.<p><b>⚠\uFE0F Do not paste it</b> unless you are certain it is safe.<p>Click for more information and contact {{contact}} if you are unsure."
     }
