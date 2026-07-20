@@ -322,7 +322,7 @@ class Config {
                 "*.base44.com",
                 "*.bolt.new",
                 "*.v0.dev",
-                "*.same.dev",
+                "*.same.dev", "*.same.new",
                 "*.tempolabs.ai",
                 "*.create.xyz",
                 "app.devin.ai",
