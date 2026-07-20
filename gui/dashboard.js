@@ -54,7 +54,7 @@ function selectTab(tabId) {
     params.set('tab', tabId)
     window.history.replaceState({}, '', `${window.location.pathname}?${params}`)
 
-    if (tabId === "events") startEventRefreshing(); else stopEventRefreshing()
+    handleVisibilityChange()
 
     const manualLink = document.getElementById('manual-link')
     if (manualLink) {
@@ -360,7 +360,7 @@ async function handleExtensionAction(event) {
 
 // ── Refresh spinner ───────────────────────────────────────────────────────────
 
-const REFRESH_TIMEOUT_MS = 60 * ONE_SECOND
+const REFRESH_TIMEOUT = 60 * ONE_SECOND
 let refreshTimeout = null
 
 function wireUpdateButton() {
@@ -368,7 +368,7 @@ function wireUpdateButton() {
     updateBtn.addEventListener('click', async () => {
         if (updateBtn.classList.contains('refreshing')) return
         updateBtn.classList.add('refreshing')
-        refreshTimeout = setTimeout(clearRefreshSpinner, REFRESH_TIMEOUT_MS)
+        refreshTimeout = setTimeout(clearRefreshSpinner, REFRESH_TIMEOUT)
         await refreshDeviceStatus()
     })
 }
