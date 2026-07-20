@@ -31,11 +31,12 @@ PERIODIC_CHECK_FREQUENCY = 60 * 60 # every hour
 DEFAULT_OSQUERY_PATH = "C:\\Program Files\\osquery\\osqueryi.exe" if SYSTEM_OS == "windows" else "/usr/local/bin/osqueryi"
 MAX_REPORT_WORKERS = 10
 CONTROL_TIMEOUT = 20   # seconds
-REPORT_TIMEOUT = 60   # seconds
+AUDIT_TIMEOUT = 60   # seconds
 FETCH_TIMEOUT = 20    # seconds
 MESSAGE_PREFIX = 'browser agent : '
+
+config = { "version": "1.5.0" }
 osqueryPath = DEFAULT_OSQUERY_PATH
-config = {}
 username = getpass.getuser()
 logger = None
 
@@ -406,7 +407,7 @@ def loadConfig():
 def osquery(query):
     escapedUsername = username.replace('\\', '\\\\').replace("'", "\\'")
     query = query.replace("{{username}}", escapedUsername)
-    proc = subprocess.run([osqueryPath, '--json', '--', query], capture_output=True, text=True)
+    proc = subprocess.run([osqueryPath, '--json', '--', query], capture_output=True, text=True, timeout=CONTROL_TIMEOUT)
     if proc.returncode != 0:
         raise Exception(proc.stderr)
     return json.loads(proc.stdout)
@@ -495,62 +496,68 @@ def getErrors(query):
     return errors
 
 
-last_devicereport = 0
-last_audit_cache = None
+report_running    = False      # True while generateAudit() is running
+last_audit_cache  = None
 devicereport_lock = threading.Lock()
 
 def generateAndSendReport():
-    global last_devicereport, last_audit_cache
-    now = time.time()
+    global report_running, last_audit_cache
 
     with devicereport_lock:
-        throttled = now - last_devicereport < REPORT_TIMEOUT
-        if not throttled:
-            last_devicereport = now
+        already_running = report_running
+        if not already_running:
+            report_running = True
         cached = last_audit_cache
 
-    if throttled:
+    if already_running:
         if cached is not None:
             sendMessage("devicetrust", cached)
         return
 
-    if not os.path.isfile(osqueryPath):
-        warning(f"device trust report not generated, osquery not found at '{osqueryPath}'")
-        return
-
+    # we own the run slot
     try:
+        if not os.path.isfile(osqueryPath):
+            warning(f"device trust report not generated, osquery not found at '{osqueryPath}'")
+            return
+
         audit = generateAudit()
         with devicereport_lock:
             last_audit_cache = audit
         sendMessage("devicetrust", audit)
     except Exception as e:
         exception("failed to generate report", e)
+    finally:
+        with devicereport_lock:
+            report_running = False
 
 
 def generateAudit():
     reports = {}
     definitions = loadControlPacks()
 
-    with ThreadPoolExecutor(max_workers = MAX_REPORT_WORKERS) as executor:
-        futures = {}
+    with ThreadPoolExecutor(max_workers=MAX_REPORT_WORKERS) as executor:
+        futures = {
+            executor.submit(getErrors, controlDefinition.get("query")): controlName
+            for controlName, controlDefinition in definitions.items()
+            if controlDefinition.get("query")
+        }
 
-        for controlName, controlDefinition in definitions.items():
-            queryStr = controlDefinition.get("query")
-            if queryStr:
-                futures[executor.submit(getErrors, queryStr)] = controlName
+        try:
+            for future in as_completed(futures, timeout=AUDIT_TIMEOUT):
+                controlName = futures[future]
+                try:
+                    errors = future.result()
+                    addReport(reports, controlName, errors)
+                except Exception as e:
+                    exception(f"control '{controlName}' failed", e)
+                    addReport(reports, controlName, None)
 
-        for future in as_completed(futures):
-            controlName = futures[future]
-            try:
-                errors = future.result(timeout = CONTROL_TIMEOUT)
-                addReport(reports, controlName, errors)
-            except TimeoutError:
-                errMsg = f"control '{controlName}' timed out after '{CONTROL_TIMEOUT}' seconds"
-                exception(errMsg, TimeoutError(errMsg))
-                addReport(reports, controlName, None)
-            except Exception as e:
-                exception(f"control '{controlName}' failed", e)
-                addReport(reports, controlName, None)
+        except TimeoutError:
+            for future, controlName in futures.items():
+                if not future.done():
+                    exception(f"control '{controlName}' timed out out after '{CONTROL_TIMEOUT}' seconds", TimeoutError())
+                    addReport(reports, controlName, None)
+                    future.cancel()
 
     reports.update(checkApplications())
     reports.update(checkProcesses())
