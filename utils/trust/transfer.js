@@ -13,7 +13,7 @@ class DLP {
         if (!tab?.id) return
 
         let items
-        trySafe(async () => {
+        await trySafe(async () => {
             [{ result: items }] = await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: async () => {
@@ -45,7 +45,7 @@ class DLP {
         if (sanitized.every((variants, i) =>
             variants.every((s, j) => s.data === items[i][j].data))) return
 
-        trySafe(async () => {
+        await trySafe(async () => {
             await chrome.scripting.executeScript({
                 target: { tabId: tab.id },
                 func: (items) => {

@@ -1,12 +1,6 @@
 injectPageScript('/utils/injected/bundle/citadel-bundle-idle.js')
 
-function trySafe(fn, ...args) {
-    try {
-        return fn(...args)
-    } catch (err) {
-        return undefined
-    }
-}
+const trySafe = (fn) => { try { return fn() } catch (e) { return undefined } }
 
 function safeHandler(fn) {
     return async function (...args) {

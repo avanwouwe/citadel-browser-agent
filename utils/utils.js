@@ -832,3 +832,14 @@ function compareSemver(a, b) {
 function semverBefore(version, threshold) {
     return compareSemver(version, threshold) === -1
 }
+
+function trySafe(fn, ...args) {
+    try {
+        const result = fn(...args)
+        if (result instanceof Promise)
+            return result.catch(e => console.warn("trySafe caught:", e))
+        return result
+    } catch (err) {
+        console.warn("trySafe caught:", err)
+    }
+}

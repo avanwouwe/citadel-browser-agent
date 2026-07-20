@@ -57,7 +57,7 @@ class Screensharing {
 }
 
 function patchNavigatorScreenShare() {
-    const trySafe = (fn) => { try { fn() } catch (e) {} }
+    const trySafe = (fn) => { try { return fn() } catch (e) { return undefined } }
 
     const report = (event) => {
         trySafe(() => {
