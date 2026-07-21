@@ -64,8 +64,11 @@ function selectTab(tabId) {
 
 // ── Dashboards ────────────────────────────────────────────────────────────────
 
+let devicetrust
+
 const renderDeviceDashboard = serialized(async function () {
-    const devicetrust = await callServiceWorker("GetDeviceStatus")
+    const prevState = devicetrust?.state
+    devicetrust = await callServiceWorker("GetDeviceStatus")
     const controls = Object.values(devicetrust.controls)
         .sort((a, b) => a.name.localeCompare(b.name))
     const state = devicetrust.state
@@ -116,6 +119,8 @@ const renderDeviceDashboard = serialized(async function () {
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state)}</td>`
         tb.appendChild(tr)
     }
+
+    if (prevState !== State.PASSING && prevState !== State.UNKNOWN && devicetrust.state === State.PASSING) confettiCelebrate()
 })
 
 const renderAccountDashboard = serialized(async function () {
