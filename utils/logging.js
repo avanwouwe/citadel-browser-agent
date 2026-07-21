@@ -48,7 +48,7 @@ class Log {
 
         description = description?.replace("@@URL@@", url?.truncate(50, 'end', '…') ?? '??')
         url = url?.truncate(config.logging.maxUrlLength)
-        initiator = initiator?.truncate(config.logging.maxUrlLength)
+        initiator = initiator?.truncate(config.logging.maxUrlLength, 'end', '…')
 
         const logEntry = {
             timestamp: timestamp ?? nowTimestamp(),
