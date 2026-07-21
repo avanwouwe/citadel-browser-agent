@@ -73,8 +73,8 @@ def createEvent(event, result, level, description):
     }
 
 def createTruncationEvent(message, max_length):
+    notice = f"entry too long ({len(message)} > {max_length}) : "
     original_message = message.removeprefix(MESSAGE_PREFIX)
-    notice = f"entry too long ({len(original_message)} > {max_length}) : "
 
     snippet_length = max_length
 
