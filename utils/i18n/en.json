@@ -32,7 +32,7 @@
       "control": "Control",
       "state": "State",
       "next-state": "Next",
-      "in-days": "In Days"
+      "in-days": "In Days →"
     },
     "notification": {
       "title": "Device security issues",
@@ -49,9 +49,10 @@
       "title": "Account Issues",
       "username": "Username",
       "system": "System",
+      "issues": "Issues",
       "state": "State",
       "next-state": "Next",
-      "in-days": "In Days",
+      "in-days": "In Days →",
       "issue": "Issue"
     },
     "password": {
@@ -60,7 +61,6 @@
         "message": "You are using the password of <b>{{username}}</b> for <b>{{system}}</b>, to connect to another site.<p>⚠\uFE0F This may be a phishing attack: verify that this is the site you think it is.<p>If it is; re-use of passwords is dangerous, and not allowed."
       },
       "quality": {
-        "title": "Account issue(s)",
         "number-digits": "Must contain at least {{min}} digit(s)",
         "number-letters": "Must contain at least {{min}} letter(s)",
         "number-uppercase": "Must contain at least {{min}} uppercase letter(s)",

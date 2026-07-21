@@ -67,7 +67,7 @@ function selectTab(tabId) {
 let devicetrust
 
 const renderDeviceDashboard = serialized(async function () {
-    const prevState = devicetrust?.state
+    const prevCompliance = devicetrust?.compliance
     devicetrust = await callServiceWorker("GetDeviceStatus")
     const controls = Object.values(devicetrust.controls)
         .sort((a, b) => a.name.localeCompare(b.name))
@@ -120,7 +120,7 @@ const renderDeviceDashboard = serialized(async function () {
         tb.appendChild(tr)
     }
 
-    if (prevState !== State.PASSING && prevState !== State.UNKNOWN && devicetrust.state === State.PASSING) confettiCelebrate()
+    if (prevCompliance < 100 && devicetrust.compliance === 100) confettiCelebrate()
 })
 
 const renderAccountDashboard = serialized(async function () {
@@ -133,16 +133,12 @@ const renderAccountDashboard = serialized(async function () {
     const failingAccounts = await callServiceWorker("GetAccountStatus")
     for (const acct of Object.values(failingAccounts)) {
         const next = acct.report.nextState
-        let errors = acct.report.issues?.description ?? ''
-        if (acct.report.issues?.count > 0) {
-            errors = `<span class="has-errors" title="${t("dashboard.action.detail")}" data-tooltip="${errors.escapeHtmlEntities()}">${Icons.search}</span>`
-        }
 
         const tr = document.createElement("tr")
         tr.innerHTML =
             `<td><span class="ellipsis"></span></td>` +
             `<td class="label"><span class="ellipsis"><a target="_blank" rel="noopener noreferrer"></a></span></td>` +
-            `<td>${errors}</td>` +
+            `<td class="issues"></td>` +
             `<td class="state ${acct.report.state.toLowerCase()}">${t("control.state." + acct.report.state)}</td>` +
             `<td class="days">${next?.days ?? ""}</td>` +
             `<td class="nextstate ${next.state.toLowerCase()}">${t("control.state." + next.state)}</td>` +
@@ -155,7 +151,12 @@ const renderAccountDashboard = serialized(async function () {
         const systemAnchor = tr.cells[1].querySelector("a")
         systemAnchor.href = `https://${acct.system}`
         systemAnchor.textContent = acct.system
+        systemAnchor.appendChild(document.createTextNode("\u00A0"))
+        systemAnchor.appendChild(Icons.nodeOf(Icons.outgoingLink))
         tr.cells[1].querySelector("span").title = acct.system
+
+        // Issues as plain text (safe, no HTML injection, newlines preserved via CSS)
+        tr.cells[2].textContent = acct.report.issues?.description ?? ""
 
         const deleteBtn = tr.querySelector(".delete-btn")
         deleteBtn.dataset.username = acct.username

@@ -144,7 +144,7 @@ class AccountTrust {
                     const lines = Object.keys(report.issues)
                         .filter(key => description[key])
                         .map(key => `• ${description[key]}`)
-                    report.issues.description = lines.length ? `${t("accounttrust.password.quality.title")}:\n${lines.join('\n')}` : ''
+                    report.issues.description = lines.length ? `${lines.join('\n')}` : ''
 
                     const accountKey = AccountTrust.accountKey(username, system)
                     accounts[accountKey] = { username, system, report }

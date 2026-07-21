@@ -101,7 +101,6 @@ td.label a:focus-visible {
 .has-errors {
     cursor: pointer;
     color: var(--color-text-soft);
-    margin-left: 5px;
     vertical-align: middle;
 }
 .has-errors:hover {
@@ -247,6 +246,11 @@ td:has(.delete-btn) {
     pointer-events: none;
 }
 
+/* ── Account status ────────────────────────────────────────────── */
+
+td.issues {
+    white-space: pre-line;
+}
 /* ── Extension logos ────────────────────────────────────────────── */
 .extension-logo {
     width: 28px;
