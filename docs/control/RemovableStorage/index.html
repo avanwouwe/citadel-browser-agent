@@ -15,7 +15,14 @@
         <h1>RemovableStorage Control</h1>
     </header>
 
-    <section class="control-info">
+    <nav class="section-nav">
+        <a href="#what">What it checks</a>
+        <a href="#why">Why it matters</a>
+        <a href="#how-to-fix" class="is-primary">How to fix →</a>
+        <a href="#verify">Verify</a>
+    </nav>
+
+    <section class="control-info" id="what">
         <h2>What does this control check?</h2>
         <p>
             The RemovableStorage control verifies that no USB storage devices (flash drives,
@@ -32,7 +39,7 @@
         </p>
     </section>
 
-    <section class="security-importance">
+    <section class="security-importance" id="why">
         <h2>Why is this important?</h2>
         <div class="importance-grid">
             <div class="importance-item">
@@ -56,7 +63,7 @@
         </div>
     </section>
 
-    <section class="remediation">
+    <section class="remediation" id="how-to-fix">
         <h2>How to fix this</h2>
 
         <div class="platform-tabs">
@@ -155,7 +162,7 @@
         </div>
     </section>
 
-    <section class="verification">
+    <section class="verification" id="verify">
         <h2>Verifying the fix</h2>
         <p>After removing all USB storage devices, Citadel will automatically verify this control during its next check.</p>
 

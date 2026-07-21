@@ -422,3 +422,49 @@ kbd {
         padding: var(--spacing-md);
     }
 }
+
+/* ============================================
+   Section Nav (horizontal jump bar)
+   ============================================ */
+
+.section-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.section-nav a {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--gray-600);
+    background-color: white;
+    border: 1px solid var(--gray-200);
+    border-radius: 999px;
+    transition: all 0.2s;
+}
+
+.section-nav a:hover {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+    text-decoration: none;
+}
+
+/* Emphasize the primary action (the fix) */
+.section-nav a.is-primary {
+    color: white;
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.section-nav a.is-primary:hover {
+    background-color: var(--primary-dark);
+    color: white;
+}
+
+html {
+    scroll-behavior: smooth;
+}
