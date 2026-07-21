@@ -27,6 +27,10 @@
     --gray-800: #1f2937;
     --gray-900: #0f172a;
 
+    /* Component surfaces */
+    --card-bg: #ffffff;   /* container + raised chips */
+    --note-bg: #eff6ff;   /* .note callout background */
+
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 1rem;
@@ -43,6 +47,48 @@
     --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+}
+
+/* ============================================
+   Dark Theme (token flip — mirrors theme.css)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* Brand */
+        --primary-color: #3b82f6;
+        --primary-dark:  #2563eb;
+        --secondary-color: #94a3b8;
+
+        /* Status */
+        --status-failed:     #ff6b6b;
+        --status-failed-bg:  #3a1e1e;
+        --status-passed:     #5ad17e;
+        --status-passed-bg:  #1a2e1f;
+        --status-warning:    #f39c12;
+        --status-warning-bg: #3a2a12;
+
+        /* Neutrals — 50–300 are surfaces/borders (go dark),
+           600–900 are text (go light). No usage conflicts. */
+        --gray-50:  #1e1e1e;   /* body bg, recessed sections   */
+        --gray-100: #2a2a2a;   /* kbd bg, footer bg            */
+        --gray-200: #3a3a3a;   /* subtle borders              */
+        --gray-300: #444444;   /* borders, kbd edge/shadow    */
+        --gray-400: #6a6a6a;
+        --gray-600: #9a9a9a;   /* secondary text              */
+        --gray-700: #bbbbbb;   /* body / list text            */
+        --gray-800: #d0d0d0;   /* h3 / h4                     */
+        --gray-900: #e8e8e8;   /* primary text / headings     */
+
+        /* Component surfaces */
+        --card-bg: #242424;
+        --note-bg: #20303f;
+
+        /* Shadows — deepen for dark backgrounds */
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6);
+    }
 }
 
 /* ============================================
@@ -68,7 +114,7 @@ body {
 .container {
     max-width: 900px;
     margin: 0 auto;
-    background-color: white;
+    background-color: var(--card-bg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     overflow: hidden;
@@ -338,7 +384,7 @@ kbd {
 
 /* Note */
 .note {
-    background-color: #eff6ff;
+    background-color: var(--note-bg);
     border-left: 4px solid var(--primary-color);
     padding: var(--spacing-sm);
     border-radius: var(--radius-sm);
@@ -441,7 +487,7 @@ kbd {
     font-size: 0.9rem;
     font-weight: 500;
     color: var(--gray-600);
-    background-color: white;
+    background-color: var(--card-bg);
     border: 1px solid var(--gray-200);
     border-radius: 999px;
     transition: all 0.2s;

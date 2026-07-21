@@ -1,0 +1,10 @@
+<script>
+    (function () {
+        var mq = window.matchMedia('(prefers-color-scheme: dark)');
+        function apply(e) {
+            jtd.setTheme(e.matches ? 'custom-dark' : 'custom');
+        }
+        apply(mq);
+        mq.addEventListener('change', apply);
+    })();
+</script>

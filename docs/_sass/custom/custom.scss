@@ -1,3 +1,7 @@
+/* ============================================
+   Layout
+   ============================================ */
+
 .site-header {
   justify-content: center;
 }
@@ -18,11 +22,37 @@
   }
 }
 
+/* ============================================
+   Status Badges — tokenised
+   ============================================ */
+
+:root {
+  --badge-text:     #000;
+  --badge-border:   #000;
+  --badge-passing:  #43d25e;
+  --badge-warning:  #ffa800;
+  --badge-blocking: #e23a3a;
+  --badge-failing:  #999;
+  --badge-unknown:  #ccc;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --badge-text:     #d0d0d0;   /* --color-on-state (dark)  */
+    --badge-border:   #555555;
+    --badge-passing:  #28925a;   /* --state-passing  (dark)  */
+    --badge-warning:  #a06e00;   /* --state-warning  (dark)  */
+    --badge-blocking: #a02828;   /* --state-blocking (dark)  */
+    --badge-failing:  #4a4a4a;   /* --state-failing  (dark)  */
+    --badge-unknown:  #6b6b6b;   /* --state-unknown  (dark)  */
+  }
+}
+
 .passing, .warning, .blocking, .failing, .unknown {
   padding: 2px 8px;
   border-radius: 3px;
-  border: 1px solid #000;
-  color: #000;
+  border: 1px solid var(--badge-border);
+  color: var(--badge-text);
   white-space: nowrap;
 
   code {
@@ -33,8 +63,8 @@
   }
 }
 
-.passing  { background: #43d25e; }
-.warning  { background: #ffa800; }
-.blocking { background: #e23a3a; }
-.failing  { background: #999; }
-.unknown  { background: #ccc; }
+.passing  { background: var(--badge-passing); }
+.warning  { background: var(--badge-warning); }
+.blocking { background: var(--badge-blocking); }
+.failing  { background: var(--badge-failing); }
+.unknown  { background: var(--badge-unknown); }
