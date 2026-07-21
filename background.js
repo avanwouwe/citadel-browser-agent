@@ -332,7 +332,7 @@ function logDownload(event, timestamp, result, level, description) {
 chrome.downloads.onChanged.addListener((delta) => {
 	if (delta.state && delta.state.current === 'complete') {
 		getDownload(delta.id).then(download => {
-			logDownload(download, download.endTime, "download completed", Log.INFO, `completed download of @@URL@@ to '${download.filename.truncate(75, 'start', '…')}'`)
+			logDownload(download, download.endTime, "download complete", Log.INFO, `download to '${download.filename.truncate(40, 'start', '…')}'`)
 		})
 	}
 
