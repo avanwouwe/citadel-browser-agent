@@ -1,10 +1,14 @@
 <script>
     (function () {
-        var mq = window.matchMedia('(prefers-color-scheme: dark)');
-        function apply(e) {
-            jtd.setTheme(e.matches ? 'custom-dark' : 'custom');
+        function start() {
+            if (typeof jtd === 'undefined') {
+                return setTimeout(start, 50);
+            }
+            var mq = window.matchMedia('(prefers-color-scheme: dark)');
+            function apply(e) { jtd.setTheme(e.matches ? 'custom-dark' : 'custom'); }
+            apply(mq);
+            mq.addEventListener('change', apply);
         }
-        apply(mq);
-        mq.addEventListener('change', apply);
+        start();
     })();
 </script>
