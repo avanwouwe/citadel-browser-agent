@@ -52,6 +52,8 @@ nav_order: 3
 | Endpoint compliance status                                               | security team via SIEM / XDR                                                                                                                                                                             | As long as the agent is installed and as per SIEM / XDR retention policy. |
 | Security configuration, installed / running apps, stored documents       | security team via SIEM / XDR                                                                                                                                                                             | Aggregated status / state only, as long as agent installed |
 | Camera, microphone                                                       | no processing                                                                                                                                                                                            | N/A |
+| Do Not Disturb status                                                    | local processing only                                                                                                                                                                                            | N/A |
+| Contents of clipboard and selected or dragged files                      | local processing only                                                                                                                                                                                            | N/A |
 
 
 ### Description of Processes and Media

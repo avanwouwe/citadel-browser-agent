@@ -169,6 +169,8 @@ Additionally, the following minimisations have been identified and implemented, 
 | App / account usage stats                              | Local only | Stored locally only to detect minimum usage threshold; never transmitted to server                                                                            |
 | Passwords or other secrets (credit card, API key, etc) | No         | Only local hashes and quality indicators retained regarding passwords entered in password fields, passwords entered elsewhere by mistake are masked from logs |
 | Endpoint status                                        | Yes        | Only pass / fail or aggregated control state                                                                                                                  |
+| Do Not Disturb status                                  | No         | Only used to withold alerts, never stored                                                                                                                     |
+| Clipboard and selected / dragged files                 | No         | Only scanned for secrets, never stored                                                                                                                        |
 
 ---
 
@@ -178,14 +180,16 @@ Additionally, the following minimisations have been identified and implemented, 
 
 An evaluation was performed of the type of data that is processed.
 
-| Data Category        | Description / Sensitivity                                                                                                | Special Category? |
-|:---------------------|:-------------------------------------------------------------------------------------------------------------------------| :---- |
-| Identifiers          | Username, application accounts                                                                                           | No, unless used for special (e.g. union) accounts |
-| Passwords  & secrets | High sensitivity, hashed when stored locally when entered in a password field, masked from logs if it appears by mistake | No |
-| App usage            | Local-only tracking to detect minimum usage threshold, but reports Yes / No indicator                                    | No |
-| Security events      | Download / upload / print, browser error events - only for protected systems or urgent security events                   | Some could be sensitive |
-| Browser navigation   | High sensitivity, stored locally and hashed                                                                              | No |
-| Endpoint compliance  | Pass / fail state, app/extension status                                                                                  | No |
+| Data Category                                   | Description / Sensitivity                                                                                                | Special Category? |
+|:------------------------------------------------|:-------------------------------------------------------------------------------------------------------------------------| :---- |
+| Identifiers                                     | Username, application accounts                                                                                           | No, unless used for special (e.g. union) accounts |
+| Passwords  & secrets                            | High sensitivity, hashed when stored locally when entered in a password field, masked from logs if it appears by mistake | No |
+| App usage                                       | Local-only tracking to detect minimum usage threshold, but reports Yes / No indicator                                    | No |
+| Security events                                 | Download / upload / print, browser error events - only for protected systems or urgent security events                   | Some could be sensitive |
+| Browser navigation                              | High sensitivity, stored locally and hashed                                                                              | No |
+| Endpoint compliance                             | Pass / fail state, app/extension status                                                                                  | No |
+| Do Not Disturb status                           | Enabled / Disabled                                                                                                       | No |
+| Clipboard and selected / dragged filed contents | High sensitivity, only processed locally, never stored                                                                   | No |
 
 **The main remaining issue is the "Special Category".** This data is never processed intentionally, and extensive efforts have been made to exclude this data where possible. There remains however a residual risk of accidental capture if the user visits sensitive (e.g. health, religious) sites that are within the protected perimeter or trigger urgent security events, such as a virus, or a phishing attack.
 
