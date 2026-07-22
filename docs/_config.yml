@@ -35,6 +35,11 @@ defaults:
     values:
       layout: default
       nav_order: 10       # Default order if none is provided
+  - scope:
+      path: "assets"
+    values:
+      layout: null
+
 
 # ------------------------------------------------------------
 # GitHub metadata (for "Edit this page" links etc.)
