@@ -169,7 +169,18 @@
             height: auto;
             object-fit: contain;
             border-radius: 6px;
+            cursor: zoom-in;
         }
+
+        .lightbox {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center; justify-content: center;
+            z-index: 1000; padding: 2rem;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 95%; max-height: 95%; border-radius: 6px; }
 
         .carousel-slide figcaption {
             font-size: 0.9rem;
@@ -548,6 +559,20 @@
         // start
         if (playing) start();
         else setPlaying(false);
+
+        const lb = document.createElement('div');
+        lb.className = 'lightbox';
+        lb.innerHTML = '<img alt="">';
+        document.body.appendChild(lb);
+        carousel.querySelectorAll('.carousel-slide img').forEach(img => {
+            img.addEventListener('click', () => {
+                lb.firstElementChild.src = img.src;
+                lb.classList.add('open');
+                stop();
+            });
+        });
+        lb.addEventListener('click', () => { lb.classList.remove('open'); if (playing) start(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
     })();
 </script>
 </body>
