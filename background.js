@@ -341,15 +341,16 @@ chrome.downloads.onChanged.addListener((delta) => {
 		switch (danger) {
 			case 'safe':
 				break
-			case 'deepScannedFailed':
 			case 'accepted':
+				const dangerType = delta.danger.previous ? `of type '${delta.danger.previous}'` : ''
 				getDownload(delta.id).then(download => {
-					logDownload(download, nowTimestamp(), "download accepted", Log.ERROR, `user accepted danger of type '${delta.danger.current}' of download of @@URL@@`)
+					logDownload(download, nowTimestamp(), "danger accepted", Log.ERROR, `user accepted danger ${dangerType} during download of @@URL@@`)
 				})
 				break
 			default:
+				const errorLevel =  danger === 'deepScannedOpenedDangerous' || danger === 'accountCompromise' ? Log.ERROR : Log.WARN
 				getDownload(delta.id).then(download => {
-					logDownload(download, nowTimestamp(), "download warned", Log.WARN, `user notified danger of type '${danger}' of download of @@URL@@`)
+					logDownload(download, nowTimestamp(), "danger warned", errorLevel, `browser raised danger of type '${danger}' during download of @@URL@@`)
 				})
 		}
 	}
