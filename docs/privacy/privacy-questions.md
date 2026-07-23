@@ -60,15 +60,15 @@ Citadel is designed with privacy in mind. Here’s what it **does** and **does n
 
     - *Does NOT access personal files or details about non-work activity.*
 
-- - **Do Not Disturb status:**  
+- **Do Not Disturb status:**  
     Checks if this is a good time to show non-urgent security warnings.
 
-- *Does NOT log your DND status.*
+    - *Does NOT log your DND status.*
 
-- - **Contents of clipboard and selected / dragged files:**  
+- **Contents of clipboard and selected / dragged files:**  
     Warns you if you are sending a file that contains a known type of secrets, such as an API key or a token.
 
-  - *Does NOT access files not selected / dragged, and does not store or modify them.*
+    - *Does NOT access files not selected / dragged, and does not store or modify them.*
 
 
 ### What’s Not Accessed
