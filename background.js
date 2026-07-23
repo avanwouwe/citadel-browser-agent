@@ -709,8 +709,15 @@ function registerInteraction(url, context) {
 }
 
 
-function registerAccountIssues(config, report, siteUrl) {
-	const appName = getSitename(siteUrl)
+function registerAccountIssues(config, report, system) {
+	if (report.password.reuse) {
+		PasswordVault.updateReuse(system, report.username)
+	}
+
+	if (! AccountTrust.checkFor(report.username, system)) {
+		debug(`did not test password policy on external account ${username} / ${system}`)
+		return
+	}
 
 	const issues = {
 		length: report.password.length < config.account.passwordPolicy.minLength ? 1 : null,
@@ -725,11 +732,7 @@ function registerAccountIssues(config, report, siteUrl) {
 		reuse: null
 	}
 
-	AppStats.setIssues(appName, report.username, issues)
-
-	if (report.password.reuse) {
-		PasswordVault.updateReuse(appName, report.username)
-	}
+	AppStats.setIssues(system, report.username, issues)
 }
 
 function registerAccountAutofill(email, url) {
@@ -848,8 +851,6 @@ chrome.cookies.onChanged.addListener((changeInfo) => {
 })
 
 async function auditPassword(username, system, password) {
-	if (! AccountTrust.checkFor(username, system)) return null
-
 	const report = {
 		username,
 		password: PasswordCheck.analyzeAccount(username, password)
@@ -897,11 +898,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 				}
 
 				const report = await auditPassword(username, siteUrl, password)
-				if (! report) {
-					debug(`did not test password policy on external account ${username} / ${siteUrl.hostname}`)
-					return
-				}
-				registerAccountIssues(config, report, siteUrl)
+				registerAccountIssues(config, report, siteUrl.hostname)
 			})
 		})
 
@@ -986,7 +983,7 @@ onMessage((request, sender) => {
 
 	if (request.type === "allow-reuse") {
 		// register the account so that at the next click it will not be seen as the first time that it was used
-		registerAccountUsage(senderUrl, request.report)
+		registerAccountUsage(senderUrl, request.report.username)
 
 		injectFuncIntoTab(tabId, () => location.reload())
 		const reason = truncateReason(request.reason)
