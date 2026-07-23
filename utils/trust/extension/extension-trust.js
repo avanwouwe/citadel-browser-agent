@@ -78,7 +78,7 @@ class ExtensionTrust {
                 scanType === ExtensionAnalysis.ScanType.UPDATE
                     ? t('extension-analysis.disable-modal.message-update')
                     : t('extension-analysis.disable-modal.message-install')
-            Notification.setAlert(Extension.TYPE, State.FAILING, title, message)
+            Notification.setAlert(Extension.TYPE, State.BLOCKING, title, message)
         }
 
         Dashboard.refreshExtension()
