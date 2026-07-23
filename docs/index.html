@@ -290,7 +290,9 @@
         }
 
         .btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
             padding: 1rem 2rem;
             font-size: 1.1rem;
             text-decoration: none;
@@ -372,10 +374,13 @@
     <section class="hero">
         <div class="pitch">
             <p>
-                <strong>Citadel is an open-source browser agent that helps CISOs and CIOs secure their organization</strong> by enforcing IT policy, detecting malware and shadow IT, and enabling rapid incident response—all without compromising user privacy.
+                <strong>Citadel is an open-source browser agent that helps IT and security teams secure their organization</strong> by enforcing IT policy (password, MFA, shadow IT) and detecting data loss, phishing and malware.
             </p>
             <p>
-                In today's landscape, the browser is the operating system. Traditional endpoint management solutions don't manage browsers effectively, and browser security solutions that do require expensive per-seat licenses, and often can't handle BYOD or contractor devices. Citadel changes this.
+                <strong>The browser is the operating system</strong>, but classical endpoint tools don't secure it. Citadel lives inside the browser.
+            </p>
+            <p>
+                Integrate Citadel with a SIEM for  <strong>situational awareness across your organization</strong>—all without compromising user privacy.
             </p>
         </div>
 
@@ -492,7 +497,20 @@
         <div class="cta">
             <div class="cta-buttons">
                 <a href="/install" class="btn btn-primary">Get Started</a>
-                <a href="https://github.com/avanwouwe/citadel-browser-agent" class="btn btn-secondary">GitHub</a>
+                <a href="https://github.com/avanwouwe/citadel-browser-agent" class="btn btn-secondary">
+                    <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20"
+                         fill="currentColor" aria-hidden="true">
+                        <path d="M12 .5C5.37.5 0 5.87 0 12.5c0 5.3 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58
+                 0-.29-.01-1.05-.02-2.06-3.34.73-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76
+                 -1.09-.75.08-.73.08-.73 1.21.09 1.84 1.24 1.84 1.24 1.07 1.84 2.81 1.31 3.5 1
+                 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.34-5.47-5.96 0-1.32.47-2.39 1.24-3.23
+                 -.12-.31-.54-1.53.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0
+                 c2.29-1.55 3.3-1.23 3.3-1.23.66 1.65.24 2.87.12 3.18.77.84 1.24 1.91 1.24 3.23
+                 0 4.63-2.81 5.65-5.49 5.95.43.37.82 1.1.82 2.22 0 1.61-.02 2.9-.02 3.29
+                 0 .32.22.7.83.58C20.56 22.29 24 17.79 24 12.5 24 5.87 18.63.5 12 .5z"/>
+                    </svg>
+                    GitHub
+                </a>
             </div>
         </div>
     </div>
@@ -500,7 +518,7 @@
 
 <footer>
     <p>Open source and maintained by the security community.</p>
-    <p><a href="https://github.com/avanwouwe/citadel-browser-agent/blob/main/doc/privacy-impact-assessment.md">Privacy Impact Assessment</a> • <a href="https://github.com/avanwouwe/citadel-browser-agent/blob/main/doc/transparency.md">Transparency</a> • <a href="mailto:contact@citadelagent.org">Contact</a></p>
+    <p><a href="https://www.citadelagent.org/privacy/privacy-impact-assessment">Privacy Impact Assessment</a> • <a href="https://www.citadelagent.org/privacy/transparency/">Transparency</a> • <a href="mailto:contact@citadelagent.org">Contact</a></p>
 </footer>
 
 <script>

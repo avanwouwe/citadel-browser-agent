@@ -5,8 +5,10 @@ nav_order: 2
 has_children: true
 ---
 
-The installation of Citadel consists of a number of moving parts: Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. The [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM. Everything is explained in the [installation guide](/install/).
+Installing Citadel is relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM. There are a few moving parts — Citadel installs in the browser, on the OS, and in your SIEM — but the [installation guide](/install/) walks you through each one. SIEM integration is optional, and only needed if you want centralised dashboards and increased situational awareness.
 
-Also check out the [configuration manual](/config/) to understand how you can adapt Citadel to your organisation, for example by configuring your logo, name and support e-mail address.
+Also check out the [configuration manual](/config/) to understand how you can adapt Citadel to your organization, for example by configuring your logo, name and support e-mail address.
 
-And finally. Citadel takes great care to respect the privacy of your users. Nevertheless, the deployment of Citadel will undoubtedly raise various questions related to privacy compliance and internal communication. You will find in the [privacy section](/privacy/) some documents that will help you deal with those.
+And finally. Citadel takes great care to respect the privacy of your users. Even so, deploying Citadel will undoubtedly raise questions around privacy compliance and internal communication. 
+
+There is also the human side: users will at times be interrupted, warned or reprimanded, and IT policy will be applied more strictly than it was before. Depending on your organizational culture, this may need some preparation and communication ahead of the rollout. The [privacy section](/privacy/) provides useful templates for compliance, along with answers to frequently asked questions, to help you deal with all of this.
