@@ -90,7 +90,7 @@ Users can then ask for a temporary exception and continue. The account will be r
 * `account.passwordReuse.exceptions.allowed` are users allowed to request an exception and enter the password
 * `account.passwordReuse.exceptions.groups` list **containing lists** of domains that you allow to share passwords between them
 
-![Phishing alert](/img/screenshot/screenshot-issue-phishing.png)
+![Phishing alert](/img/screenshot/screenshot-warning-phishing.png)
 
 ## professional accounts in personal profiles
 When a browser profile is signed into a *personal* cloud account (e.g. a personal Google account), the passwords it stores are synced to that account. Personal accounts are generally less protected, they propagate to non-enterprise devices, and survives offboarding.

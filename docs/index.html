@@ -6,6 +6,46 @@
     <title>Citadel - Privacy-First Enterprise Browser Security for the Rest of Us</title>
     <meta name="description" content="Open-source browser agent that enforces IT policy, detects malware and shadow IT, while respecting user privacy. Built for CISOs and CIOs.">
     <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --surface-alt: #f9fafb;
+            --band: #f0f1f3;
+            --text: #333333;
+            --text-strong: #1a1a1a;
+            --text-muted: #666666;
+            --text-faint: #999999;
+            --text-body: #555555;
+            --border: #1a1a1a;
+            --btn-primary-bg: #1a1a1a;
+            --btn-primary-bg-hover: #333333;
+            --btn-primary-text: #ffffff;
+            --btn-secondary-hover: #f5f5f5;
+            --shadow: rgba(0, 0, 0, 0.08);
+            --shadow-hover: rgba(0, 0, 0, 0.15);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #121212;
+                --surface: #1e1e1e;
+                --surface-alt: #181818;
+                --band: #0d0d0d;
+                --text: #e0e0e0;
+                --text-strong: #f5f5f5;
+                --text-muted: #b0b0b0;
+                --text-faint: #888888;
+                --text-body: #c8c8c8;
+                --border: #e0e0e0;
+                --btn-primary-bg: #f5f5f5;
+                --btn-primary-bg-hover: #ffffff;
+                --btn-primary-text: #1a1a1a;
+                --btn-secondary-hover: #2a2a2a;
+                --shadow: rgba(0, 0, 0, 0.4);
+                --shadow-hover: rgba(0, 0, 0, 0.6);
+            }
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -15,12 +55,13 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background: #fafafa;
+            color: var(--text);
+            background: var(--bg);
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         .container {
-            max-width: 900px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 2rem;
         }
@@ -50,55 +91,174 @@
         h1 {
             font-size: 3rem;
             font-weight: 700;
-            color: #1a1a1a;
+            color: var(--text-strong);
             margin-bottom: 1rem;
             letter-spacing: -0.02em;
         }
 
         .tagline {
             font-size: 1.5rem;
-            color: #666;
+            color: var(--text-muted);
             font-weight: 300;
             margin-bottom: 3rem;
         }
 
+        /* ---------- Two-column hero ---------- */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            align-items: stretch;
+            margin-bottom: 2rem;
+        }
+
         .pitch {
-            background: white;
+            background: var(--surface);
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px var(--shadow);
         }
 
         .pitch p {
-            color: #555;
+            color: var(--text-body);
         }
 
         .pitch p + p {
             margin-top: 1.5rem;
         }
 
+        /* ---------- Carousel ---------- */
+        .carousel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .carousel-stage {
+            position: relative;
+            width: 100%;
+            flex: 1;                /* fill the stretched column height */
+            display: grid;          /* stack all slides in one cell */
+            background: var(--surface);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px var(--shadow);
+            overflow: hidden;
+        }
+
+        .carousel-slide {
+            grid-area: 1 / 1;       /* all slides share the same grid cell */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .carousel-slide img {
+            max-width: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .carousel-slide figcaption {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .carousel-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .carousel-btn {
+            background: var(--surface);
+            color: var(--text-strong);
+            border: 1px solid var(--border);
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s, transform 0.2s;
+        }
+
+        .carousel-btn:hover {
+            background: var(--btn-secondary-hover);
+            transform: scale(1.08);
+        }
+
+        .carousel-dots {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            border: none;
+            padding: 0;
+            background: var(--text-faint);
+            opacity: 0.4;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.2s;
+        }
+
+        .carousel-dot.active {
+            opacity: 1;
+            transform: scale(1.3);
+            background: var(--text-strong);
+        }
+
+        /* ---------- Full-bleed "second page" band ---------- */
+        .band {
+            background: var(--band);
+            border-top: 1px solid var(--shadow);
+            margin-top: 3rem;
+        }
+
         .features {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
-            margin: 3rem 0;
+            margin: 1rem 0 3rem;
         }
 
         .feature {
-            background: white;
+            background: var(--surface);
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            box-shadow: 0 2px 8px var(--shadow);
         }
 
         .feature h3 {
             font-size: 1.2rem;
             margin-bottom: 0.8rem;
-            color: #1a1a1a;
+            color: var(--text-strong);
         }
 
         .feature p {
-            color: #666;
+            color: var(--text-muted);
             font-size: 0.95rem;
         }
 
@@ -125,108 +285,61 @@
         }
 
         .btn-primary {
-            background: #1a1a1a;
-            color: white;
+            background: var(--btn-primary-bg);
+            color: var(--btn-primary-text);
         }
 
         .btn-primary:hover {
-            background: #333;
+            background: var(--btn-primary-bg-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px var(--shadow-hover);
         }
 
         .btn-secondary {
-            background: white;
-            color: #1a1a1a;
-            border: 2px solid #1a1a1a;
+            background: var(--surface);
+            color: var(--text-strong);
+            border: 2px solid var(--border);
         }
 
         .btn-secondary:hover {
-            background: #f5f5f5;
+            background: var(--btn-secondary-hover);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px var(--shadow-hover);
         }
 
         footer {
             text-align: center;
             padding: 3rem 0 2rem;
-            color: #999;
+            color: var(--text-faint);
             font-size: 0.9rem;
         }
 
         footer a {
-            color: #666;
+            color: var(--text-muted);
             text-decoration: none;
         }
 
         footer a:hover {
-            color: #1a1a1a;
+            color: var(--text-strong);
         }
 
         @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .tagline {
-                font-size: 1.2rem;
-            }
-
-            .pitch {
-                padding: 2rem;
-            }
-
-            .features {
+            h1 { font-size: 2rem; }
+            .tagline { font-size: 1.2rem; }
+            .hero {
                 grid-template-columns: 1fr;
+                gap: 2rem;
             }
-        }
-        .screenshots-section {
-            background: #f9fafb;
-            margin-top: 2rem;
+            .features { grid-template-columns: 1fr; }
         }
 
-        .screenshots-carousel {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            position: relative;
-            height: 500px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .screenshot-img {
-            position: absolute;
-            max-height: 500px;
-            max-width: 90%;
-            width: auto;
-            height: auto;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            object-fit: contain;
-            opacity: 0;
-            animation: fadeInOut 44s infinite;
-        }
-
-        .screenshot-img:nth-child(1) { animation-delay: 0s; }
-        .screenshot-img:nth-child(2) { animation-delay: 4s; }
-        .screenshot-img:nth-child(3) { animation-delay: 8s; }
-        .screenshot-img:nth-child(4) { animation-delay: 12s; }
-        .screenshot-img:nth-child(5) { animation-delay: 16s; }
-        .screenshot-img:nth-child(6) { animation-delay: 20s; }
-        .screenshot-img:nth-child(7) { animation-delay: 24s; }
-        .screenshot-img:nth-child(8) { animation-delay: 28s; }
-        .screenshot-img:nth-child(9) { animation-delay: 32s; }
-        .screenshot-img:nth-child(10) { animation-delay: 36s; }
-        .screenshot-img:nth-child(11) { animation-delay: 40s; }
-
-        @keyframes fadeInOut {
-            0% { opacity: 0; }
-            2.5% { opacity: 1; }
-            10% { opacity: 1; }
-            12.5% { opacity: 0; }
-            100% { opacity: 0; }
+        @media (prefers-reduced-motion: reduce) {
+            .carousel-slide,
+            .carousel-btn,
+            .carousel-dot,
+            .btn { transition: none; }
+            .carousel-btn:hover,
+            .btn:hover { transform: none; }
         }
     </style>
 </head>
@@ -234,94 +347,208 @@
 <div class="container">
     <header>
         <div class="header-title">
-            <img src="/img/logo.png"
-                 alt="Citadel Logo"
-                 class="logo">
+            <img src="/img/logo.png" alt="Citadel Logo" class="logo">
             <h1>Citadel</h1>
         </div>
         <p class="tagline">Enterprise Browser Security for the Rest of Us</p>
     </header>
 
-    <div class="pitch">
-        <p>
-            <strong>Citadel is an open-source browser agent that helps CISOs and CIOs secure their organization</strong> by enforcing IT policy, detecting malware and shadow IT, and enabling rapid incident response—all without compromising user privacy.
-        </p>
-        <p>
-            In today's landscape, the browser is the operating system. Traditional endpoint management solutions don't manage browsers effectively, and browser security solutions that do require expensive per-seat licenses, and often can't handle BYOD or contractor devices. Citadel changes this.
-        </p>
-    </div>
+    <!-- Two-column hero: pitch left, carousel right -->
+    <section class="hero">
+        <div class="pitch">
+            <p>
+                <strong>Citadel is an open-source browser agent that helps CISOs and CIOs secure their organization</strong> by enforcing IT policy, detecting malware and shadow IT, and enabling rapid incident response—all without compromising user privacy.
+            </p>
+            <p>
+                In today's landscape, the browser is the operating system. Traditional endpoint management solutions don't manage browsers effectively, and browser security solutions that do require expensive per-seat licenses, and often can't handle BYOD or contractor devices. Citadel changes this.
+            </p>
+        </div>
 
-    <section class="screenshots-section">
-        <div class="screenshots-carousel">
-            <img src="/img/screenshot/screenshot-issue-account.png" alt="Account Issue" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-issue-mfa.png" alt="MFA Issue" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-issue-device.png" alt="Device Issue" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-issue-phishing.png" alt="Phishing Alert" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-issue-webfilter.png" alt="Webfilter Alert" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-extension-analysis.png" alt="Analysis Extension" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-extension-disabled.png" alt="Disabled Extension" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-dashboard-accounts.png" alt="Accounts Dashboard" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-dashboard-device.png" alt="Device Dashboard " class="screenshot-img">
-            <img src="/img/screenshot/screenshot-dashboard-extensions.png" alt="Extensions Dashboard" class="screenshot-img">
-            <img src="/img/screenshot/screenshot-dashboard-events.png" alt="Events Dashboard" class="screenshot-img">
+        <div class="carousel" id="carousel">
+            <div class="carousel-stage">
+                <figure class="carousel-slide active">
+                    <img src="/img/screenshot/screenshot-issue-account.png" alt="Account issue warning">
+                    <figcaption>Account issue detected</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-issue-mfa.png" alt="MFA requirement warning">
+                    <figcaption>MFA required</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-issue-device.png" alt="Device compliance issue">
+                    <figcaption>Device compliance issue</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-warning-phishing.png" alt="Phishing warning">
+                    <figcaption>Phishing detected</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-issue-webfilter.png" alt="Web filter block">
+                    <figcaption>Site blocked by web filter</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-warning-shadowit.png" alt="Shadow IT warning">
+                    <figcaption>Shadow IT detected</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-warning-clickfix.png" alt="ClickFix scam warning">
+                    <figcaption>ClickFix scam blocked</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-secret-leaking.png" alt="Secret detected in clipboard">
+                    <figcaption>Secret detected in copy-paste</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-extension-analysis.png" alt="Browser extension analysis">
+                    <figcaption>Extension analysis</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-extension-disabled.png" alt="Disabled extension notice">
+                    <figcaption>Dangerous extension disabled</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-dashboard-accounts.png" alt="Accounts dashboard">
+                    <figcaption>Dashboard: accounts</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-dashboard-device.png" alt="Device dashboard">
+                    <figcaption>Dashboard: device</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-dashboard-extensions.png" alt="Extensions dashboard">
+                    <figcaption>Dashboard: extensions</figcaption>
+                </figure>
+                <figure class="carousel-slide">
+                    <img src="/img/screenshot/screenshot-dashboard-events.png" alt="Events dashboard">
+                    <figcaption>Dashboard: events</figcaption>
+                </figure>
+            </div>
+
+            <div class="carousel-controls">
+                <button class="carousel-btn" id="carPrev" aria-label="Previous screenshot">&#8249;</button>
+                <button class="carousel-btn" id="carPlay" aria-label="Pause slideshow">&#10073;&#10073;</button>
+                <div class="carousel-dots" id="carDots"></div>
+                <button class="carousel-btn" id="carNext" aria-label="Next screenshot">&#8250;</button>
+            </div>
         </div>
     </section>
-
-    <p>
-
-    <div class="features">
-        <div class="feature">
-            <h3>🛡️ Enforce Policy</h3>
-            <p>Password quality, MFA requirements, device compliance, web filtering, and session duration limits—all managed from one agent.</p>
-        </div>
-
-        <div class="feature">
-            <h3>🔍 Detect Threats</h3>
-            <p>Malware downloads, blacklisted sites, encryption issues, dangerous browser extensions, and security violations detected in real-time.</p>
-        </div>
-
-        <div class="feature">
-            <h3>📊 Manage Licenses</h3>
-            <p>Track application usage and identify shadow IT or unused licenses without invasive monitoring of personal browsing.</p>
-        </div>
-
-        <div class="feature">
-            <h3>🥷 Privacy Respecting</h3>
-            <p>Only tracks authenticated applications, hashes URLs for forensics, and keeps data local. Designed for GDPR compliance.</p>
-        </div>
-
-        <div class="feature">
-            <h3>🔌 Integrates Easily</h3>
-            <p>Works with any SIEM/XDR that ingests syslog. Pre-integrated with Wazuh. No central server required.</p>
-        </div>
-
-        <div class="feature">
-            <h3>🌐 Cross-Browser</h3>
-            <p>Supports Chrome, Firefox, Edge, Brave, Opera, Arc, Atlas (OpenAI) and Comet (Perplexity). Works on macOS and Windows endpoints.</p>
-        </div>
-    </div>
-
-    <div class="pitch" style="margin-top: 3rem;">
-        <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: #1a1a1a;">Device Security Controls</h2>
-        <p>
-            <strong>Citadel includes comprehensive device posture checks</strong> that verify your endpoints meet security standards. These controls ensure disk encryption is enabled, systems are updated, firewalls are active, and sensitive data is properly protected.
-        </p>
-        <p>
-            Users receive clear, actionable guidance when issues are detected—no IT jargon, just step-by-step instructions to fix problems. <a href="/control" style="color: #1a1a1a; font-weight: 500;">View all security controls →</a>
-        </p>
-    </div>
-
-    <div class="cta">
-        <div class="cta-buttons">
-            <a href="/install" class="btn btn-primary">Install Citadel</a>
-            <a href="https://github.com/avanwouwe/citadel-browser-agent" class="btn btn-secondary">View on GitHub</a>
-        </div>
-    </div>
-
-    <footer>
-        <p>Open source and maintained by the security community.</p>
-        <p><a href="https://github.com/avanwouwe/citadel-browser-agent/blob/main/doc/privacy-impact-assessment.md">Privacy Impact Assessment</a> • <a href="https://github.com/avanwouwe/citadel-browser-agent/blob/main/doc/transparency.md">Transparency</a> • <a href="mailto:contact@citadelagent.org">Contact</a></p>
-    </footer>
 </div>
+
+<!-- Full-bleed second "page" -->
+<div class="band">
+    <div class="container">
+        <div class="features">
+            <div class="feature">
+                <h3>🛡️ Enforce Policy</h3>
+                <p>Password quality, MFA requirements, device compliance, web filtering, and session duration limits—all managed from one agent.</p>
+            </div>
+            <div class="feature">
+                <h3>🔍 Detect Threats</h3>
+                <p>Malware downloads, blacklisted sites, encryption issues, dangerous browser extensions, and security violations detected in real-time.</p>
+            </div>
+            <div class="feature">
+                <h3>📊 Manage Licenses</h3>
+                <p>Track application usage and identify shadow IT or unused licenses without invasive monitoring of personal browsing.</p>
+            </div>
+            <div class="feature">
+                <h3>🥷 Privacy Respecting</h3>
+                <p>Only tracks authenticated applications, hashes URLs for forensics, and keeps data local. Designed for GDPR compliance.</p>
+            </div>
+            <div class="feature">
+                <h3>🔌 Integrates Easily</h3>
+                <p>Works with any SIEM/XDR that ingests syslog. Pre-integrated with Wazuh. No central server required.</p>
+            </div>
+            <div class="feature">
+                <h3>🌐 Cross-Browser</h3>
+                <p>Supports Chrome, Firefox, Edge, Brave, Opera, Arc, Atlas (OpenAI) and Comet (Perplexity). Works on macOS and Windows endpoints.</p>
+            </div>
+        </div>
+
+        <div class="pitch" style="margin-top: 3rem;">
+            <h2 style="font-size: 1.5rem; margin-bottom: 1rem; color: var(--text-strong);">Device Security Controls</h2>
+            <p>
+                <strong>Citadel includes comprehensive device posture checks</strong> that verify your endpoints meet security standards. These controls ensure disk encryption is enabled, systems are updated, firewalls are active, and sensitive data is properly protected.
+            </p>
+            <p>
+                Users receive clear, actionable guidance when issues are detected—no IT jargon, just step-by-step instructions to fix problems. <a href="/control" style="color: var(--text-strong); font-weight: 500;">View all security controls →</a>
+            </p>
+        </div>
+
+        <div class="cta">
+            <div class="cta-buttons">
+                <a href="/install" class="btn btn-primary">Get Started</a>
+                <a href="https://github.com/avanwouwe/citadel-browser-agent" class="btn btn-secondary">GitHub</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>Open source and maintained by the security community.</p>
+    <p><a href="https://github.com/avanwouwe/citadel-browser-agent/blob/main/doc/privacy-impact-assessment.md">Privacy Impact Assessment</a> • <a href="https://github.com/avanwouwe/citadel-browser-agent/blob/main/doc/transparency.md">Transparency</a> • <a href="mailto:contact@citadelagent.org">Contact</a></p>
+</footer>
+
+<script>
+    (function () {
+        const carousel = document.getElementById('carousel');
+        const slides = Array.from(carousel.querySelectorAll('.carousel-slide'));
+        const prevBtn = document.getElementById('carPrev');
+        const nextBtn = document.getElementById('carNext');
+        const playBtn = document.getElementById('carPlay');
+        const dotsWrap = document.getElementById('carDots');
+        const INTERVAL = 4000;
+
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let current = 0;
+        let timer = null;
+        let playing = !reduceMotion;
+
+        // build dots
+        slides.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot' + (i === 0 ? ' active' : '');
+            dot.setAttribute('aria-label', 'Go to screenshot ' + (i + 1));
+            dot.addEventListener('click', () => { show(i); if (playing) restart(); });
+            dotsWrap.appendChild(dot);
+        });
+        const dots = Array.from(dotsWrap.children);
+
+        function show(i) {
+            current = (i + slides.length) % slides.length;
+            slides.forEach((s, idx) => s.classList.toggle('active', idx === current));
+            dots.forEach((d, idx) => d.classList.toggle('active', idx === current));
+        }
+
+        function next() { show(current + 1); }
+        function prev() { show(current - 1); }
+
+        function start() {
+            stop();
+            timer = setInterval(next, INTERVAL);
+        }
+        function stop() {
+            if (timer) { clearInterval(timer); timer = null; }
+        }
+        function restart() { start(); }
+
+        function setPlaying(state) {
+            playing = state;
+            if (playing) { start(); playBtn.innerHTML = '&#10073;&#10073;'; playBtn.setAttribute('aria-label', 'Pause slideshow'); }
+            else { stop(); playBtn.innerHTML = '&#9654;'; playBtn.setAttribute('aria-label', 'Play slideshow'); }
+        }
+
+        prevBtn.addEventListener('click', () => { prev(); if (playing) restart(); });
+        nextBtn.addEventListener('click', () => { next(); if (playing) restart(); });
+        playBtn.addEventListener('click', () => setPlaying(!playing));
+
+        // pause on hover, resume on leave (only if playing)
+        carousel.addEventListener('mouseenter', () => { if (playing) stop(); });
+        carousel.addEventListener('mouseleave', () => { if (playing) start(); });
+
+        // start
+        if (playing) start();
+        else setPlaying(false);
+    })();
+</script>
 </body>
 </html>
