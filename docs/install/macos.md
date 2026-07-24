@@ -7,7 +7,7 @@ nav_order: 2
 
 # macOS installation
 
-Browser extensions are sandboxed and cannot access the local operating system. To allow the Citadel extension to write to syslog it is necessary to set up Native Messaging. This involves placing a JSON manifest file in a specific place that gives the path to the program that will be started by Chrome, and then receive the events and log them to syslog.
+Browser extensions are sandboxed and cannot access the local operating system. To allow the Citadel extension to check the device status and write to syslog it is necessary to set up Native Messaging. This involves placing a JSON manifest file in a specific place that gives the path to the program that will be started by Chrome, and then receive the events and log them to syslog.
 
 You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest), which will take care of all of that.
 
@@ -30,7 +30,7 @@ log stream --process citadel-browser-agent --predicate 'eventMessage BEGINSWITH 
 ```
 
 ## configuration
-Citadel has sensible defaults, but you can change the configuration of Citadel, for example to change the logging and masking levels or to declare your own blacklist or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the correct format in the `/Library/Scripts/Citadel/` directory. See the [configuration manual](/config/) for more information.
+Citadel has sensible defaults, but you can change the configuration of Citadel. You can for example change the logging and masking levels or declare your own blacklist, the domains you consider part of your IS, or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the correct format in the `/Library/Scripts/Citadel/` directory. See the [configuration manual](/config/) for more information.
 
 ## macOS configuration profile
 
