@@ -909,9 +909,10 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 			const account = AppStats.getAccount(app, username)
 
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
-				const showModal = account.lastMFA === undefined
+				const isReconnect = account.lastMFA !== undefined
+				if (isReconnect) debug(`MFA session expired for '${username}' of ${siteUrl.hostname}`)
+				MFACheck.startTimer(siteUrl, isReconnect)
 				delete account.lastMFA
-				MFACheck.startTimer(siteUrl, config.account.mfa.waitMinutes, showModal)
 			}
 		}
 	}
@@ -1003,6 +1004,11 @@ onMessage((request, sender) => {
 		Modal.removeFromDomain(request.domain)
 		const reason = truncateReason(request.reason)
 		logger.log(nowTimestamp(), "exception", "MFA exception", senderUrl.origin, Log.ERROR, reason, `MFA exception used for account '${app.lastAccount}' on '${request.domain}' for reason '${reason}'`)
+	}
+
+	if (request.type === "logoff-domain") {
+		MFACheck.cancelTimer(`https://${request.domain}`, 'logged off from domain')
+		logOffDomain(request.domain).then(() => injectFuncIntoDomain(request.domain, () => location.reload()))
 	}
 
 	if (request.type === "allow-blacklist") {

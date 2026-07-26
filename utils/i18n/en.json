@@ -5,6 +5,7 @@
     "ok": "OK",
     "cancel": "Cancel",
     "back": "Back",
+    "later": "Not now",
     "contact": "your IT support"
   },
   "control": {
@@ -37,7 +38,6 @@
     "notification": {
       "title": "Device security issues",
       "acknowledge": "Fix",
-      "later": "Not now",
       "failing": "Your device has security issues. Click to fix them or contact {{contact}}.",
       "warning": "⚠\uFE0F Your device is not securely configured.<p><u>In <b>{{days}} days</b> your access will be blocked</u>.<p>Click to fix issues now or contact {{contact}}.",
       "blocking": "⚠\uFE0F Your device is insecure and your access has been blocked. Click to fix issues or contact {{contact}}.",
@@ -77,7 +77,6 @@
     "notification": {
       "title": "Account security issues",
       "acknowledge": "Fix",
-      "later": "Not now",
       "failing": "One of your accounts has security issues. Click to fix them or contact {{contact}}.",
       "warning": "⚠\uFE0F One of your accounts is not securely configured.<p><u>In <b>{{days}} days</b> your access will be blocked</u>.<p>Click to fix issues now or contact {{contact}}.",
       "blocking": "⚠\uFE0F One of your accounts is not securely configured. Your access has been blocked. Click to fix issues or contact {{contact}}."
@@ -109,8 +108,16 @@
     }
   },
   "mfa": {
-    "title": "You are not connecting with MFA",
-    "disconnected": "You have been disconnected from <b>{{domain}}</b> because you connected to <b>{{hostname}}</b> without Multi-Factor Authentication (MFA).<P>Reconnect and configure your account to use MFA, such as a Time-based One-Time Password (TOTP).<P>Contact {{contact}} if you need help."
+    "title": "Connect with MFA",
+    "reconnect": "Reconnect",
+    "first-connect" : {
+      "warning": "Connection to <b>{{hostname}}</b> requires Multi-Factor Authentication (MFA).<p>⚠\uFE0F <b>You will be disconnected in {{minutes}} minutes</b> if you do not configure your account to use MFA, such as a Time-based One-Time Password (TOTP).<p>Contact {{contact}} if you need help.",
+      "disconnected": "You have been disconnected from <b>{{domain}}</b> because you connected to <b>{{hostname}}</b> without Multi-Factor Authentication (MFA).<P>Reconnect and configure your account to use MFA, such as a Time-based One-Time Password (TOTP).<P>Contact {{contact}} if you need help."
+    },
+    "session-expiration": {
+      "warning": "You have to periodically reconnect to <b>{{hostname}}</b> using Multi-Factor Authentication (MFA).<p>⚠\uFE0F <b>You will be disconnected in {{minutes}} minutes</b> if you do not do not reconnect.",
+      "disconnected": "You have been disconnected from <b>{{domain}}</b> because you did not reconnect to <b>{{hostname}}</b> using Multi-Factor Authentication (MFA)."
+    }
   },
   "block-page": {
     "not-specified": "Not specified",

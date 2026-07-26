@@ -5,6 +5,7 @@
     "ok": "OK",
     "cancel": "Annuler",
     "back": "Retour",
+    "later": "Pas maintenant",
     "contact": "votre support IT"
   },
   "control": {
@@ -37,7 +38,6 @@
     "notification": {
       "title": "Problèmes de sécurité",
       "acknowledge": "Corriger",
-      "later": "Pas maintenant",
       "failing": "Votre appareil présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
       "warning": "⚠\uFE0F Votre appareil n’est pas configuré de manière sécurisée.<p><u>Dans <b>{{days}} jours</b> votre accès sera bloqué</u>.<p>Cliquez pour corriger les problèmes ou contactez {{contact}}.",
       "blocking": "⚠\uFE0F Votre appareil n’est pas sécurisé et votre accès a été bloqué. Cliquez pour corriger les problèmes ou contactez {{contact}}.",
@@ -77,7 +77,6 @@
     "notification": {
       "title": "Problèmes de sécurité",
       "acknowledge": "Corriger",
-      "later": "Pas maintenant",
       "failing": "Un de vos comptes présente des problèmes de sécurité. Cliquez pour les corriger ou contactez {{contact}}.",
       "warning": "⚠\uFE0F Un de vos comptes n’est pas sécurisé.<p><u>Dans <b>{{days}} jours</b> votre accès sera bloqué</u>.<p>Cliquez pour corriger le compte ou contactez {{contact}}.",
       "blocking": "⚠\uFE0F Un de vos comptes n’est pas sécurisé. Votre accès a été bloqué. Cliquez pour corriger le compte ou contactez {{contact}}."
@@ -109,8 +108,16 @@
     }
   },
   "mfa": {
-    "title": "Vous ne connectez pas avec MFA",
-    "disconnected": "Vous avez été déconnecté de <b>{{domain}}</b> car vous vous êtes connecté à <b>{{hostname}}</b> sans authentification multifacteur (MFA).<P>Reconnectez-vous et configurez votre compte afin d’utiliser l’authentification multifacteur (MFA), par exemple avec un mot de passe à usage unique basé sur le temps (TOTP).<P>Contactez {{contact}} si vous avez besoin d’aide."
+    "title": "Connexion avec MFA",
+    "reconnect": "Se reconnecter",
+    "first-connect" : {
+      "warning": "La connexion à <b>{{hostname}}</b> nécessite une authentification multifacteur (MFA).<p>⚠️ <b>Vous serez déconnecté(e) dans {{minutes}} minutes</b> si vous ne configurez pas votre compte pour utiliser le MFA, comme un mot de passe à usage unique basé sur le temps (TOTP).<p>Contactez {{contact}} si vous avez besoin d'aide.",
+      "disconnected": "Vous avez été déconnecté(e) de <b>{{domain}}</b> car vous vous êtes connecté(e) à <b>{{hostname}}</b> sans authentification multifacteur (MFA).<P>Reconnectez-vous et configurez votre compte pour utiliser le MFA, comme un mot de passe à usage unique basé sur le temps (TOTP).<P>Contactez {{contact}} si vous avez besoin d'aide."
+    },
+    "session-expiration": {
+      "warning": "Vous devez vous reconnecter périodiquement à <b>{{hostname}}</b> en utilisant l'authentification multifacteur (MFA).<p>⚠️ <b>Vous serez déconnecté(e) dans {{minutes}} minutes</b> si vous ne vous reconnectez pas.",
+      "disconnected": "Vous avez été déconnecté(e) de <b>{{domain}}</b> car vous ne vous êtes pas reconnecté(e) à <b>{{hostname}}</b> en utilisant l'authentification multifacteur (MFA)."
+    }
   },
   "block-page": {
     "not-specified": "Non spécifié",
@@ -173,7 +180,9 @@
     "disable-modal": {
       "title": "Extension Dangereuse",
       "message-install": "Une extension potentiellement dangereuse a été détectée et désactivée.",
-      "message-update": "Une extension a été désactivée, car une mise à jour a augmenté le risque qu'elle présente. Ne la réactivez pas sans avoir compris ce risque."    },
+      "message-update": "Une extension a été désactivée, car une mise à jour a augmenté le risque qu'elle présente. Ne la réactivez pas sans avoir compris ce risque.",
+      "message-error": "L'extension n'a pas pu être analysée car"
+    },
     "block-page": {
       "install": "Installer",
       "back": "Retour",

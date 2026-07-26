@@ -92,7 +92,7 @@ class Notification {
 
         if (alert.type === AccountTrust.TYPE || alert.type === DeviceTrust.TYPE) {
             onAcknowledge.label = t(`${alert.type}trust.notification.acknowledge`)
-            if (onCancel) onCancel.label = t(`${alert.type}trust.notification.later`)
+            if (onCancel) onCancel.label = t('global.later')
         }
 
         const onException = (isBlocking && exceptions?.duration > 0 && matchDomain(hostname, exceptions?.domains)) ? { type: 'allow-alert', alert } : undefined
