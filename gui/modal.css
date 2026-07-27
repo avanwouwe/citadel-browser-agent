@@ -104,7 +104,7 @@
 }
 .message {
     line-height: 1.4;
-    text-align: justify;
+    text-align: left;
 }
 
 /* ── Buttons ────────────────────────────────────────── */
