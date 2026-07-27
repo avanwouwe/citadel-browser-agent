@@ -38,7 +38,7 @@ async function safeInject(label, fn) {
     try {
         return await fn()
     } catch (e) {
-        debug(`Exception in ${label}:`, e)
+        error(`Exception in ${label}:`, e)
     }
 }
 

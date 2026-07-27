@@ -559,6 +559,7 @@ function applyPath(obj, attributePaths, func) {
 }
 
 const debug = console.log.bind(console)
+const error = console.error.bind(console)
 
 async function sleep(time) {
     await new Promise(r => setTimeout(r, time))

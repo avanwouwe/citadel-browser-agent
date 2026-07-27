@@ -1,5 +1,6 @@
 class Config {
     static default = {
+        version: '1.5.0',                       // version of the config format, only increases if compatibility is impacted
         system: {                               // N.B. NOT INTENDED FOR USER MODIFICATION
             maxReasonLength: 150,               // max number of characters when users give a reason
             downloadReportingFreq: 20,          // perform error reporting every N downloads
@@ -14,7 +15,7 @@ class Config {
             contact: undefined,                 // replace with the email address of your support
             logo: {
                 light: undefined,               // replace with the URL of your logo (128 x 128 pixel, transparent)
-                dark: undefined,                // .. and the dark version (optionally, otherwise the logo is just inverted)
+                dark: undefined,                // .. and the dark version (optionally, otherwise the standard logo is used)
             },
             domains: [ ],                       // replace with your domains, e.g. ["*.yourdomain.com","*.yourdomain.io"]
             applications: [ ]                   // list your applications, e.g. ["*.your-crm.com", "*.your-mdm.com"]
@@ -632,6 +633,49 @@ class Config {
     static load(localConfig = null) {
         debug(`loading ${localConfig ? 'local' : 'global'} configuration`)
 
+        if (localConfig) {
+            const configVersion = localConfig.version
+            const minVersion = Config.default.version
+
+            if (! Config.isEmpty(localConfig)) {
+                if (! configVersion) return debug(`unknown config file version, requires at least v${minVersion}`)
+                if (semverBefore(configVersion, minVersion)) return debug(`refused configuration of v${configVersion}, requires at least v${minVersion}`)
+            } else {
+                // empty config; installation by non-admin that wants the security features of Citadel, without being blocked
+                // * the protected scope is the entire internet
+                // * do not block, just remind periodically
+                // * do not warn against shadow IT
+                localConfig = {
+                    company: {
+                        applications: ["*"],
+                    },
+                    account: {
+                        actions: {
+                            WARN: Number.POSITIVE_INFINITY,
+                            BLOCK: Number.POSITIVE_INFINITY
+                        },
+                        passwordReuse: {
+                            action: Action.NOTIFY
+                        },
+                        profileSeparation: {
+                            action: Action.NOTIFY
+                        }
+                    },
+                    device: {
+                        action: {
+                            default: Action.NOTIFY,
+                            WARN: [],
+                            BLOCK: []
+                        }
+                    },
+                    shadowit: {
+                        warn: [],
+                        block: []
+                    }
+                }
+            }
+        }
+
         const newConfig = structuredClone(Config.default)
         if (localConfig) mergeDeep(localConfig, newConfig)
 
@@ -709,6 +753,7 @@ class Config {
     }
 
     static isLoaded = () => Config.#isLoaded
+    static isEmpty = (config) => Object.keys(config).length === 0
 
     static #loadPromise = null
     static #loadResolve = null

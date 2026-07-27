@@ -65,15 +65,16 @@ class Notification {
     }
 
     static async showIfRequired(url, tabId) {
-        if (!url || !tabId) return false
+        url = url.toURL()
+        if (!tabId || !url || !url.isWebURL()) return false
 
         Notification.#checkExpiredAcknowledgements()
 
         const alert = Notification.#alerts[Notification.showing?.type]
         if (!alert) return false
 
-        const hostname = url.toURL()?.hostname
-        if (!Config.isProtected(hostname)) return false
+        const hostname = url.hostname
+        if (!Config.isProtected(hostname) || matchDomain(hostname, config.system.excludeInject)) return false
 
         // if the issue related to the password of a site, don't block that site so the user can connect to correct the issue
         if (alert.type === AccountTrust.TYPE && alert.level === State.BLOCKING) {

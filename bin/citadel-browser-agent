@@ -35,7 +35,7 @@ AUDIT_TIMEOUT = 60   # seconds
 FETCH_TIMEOUT = 20    # seconds
 MESSAGE_PREFIX = 'browser agent : '
 
-config = { "version": "1.5.0" }
+config = { }
 osqueryPath = DEFAULT_OSQUERY_PATH
 username = getpass.getuser()
 logger = None

@@ -48,6 +48,8 @@ I18n.fromFile('/utils/i18n')
 Port.onMessage("config", async (newConfig) => {
 	Config.load(newConfig)
 
+	if (! Config.isLoaded()) return
+
 	await Promise.all([
 		AccountTrust.init(),
 		DeviceTrust.init(),
@@ -109,8 +111,8 @@ chrome.runtime.onUpdateAvailable.addListener(async () => {
 		logInstall("new version available")
 		reportDaily()
 		await Modal.removeFromDomain("*")
-	} catch (error) {
-		debug("error while preparing update of extension", error)
+	} catch (e) {
+		error("error while preparing update of extension", e)
 	}
 
 	restartExtension()
@@ -788,7 +790,7 @@ chrome.webNavigation.onCommitted.addListener(async details => {
 				injectImmediately: true,
 				func,
 				args
-			}).catch(() => debug(`unable to inject ${what}`, details))
+			}).catch((e) => error(`unable to inject ${what}`, details, e))
 
 		const key = await SecureMessage.getPublicKey().catch(() => null)
 		inject(patchNavigatorCredentials, [key], "credentials hooks")

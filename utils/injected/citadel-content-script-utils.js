@@ -35,6 +35,7 @@ function assert(condition, message) {
 }
 
 const debug = console.log.bind(console, '[CITADEL]')
+const error = console.error.bind(console, '[CITADEL]')
 
 function injectPageScript(scriptPath) {
     try {
