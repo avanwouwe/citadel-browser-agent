@@ -933,7 +933,7 @@ onMessage((request, sender) => {
 	if (request.type === "print-dialog") {
 		registerInteraction(senderUrl, sender)
 
-		logger.log(nowTimestamp(), "print dialog", null, sender.url, Log.INFO, null, "user opened print dialog", null, tabId)
+		logger.log(nowTimestamp(), "download", "print dialog opened", sender.url, Log.INFO, null, "user opened print dialog", null, tabId)
 	}
 
 	if (request.type === "receive-totp") {
