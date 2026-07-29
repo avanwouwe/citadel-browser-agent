@@ -50,7 +50,7 @@ async function injectFilesIntoTab(tabId, files) {
 
 async function injectFilesIntoDomain(domain, files) {
     return safeInject(`injectFilesIntoDomain ${domain}`, async () => {
-        const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, `*://*.${domain}/*`] })
+        const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, ...(domain !== '*' ? [`*://*.${domain}/*`] : [])] })
         return Promise.allSettled(
             tabs.map(tab => safeInject(`injectFilesIntoDomain tab ${tab.id}`,
                 () => chrome.scripting.executeScript({ target: { tabId: tab.id }, files })
@@ -67,7 +67,7 @@ async function injectFuncIntoTab(tabId, func, args = []) {
 
 async function injectFuncIntoDomain(domain, func, args = []) {
     return safeInject(`injectFuncIntoDomain ${domain} [${func.name}]`, async () => {
-        const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, `*://*.${domain}/*`] })
+        const tabs = await chrome.tabs.query({ url: [`*://${domain}/*`, ...(domain !== '*' ? [`*://*.${domain}/*`] : [])] })
         return Promise.allSettled(
             tabs.map(tab => safeInject(`injectFuncIntoDomain tab ${tab.id} [${func.name}]`,
                 () => chrome.scripting.executeScript({ target: { tabId: tab.id }, func, args })
