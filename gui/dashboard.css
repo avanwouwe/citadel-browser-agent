@@ -311,6 +311,13 @@ td.alert-alert {
     font-weight: 600;
 }
 
+/* ── Privacy  ──────────────────────────── */
+
+.privacy-section { margin-bottom: 20px; }
+.privacy-section h3 { margin-bottom: 6px; }
+.privacy-section ul { margin: 6px 0 6px 20px; }
+.privacy-meta { color: var(--color-text-soft); margin-bottom: 16px; }
+
 /* ── Extension enable / disable toggle ──────────────────────────── */
 td.action-cell {
     text-align: center;

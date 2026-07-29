@@ -6,7 +6,8 @@
     "cancel": "Cancel",
     "back": "Back",
     "later": "Not now",
-    "contact": "support"
+    "contact": "support",
+    "organisation": "your organisation"
   },
   "control": {
     "state": {
@@ -143,10 +144,10 @@
   },
   "shadow-it": {
     "block": {
-      "reason": "application is not authorized (shadow IT)"
+      "reason": "application is not managed (shadow IT)"
     },
     "warn": {
-      "title": "Unauthorized application (shadow IT)",
+      "title": "Unmanaged application (shadow IT)",
       "message": "Be careful not to share confidential or company data with <b>{{hostname}}</b>, and contact {{contact}} if you need an approved alternative.",
       "acknowledge": "Understood"
     }
@@ -564,6 +565,88 @@
       "2" : "Medium",
       "3" : "High",
       "4" : "Critical"
+    }
+  },
+  "privacy": {
+    "dashboard": {
+      "title": "Privacy"
+    },
+    "notice": {
+      "header": "Data Protection Notice — {{org}}",
+      "meta": "Effective: {{effective}} · Last modified: {{modified}}",
+      "controller": {
+        "title": "Who is responsible for my data",
+        "body": "The organisation responsible for the data described in this notice is {{org}}. {{org}} decided to deploy Citadel and configured how it operates on this device."
+      },
+      "roles": {
+        "title": "Citadel's role",
+        "body": "Citadel is security software installed by {{org}}, not a service operated by its publisher. The publisher does not receive, store, or have access to any data produced by Citadel. Everything described below is sent only to systems operated by {{org}}."
+      },
+      "changes": {
+        "title": "Will this notice change?",
+        "body": "{{org}} may update this notice if the configuration of Citadel changes. You will always see the version that reflects the current configuration of this device."
+      },
+      "purposes": {
+        "title": "What Citadel checks, and why",
+        "item": {
+          "device": "Basic security settings on this device, such as disk encryption and pending updates.",
+          "account": "Whether corporate and sensitive third-party accounts follow password and multi-factor authentication requirements.",
+          "shadowit": "Use of external applications not managed by {{org}} (\"shadow IT\").",
+          "dlp": "Accidental disclosure of secrets or credentials in what you type or paste.",
+          "extension": "Browser extensions, before they are installed or updated."
+        }
+      },
+      "legal-basis": {
+        "title": "Legal basis",
+        "body": "This processing is carried out in the context of your employment or engagement with {{org}}, on the basis of {{org}}'s legitimate interest in protecting its information systems, or in performance of your contract."
+      },
+      "scope": {
+        "title": "Protected scope",
+        "intro": "{{org}}'s protected scope for Citadel covers:",
+        "domains": "Domains — {{domains}}",
+        "applications": "Applications — {{apps}}",
+        "none": "{{org}} has not restricted Citadel's protected scope to specific domains or applications in this configuration.",
+        "none-listed": "none specified",
+        "internal-only": "accounts within {{org}}'s protected scope",
+        "all-accounts": "all accounts used in the browser",
+        "protected-only": "restricted to third-party services within {{org}}'s protected scope",
+        "no-restriction": "not restricted to any particular list of services"
+      },
+      "account-scope": {
+        "title": "Which accounts are checked",
+        "body": "Account checks apply to {{scope}}, and are {{restriction}}."
+      },
+      "recipients": {
+        "title": "Who receives this data",
+        "body": "Citadel sends the results of these checks only to systems operated by {{org}} (e.g. its own security monitoring platform). Citadel's publisher never receives this data. Some checks rely on public threat-intelligence lists (e.g. known malicious domains) that are downloaded by Citadel; nothing about your activity is sent to those sources."
+      },
+      "retention": {
+        "title": "How long data is kept",
+        "body": "Security event data is kept in the browser for {{appDays}} days, account-related data for {{acctDays}} days, and session data for {{sessionDays}} days, after which it is deleted. Where this data is also sent to {{org}}'s security monitoring platform, it is retained there according to that platform's own retention policy, as configured by {{org}}."
+      },
+      "security": {
+        "title": "Security",
+        "body": "Citadel processes only the data necessary for the purposes above, and all communication with {{org}}'s systems is encrypted in transit. Any passwords or credentials Citadel evaluates are hashed and are never stored or transmitted in plain text."
+      },
+      "data-collected": {
+        "title": "What data is collected",
+        "body": "The specific data points collected for each check above, and why, are {{link}}.",
+        "link-text": "documented here"
+      },
+      "rights": {
+        "title": "Your rights",
+        "intro": "To exercise any of the following rights, contact {{org}}'s data protection contact: {{contact}}. Citadel's publisher cannot act on this request, as it does not hold your data.",
+        "item": {
+          "access": "Right of access — obtain a copy of the data {{org}} holds about you through Citadel.",
+          "rectification": "Right to rectification — correct inaccurate or incomplete data.",
+          "erasure": "Right to erasure — request deletion of your data, subject to {{org}}'s legal retention obligations.",
+          "restriction": "Right to restriction — request that processing of your data be limited.",
+          "objection": "Right to object — object to processing carried out on the basis of legitimate interest.",
+          "portability": "Right to portability — receive data you provided in a machine-readable format."
+        },
+        "authority": "You also have the right to lodge a complaint with {{name}} ({{url}}).",
+        "authority-unset": "You also have the right to lodge a complaint with your local data protection supervisory authority."
+      }
     }
   }
 }

@@ -6,7 +6,8 @@
     "cancel": "Annuler",
     "back": "Retour",
     "later": "Pas maintenant",
-    "contact": "le support"
+    "contact": "le support",
+    "organisation": "votre organisation"
   },
   "control": {
     "state": {
@@ -110,7 +111,7 @@
   "mfa": {
     "title": "Connexion avec MFA",
     "reconnect": "Se reconnecter",
-    "first-connect" : {
+    "first-connect": {
       "warning": "La connexion à <b>{{hostname}}</b> nécessite une authentification multifacteur (MFA).<p>⚠️ <b>Vous serez déconnecté(e) dans {{minutes}} minutes</b> si vous ne configurez pas votre compte pour utiliser le MFA, comme un mot de passe à usage unique basé sur le temps (TOTP).<p>Contactez {{contact}} si vous avez besoin d'aide.",
       "disconnected": "Vous avez été déconnecté(e) de <b>{{domain}}</b> car vous vous êtes connecté(e) à <b>{{hostname}}</b> sans authentification multifacteur (MFA).<P>Reconnectez-vous et configurez votre compte pour utiliser le MFA, comme un mot de passe à usage unique basé sur le temps (TOTP).<P>Contactez {{contact}} si vous avez besoin d'aide."
     },
@@ -143,10 +144,10 @@
   },
   "shadow-it": {
     "block": {
-      "reason": "application non autorisée (shadow IT)"
+      "reason": "application non gérée (shadow IT)"
     },
     "warn": {
-      "title": "Application non autorisée (shadow IT)",
+      "title": "Application non gérée (shadow IT)",
       "message": "Veillez à ne pas partager de données confidentielles ou d’entreprise avec <b>{{hostname}}</b>, et contactez {{contact}} si vous avez besoin d’une alternative autorisée.",
       "acknowledge": "Compris"
     }
@@ -552,18 +553,100 @@
       },
       "webRequest": {
         "description": "Donne accès à l’API chrome.webRequest.",
-        "analysis" : "Accès aux HTTP headers, y compris les cookies, permettant le vol de secrets de session."
+        "analysis": "Accès aux HTTP headers, y compris les cookies, permettant le vol de secrets de session."
       },
       "<all_urls>": {
         "description": "Autorise l’extension à opérer sur toutes les URLs http:// et https:// dans le navigateur.",
         "analysis": "Les extensions disposant de la permission <all_urls> (ou host pattern équivalent) peuvent utiliser leurs autorisations sur tous les sites visités, augmentant ainsi le risque de collecte de données ou d’attaques d’injection à grande échelle."
       }
     },
-    "risk-level" : {
-      "1" : "Faible",
-      "2" : "Moyen",
-      "3" : "Élevé",
-      "4" : "Critique"
+    "risk-level": {
+      "1": "Faible",
+      "2": "Moyen",
+      "3": "Élevé",
+      "4": "Critique"
+    }
+  },
+  "privacy": {
+    "dashboard": {
+      "title": "Confidentialité"
+    },
+    "notice": {
+      "header": "Avis de protection des données — {{org}}",
+      "meta": "Entrée en vigueur : {{effective}} · Dernière modification : {{modified}}",
+      "controller": {
+        "title": "Qui est responsable de mes données",
+        "body": "L'organisation responsable des données décrites dans cet avis est {{org}}. {{org}} a décidé de déployer Citadel et a configuré son fonctionnement sur cet appareil."
+      },
+      "roles": {
+        "title": "Rôle de Citadel",
+        "body": "Citadel est un logiciel de sécurité installé par {{org}}, et non un service exploité par son éditeur. L'éditeur ne reçoit, ne stocke ni n'a accès à aucune donnée produite par Citadel. Tout ce qui est décrit ci-dessous n'est envoyé qu'aux systèmes exploités par {{org}}."
+      },
+      "changes": {
+        "title": "Cet avis va-t-il changer ?",
+        "body": "{{org}} peut mettre à jour cet avis si la configuration de Citadel change. Vous verrez toujours la version qui reflète la configuration actuelle de cet appareil."
+      },
+      "purposes": {
+        "title": "Ce que Citadel vérifie, et pourquoi",
+        "item": {
+          "device": "Les paramètres de sécurité de base de cet appareil, tels que le chiffrement du disque et les mises à jour en attente.",
+          "account": "Si les comptes professionnels et les comptes tiers sensibles respectent les exigences en matière de mot de passe et d'authentification multifacteur.",
+          "shadowit": "L'utilisation d'outils externes non gérées par {{org}} (« shadow IT »).",
+          "dlp": "La divulgation accidentelle de secrets ou d'identifiants dans ce que vous saisissez ou collez.",
+          "extension": "Les extensions de navigateur, avant qu'elles ne soient installées ou mises à jours."
+        }
+      },
+      "legal-basis": {
+        "title": "Base juridique",
+        "body": "Ce traitement est réalisé dans le cadre de votre emploi ou de votre engagement auprès de {{org}}, sur la base de l'intérêt légitime de {{org}} à protéger ses systèmes d'information, ou dans le cadre de l'exécution de votre contrat."
+      },
+      "scope": {
+        "title": "Périmètre protégé",
+        "intro": "Le périmètre protégé de {{org}} pour Citadel couvre :",
+        "domains": "Domaines — {{domains}}",
+        "applications": "Applications — {{apps}}",
+        "none": "{{org}} n'a pas restreint le périmètre protégé de Citadel à des domaines ou applications spécifiques dans cette configuration.",
+        "none-listed": "aucun spécifié",
+        "internal-only": "les comptes au sein du périmètre protégé de {{org}}",
+        "all-accounts": "tous les comptes utilisés dans le navigateur",
+        "protected-only": "limité aux services tiers au sein du périmètre protégé de {{org}}",
+        "no-restriction": "non limité à une liste particulière de services"
+      },
+      "account-scope": {
+        "title": "Quels comptes sont vérifiés",
+        "body": "Les vérifications de comptes s'appliquent à {{scope}}, et sont {{restriction}}."
+      },
+      "recipients": {
+        "title": "Qui reçoit ces données",
+        "body": "Citadel envoie les résultats de ces vérifications uniquement aux systèmes exploités par {{org}} (par exemple, sa propre plateforme de surveillance de la sécurité). L'éditeur de Citadel ne reçoit jamais ces données. Certaines vérifications s'appuient sur des listes publiques de renseignement sur les menaces (par exemple, des domaines malveillants connus) qui sont téléchargées par Citadel ; aucune information sur votre activité n'est envoyée à ces sources."
+      },
+      "retention": {
+        "title": "Durée de conservation des données",
+        "body": "Les données relatives aux événements de sécurité sont conservées dans le navigateur pendant {{appDays}} jours, les données relatives aux comptes pendant {{acctDays}} jours, et les données de session pendant {{sessionDays}} jours, après quoi elles sont supprimées. Lorsque ces données sont également envoyées à la plateforme de surveillance de la sécurité de {{org}}, elles y sont conservées conformément à la politique de conservation propre à cette plateforme, telle que configurée par {{org}}."
+      },
+      "security": {
+        "title": "Sécurité",
+        "body": "Citadel ne traite que les données nécessaires aux finalités décrites ci-dessus, et toutes les communications avec les systèmes de {{org}} sont chiffrées lors de leur transmission. Tous les mots de passe ou identifiants évalués par Citadel sont hachés et ne sont jamais stockés ni transmis en texte clair."
+      },
+      "data-collected": {
+        "title": "Quelles données sont collectées",
+        "body": "Les données précises collectées pour chaque vérification mentionnée ci-dessus, ainsi que les raisons de leur collecte, sont {{link}}.",
+        "link-text": "documentées ici"
+      },
+      "rights": {
+        "title": "Vos droits",
+        "intro": "Pour exercer l'un des droits suivants, contactez le responsable de la protection des données de {{org}} : {{contact}}. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne détient pas vos données.",
+        "item": {
+          "access": "Droit d'accès — obtenir une copie des données que {{org}} détient à votre sujet via Citadel.",
+          "rectification": "Droit de rectification — corriger des données inexactes ou incomplètes.",
+          "erasure": "Droit à l'effacement — demander la suppression de vos données, sous réserve des obligations légales de conservation de {{org}}.",
+          "restriction": "Droit à la limitation — demander que le traitement de vos données soit limité.",
+          "objection": "Droit d'opposition — s'opposer à un traitement effectué sur la base de l'intérêt légitime.",
+          "portability": "Droit à la portabilité — recevoir les données que vous avez fournies dans un format lisible par machine."
+        },
+        "authority": "Vous avez également le droit d'introduire une réclamation auprès de {{name}} ({{url}}).",
+        "authority-unset": "Vous avez également le droit d'introduire une réclamation auprès de l'autorité de contrôle locale compétente en matière de protection des données."
+      }
     }
   }
 }

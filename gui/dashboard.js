@@ -6,11 +6,11 @@ let currentTab
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 
-I18n.loadPage('/utils/i18n', (i18n) => {
+I18n.loadPage('/utils/i18n', async (i18n) => {
     t = i18n.getTranslator()
     i18n.translatePage()
 
-    callServiceWorker("GetConfig").then(conf => config = conf)
+    await callServiceWorker("GetConfig").then(conf => config = conf)
 
     init()
 
@@ -58,9 +58,10 @@ function selectTab(tabId) {
 
     const manualLink = document.getElementById('manual-link')
     if (manualLink) {
-        manualLink.href = `https://citadelagent.org/dashboard/${tabId}-dashboard`
-    }
-}
+        manualLink.href = tabId === 'privacy'
+            ? 'https://citadelagent.org/privacy'
+            : `https://citadelagent.org/dashboard/${tabId}-dashboard`
+    }}
 
 // ── Dashboards ────────────────────────────────────────────────────────────────
 
@@ -300,10 +301,136 @@ const renderEventsDashboard = serialized(async function () {
     }
 })
 
+const renderPrivacyDashboard = serialized(async function () {
+    document.getElementById("privacy-notice").innerHTML = buildPrivacyNotice()
+})
+
+function buildPrivacyNotice() {
+    const org = (config.privacy?.controller ?? config.company.name).escapeHtmlEntities()
+    const contact = (config.privacy?.dpo ?? config.company.contact ?? '').escapeHtmlEntities()
+    const authority = config.privacy?.supervisoryAuthority ?? {}
+    const domains = keysOf(config.company.domains)
+    const apps = keysOf(config.company.applications)
+
+    const header = `<h2>${t('privacy.notice.header', { org })}</h2>
+         <div class="privacy-meta">${t('privacy.notice.meta', {
+        effective: config.privacy?.effectiveDate ?? '-',
+        modified: config.privacy?.lastModified ?? '-'
+    })}</div>`
+
+    const scope = t(config.account.checkOnlyInternal
+        ? 'privacy.notice.scope.internal-only'
+        : 'privacy.notice.scope.all-accounts', { org })
+
+    const restriction = t(config.account.checkOnlyProtected
+        ? 'privacy.notice.scope.protected-only'
+        : 'privacy.notice.scope.no-restriction', { org })
+
+    return [
+        header,
+        section('privacy.notice.controller.title', 'privacy.notice.controller.body', { org }),
+        section('privacy.notice.roles.title', 'privacy.notice.roles.body', { org }),
+        section('privacy.notice.changes.title', 'privacy.notice.changes.body', { org }),
+        purposesSection(org),
+        dataCollectedSection(),
+        section('privacy.notice.legal-basis.title', 'privacy.notice.legal-basis.body', { org }),
+        scopeSection(org, domains, apps),
+        section('privacy.notice.account-scope.title', 'privacy.notice.account-scope.body', { scope, restriction }),
+        retentionSection(org),
+        section('privacy.notice.security.title', 'privacy.notice.security.body', { org }),
+        section('privacy.notice.recipients.title', 'privacy.notice.recipients.body', { org }),
+        rightsSection(contact, authority, org),
+    ].join('')
+}
+
+function purposesSection(org) {
+    const items = ['device', 'account', 'shadowit', 'dlp', 'extension']
+        .map(k => `<li>${t('privacy.notice.purposes.item.' + k, { org })}</li>`).join('')
+    return `<section class="privacy-section">
+        <h3>${t('privacy.notice.purposes.title')}</h3>
+        <ul>${items}</ul>
+    </section>`
+}
+
+function rightsSection(contact, authority, org) {
+    const rightKeys = ['access', 'rectification', 'erasure', 'restriction', 'objection', 'portability']
+    const items = rightKeys.map(k => `<li>${t('privacy.notice.rights.item.' + k, { org })}</li>`).join('')
+    const authorityLine = authority.name
+        ? t('privacy.notice.rights.authority', { name: authority.name.escapeHtmlEntities(), url: (authority.url ?? '').escapeHtmlEntities() })
+        : t('privacy.notice.rights.authority-unset')
+
+    return `<section class="privacy-section">
+        <h3>${t('privacy.notice.rights.title')}</h3>
+        <p>${t('privacy.notice.rights.intro', { contact, org })}</p>
+        <ul>${items}</ul>
+        <p>${authorityLine}</p>
+    </section>`
+}
+
+
+function scopeSection(org, domains, apps) {
+    if (!domains.length && !apps.length) {
+        return `<section class="privacy-section">
+            <h3>${t('privacy.notice.scope.title')}</h3>
+            <p>${t('privacy.notice.scope.none', { org })}</p>
+        </section>`
+    }
+    const domainsText = domains.map(d => d.escapeHtmlEntities()).join(', ') || t('privacy.notice.scope.none-listed')
+    const appsText = apps.map(a => a.escapeHtmlEntities()).join(', ') || t('privacy.notice.scope.none-listed')
+
+    return `<section class="privacy-section">
+        <h3>${t('privacy.notice.scope.title')}</h3>
+        <p>${t('privacy.notice.scope.intro', { org })}</p>
+        <ul>
+            <li>${t('privacy.notice.scope.domains', { domains: domainsText })}</li>
+            <li>${t('privacy.notice.scope.applications', { apps: appsText })}</li>
+        </ul>
+    </section>`
+}
+
+function retentionSection(org) {
+    return section('privacy.notice.retention.title', 'privacy.notice.retention.body', {
+        org,
+        appDays: config.application.retentionDays,
+        acctDays: config.account.retentionDays,
+        sessionDays: config.session.maxSessionDays,
+    })
+}
+
+function section(titleKey, bodyKey, params) {
+    return `<section class="privacy-section">
+        <h3>${t(titleKey)}</h3>
+        <p>${t(bodyKey, params)}</p>
+    </section>`
+}
+
+function keysOf(value) {
+    if (Array.isArray(value)) return value
+    if (value && typeof value === 'object') return Object.keys(value)
+    return []
+}
+
+function dataCollectedSection() {
+    const url = 'https://www.citadelagent.org/privacy/transparency/'
+    const link = `<a href="${url}" target="_blank" rel="noopener noreferrer">${t('privacy.notice.data-collected.link-text')}</a>`
+    return `<section class="privacy-section">
+        <h3>${t('privacy.notice.data-collected.title')}</h3>
+        <p>${t('privacy.notice.data-collected.body', { link })}</p>
+    </section>`
+}
+
+document.getElementById('privacy-notice').addEventListener('click', (ev) => {
+    const link = ev.target.closest('[data-tab-ref]')
+    if (!link) return
+    ev.preventDefault()
+    selectTab(link.dataset.tabRef)
+})
+
 const dashboards = {
     device: renderDeviceDashboard,
     account: renderAccountDashboard,
     extension: renderExtensionDashboard,
+    privacy: renderPrivacyDashboard,
 }
 
 // ── Actions ───────────────────────────────────────────────────────────────────

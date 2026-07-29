@@ -11,7 +11,7 @@ class Config {
             ]
         },
         company: {
-            name: 'Your Organisation',          // name of your organization
+            name: undefined,          // name of your organization
             contact: undefined,                 // replace with the email address of your support
             logo: {
                 light: undefined,               // replace with the URL of your logo (128 x 128 pixel, transparent)
@@ -566,6 +566,17 @@ class Config {
             },
             allowSideloading: false,
             allowExisting: false
+        },
+        privacy: {
+            controller: undefined,
+            dpo: undefined,
+            effectiveDate: undefined,
+            lastModified: undefined,
+            supervisoryAuthority: {
+                name: undefined,      // e.g. "CNIL", "ICO"
+                url: undefined,
+                address: undefined,
+            },
         }
     }
 
@@ -706,6 +717,7 @@ class Config {
             newConfig.extensions.whitelist.allowAlways,
         )
 
+        newConfig.company.name = newConfig.company.name ?? t('global.organisation')
         newConfig.company.contact = newConfig.company.contact ?? t('global.contact')
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
@@ -781,12 +793,12 @@ class Config {
 
     static isProtected(sitename) {
         Config.assertIsLoaded()
-        return matchDomain(sitename, config.protectedDomains)
+        return !!matchDomain(sitename, config.protectedDomains)
     }
 
     static isSensitive(sitename) {
         Config.assertIsLoaded()
-        return matchDomain(sitename, config.sensitiveDomains)
+        return !!matchDomain(sitename, config.sensitiveDomains)
     }
 
 }
