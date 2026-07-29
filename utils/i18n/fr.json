@@ -573,10 +573,10 @@
     },
     "notice": {
       "header": "Avis de protection des données — {{org}}",
-      "meta": "Entrée en vigueur : {{effective}} · Dernière modification : {{modified}}",
+      "meta": "Entrée en vigueur : {{effectiveDate}} · Dernière modification : {{lastModified}}",
       "controller": {
         "title": "Qui est responsable de mes données",
-        "body": "L'organisation responsable des données décrites dans cet avis est {{org}}. {{org}} a décidé de déployer Citadel et a configuré son fonctionnement sur cet appareil."
+        "body": "L'organisation responsable des données décrites dans cet avis est <b>{{org}}</b>. {{org}} a décidé de déployer Citadel et a configuré son fonctionnement sur cet appareil."
       },
       "roles": {
         "title": "Rôle de Citadel",
@@ -591,9 +591,9 @@
         "item": {
           "device": "Les paramètres de sécurité de base de cet appareil, tels que le chiffrement du disque et les mises à jour en attente.",
           "account": "Si les comptes professionnels et les comptes tiers sensibles respectent les exigences en matière de mot de passe et d'authentification multifacteur.",
-          "shadowit": "L'utilisation d'outils externes non gérées par {{org}} (« shadow IT »).",
+          "shadowit": "L'utilisation d'outils externes non gérés par {{org}} (« shadow IT »).",
           "dlp": "La divulgation accidentelle de secrets ou d'identifiants dans ce que vous saisissez ou collez.",
-          "extension": "Les extensions de navigateur, avant qu'elles ne soient installées ou mises à jours."
+          "extension": "Les extensions de navigateur, avant qu'elles ne soient installées ou mises à jour."
         }
       },
       "legal-basis": {
@@ -603,8 +603,8 @@
       "scope": {
         "title": "Périmètre protégé",
         "intro": "Le périmètre protégé de {{org}} pour Citadel couvre :",
-        "domains": "Domaines — {{domains}}",
-        "applications": "Applications — {{apps}}",
+        "domains": "<b>Domaines</b> : {{domains}}",
+        "applications": "<b>Applications</b> : {{apps}}",
         "none": "{{org}} n'a pas restreint le périmètre protégé de Citadel à des domaines ou applications spécifiques dans cette configuration.",
         "none-listed": "aucun spécifié",
         "internal-only": "les comptes au sein du périmètre protégé de {{org}}",
@@ -618,11 +618,11 @@
       },
       "recipients": {
         "title": "Qui reçoit ces données",
-        "body": "Citadel envoie les résultats de ces vérifications uniquement aux systèmes exploités par {{org}} (par exemple, sa propre plateforme de surveillance de la sécurité). L'éditeur de Citadel ne reçoit jamais ces données. Certaines vérifications s'appuient sur des listes publiques de renseignement sur les menaces (par exemple, des domaines malveillants connus) qui sont téléchargées par Citadel ; aucune information sur votre activité n'est envoyée à ces sources."
+        "body": "Citadel envoie les résultats de ces vérifications uniquement aux systèmes exploités par {{org}} (par exemple, sa propre plateforme de surveillance de la sécurité). L'éditeur de Citadel ne reçoit jamais ces données. Certaines vérifications s'appuient sur des listes publiques de renseignement sur les menaces (par exemple, des domaines malveillants connus ou des formats courants de secrets) qui sont téléchargées par Citadel ; aucune information sur votre activité n'est envoyée à ces sources."
       },
       "retention": {
         "title": "Durée de conservation des données",
-        "body": "Les données relatives aux événements de sécurité sont conservées dans le navigateur pendant {{appDays}} jours, les données relatives aux comptes pendant {{acctDays}} jours, et les données de session pendant {{sessionDays}} jours, après quoi elles sont supprimées. Lorsque ces données sont également envoyées à la plateforme de surveillance de la sécurité de {{org}}, elles y sont conservées conformément à la politique de conservation propre à cette plateforme, telle que configurée par {{org}}."
+        "body": "Les données relatives aux événements de sécurité sont conservées dans le navigateur pendant <b>{{appDays}}</b> jours, les données relatives aux comptes pendant <b>{{acctDays}}</b> jours, et les données de session pendant <b>{{sessionDays}}</b> jours, après quoi elles sont supprimées. Lorsque ces données sont également envoyées à la plateforme de surveillance de la sécurité de {{org}}, elles y sont conservées conformément à la politique de conservation propre à cette plateforme, telle que configurée par {{org}}."
       },
       "security": {
         "title": "Sécurité",
@@ -635,17 +635,16 @@
       },
       "rights": {
         "title": "Vos droits",
-        "intro": "Pour exercer l'un des droits suivants, contactez le responsable de la protection des données de {{org}} : {{contact}}. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne détient pas vos données.",
+        "intro": "Pour exercer l'un des droits suivants, contactez le responsable de la protection des données de {{org}} : <b>{{contact}}</b>. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne détient pas vos données.",
         "item": {
-          "access": "Droit d'accès — obtenir une copie des données que {{org}} détient à votre sujet via Citadel.",
-          "rectification": "Droit de rectification — corriger des données inexactes ou incomplètes.",
-          "erasure": "Droit à l'effacement — demander la suppression de vos données, sous réserve des obligations légales de conservation de {{org}}.",
-          "restriction": "Droit à la limitation — demander que le traitement de vos données soit limité.",
-          "objection": "Droit d'opposition — s'opposer à un traitement effectué sur la base de l'intérêt légitime.",
-          "portability": "Droit à la portabilité — recevoir les données que vous avez fournies dans un format lisible par machine."
+          "access": "<b>Droit d'accès</b> : obtenir une copie des données que {{org}} détient à votre sujet via Citadel.",
+          "rectification": "<b>Droit de rectification</b> : corriger des données inexactes ou incomplètes.",
+          "erasure": "<b>Droit à l'effacement</b> : demander la suppression de vos données, sous réserve des obligations légales de conservation de {{org}}.",
+          "restriction": "<b>Droit à la limitation</b> : demander que le traitement de vos données soit limité.",
+          "objection": "<b>Droit d'opposition</b> : s'opposer à un traitement effectué sur la base de l'intérêt légitime.",
+          "portability": "<b>Droit à la portabilité</b> : recevoir les données que vous avez fournies dans un format lisible par machine."
         },
-        "authority": "Vous avez également le droit d'introduire une réclamation auprès de {{name}} ({{url}}).",
-        "authority-unset": "Vous avez également le droit d'introduire une réclamation auprès de l'autorité de contrôle locale compétente en matière de protection des données."
+        "authority": "Vous avez également le droit d'introduire une réclamation auprès de l'autorité de contrôle compétente en matière de protection des données."
       }
     }
   }

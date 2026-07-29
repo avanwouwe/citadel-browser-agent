@@ -568,15 +568,11 @@ class Config {
             allowExisting: false
         },
         privacy: {
-            controller: undefined,
-            dpo: undefined,
             effectiveDate: undefined,
             lastModified: undefined,
-            supervisoryAuthority: {
-                name: undefined,      // e.g. "CNIL", "ICO"
-                url: undefined,
-                address: undefined,
-            },
+            controller: undefined,
+            dpo: undefined,
+            authority: undefined
         }
     }
 

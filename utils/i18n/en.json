@@ -573,10 +573,10 @@
     },
     "notice": {
       "header": "Data Protection Notice — {{org}}",
-      "meta": "Effective: {{effective}} · Last modified: {{modified}}",
+      "meta": "Effective: {{effectiveDate}} · Last modified: {{lastModified}}",
       "controller": {
         "title": "Who is responsible for my data",
-        "body": "The organisation responsible for the data described in this notice is {{org}}. {{org}} decided to deploy Citadel and configured how it operates on this device."
+        "body": "The organisation responsible for the data described in this notice is <b>{{org}}</b>. {{org}} decided to deploy Citadel and configured how it operates on this device."
       },
       "roles": {
         "title": "Citadel's role",
@@ -603,8 +603,8 @@
       "scope": {
         "title": "Protected scope",
         "intro": "{{org}}'s protected scope for Citadel covers:",
-        "domains": "Domains — {{domains}}",
-        "applications": "Applications — {{apps}}",
+        "domains": "<b>Domains</b> : {{domains}}",
+        "applications": "<b>Applications</b> : {{apps}}",
         "none": "{{org}} has not restricted Citadel's protected scope to specific domains or applications in this configuration.",
         "none-listed": "none specified",
         "internal-only": "accounts within {{org}}'s protected scope",
@@ -618,11 +618,11 @@
       },
       "recipients": {
         "title": "Who receives this data",
-        "body": "Citadel sends the results of these checks only to systems operated by {{org}} (e.g. its own security monitoring platform). Citadel's publisher never receives this data. Some checks rely on public threat-intelligence lists (e.g. known malicious domains) that are downloaded by Citadel; nothing about your activity is sent to those sources."
+        "body": "Citadel sends the results of these checks only to systems operated by {{org}} (e.g. its own security monitoring platform). Citadel's publisher never receives this data. Some checks rely on public threat-intelligence lists (e.g. known malicious domains or common secrets formats) that are downloaded by Citadel; nothing about your activity is sent to those sources."
       },
       "retention": {
         "title": "How long data is kept",
-        "body": "Security event data is kept in the browser for {{appDays}} days, account-related data for {{acctDays}} days, and session data for {{sessionDays}} days, after which it is deleted. Where this data is also sent to {{org}}'s security monitoring platform, it is retained there according to that platform's own retention policy, as configured by {{org}}."
+        "body": "Security event data is kept in the browser for <b>{{appDays}}</b> days, account-related data for <b>{{acctDays}}</b> days, and session data for <b>{{sessionDays}}</b> days, after which it is deleted. Where this data is also sent to {{org}}'s security monitoring platform, it is retained there according to that platform's own retention policy, as configured by {{org}}."
       },
       "security": {
         "title": "Security",
@@ -635,17 +635,16 @@
       },
       "rights": {
         "title": "Your rights",
-        "intro": "To exercise any of the following rights, contact {{org}}'s data protection contact: {{contact}}. Citadel's publisher cannot act on this request, as it does not hold your data.",
+        "intro": "To exercise any of the following rights, contact {{org}}'s data protection contact: <b>{{contact}}</b>. Citadel's publisher cannot act on this request, as it does not hold your data.",
         "item": {
-          "access": "Right of access — obtain a copy of the data {{org}} holds about you through Citadel.",
-          "rectification": "Right to rectification — correct inaccurate or incomplete data.",
-          "erasure": "Right to erasure — request deletion of your data, subject to {{org}}'s legal retention obligations.",
-          "restriction": "Right to restriction — request that processing of your data be limited.",
-          "objection": "Right to object — object to processing carried out on the basis of legitimate interest.",
-          "portability": "Right to portability — receive data you provided in a machine-readable format."
+          "access": "<b>Right of access</b> : obtain a copy of the data {{org}} holds about you through Citadel.",
+          "rectification": "<b>Right to rectification</b> : correct inaccurate or incomplete data.",
+          "erasure": "<b>Right to erasure</b> : request deletion of your data, subject to {{org}}'s legal retention obligations.",
+          "restriction": "<b>Right to restriction</b> : request that processing of your data be limited.",
+          "objection": "<b>Right to object</b> : object to processing carried out on the basis of legitimate interest.",
+          "portability": "<b>Right to portability</b> : receive data you provided in a machine-readable format."
         },
-        "authority": "You also have the right to lodge a complaint with {{name}} ({{url}}).",
-        "authority-unset": "You also have the right to lodge a complaint with your local data protection supervisory authority."
+        "authority": "You also have the right to lodge a complaint with the relevant data protection supervisory authority."
       }
     }
   }

@@ -226,6 +226,9 @@ td:has(.delete-btn) {
 }
 
 /* ── Manual / help link ─────────────────────────────────────────── */
+a:link, a:visited {
+    color: var(--color-link);
+}
 .manual-link {
     margin-left: auto;
     padding: 9px 12px;
@@ -313,10 +316,7 @@ td.alert-alert {
 
 /* ── Privacy  ──────────────────────────── */
 
-.privacy-section { margin-bottom: 20px; }
-.privacy-section h3 { margin-bottom: 6px; }
-.privacy-section ul { margin: 6px 0 6px 20px; }
-.privacy-meta { color: var(--color-text-soft); margin-bottom: 16px; }
+#privacy-notice h2 + p { color: var(--color-text-soft); margin-bottom: 16px; }
 
 /* ── Extension enable / disable toggle ──────────────────────────── */
 td.action-cell {
