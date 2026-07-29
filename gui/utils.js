@@ -196,7 +196,7 @@ async function sha256Hash(str) {
 
 if (typeof HTMLElement !== 'undefined') {
     HTMLElement.prototype.safeInnerHTML = function(text, handlers = {}) {
-        const allowedTags = ['p', 'br', 'b', 'i', 'u', 'strong', 'em', 'code', 'link', 'nowrap', 'mono', 'small', 'del', 's', 'sub', 'sup', 'kbd', 'q', 'ul', 'ol', 'li', 'blockquote', 'pre', 'div']
+        const allowedTags = ['h1', 'h2', 'h3', 'h4', 'h5','p', 'br', 'b', 'i', 'u', 'strong', 'em', 'code', 'a', 'nowrap', 'mono', 'small', 'del', 's', 'sub', 'sup', 'kbd', 'q', 'ul', 'ol', 'li', 'blockquote', 'pre', 'div', 'section']
         const container = document.createDocumentFragment()
         const stack = [container]
 
@@ -229,7 +229,7 @@ if (typeof HTMLElement !== 'undefined') {
                                 stack[stack.length - 1].appendChild(document.createElement('br'))
                                 i += fullMatch.length
                                 continue
-                            } else if (tagName === 'link') {
+                            } else if (tagName === 'a') {
                                 if (safeHref) {
                                     el = document.createElement('a')
                                     el.href = safeHref
