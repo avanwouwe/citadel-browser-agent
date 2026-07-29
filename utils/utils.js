@@ -1,6 +1,6 @@
 function assert(condition, message) {
   if (!condition) {
-      console.trace(message)
+      console.error(message)
       throw new Error(message || "Assertion failed")
   }
 }

@@ -154,6 +154,8 @@ class URLBlacklist {
 	}
 
 	async load(url) {
+		this.init()
+
 		const lines = await getCached(url).then(res => res.body.pipeThrough(new TextDecoderStream()))
 
 		await processTextStream(lines,line => {
