@@ -568,6 +568,11 @@
     }
   },
   "privacy": {
+    "modal": {
+      "title": "Notice de confidentialité",
+      "message": "Votre navigateur est protégé et surveillé par {{organization}}. Pour plus d’informations par rapport à la vie privée, consultez la Notice de confidentialité.",
+      "acknowledge": "Notice de confidentialité"
+    },
     "dashboard": {
       "title": "Confidentialité"
     },
@@ -635,7 +640,7 @@
       },
       "rights": {
         "title": "Vos droits",
-        "intro": "Pour exercer l'un des droits suivants, contactez le responsable de la protection des données de {{org}} : <b>{{contact}}</b>. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne détient pas vos données.",
+        "intro": "Pour exercer l'un des droits suivants, contactez {{org}} à l'adresse : <b>{{contact}}</b>. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne détient pas vos données.",
         "item": {
           "access": "<b>Droit d'accès</b> : obtenir une copie des données que {{org}} détient à votre sujet via Citadel.",
           "rectification": "<b>Droit de rectification</b> : corriger des données inexactes ou incomplètes.",

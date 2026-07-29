@@ -126,6 +126,11 @@ chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {
 
 		setTimeout(async () => {
 			logInstall(reason)
+			const title = t('privacy.modal.title')
+			const message = t('privacy.modal.title', { organisation: config.company.name })
+			const onAcknowledge = { label: t('privacy.modal.acknowledge'), type: "privacy-notice" }
+			const onCancel = { label: t('privacy.modal.acknowledge'), remove: true}
+			await Modal.createForDomain("*", title, message, onAcknowledge, undefined, onCancel)
 			await ExtensionAnalysis.Headless.ofAllInstalled(true)
 		}, 1 * ONE_MINUTE)
 	} else if (reason === "update" && previousVersion !== currentVersion) {
@@ -925,6 +930,8 @@ function truncateReason(reason) { return reason.truncate(config.system.maxReason
 onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()
 	const tabId = sender?.tab?.id
+
+	if (request.type === "privacy-notice") openDashboard("privacy")
 
 	if (request.type === "user-interaction") {
 		registerInteraction(senderUrl, sender)

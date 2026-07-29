@@ -2,7 +2,7 @@
 layout: default
 title: Data Loss Prevention
 parent: Configuration
-nav_order: 8
+nav_order: 9
 ---
 
 # Data Loss Prevention

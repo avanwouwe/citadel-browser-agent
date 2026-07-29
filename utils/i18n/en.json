@@ -568,6 +568,11 @@
     }
   },
   "privacy": {
+    "modal": {
+      "title": "Privacy Notification",
+      "message": "Your browser is protected and monitored by {{organization}}. For more information regarding privacy, see the Privacy Notice",
+      "acknowledge": "Privacy Notice"
+    },
     "dashboard": {
       "title": "Privacy"
     },
@@ -635,7 +640,7 @@
       },
       "rights": {
         "title": "Your rights",
-        "intro": "To exercise any of the following rights, contact {{org}}'s data protection contact: <b>{{contact}}</b>. Citadel's publisher cannot act on this request, as it does not hold your data.",
+        "intro": "To exercise any of the following rights, contact {{org}} at: <b>{{contact}}</b>. Citadel's publisher cannot act on this request, as it does not hold your data.",
         "item": {
           "access": "<b>Right of access</b> : obtain a copy of the data {{org}} holds about you through Citadel.",
           "rectification": "<b>Right to rectification</b> : correct inaccurate or incomplete data.",

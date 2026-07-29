@@ -2,7 +2,7 @@
 layout: default
 title: Limitations
 parent: Configuration
-nav_order: 11
+nav_order: 12
 ---
 
 # Limitations
