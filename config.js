@@ -642,10 +642,11 @@ class Config {
         debug(`loading ${localConfig ? 'local' : 'global'} configuration`)
 
         if (localConfig) {
-            const configVersion = localConfig.version
-            const minVersion = Config.default.version
+            const isStandalone = Object.keys(localConfig).length === 0
+            if (! isStandalone) {
+                const configVersion = localConfig.version
+                const minVersion = Config.default.version
 
-            if (! Config.isEmpty(localConfig)) {
                 if (! configVersion) return debug(`unknown config file version, requires at least v${minVersion}`)
                 if (semverBefore(configVersion, minVersion)) return debug(`refused configuration of v${configVersion}, requires at least v${minVersion}`)
             } else {
@@ -682,6 +683,8 @@ class Config {
                     }
                 }
             }
+
+            localConfig.isStandalone = isStandalone
         }
 
         const newConfig = structuredClone(Config.default)
@@ -750,9 +753,8 @@ class Config {
         if (localConfig) {
             Config.#loadResolve?.(config)
             Config.#isLoaded = true
+            Log.start()
         }
-        
-        Log.start()
     }
 
     static assertIsLoaded() {
@@ -762,7 +764,6 @@ class Config {
     }
 
     static isLoaded = () => Config.#isLoaded
-    static isEmpty = (config) => Object.keys(config).length === 0
 
     static #loadPromise = null
     static #loadResolve = null

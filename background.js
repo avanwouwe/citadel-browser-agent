@@ -41,14 +41,17 @@ let blockDebouncer = new Debouncer(5 * ONE_SECOND, null, true)
 let events = new RingBuffer(200)
 let t
 
-I18n.fromFile('/utils/i18n')
-	.then(i18n => t = i18n.getTranslator())
-	.then(() => Config.load())
+const i18nReady = I18n.fromFile('/utils/i18n')
+	.then(i18n => { t = i18n.getTranslator() })
+
+i18nReady.then(() => Config.load())
 
 Port.onMessage("config", async (newConfig) => {
+	await i18nReady
+
 	Config.load(newConfig)
 
-	if (! Config.isLoaded()) return
+	if (!Config.isLoaded()) return
 
 	await Promise.all([
 		AccountTrust.init(),

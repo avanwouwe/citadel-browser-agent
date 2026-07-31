@@ -2,7 +2,7 @@
 layout: default
 title: Data Privacy Impact Assessment (DPIA)
 parent: Privacy & Compliance
-nav_order: 3
+nav_order: 4
 ---
 
 # **1 Data Privacy Impact Assessment : Citadel**
@@ -29,22 +29,29 @@ This document should therefore be reviewed, completed, adapted and validated by 
 
 ### Context and objectives of the Processing considered  
 **Cybersecurity Context**  
-Organisations increasingly rely on digital services and cloud-based applications to conduct their business activities. At the same time, they are exposed to a growing number of sophisticated cyber threats, including phishing campaigns, credential theft, malware, ransomware, account compromise, malicious websites, browser-based attacks, shadow IT, data exfiltration attempts and supply-chain attacks.  
-Such threats may compromise the confidentiality, integrity and availability of information systems, expose organisations to personal data breaches, disrupt business continuity and lead to significant legal, contractual and regulatory consequences.  
+Organisations increasingly rely on digital services and cloud-based applications to conduct their business activities. At the same time, they are exposed to a growing number of sophisticated cyber threats, including phishing campaigns, credential theft, malware, ransomware, account compromise, malicious websites, browser-based attacks, shadow IT, data exfiltration attempts and supply-chain attacks.
+
+Such threats may compromise the confidentiality, integrity and availability of information systems, expose organisations to personal data breaches, disrupt business continuity and lead to significant legal, contractual and regulatory consequences.
+
 Consequently, organisations are expected to implement appropriate technical and organisational measures allowing them to prevent, detect, investigate and respond to cybersecurity incidents throughout their lifecycle.  
 
 **Regulatory Context**  
-The GDPR does not merely restrict the processing of personal data. It also requires controllers and processors to implement appropriate technical and organisational measures ensuring a level of security appropriate to the risks presented by the processing (Article 32 GDPR).  
-Similarly, numerous cybersecurity frameworks and sector-specific regulations—including ISO 27001, NIS2, DORA and national cybersecurity guidance—require organisations to implement effective monitoring, logging and incident detection capabilities in order to protect their information systems.  
+The GDPR does not merely restrict the processing of personal data. It also requires controllers and processors to implement appropriate technical and organisational measures ensuring a level of security appropriate to the risks presented by the processing (Article 32 GDPR).
+
+Similarly, numerous cybersecurity frameworks and sector-specific regulations—including ISO 27001, NIS2, DORA and national cybersecurity guidance—require organisations to implement effective monitoring, logging and incident detection capabilities in order to protect their information systems.
+
 The implementation of security monitoring mechanisms therefore constitutes not only a legitimate operational necessity but, in many situations, a regulatory expectation.
 
 ### Cybersecurity Monitoring and the Principle of Proportionality
 Cybersecurity monitoring inevitably involves the processing of certain information relating to users’ interactions with corporate information systems.  
 However, cybersecurity monitoring must not result in disproportionate monitoring of individuals or become a tool for assessing employees’ behaviour or productivity.  
-As highlighted by the French Supervisory Authority (CNIL) in its recommendations relating to logging measures and web filtering proxy servers, organisations must strike an appropriate balance between the legitimate need to secure their information systems and the protection of individuals’ rights and freedoms.   
+As highlighted by the French Supervisory Authority (CNIL) in its recommendations relating to logging measures and web filtering proxy servers, organisations must strike an appropriate balance between the legitimate need to secure their information systems and the protection of individuals’ rights and freedoms.
+
 This balance requires that monitoring mechanisms remain strictly limited to what is necessary for cybersecurity purposes, that collected information be minimised, that users be adequately informed, that access to collected data be restricted, and that security logs not be reused for purposes incompatible with the initial cybersecurity objective.  
-Citadel has been designed in accordance with these principles. Rather than implementing continuous or behavioural monitoring of users, the solution seeks to detect cybersecurity threats while incorporating privacy-enhancing measures throughout its architecture. These measures include local processing whenever possible, transmission limited to security-relevant events, automatic masking of sensitive information, hashing of certain data, minimisation of transmitted metadata, purpose limitation, and transparency mechanisms enabling users to understand which security events are processed.  
-Accordingly, Citadel is intended to support organisations in implementing effective cybersecurity controls while preserving an appropriate balance between information systems security and the fundamental rights of individuals.  
+Citadel has been designed in accordance with these principles. Rather than implementing continuous or behavioural monitoring of users, the solution seeks to detect cybersecurity threats while incorporating privacy-enhancing measures throughout its architecture. These measures include local processing whenever possible, transmission limited to security-relevant events, automatic masking of sensitive information, hashing of certain data, minimisation of transmitted metadata, purpose limitation, and transparency mechanisms enabling users to understand which security events are processed.
+
+Accordingly, Citadel is intended to support organisations in implementing effective cybersecurity controls while preserving an appropriate balance between information systems security and the fundamental rights of individuals.
+
 The deployment of Citadel should always be accompanied by appropriate organisational safeguards implemented by the deploying organisation. These include defining a clear cybersecurity purpose for the processing, restricting access to security logs on a strict need-to-know basis, adopting appropriate retention periods, ensuring transparency towards users, preventing the use of collected information for employee performance monitoring or other incompatible purposes, and periodically reviewing the continued necessity and proportionality of the monitoring measures in light of evolving cyber threats and organisational needs.
 
 ### Description of the Processing Considered

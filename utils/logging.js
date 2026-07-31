@@ -83,7 +83,9 @@ class Log {
         }
 
         if (config.logging.logLevel > 0 && levelValue >= config.logging.logLevel) {
-            Port.postMessage("event", logEntry)
+            if (!config.isStandalone) {
+                Port.postMessage("event", logEntry)
+            }
 
             if (levelValue >= config.logging.shipLevel) {
                 events.push(logEntry)

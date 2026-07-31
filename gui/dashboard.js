@@ -19,6 +19,13 @@ I18n.loadPage('/utils/i18n', async (i18n) => {
 })().catch(err => console.error('dashboard init failed', err))
 
 function init() {
+    if (config.isStandalone) {
+        for (const tabId of ['privacy']) {
+            const btn = document.getElementById(tabId)
+            if (btn) btn.hidden = true
+        }
+    }
+
     wireTabs()
     wireUpdateButton()
     wireTooltip()
@@ -427,6 +434,7 @@ const dashboards = {
     device: renderDeviceDashboard,
     account: renderAccountDashboard,
     extension: renderExtensionDashboard,
+    events: renderEventsDashboard,
     privacy: renderPrivacyDashboard,
 }
 

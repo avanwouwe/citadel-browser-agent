@@ -2,7 +2,7 @@
 layout: default
 title: Data Processing Overview
 parent: Privacy & Compliance
-nav_order: 4
+nav_order: 2
 ---
 
 > **Warning**
