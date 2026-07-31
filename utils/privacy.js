@@ -5,6 +5,8 @@ class Privacy {
     static #storage = new PersistentObject("privacy")
 
     static async init() {
+        await Config.ready()
+
         if (config.isStandalone) return
 
         const storage = await Privacy.#storage.ready()
