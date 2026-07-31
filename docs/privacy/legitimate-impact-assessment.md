@@ -7,8 +7,24 @@ nav_order: 2
 
 # Legitimate Interests Assessment (LIA)
 
-> **Note** 
-> This is the Legitimate Impact Assessment performed by the developer of Citadel, as part of the development of Citadel. It can be used as a **template** to be used by a CISO / CIO during the Citadel deployment. The template should however be carefully analysed, verified for compliance, and adapted to the specifics of the organisation, for example with respect to data retention, local laws or use of external SIEM / SOAR solutions.
+# Legitimate Interests Assessment (LIA): Citadel
+
+> **Legal Disclaimer**
+> This document has been prepared by the developer of Citadel solely for informational purposes in order to facilitate the Organisation’s own assessment of the legitimate interest basis for a deployment of Citadel. It is provided as a general template and technical reference only. It does not constitute legal advice, regulatory advice, or a legal assessment of the Organisation’s specific processing activities. It does not replace the Organisation’s obligation to assess the lawfulness of its processing operations, determine whether reliance on Article 6(1)(f) GDPR (or equivalent legal bases under applicable law) is appropriate for its specific processing, carry out and document its own Legitimate Interests Assessment (LIA) where required, or ensure compliance with applicable employment, cybersecurity, and data protection laws.
+{: .note }
+
+The Organisation remains solely responsible for:
+* determining whether and to what extent this template is appropriate for its deployment;
+* carrying out and documenting its own LIA (where required), including a purpose test, necessity test and balancing test tailored to its own processing activities;
+* identifying the applicable legal basis and implementing appropriate safeguards;
+* assessing the necessity and proportionality of the processing;
+* consulting its Data Protection Officer, legal advisers, employee representative bodies, works councils or supervisory authorities where required by applicable law; and
+* ensuring that the deployment and use of Citadel comply with all applicable legal and regulatory requirements.
+
+This document should therefore be reviewed, completed, adapted and validated by the Organisation before any deployment of Citadel, and should be read together with the Organisation's own Data Privacy Impact Assessment (DPIA) where one has been carried out.
+
+> **Note**
+> No reliance should be placed on this document as evidence of the Organisation’s compliance with applicable law, nor as a legal opinion that legitimate interest is the appropriate legal basis for the Organisation’s specific processing. The Organisation remains solely responsible for its compliance obligations and for any decisions taken on the basis of this document.
 {: .note }
 
 *Citadel Browser Agent*
@@ -65,7 +81,7 @@ Protecting enterprise and employee data is critical to business continuity, norm
 
 ### 1.6 Legal Framework Compliance
 
-To the best of our knowledge, Citadel complies (or facilitates the compliance of organisations) with the following relevant legal and normative rules.
+To the best of our knowledge, Citadel facilitates the compliance of organisations with the following relevant legal and normative rules.
 
 #### 1\. GDPR (General Data Protection Regulation)
 
@@ -116,7 +132,7 @@ To the best of our knowledge, Citadel complies (or facilitates the compliance of
 
 ### 1.7 Codes of Practice and Ethics
 
-We consider that Citadel implements (or facilitates the implementation by organisations) of the following relevant industry guidelines and codes of practise.
+We consider that Citadel facilitates the implementation by organisations of the following relevant industry guidelines and codes of practise.
 
 - **Privacy by design**: data minimisation and privacy-preserving defaults
 - **Transparency with users**; monitoring is justified, documented, and proportionate
@@ -232,9 +248,6 @@ Yes, via configuration or organisational process in special situations.
 
 ---
 
-## 5\. Next Steps
-
-- **Filing:** Store this LIA and review annually, or on major technical or legal change.
-- **Transparency:** Summarise processing and legal basis in user privacy notices (see [statement](http:///doc/priavacy/transparency.md)).
-- **DPIA:** Complete full DPIA where required by law, risk, or scale. (see [template](/doc/privacy/privacy-impact-assessment.md))
-- **Review:** Monitor for regulatory/technical updates; revise document as needed.
+> **Legal Disclaimer**
+> This template does not replace the controller’s obligation to conduct and document its own Legitimate Interests Assessment based on the specific characteristics of its deployment, and does not constitute a legal determination that legitimate interest is a valid legal basis for the controller’s processing.
+{: .note }

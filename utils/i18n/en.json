@@ -6,6 +6,7 @@
     "cancel": "Cancel",
     "back": "Back",
     "later": "Not now",
+    "understood": "Understood",
     "contact": "support",
     "organisation": "your organisation"
   },
@@ -148,8 +149,7 @@
     },
     "warn": {
       "title": "Unmanaged application (shadow IT)",
-      "message": "Be careful not to share confidential or company data with <b>{{hostname}}</b>, and contact {{contact}} if you need an approved alternative.",
-      "acknowledge": "Understood"
+      "message": "Be careful not to share confidential or company data with <b>{{hostname}}</b>, and contact {{contact}} if you need an approved alternative."
     }
   },
   "attack": {
@@ -570,8 +570,7 @@
   "privacy": {
     "modal": {
       "title": "Privacy Notification",
-      "message": "Your browser is protected and monitored by {{organization}}. For more information regarding privacy, see the Privacy Notice",
-      "acknowledge": "Privacy Notice"
+      "message": "Your browser is protected and monitored by {{organization}}. For more information regarding privacy, see the Privacy Notice"
     },
     "dashboard": {
       "title": "Privacy"
@@ -593,6 +592,7 @@
       },
       "purposes": {
         "title": "What Citadel checks, and why",
+        "body": "Depending on the configuration set by the administrators, can check amongst others the following elements:",
         "item": {
           "device": "Basic security settings on this device, such as disk encryption and pending updates.",
           "account": "Whether corporate and sensitive third-party accounts follow password and multi-factor authentication requirements.",
@@ -603,7 +603,8 @@
       },
       "legal-basis": {
         "title": "Legal basis",
-        "body": "This processing is carried out in the context of your employment or engagement with {{org}}, on the basis of {{org}}'s legitimate interest in protecting its information systems, or in performance of your contract."
+        "legitimateInterest": "This processing is carried out in the context of your employment or engagement with {{org}}, on the basis of {{org}}'s legitimate interest in protecting its information systems, or in performance of your contract.",
+        "other": "Contact {{org}} at <b>{{contact}}</b> for information regarding the legal basis."
       },
       "scope": {
         "title": "Protected scope",
@@ -623,7 +624,7 @@
       },
       "recipients": {
         "title": "Who receives this data",
-        "body": "Citadel sends the results of these checks only to systems operated by {{org}} (e.g. its own security monitoring platform). Citadel's publisher never receives this data. Some checks rely on public threat-intelligence lists (e.g. known malicious domains or common secrets formats) that are downloaded by Citadel; nothing about your activity is sent to those sources."
+        "body": "Your organisation can decide to configure Citadel to send the results of these checks to systems operated by {{org}} (e.g. its own security monitoring platform). Citadel's publisher never receives this data. Some checks rely on public threat-intelligence lists (e.g. known malicious domains or common secrets formats) that are downloaded by Citadel; nothing about your activity is sent to those sources."
       },
       "retention": {
         "title": "How long data is kept",
@@ -631,24 +632,15 @@
       },
       "security": {
         "title": "Security",
-        "body": "Citadel processes only the data necessary for the purposes above, and all communication with {{org}}'s systems is encrypted in transit. Any passwords or credentials Citadel evaluates are hashed and are never stored or transmitted in plain text."
+        "body": "Citadel processes only the data necessary for the purposes above, and all communication performed by Citadel is encrypted in transit. Any passwords or credentials Citadel evaluates are hashed and are never stored or transmitted in plain text."
       },
       "data-collected": {
         "title": "What data is collected",
-        "body": "The specific data points collected for each check above, and why, are {{link}}.",
-        "link-text": "documented here"
+        "body": "The specific data points collected for each check above, and why, are documented on the <a href=\"{{url}}\">transparency page</a>."
       },
       "rights": {
         "title": "Your rights",
-        "intro": "To exercise any of the following rights, contact {{org}} at: <b>{{contact}}</b>. Citadel's publisher cannot act on this request, as it does not hold your data.",
-        "item": {
-          "access": "<b>Right of access</b> : obtain a copy of the data {{org}} holds about you through Citadel.",
-          "rectification": "<b>Right to rectification</b> : correct inaccurate or incomplete data.",
-          "erasure": "<b>Right to erasure</b> : request deletion of your data, subject to {{org}}'s legal retention obligations.",
-          "restriction": "<b>Right to restriction</b> : request that processing of your data be limited.",
-          "objection": "<b>Right to object</b> : object to processing carried out on the basis of legitimate interest.",
-          "portability": "<b>Right to portability</b> : receive data you provided in a machine-readable format."
-        },
+        "body": "To exercise any of your data subject rights, contact {{org}} at: <b>{{contact}}</b>. Citadel's publisher cannot act on this request, as it does not process your data.",
         "authority": "You also have the right to lodge a complaint with the relevant data protection supervisory authority."
       }
     }

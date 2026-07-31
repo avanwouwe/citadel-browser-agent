@@ -6,6 +6,7 @@
     "cancel": "Annuler",
     "back": "Retour",
     "later": "Pas maintenant",
+    "understood": "Compris",
     "contact": "le support",
     "organisation": "votre organisation"
   },
@@ -148,8 +149,7 @@
     },
     "warn": {
       "title": "Application non gérée (shadow IT)",
-      "message": "Veillez à ne pas partager de données confidentielles ou d’entreprise avec <b>{{hostname}}</b>, et contactez {{contact}} si vous avez besoin d’une alternative autorisée.",
-      "acknowledge": "Compris"
+      "message": "Veillez à ne pas partager de données confidentielles ou d’entreprise avec <b>{{hostname}}</b>, et contactez {{contact}} si vous avez besoin d’une alternative autorisée."
     }
   },
   "attack": {
@@ -570,8 +570,7 @@
   "privacy": {
     "modal": {
       "title": "Notice de confidentialité",
-      "message": "Votre navigateur est protégé et surveillé par {{organization}}. Pour plus d’informations par rapport à la vie privée, consultez la Notice de confidentialité.",
-      "acknowledge": "Notice de confidentialité"
+      "message": "Votre navigateur est protégé et surveillé par {{organization}}. Pour plus d’informations par rapport à la vie privée, consultez la Notice de confidentialité."
     },
     "dashboard": {
       "title": "Confidentialité"
@@ -593,6 +592,7 @@
       },
       "purposes": {
         "title": "Ce que Citadel vérifie, et pourquoi",
+        "body": "Selon la configuration définie par les administrateurs, peut vérifier entre autres les éléments suivants :",
         "item": {
           "device": "Les paramètres de sécurité de base de cet appareil, tels que le chiffrement du disque et les mises à jour en attente.",
           "account": "Si les comptes professionnels et les comptes tiers sensibles respectent les exigences en matière de mot de passe et d'authentification multifacteur.",
@@ -603,7 +603,8 @@
       },
       "legal-basis": {
         "title": "Base juridique",
-        "body": "Ce traitement est réalisé dans le cadre de votre emploi ou de votre engagement auprès de {{org}}, sur la base de l'intérêt légitime de {{org}} à protéger ses systèmes d'information, ou dans le cadre de l'exécution de votre contrat."
+        "legitimateInterest": "Ce traitement est réalisé dans le cadre de votre emploi ou de votre engagement auprès de {{org}}, sur la base de l'intérêt légitime de {{org}} à protéger ses systèmes d'information, ou dans le cadre de l'exécution de votre contrat.",
+        "other": "Contactez {{org}} à l'adresse <b>{{contact}}</b> pour toute renseignement concernant la base légale."
       },
       "scope": {
         "title": "Périmètre protégé",
@@ -631,24 +632,15 @@
       },
       "security": {
         "title": "Sécurité",
-        "body": "Citadel ne traite que les données nécessaires aux finalités décrites ci-dessus, et toutes les communications avec les systèmes de {{org}} sont chiffrées lors de leur transmission. Tous les mots de passe ou identifiants évalués par Citadel sont hachés et ne sont jamais stockés ni transmis en texte clair."
+        "body": "Citadel ne traite que les données nécessaires aux finalités décrites ci-dessus, et toutes les communications effectués par Citadel sont chiffrées lors de leur transmission. Tous les mots de passe ou identifiants évalués par Citadel sont hachés et ne sont jamais stockés ni transmis en texte clair."
       },
       "data-collected": {
         "title": "Quelles données sont collectées",
-        "body": "Les données précises collectées pour chaque vérification mentionnée ci-dessus, ainsi que les raisons de leur collecte, sont {{link}}.",
-        "link-text": "documentées ici"
+        "body": "Les données précises collectées pour chaque vérification mentionnée ci-dessus, ainsi que les raisons de leur collecte, sont documentées sur <a href=\"{{url}}\">la page de transparence</a>."
       },
       "rights": {
         "title": "Vos droits",
-        "intro": "Pour exercer l'un des droits suivants, contactez {{org}} à l'adresse : <b>{{contact}}</b>. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne détient pas vos données.",
-        "item": {
-          "access": "<b>Droit d'accès</b> : obtenir une copie des données que {{org}} détient à votre sujet via Citadel.",
-          "rectification": "<b>Droit de rectification</b> : corriger des données inexactes ou incomplètes.",
-          "erasure": "<b>Droit à l'effacement</b> : demander la suppression de vos données, sous réserve des obligations légales de conservation de {{org}}.",
-          "restriction": "<b>Droit à la limitation</b> : demander que le traitement de vos données soit limité.",
-          "objection": "<b>Droit d'opposition</b> : s'opposer à un traitement effectué sur la base de l'intérêt légitime.",
-          "portability": "<b>Droit à la portabilité</b> : recevoir les données que vous avez fournies dans un format lisible par machine."
-        },
+        "body": "Pour exercer vous droits des personnes concernées, contactez {{org}} à l'adresse : <b>{{contact}}</b>. L'éditeur de Citadel ne peut pas traiter cette demande, car il ne traite pas vos données.",
         "authority": "Vous avez également le droit d'introduire une réclamation auprès de l'autorité de contrôle compétente en matière de protection des données."
       }
     }

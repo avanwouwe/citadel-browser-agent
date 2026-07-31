@@ -1,24 +1,13 @@
 ---
 layout: default
-title: Transparency
+title: Data Processing Overview
 parent: Privacy & Compliance
 nav_order: 4
 ---
 
-# Data Protection Transparency
-Citadel aims to strike a fair balance between security and privacy, and to maintain a posture of transparency towards end-users, in order to gain and maintain their confidence. This page gives an overview of the data processed by Citadel, and is designed to be able to be used as a Data Protection Impact Assessment.
-
-Citadel is highly configurable. The following statements assume a default installation of Citadel and an application of the best practises outlined in this document.
-
-## Purpose
-The objective of Citadel is to allow a CISO or CIO to protect a set of sensitive web applications from cybersecurity threats, and to respond to legal, contractual and normative obligations. It does this by responding to various IT security related stakes distributed over the Security Incident Lifecycle:
-* [Prevention] control efficacy : ensure that defined security controls (human, technical, organisational) are operating as designed
-* [Detection] [situational awareness](https://en.wikipedia.org/wiki/Situation_awareness) : being aware of general network patterns, and possible deviations
-* [Detection] incident detection : alert the Security Operations Center (SOC) of potential imminent threats
-* [Response] [Digital Forensics and Incident Response (DFIR)](https://en.wikipedia.org/wiki/Digital_forensics) : investigation, examination, and analysis after cyber incidents
-
-## Data Processing Overview
-By design, Citadel lives in the browser, so that it can have access to the information that it needs to fulfill it's mission. On top of that, a local agent runs outside of the browser sandbox, in order to be able to query device status and log security events.
+> **Warning**
+> The following list shows the default configuration and is subject to the configuration set by the solution’s deployer, and must be updated accordingly by the deployer.
+> {: .note }
 
 | information                                        | example of reporting                                                                                          | treatment        | reason                                                       | scope                                                                                  |
 |----------------------------------------------------|---------------------------------------------------------------------------------------------------------------|------------------|--------------------------------------------------------------|----------------------------------------------------------------------------------------|
@@ -46,21 +35,3 @@ By design, Citadel lives in the browser, so that it can have access to the infor
 | Do Not Disturb status                              | N/A                                                                                                           | processed        | N/A                                                          |                                                                                        |
 | Contents of clipboard and selected / dropped files | `found AWS API key during clipboard-paste`                                                                     | processed        | control efficacy, incident detection, situational awareness                          | only type of secret is logged, the actual secret is never stored                       |
 
-## Data Storage
-In order to reduce attack surface and deployment cost, Citadel has no central server. The browser agent stores information, such as historical application use and device- or account status, in the local browser storage, but never on a central server. It does however report security events that are meant to be shipped to the SIEM / XDR, and that are thus covered by the existing authorization, security and retention policies that govern the SIEM / XDR.
-
-## Necessity, Risks & Proportionality
-Citadel requires the above data processing in order to fulfill its objectives of prevention, detection and response, and considers that those objectives constitute "legitimate interest", as per the GDPR.
-
-Whenever possible, data minimisation is used to ensure that only the information strictly necessary is stored. Specifically:
-* **web navigation** : only hashed versions of URLs are stored, and only locally on the endpoint, to allow post-incident confirmation that a previously identified site was visited
-* **download / upload meta-data & security events** : given the increased risk potential, all downloads are reported and URLs and filenames are not hashed
-* **web application use** : only sites with authentication mechanisms are reported (since they represent a risk of shadow IT) and only at a high level (number of interactions per day) in order to prevent function creep
-* **device control status** : only the control status is reported, not the detail of which process or which file caused issues
-* **account security** : only insecure accounts are reported, in a high-level manner, and only for protected web application *and* when using internal accounts
-
-Since malware and Data Loss risks are not restricted to one profile or one browser, IT policies apply to endpoints and not browser policies. Citadel is expected to be run on all browsers, and all profiles installed on an endpoint, including those used for personal use.
-
-Most of the risks created by the storage of the security events should be covered by existing security measures implemented for the SIEM / XDR, such as IAM, data retention and encryption policies and controls. However, in spite of the extensive Data Limitation measures, some of the security events generated by Citadel remain potentially sensitive in nature. For example, if end-users visit websites related to religion, ethnicity, or sexual orientation, these may accidentally be included in the reporting of sensitive operations such as uploads or downloads files, or in the reporting about daily interactions (since if the sites use authentication it is considered an application). So far no credible Data Limitation solution has been identified that would not significantly reduce the security guarantees provided by Citadel, but suggestions can be created submitted as a bugreport.
-
-As a result, supplementary access restrictions should be considered to ensure that Citadel security events are only accessible by staff on a strict Need to Know basis. If possible, a data access audit trail should be kept, and regularly checked.

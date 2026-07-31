@@ -318,6 +318,8 @@ function buildPrivacyNotice() {
     const lastModified = config.privacy.lastModified ?? config.privacy.effectiveDate
     const dates = lastModified ?? effectiveDate ? `<p>${t('privacy.notice.meta', { effectiveDate, lastModified })}</p>` : ''
 
+    const legalBasisKey = config.privacy.legitimateInterest ? 'privacy.notice.legal-basis.legitimateInterest' : 'privacy.notice.legal-basis.other'
+
     const scope = t(config.account.checkOnlyInternal
         ? 'privacy.notice.scope.internal-only'
         : 'privacy.notice.scope.all-accounts', { org })
@@ -334,7 +336,7 @@ function buildPrivacyNotice() {
         section('privacy.notice.changes.title', 'privacy.notice.changes.body', { org }),
         purposesSection(org),
         dataCollectedSection(),
-        section('privacy.notice.legal-basis.title', 'privacy.notice.legal-basis.body', { org }),
+        section('privacy.notice.legal-basis.title', legalBasisKey, { org, contact }),
         scopeSection(org, domains, apps),
         section('privacy.notice.account-scope.title', 'privacy.notice.account-scope.body', { scope, restriction }),
         retentionSection(org),
@@ -353,16 +355,16 @@ function purposesSection(org) {
         .map(k => `<li>${t('privacy.notice.purposes.item.' + k, { org })}</li>`).join('')
     return `<section>
         <h3>${t('privacy.notice.purposes.title')}</h3>
+        <p>${t('privacy.notice.purposes.body')}</p>
         <ul>${items}</ul>
     </section>`
 }
 
 function dataCollectedSection() {
     const url = 'https://www.citadelagent.org/privacy/transparency/'
-    const link = `<a href="${url}">${t('privacy.notice.data-collected.link-text')}</a>`
     return `<section>
         <h3>${t('privacy.notice.data-collected.title')}</h3>
-        <p>${t('privacy.notice.data-collected.body', { link })}</p>
+        <p>${t('privacy.notice.data-collected.body', { url })}</p>
     </section>`
 }
 
@@ -396,14 +398,11 @@ function retentionSection(org) {
 }
 
 function rightsSection(contact, authority, org) {
-    const rightKeys = ['access', 'rectification', 'erasure', 'restriction', 'objection', 'portability']
-    const items = rightKeys.map(k => `<li>${t('privacy.notice.rights.item.' + k, { org })}</li>`).join('')
     authority = authority?.replace(/\n/g, '<br>') ?? ''
 
     return `<section>
         <h3>${t('privacy.notice.rights.title')}</h3>
-        <p>${t('privacy.notice.rights.intro', { contact, org })}</p>
-        <ul>${items}</ul>
+        <p>${t('privacy.notice.rights.body', { contact, org })}</p>
         <p>${t('privacy.notice.rights.authority')}</p>
         <p>${authority}</p>
     </section>`

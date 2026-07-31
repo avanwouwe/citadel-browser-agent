@@ -27,6 +27,7 @@ importScripts('utils/browser.js');
 importScripts('utils/dnd.js');
 importScripts('utils/toml.js');
 importScripts('utils/re2.js');
+importScripts('utils/privacy.js');
 importScripts('gui/color-scheme/color-scheme.js');
 importScripts('gui/interface.js');
 importScripts('gui/modal.js');

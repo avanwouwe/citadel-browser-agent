@@ -568,6 +568,7 @@ class Config {
             allowExisting: false
         },
         privacy: {
+            legitimateInterest: true,
             effectiveDate: undefined,
             lastModified: undefined,
             controller: undefined,

@@ -70,6 +70,7 @@
       "/utils/dnd.js",
       "/utils/toml.js",
       "/utils/re2.js",
+      "/utils/privacy.js",
       "/gui/color-scheme/color-scheme.js",
       "/gui/interface.js",
       "/gui/modal.js",

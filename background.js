@@ -54,7 +54,8 @@ Port.onMessage("config", async (newConfig) => {
 		AccountTrust.init(),
 		DeviceTrust.init(),
 		ShadowIT.init(),
-		Gitleaks.init()
+		Gitleaks.init(),
+		Privacy.init()
 	]);
 
 	[blacklistIP, blacklistURL] = await Promise.all([
@@ -126,11 +127,6 @@ chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {
 
 		setTimeout(async () => {
 			logInstall(reason)
-			const title = t('privacy.modal.title')
-			const message = t('privacy.modal.title', { organisation: config.company.name })
-			const onAcknowledge = { label: t('privacy.modal.acknowledge'), type: "privacy-notice" }
-			const onCancel = { label: t('privacy.modal.acknowledge'), remove: true}
-			await Modal.createForDomain("*", title, message, onAcknowledge, undefined, onCancel)
 			await ExtensionAnalysis.Headless.ofAllInstalled(true)
 		}, 1 * ONE_MINUTE)
 	} else if (reason === "update" && previousVersion !== currentVersion) {
@@ -931,8 +927,6 @@ onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()
 	const tabId = sender?.tab?.id
 
-	if (request.type === "privacy-notice") openDashboard("privacy")
-
 	if (request.type === "user-interaction") {
 		registerInteraction(senderUrl, sender)
 	}
@@ -950,6 +944,11 @@ onMessage((request, sender) => {
 	if (request.type === "acknowledge-alert") {
 		if (request.alert.type === Extension.TYPE) {
 			Notification.setAlert(Extension.TYPE, State.PASSING)
+		}
+
+		if (request.alert.type === Privacy.TYPE) {
+			Privacy.acknowledge()
+			Notification.setAlert(Privacy.TYPE, State.PASSING)
 		}
 
 		if (request.openDashboard) {

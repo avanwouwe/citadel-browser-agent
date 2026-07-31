@@ -29,6 +29,7 @@ class LocalStorage {
     static async clear() {
         await chrome.storage.local.clear()
 
+        await Privacy.flush()
         await ExtensionTrust.flush()
 
         restartExtension()
