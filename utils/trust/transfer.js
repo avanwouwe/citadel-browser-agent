@@ -380,6 +380,8 @@ class Gitleaks {
     static #DOWNLOAD_ERRORS_KEY = "gitleaks-download-errors"
 
     static async init() {
+        if (Gitleaks.isLoaded) return
+
         const { rules, freq } = config.dlp.leaking
 
         return scheduleReload({
