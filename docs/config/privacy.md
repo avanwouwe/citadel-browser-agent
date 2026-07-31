@@ -8,7 +8,7 @@ nav_order: 7
 # Privacy
 
 > **Legal Disclaimer**
-> This document has been prepared by the developer of Citadel solely for informational purposes in order to facilitate the Organisation’s deployment of Citadel. It does not constitute legal advice, regulatory advice, or a legal assessment of the Organisation’s specific processing activities. It does not replace the Organisation’s obligation to assess the lawfulness of its processing operations, determine whether a Data Protection Impact Assessment (DPIA) is required under Article 35 GDPR or any applicable data protection legislation, or ensure compliance with applicable employment, cybersecurity, and data protection laws.
+> This document has been prepared by the developer of Citadel solely for informational purposes in order to facilitate the Organisation’s deployment of Citadel. It does not constitute legal advice, regulatory advice, or a legal assessment of the Organisation’s specific processing activities. It does not replace the Organisation’s obligation to assess the lawfulness of its processing operations, or ensure compliance with applicable employment, cybersecurity, and data protection laws.
 {: .note }
 
 Deploying Citadel means processing personal data about your users, such as password metadata, account status, device compliance, browser extensions, and security events. Data protection regulations (e.g. GDPR) typically require that the organisation responsible for this processing (i.e. **you**, the organisation deploying Citadel) informs users of this processing.
@@ -26,7 +26,7 @@ The notice is not static text: each section is built from your live configuratio
 This means that if you change your configuration, the notice shown to users changes automatically; you do not need to maintain it separately.
 
 ## what it does *not* cover
-Whilst the notice always reflects the currently deployed configuration, Citadel will only notify the user during the initial installation. If you change your configuration, you need to determine if those changes materially change the notice, and require you to notify your users.
+Whilst the notice always reflects the currently deployed configuration, Citadel will only notify the user during the initial installation. If you change your configuration, and those changes materially change the notice, you may need to re-notify your users.
 
 Citadel's publisher does not operate a service, and does not receive, store, or have access to any data that Citadel produces. The notice makes this explicit, so that end-users understand that all data described stays within systems that you, the deploying organisation, operate and control.
 
@@ -54,3 +54,7 @@ The dashboard allows you to configure privacy-specific elements:
 * `privacy.effectiveDate` : date when notice was first published (defaults to `privacy.lastModified`)
 * `privacy.lastModified` : date when notice was last modified (defaults to `privacy.effectiveDate`)
 * `privacy.authority` : free text (may include basic HTML such as lists and links) identifying the supervisory authority, or authorities, competent to receive complaints. Since some organisations operate across multiple jurisdictions, this is left free-form rather than a single fixed field. If left unset, a generic reference to "your local data protection supervisory authority" is shown.
+
+> > **Legal Disclaimer**
+> This installation guide does not replace the controller’s obligation to conduct and document its own assessment based on the specific characteristics of its deployment.
+> {: .note }
