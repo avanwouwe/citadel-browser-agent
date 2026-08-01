@@ -25,7 +25,7 @@ function blockPage(tabId, reason, blockedPage, blacklistEntry, options = {}) {
         reason,
         blacklistEntry,
         url: blockedPage,
-        contact: config.company.contact,
+        contact: config.organization.contact,
         logo: Logo.getLogo(),
         allowException: options.allowException,
         exceptionType: options.exceptionType,

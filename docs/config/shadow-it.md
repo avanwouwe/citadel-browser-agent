@@ -37,7 +37,7 @@ Applications on the `shadowit.warn` list are warned, and applications on the `sh
 Shadow IT applications are considered sensitive, in the same way as the domains in `domain.sensitive`. This means that their URLs are not masked in the logs, even for events below the `maskUrlLevel`. Where a regular hostname, path and query string would be hashed to protect personal data, the URLs of shadow IT applications are logged in clear, so that your SOC can understand exactly which application was used and how. See [Logging & Reporting](/config/logging-reporting) for more on URL masking.
 
 ## your own applications
-An application is only considered shadow IT if it is not one of your own. Any host listed in `company.applications` or `company.domains` is part of your protected scope, and Citadel never applies shadow IT logic to it. To stop a sanctioned application from being treated as shadow IT, simply declare it as one of your applications.
+An application is only considered shadow IT if it is not one of your own. Any host listed in `organization.applications` or `organization.domains` is part of your protected scope, and Citadel never applies shadow IT logic to it. To stop a sanctioned application from being treated as shadow IT, simply declare it as one of your applications.
 
 ```
     ...
@@ -47,7 +47,7 @@ An application is only considered shadow IT if it is not one of your own. Any ho
     ...
 ```
 
-This is useful when one of the applications in the default list is in fact sanctioned in your organization. For example, if you have a company agreement for Dropbox, adding `*.dropbox.com` to `company.applications` stops it from being flagged.
+This is useful when one of the applications in the default list is in fact sanctioned in your organization. For example, if you have a company agreement for Dropbox, adding `*.dropbox.com` to `organization.applications` stops it from being flagged.
 
 ## default applications
 Citadel ships with a list of typical shadow IT applications, all configured as `warn`. These cover categories such as public AI assistants and AI coding tools, personal cloud storage and file transfer, online document processing, tunneling services, unsanctioned messaging and collaboration tools, personal email, remote access tools, and no-code application builders. The intent is to give you a useful starting point that surfaces the most common cases without blocking anyone, so that you can observe what is actually used in your organization before hardening your stance.
@@ -75,7 +75,7 @@ There are two ways to move an application, or all applications, from warning to 
     ...
 ```
 
-When you deploy Citadel, generally you start with the default warnings, review what the warnings surface in your SIEM, then either block individual applications that you do not want used, or switch to `alwaysBlock` once you are confident that everything legitimate has been declared in `company.applications`.
+When you deploy Citadel, generally you start with the default warnings, review what the warnings surface in your SIEM, then either block individual applications that you do not want used, or switch to `alwaysBlock` once you are confident that everything legitimate has been declared in `organization.applications`.
 
 ## exceptions and warning interval
 Once a user has dismissed warnings or obtained exceptions for a specific shadow IT application, Citadel does not bother them again straight away. How long it waits depends on how the application was handled:

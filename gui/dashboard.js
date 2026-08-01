@@ -314,11 +314,11 @@ const renderPrivacyDashboard = serialized(async function () {
 })
 
 function buildPrivacyNotice() {
-    const org = (config.privacy.controller ?? config.company.name).escapeHtmlEntities()
-    const contact = (config.privacy.dpo ?? config.company.contact ?? '').escapeHtmlEntities()
+    const org = (config.privacy.controller ?? config.organization.name).escapeHtmlEntities()
+    const contact = (config.privacy.dpo ?? config.organization.contact ?? '').escapeHtmlEntities()
     const authority = config.privacy.authority
-    const domains = patternsOf(config.company.domains)
-    const apps = patternsOf(config.company.applications)
+    const domains = patternsOf(config.organization.domains)
+    const apps = patternsOf(config.organization.applications)
 
     const header = `<h2>${t('privacy.notice.header', { org })}</h2>`
     const effectiveDate = config.privacy.effectiveDate ?? config.privacy.lastModified

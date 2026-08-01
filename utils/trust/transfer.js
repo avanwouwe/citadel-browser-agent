@@ -119,7 +119,7 @@ class DLP {
         const remaining = findings.length - DLP.MAX_EXAMPLES
         if (remaining > 0) examples += '<br>' + t('dlp.leaking.and-more', { remaining })
 
-        const contact = config.company.contact.embedTag('nowrap')
+        const contact = config.organization.contact.embedTag('nowrap')
         let sanitizeMode, onAcknowledge, onCancel
         if (proposeSanitize) {
             sanitizeMode = t('dlp.leaking.automated-sanitize')
@@ -298,7 +298,7 @@ class ClickFix {
 
         if (eventLevel === Log.NEVER || ! ClickFix.score(content)) return false
 
-        const contact = config.company.contact.embedTag('nowrap')
+        const contact = config.organization.contact.embedTag('nowrap')
         const onAcknowledge = { type: "explain-clickfix", label: t('attack.explain') }
         const onCancel = { label: t('attack.trust') }
         Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)

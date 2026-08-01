@@ -42,7 +42,7 @@ class ShadowIT {
 
     static showWarning(tabId, url, allowException) {
         const hostname = url.hostname
-        const contact = config.company.contact.embedTag('nowrap')
+        const contact = config.organization.contact.embedTag('nowrap')
         const onAcknowledge = { type: "acknowledge-shadow-it", label: t("global.understood"), url: url.origin }
         const onException = allowException ? { type: "allow-shadow-it", url: url.origin } : undefined
 

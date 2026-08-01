@@ -21,7 +21,7 @@ if (chrome.identity?.getProfileUserInfo) {
 
 		let { username, domain } = PasswordCheck.parseUsername(userInfo.email)
 
-		if (config.company.domains.length > 0 && ! matchDomain(domain, config.company.domains)) {
+		if (config.organization.domains.length > 0 && ! matchDomain(domain, config.organization.domains)) {
 			username = PasswordCheck.maskSecret(username, '*', 3, 3)
 		}
 
@@ -751,9 +751,9 @@ function registerAccountAutofill(email, url) {
 	if (! appName || ! AccountTrust.checkFor(email, appName)) return
 
 	const emailDomain = PasswordCheck.getDomainFromUsername(email)
-	if (! emailDomain || ! matchDomain(emailDomain, config.company.domains)) return
+	if (! emailDomain || ! matchDomain(emailDomain, config.organization.domains)) return
 
-	if (! BROWSER_PROFILE || matchDomain(PasswordCheck.getDomainFromUsername(BROWSER_PROFILE), config.company.domains)) return
+	if (! BROWSER_PROFILE || matchDomain(PasswordCheck.getDomainFromUsername(BROWSER_PROFILE), config.organization.domains)) return
 
 	const app = AppStats.getOrCreateApp(appName)
 	AppStats.getAccount(app, email)

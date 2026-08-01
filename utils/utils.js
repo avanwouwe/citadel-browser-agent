@@ -529,7 +529,7 @@ function isExternalUser(config, username) {
 
     if (! domain) return false
 
-    if (Object.keys(config.company.domains)?.length > 0) return ! matchDomain(domain, config.company.domains)
+    if (Object.keys(config.organization.domains)?.length > 0) return ! matchDomain(domain, config.organization.domains)
 
     return matchDomain(domain, config.domain.publicMail) === true
 }

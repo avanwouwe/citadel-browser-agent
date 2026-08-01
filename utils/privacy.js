@@ -14,7 +14,7 @@ class Privacy {
         if (storage.value().shown) return
 
         const title = t('privacy.modal.title')
-        const message = t('privacy.modal.message', { organization: config.company.name })
+        const message = t('privacy.modal.message', { organization: config.organization.name })
 
         if (! await Privacy.wasAcknowledged())  Notification.setAlert("privacy", State.BLOCKING, title, message)
     }

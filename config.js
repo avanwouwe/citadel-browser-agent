@@ -10,7 +10,7 @@ class Config {
                 "docs.google.com"
             ]
         },
-        company: {
+        organization: {
             name: undefined,          // name of your organization
             contact: undefined,                 // replace with the email address of your support
             logo: {
@@ -590,8 +590,8 @@ class Config {
     static #domainPatterns = [
         "system.excludeInject",
         "domain.unmask",
-        "company.domains",
-        "company.applications",
+        "organization.domains",
+        "organization.applications",
         "session.domains",
         "session.exceptions",
         "domain.sensitive",
@@ -655,7 +655,7 @@ class Config {
                 // * do not block, just remind periodically
                 // * do not warn against shadow IT
                 localConfig = {
-                    company: {
+                    organization: {
                         applications: ["*"],
                     },
                     account: {
@@ -693,7 +693,7 @@ class Config {
         Config.#init(newConfig)
 
         // calculate the list of protected, sensitive and unmask domains
-        const protectedDomains = mergeArrays(newConfig.company.domains, newConfig.company.applications)
+        const protectedDomains = mergeArrays(newConfig.organization.domains, newConfig.organization.applications)
         newConfig.protectedDomains = protectedDomains.reduce((result, obj) => {
             Object.keys(obj).forEach(key => { result[key] = result[key] || obj[key]})
             return result
@@ -717,8 +717,8 @@ class Config {
             newConfig.extensions.whitelist.allowAlways,
         )
 
-        newConfig.company.name = newConfig.company.name ?? t('global.organisation')
-        newConfig.company.contact = newConfig.company.contact ?? t('global.contact')
+        newConfig.organization.name = newConfig.organization.name ?? t('global.organisation')
+        newConfig.organization.contact = newConfig.organization.contact ?? t('global.contact')
 
         // for every defined exception, copy the global config and override with the fields defined in the exception
         const exceptions = newConfig.exceptions

@@ -18,7 +18,7 @@ class MFACheck {
 
         const warnMinutes = config.account.mfa.warnMinutes
         const blockMinutes = config.account.mfa.blockMinutes
-        const contact = config.company.contact
+        const contact = config.organization.contact
 
         if (session?.state === 'cancelled' && (Date.now() - session.cancelledAt) < MFACheck.#CANCEL_GRACE) {
             debug(`MFA startTimer suppressed for ${domain} — cancelled ${Date.now() - session.cancelledAt}ms ago`)

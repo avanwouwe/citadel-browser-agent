@@ -22,7 +22,7 @@ But to protect the privacy of your end-users, it:
 * only applies the policy to the systems in your protected scope
 * purges accounts after 90 days of not being used
 
-If `checkOnlyInternal` is set to `true` then the policy is not applied to external users. The domain of usernames is used to determine if the user is internal or external. If you have defined `company.domains` then any domain not in that list is considered external. If you have not defined `company.domains` then any domain in `domain.publicMail` (containing a default list of known public mail services) is considered external. Usernames without a domain are always considered as internal. 
+If `checkOnlyInternal` is set to `true` then the policy is not applied to external users. The domain of usernames is used to determine if the user is internal or external. If you have defined `organization.domains` then any domain not in that list is considered external. If you have not defined `organization.domains` then any domain in `domain.publicMail` (containing a default list of known public mail services) is considered external. Usernames without a domain are always considered as internal. 
 
 ```
     ...
@@ -95,7 +95,7 @@ Users can then ask for a temporary exception and continue. The account will be r
 ## professional accounts in personal profiles
 When a browser profile is signed into a *personal* cloud account (e.g. a personal Google account), the passwords it stores are synced to that account. Personal accounts are generally less protected, they propagate to non-enterprise devices, and survives offboarding.
 
-Citadel detects this when the browser auto-fills an e-mail address belonging to one of your `company.domains` while the browser profile is signed into an account that is *not* on one of those domains. The account is raised as an Account Trust issue, so it follows the same escalation logic as the other account issues, and the user can clear it from the Account Dashboard with the account *delete* button.
+Citadel detects this when the browser auto-fills an e-mail address belonging to one of your `organization.domains` while the browser profile is signed into an account that is *not* on one of those domains. The account is raised as an Account Trust issue, so it follows the same escalation logic as the other account issues, and the user can clear it from the Account Dashboard with the account *delete* button.
 
 Use`account.profileSeparation.action` to configure the escalation step to take when a professional account is auto-filled in a personal profile. Set to `"NOTHING"` to disable the check.
 

@@ -151,7 +151,7 @@ class Audit {
 
     notify() {
         const title = t(`${this.#type}trust.notification.title`)
-        const contact = config.company.contact
+        const contact = config.organization.contact
 
         if (this.#conclusion === State.PASSING) {
             Notification.setAlert(this.#type, this.#conclusion)

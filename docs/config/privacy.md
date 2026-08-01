@@ -21,7 +21,7 @@ Upon installation, Citadel notifies your users that it is installed, and shows t
 The notice is not static text: each section is built from your live configuration, so it always reflects what Citadel is actually doing on that device. For example:
 * the accounts section states whether checks apply to `checkOnlyInternal` accounts only, or to all accounts, and whether they are `checkOnlyProtected`
 * the retention section states the actual number of days configured in `application.retentionDays`, `account.retentionDays` and `session.maxSessionDays`
-* the protected scope section lists the actual domains and applications configured in `company.domains` and `company.applications`
+* the protected scope section lists the actual domains and applications configured in `organization.domains` and `organization.applications`
 
 This means that if you change your configuration, the notice shown to users changes automatically; you do not need to maintain it separately.
 
@@ -49,8 +49,8 @@ The dashboard allows you to configure privacy-specific elements:
 ```
 
 * `privacy.legimateInterest` : assumes `true` by default, will tell users to contact your DPO if `false`
-* `privacy.controller` : name used for the Privacy Notification (defaults to the `company.name`)
-* `privacy.dpo` : address of the DPO (defaults to `company.contact`)
+* `privacy.controller` : name used for the Privacy Notification (defaults to the `organization.name`)
+* `privacy.dpo` : address of the DPO (defaults to `organization.contact`)
 * `privacy.effectiveDate` : date when notice was first published (defaults to `privacy.lastModified`)
 * `privacy.lastModified` : date when notice was last modified (defaults to `privacy.effectiveDate`)
 * `privacy.authority` : free text (may include basic HTML such as lists and links) identifying the supervisory authority, or authorities, competent to receive complaints. Since some organisations operate across multiple jurisdictions, this is left free-form rather than a single fixed field. If left unset, a generic reference to "your local data protection supervisory authority" is shown.
