@@ -217,7 +217,29 @@
       }
     },
     "SensitiveFiles": {
-      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE directory = 'C:\\\\Users\\\\{{username}}\\\\Downloads' AND (filename LIKE '%backup%code%' OR filename LIKE '%recovery%code%' OR filename LIKE '%password%') AND btime <= (strftime('%s','now') - (7 * 24 * 60 * 60)) AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
+      "query":
+      "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error \
+       FROM file \
+       WHERE path LIKE 'C:\\Users\\{{username}}\\Downloads\\%%' \
+       AND ( \
+         REGEX_MATCH(LOWER(filename), 'password.*\\.(txt|xlsx?|tsv|csv|json|ya?ml|conf|ini|pdf)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(backup|recovery|access|secret|private).?(token|password|code|key).*\\.(txt|xls|xlsx|tsv|csv|json|ya?ml|conf|ini)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(bitwarden|lastpass|dashlane).*export', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '\\.(ppk|pfx|p12|kdbx|1pux|opvault|wallet)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(2fa|authenticator|mfa).*backup', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(wallet\\.dat)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(rootkey|credentials)\\.csv$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), 'service.?account.*\\.json$', 0) IS NOT NULL \
+         OR (filename LIKE '%id_rsa%' AND filename NOT LIKE '%.pub') \
+         OR (filename LIKE '%id_ed25519%' AND filename NOT LIKE '%.pub') \
+         OR filename LIKE '%seed%phrase%' \
+         OR filename LIKE '%mnemonic%' \
+         OR filename LIKE '%wallet.dat' \
+         OR filename LIKE '%azureprofile%' \
+         OR filename LIKE 'client_secret%.json' \
+       ) \
+       AND btime <= (strftime('%s','now') - (7 * 24 * 60 * 60)) \
+       AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
       "text": {
         "en": {
           "label": "Sensitive data is protected",
@@ -230,20 +252,26 @@
       }
     },
     "ExportedFiles": {
-      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE directory = 'C:\\\\Users\\\\{{username}}\\\\Downloads' AND (filename LIKE '%export%.csv' OR filename LIKE '%export%.json' OR filename LIKE '%export%.txt' OR filename LIKE '%export%.xls' OR filename LIKE '%export%.xlsx') AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60)) AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
+      "query":
+      "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error \
+       FROM file \
+       WHERE path LIKE 'C:\\Users\\{{username}}\\Downloads\\  %%' \
+       AND REGEX_MATCH(LOWER(filename), 'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', 0) IS NOT NULL \
+       AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60)) \
+       AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
       "text": {
         "en": {
           "label": "Exported files are purged",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/ExportedFiles"
         },
         "fr": {
           "label": "Fichiers exportés sont supprimés",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/ExportedFiles"
         }
       }
     },
     "UnusedFiles": {
-      "query": "SELECT replace(path, 'C:\\\\Users\\\\{{username}}\\\\', '') AS error FROM file WHERE directory = 'C:\\\\Users\\\\{{username}}\\\\Downloads' AND btime <= (strftime('%s','now') - (90 * 24 * 60 * 60)) AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
+      "query": "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error FROM file WHERE directory = 'C:\\Users\\{{username}}\\Downloads' AND btime <= (strftime('%s','now') - (90 * 24 * 60 * 60)) AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
       "text": {
         "en": {
           "label": "Unused files are purged",
