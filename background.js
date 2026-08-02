@@ -927,6 +927,25 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 
 function truncateReason(reason) { return reason.truncate(config.system.maxReasonLength, 'end') }
 
+function acknowledgeAlert(alert, showDashboard) {
+	if (alert.type === Extension.TYPE) {
+		Notification.setAlert(Extension.TYPE, State.PASSING)
+	}
+
+	if (alert.type === Privacy.TYPE) {
+		Privacy.acknowledge()
+		Notification.setAlert(Privacy.TYPE, State.PASSING)
+	}
+
+	if (showDashboard) {
+		openDashboard(alert.type, true)
+	}
+
+	if (alert.level !== State.BLOCKING) {
+		Notification.acknowledge(alert.type)
+	}
+}
+
 onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()
 	const tabId = sender?.tab?.id
@@ -946,22 +965,7 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "acknowledge-alert") {
-		if (request.alert.type === Extension.TYPE) {
-			Notification.setAlert(Extension.TYPE, State.PASSING)
-		}
-
-		if (request.alert.type === Privacy.TYPE) {
-			Privacy.acknowledge()
-			Notification.setAlert(Privacy.TYPE, State.PASSING)
-		}
-
-		if (request.openDashboard) {
-			openDashboard(request.alert.type, true)
-		}
-
-		if (request.alert.level !== State.BLOCKING) {
-			Notification.acknowledge(request.alert.type)
-		}
+		acknowledgeAlert(request.alert, request.openDashboard)
 	}
 
 	if (request.type === "allow-alert") {
@@ -1086,13 +1090,8 @@ chrome.action.onClicked.addListener(() => {
 })
 
 chrome.notifications.onClicked.addListener(function(notificationId) {
-	if (notificationId === DeviceTrust.TYPE || notificationId === AccountTrust.TYPE || notificationId === ExtensionTrust.TYPE) {
-		openDashboard(notificationId)
-
-		if (Notification.showing?.type === notificationId && Notification.showing?.level === State.BLOCKING) {
-			return
-		}
-
-		Notification.acknowledge(notificationId)
+	const alert = Notification.getAlert(notificationId)
+	if (alert) {
+		acknowledgeAlert(alert, true)
 	}
 })
