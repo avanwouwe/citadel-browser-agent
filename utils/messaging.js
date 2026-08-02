@@ -21,7 +21,7 @@ class NativeMessaging {
     static #readyPromise = new Promise((resolve) => { NativeMessaging.#readyResolve = resolve })
 
     static init() {
-        assert(Context.isServiceWorker(), "must initialized in background process")
+        assert(Context.isBackground(), "must initialized in background service worker")
 
         NativeMessaging.#resetRetryDelay()
         NativeMessaging.#connect()

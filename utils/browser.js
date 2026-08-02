@@ -90,7 +90,7 @@ class Browser {
     static startTime
 
     static {
-        if (Context.isServiceWorker()) {
+        if (Context.isBackground()) {
             (async () => {
                 const result = await chrome.storage.session.get(['browserStartTime'])
 

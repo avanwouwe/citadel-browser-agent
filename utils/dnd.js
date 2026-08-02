@@ -48,7 +48,7 @@ class Screensharing {
     static {
         const onTabGone = tabId => Screensharing.#sessions.delete(tabId)
 
-        if (Context.isServiceWorker()) {
+        if (Context.isBackground()) {
             chrome.tabs.onRemoved.addListener(onTabGone)
             chrome.webNavigation.onCommitted.addListener(details => onTabGone(details.tabId))
         }

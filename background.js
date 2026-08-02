@@ -1,4 +1,4 @@
-console.log("service worker starting")
+console.log("background service worker starting")
 
 let BROWSER_PROFILE
 if (chrome.identity?.getProfileUserInfo) {

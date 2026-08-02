@@ -20,13 +20,13 @@ class TabState {
     }
 
     clear() {
-        assert ( this.#handler, "only service worker can set state")
+        assert ( this.#handler, "only background service worker can set state")
 
         this.#state = { }
     }
 
     setState(key, tabId, value) {
-        assert ( this.#handler, "only service worker can set state")
+        assert ( this.#handler, "only background service worker can set state")
 
         if (tabId === undefined) { return console.error("tabId parameter is required") }
 

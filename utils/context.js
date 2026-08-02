@@ -6,7 +6,7 @@ class Context {
     static #hasBrowserTabs       = () => !!(typeof chrome !== 'undefined' && chrome.tabs || typeof browser !== 'undefined' && browser.tabs)
     static #isBackgroundPage     = () => !Context.#hasWindow() || typeof browser !== 'undefined' && window === browser.extension?.getBackgroundPage()
 
-    static isServiceWorker = () =>
+    static isBackground = () =>
         Context.#hasRuntimeId() &&
         Context.#hasBrowserTabs() &&
         Context.#isBackgroundPage()

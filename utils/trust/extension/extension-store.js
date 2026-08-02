@@ -33,7 +33,7 @@ class ExtensionStore {
     static pageOf = async (id, store = ExtensionStore.Chrome) => await store.pageOf(id)
 
     static async fetchStoreInfo(storePage) {
-        const html = Context.isServiceWorker() ? await ExtensionStore.fetchPage(storePage) : await callServiceWorker('FetchExtensionPage', { url: storePage })
+        const html = Context.isBackground() ? await ExtensionStore.fetchPage(storePage) : await callServiceWorker('FetchExtensionPage', { url: storePage })
         const dom = html2dom(html.content)
         dom.url = storePage
 

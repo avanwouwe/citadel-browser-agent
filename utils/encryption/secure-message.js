@@ -5,7 +5,7 @@ class SecureMessage {
     static #privateKey
 
     static async getPublicKey() {
-        if (Context.isServiceWorker())  return SecureMessage.#publicKey
+        if (Context.isBackground())  return SecureMessage.#publicKey
         if (Context.isContentScript())  return callServiceWorker("SecureMessageKey")
 
         debug("method cannot be called in this context")
@@ -34,7 +34,7 @@ class SecureMessage {
     }
 
     static async decrypt(payload) {
-        assert(Context.isServiceWorker(), "method can only be called from service worker context")
+        assert(Context.isBackground(), "method can only be called from background service worker context")
         assert(SecureMessage.#privateKey, "private key not initialized")
 
         const decrypted = await crypto.subtle.decrypt(
@@ -62,7 +62,7 @@ class SecureMessage {
     }
 
     static listenTo(type, handler) {
-        assert(Context.isServiceWorker(), "method can only be called from service worker context")
+        assert(Context.isBackground(), "method can only be called from background service worker context")
 
         Bridge.listenTo(type, async (msg, sender) => {
             assert(msg.channel === SecureMessage.CHANNEL_NAME, "secure handler received insecure message")
@@ -73,7 +73,7 @@ class SecureMessage {
     }
 
     static {
-        if (Context.isServiceWorker()) {
+        if (Context.isBackground()) {
             SecureMessage.#publicKey = crypto.subtle.generateKey(
                 { name: "RSA-OAEP", modulusLength: 2048, publicExponent: new Uint8Array([1, 0, 1]), hash: "SHA-256" },
                 false,
