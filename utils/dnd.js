@@ -2,7 +2,7 @@ class DoNotDisturb {
 
     static #MAX_DURATION = 24 * ONE_HOUR    // if the user is DND for more than this period, ignore the DND
 
-    static #nativeDND = cachedCall(ONE_MINUTE, () => Port.request("dnd"))
+    static #nativeDND = cachedCall(ONE_MINUTE, () => NativeMessaging.request("dnd"))
 
     static #activeSince = null
 

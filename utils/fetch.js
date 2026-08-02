@@ -24,7 +24,7 @@ class Fetch {
             rejectFn
         }
 
-        Port.postMessage("fetch", { url })
+        NativeMessaging.postMessage("fetch", { url })
 
         return promise
     }
@@ -38,7 +38,7 @@ class Fetch {
             })
         }, ONE_DAY)
 
-        Port.ready().then(() => Port.onMessage("fetch", (message) => {
+        NativeMessaging.ready().then(() => NativeMessaging.onMessage("fetch", (message) => {
             debug("received fetch result", { url: message.url, status: message.status, ok: message.ok })
 
             const url = message.url

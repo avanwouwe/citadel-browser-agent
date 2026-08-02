@@ -44,11 +44,11 @@ let t
 I18n.fromFile('/utils/i18n').then(async i18n => {
 	t = i18n.getTranslator()
 	Config.load()
-	Port.init()
+	NativeMessaging.init()
 })
 
-Port.ready().then(() => {
-	Port.onMessage("config", async (newConfig) => {
+NativeMessaging.ready().then(() => {
+	NativeMessaging.onMessage("config", async (newConfig) => {
 		Config.load(newConfig)
 
 		if (!Config.isLoaded()) return
@@ -81,11 +81,11 @@ Port.ready().then(() => {
 		logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, undefined, undefined, false)
 	})
 
-	Port.onMessage("restart", () => {
+	NativeMessaging.onMessage("restart", () => {
 		restartExtension()
 	})
 
-	Port.onMessage("devicetrust",(audit) => {
+	NativeMessaging.onMessage("devicetrust",(audit) => {
 		debug("received device audit", audit)
 
 		for (const report of Object.values(audit.reports)) {

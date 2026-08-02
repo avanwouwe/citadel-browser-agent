@@ -39,7 +39,7 @@ class Bridge {
 
         Bridge.listenTo("RefreshDeviceStatus", () => {
             debug("dashboard requested update")
-            Port.postMessage("devicetrust", { request: "update" })
+            NativeMessaging.postMessage("devicetrust", { request: "update" })
         })
 
         Bridge.listenTo("GetExtensionStatus", async() => await ExtensionTrust.getStatus())
