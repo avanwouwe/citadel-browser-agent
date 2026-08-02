@@ -41,68 +41,69 @@ let blockDebouncer = new Debouncer(5 * ONE_SECOND, null, true)
 let events = new RingBuffer(200)
 let t
 
-const i18nReady = I18n.fromFile('/utils/i18n')
-	.then(i18n => { t = i18n.getTranslator() })
-
-i18nReady.then(() => Config.load())
-
-Port.onMessage("config", async (newConfig) => {
-	await i18nReady
-
-	Config.load(newConfig)
-
-	if (!Config.isLoaded()) return
-
-	await Promise.all([
-		AccountTrust.init(),
-		DeviceTrust.init(),
-		ShadowIT.init(),
-		Gitleaks.init(),
-		Privacy.init()
-	]);
-
-	[blacklistIP, blacklistURL] = await Promise.all([
-		new CombinedBlacklist().load(config.webfilter.blacklist.ip, IPBlacklist),
-		new CombinedBlacklist().load(config.webfilter.blacklist.url, URLBlacklist)
-	])
-	whitelistIP = new IPBlacklist().init()
-	whitelistURL = new URLBlacklist().init()
-	config.webfilter.whitelist.ip.forEach(entry => whitelistIP.add(entry))
-	config.webfilter.whitelist.url.forEach(entry => whitelistURL.add(entry))
-	exceptionList = new Exceptionlist()
-	ignorelist = new Ignorelist()
-
-	tabState = new TabState(true)
-
-	issueRegistrationDebouncer = new Debouncer(config.account.confirmLoginDelay * ONE_SECOND)
-	const version = chrome.runtime.getManifest().version
-	const configHash = config?.hashDJB2()
-
-	logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, undefined, undefined, false)
+I18n.fromFile('/utils/i18n').then(async i18n => {
+	t = i18n.getTranslator()
+	Config.load()
+	Port.init()
 })
 
-Port.onMessage("restart", () => {
-	restartExtension()
-})
+Port.ready().then(() => {
+	Port.onMessage("config", async (newConfig) => {
+		Config.load(newConfig)
 
-Port.onMessage("devicetrust",(audit) => {
-	debug("received device audit", audit)
+		if (!Config.isLoaded()) return
 
-	for (const report of Object.values(audit.reports)) {
-		report.timestamp = parseTimestamp(report.timestamp)
-	}
+		await Promise.all([
+			AccountTrust.init(),
+			DeviceTrust.init(),
+			ShadowIT.init(),
+			Gitleaks.init(),
+			Privacy.init()
+		]);
 
-	const browserUptime = (Date.now() - Browser.startTime) / ONE_DAY
-	const browserUptimePassing = browserUptime <= config.device.controls.browser.maxUptime
-	audit.reports.BrowserUpdated = {
-		"name": "BrowserUpdated",
-		"passing": browserUptimePassing,
-		"timestamp": new Date(),
-		"errors": browserUptimePassing ? null : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
-	}
+		[blacklistIP, blacklistURL] = await Promise.all([
+			new CombinedBlacklist().load(config.webfilter.blacklist.ip, IPBlacklist),
+			new CombinedBlacklist().load(config.webfilter.blacklist.url, URLBlacklist)
+		])
+		whitelistIP = new IPBlacklist().init()
+		whitelistURL = new URLBlacklist().init()
+		config.webfilter.whitelist.ip.forEach(entry => whitelistIP.add(entry))
+		config.webfilter.whitelist.url.forEach(entry => whitelistURL.add(entry))
+		exceptionList = new Exceptionlist()
+		ignorelist = new Ignorelist()
 
-	DeviceTrust.addAudit(audit)
-	Dashboard.refreshDevice()
+		tabState = new TabState(true)
+
+		issueRegistrationDebouncer = new Debouncer(config.account.confirmLoginDelay * ONE_SECOND)
+		const version = chrome.runtime.getManifest().version
+		const configHash = config?.hashDJB2()
+
+		logger.log(nowTimestamp(), "agent start", "start", undefined, Log.INFO, configHash, `browser agent started version ${version} and config ${configHash}`, undefined, undefined, false)
+	})
+
+	Port.onMessage("restart", () => {
+		restartExtension()
+	})
+
+	Port.onMessage("devicetrust",(audit) => {
+		debug("received device audit", audit)
+
+		for (const report of Object.values(audit.reports)) {
+			report.timestamp = parseTimestamp(report.timestamp)
+		}
+
+		const browserUptime = (Date.now() - Browser.startTime) / ONE_DAY
+		const browserUptimePassing = browserUptime <= config.device.controls.browser.maxUptime
+		audit.reports.BrowserUpdated = {
+			"name": "BrowserUpdated",
+			"passing": browserUptimePassing,
+			"timestamp": new Date(),
+			"errors": browserUptimePassing ? null : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
+		}
+
+		DeviceTrust.addAudit(audit)
+		Dashboard.refreshDevice()
+	})
 })
 
 function logInstall(reason) {

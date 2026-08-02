@@ -17,9 +17,25 @@ class Port {
         logger.log(nowTimestamp(), "report", "events lost", undefined, Log.ERROR, lostEvents, `lost ${lostEvents} event due to native messaging issue`)
     })
 
+    static #readyResolve
+    static #readyPromise = new Promise((resolve) => { Port.#readyResolve = resolve })
+
+    static init() {
+        assert(Context.isServiceWorker(), "must initialized in background process")
+
+        Port.#resetRetryDelay()
+        Port.#connect()
+        Port.#readyResolve()
+    }
+
+    static ready() {
+        return Port.#readyPromise
+    }
 
     static postMessage(type, message) {
         try {
+            assert(Port.#port, 'Native Messaging is not yet initialized')
+
             message = { type, version: PROTOCOL_VERSION, message };
 
             Port.#port.postMessage(message);
@@ -35,6 +51,8 @@ class Port {
     }
 
     static onMessage(type, handler) {
+        assert(Port.#port, 'Native Messaging is not yet initialized')
+
         Port.#messageHandlers[type] = handler
         Port.#port.onMessage.addListener((message) => {
             this.#hasReceivedMessage = true
@@ -46,6 +64,8 @@ class Port {
     }
 
     static request(sendType, message = undefined, replyType = sendType) {
+        assert(Port.#port, 'Native Messaging is not yet initialized')
+
         return new Promise((resolve, reject) => {
             const entry = { resolve, reject }
             Port.#addWaiter(replyType, entry)
@@ -122,11 +142,4 @@ class Port {
             Port.#retryDelay = Port.#MIN_RETRY_DELAY
         }
     }
-
-    static {
-        assert(Context.isServiceWorker(), "must load class in background process")
-        Port.#resetRetryDelay()
-        Port.#connect()
-    }
-
 }

@@ -38,7 +38,7 @@ class Fetch {
             })
         }, ONE_DAY)
 
-        Port.onMessage("fetch", (message) => {
+        Port.ready().then(() => Port.onMessage("fetch", (message) => {
             debug("received fetch result", { url: message.url, status: message.status, ok: message.ok })
 
             const url = message.url
@@ -51,7 +51,7 @@ class Fetch {
                 }
                 delete Fetch.#requests[url]
             }
-        })
+        }))
     }
 
 }
