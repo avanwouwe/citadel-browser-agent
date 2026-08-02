@@ -1,6 +1,7 @@
 class Notification {
     static #alerts = {}
     static #tabs = new Set()
+    static #held = new Set()
     static showing
     static #persistence
 
@@ -22,7 +23,19 @@ class Notification {
         await Notification.#persistence.ready()
     }
 
+    // only notify if a fresh alert is received, hold alerts that were deserialized upon startup
+    static hold(type) {
+        Notification.#held.add(type)
+    }
+
+    static getAlert(type) {
+        const alert = Notification.#alerts[type]
+        return structuredClone(alert)
+    }
+
     static setAlert(type, level, title, message) {
+        Notification.#held.delete(type)
+
         if (level === State.PASSING) {
             delete Notification.#alerts[type]
             Notification.#updateState()
@@ -128,6 +141,8 @@ class Notification {
         // find both the worst alert, and the worst alert that is not acknowledged (i.e. 'showing')
         let worstAlert = { level: State.PASSING }
         for (const alert of Object.values(Notification.#alerts)) {
+            if (Notification.#held.has(alert.type)) continue
+
             const alertLevel = State.indexOf(alert.level)
             const worstAlertLevel = State.indexOf(worstAlert.level)
 

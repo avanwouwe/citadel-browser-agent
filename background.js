@@ -53,6 +53,8 @@ NativeMessaging.ready().then(() => {
 
 		if (!Config.isLoaded()) return
 
+		Notification.hold(DeviceTrust.TYPE)			// no DeviceTrust notifications until a fresh report comes in
+
 		await Promise.all([
 			AccountTrust.init(),
 			DeviceTrust.init(),
