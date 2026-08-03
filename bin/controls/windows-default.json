@@ -255,7 +255,7 @@
       "query":
       "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error \
        FROM file \
-       WHERE path LIKE 'C:\\Users\\{{username}}\\Downloads\\  %%' \
+       WHERE path LIKE 'C:\\Users\\{{username}}\\Downloads\\%%' \
        AND REGEX_MATCH(LOWER(filename), 'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', 0) IS NOT NULL \
        AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60)) \
        AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
