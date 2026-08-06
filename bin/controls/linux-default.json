@@ -1,0 +1,545 @@
+{
+  "controls": {
+    "BrowserUpdated": {
+      "text": {
+        "en": {
+          "label": "Browser is updated",
+          "explain": "https://www.citadelagent.org/control/BrowserUpdated"
+        },
+        "fr": {
+          "label": "Navigateur est à jour",
+          "explain": "https://www.citadelagent.org/control/BrowserUpdated"
+        }
+      }
+    },
+    "ForbiddenApplications": {
+      "text": {
+        "en": {
+          "label": "No forbidden applications installed",
+          "explain": "https://www.citadelagent.org/control/ForbiddenApplications"
+        },
+        "fr": {
+          "label": "Aucune application interdite installée",
+          "explain": "https://www.citadelagent.org/control/ForbiddenApplications"
+        }
+      }
+    },
+    "MissingApplications": {
+      "text": {
+        "en": {
+          "label": "All required applications installed",
+          "explain": "https://www.citadelagent.org/control/MissingApplications"
+        },
+        "fr": {
+          "label": "Toutes les applications requises installées",
+          "explain": "https://www.citadelagent.org/control/MissingApplications"
+        }
+      }
+    },
+    "ForbiddenProcesses": {
+      "text": {
+        "en": {
+          "label": "No forbidden processes running",
+          "explain": "https://www.citadelagent.org/control/ForbiddenProcesses"
+        },
+        "fr": {
+          "label": "Aucun processus interdit actif",
+          "explain": "https://www.citadelagent.org/control/ForbiddenProcesses"
+        }
+      }
+    },
+    "MissingProcesses": {
+      "text": {
+        "en": {
+          "label": "All required processes running",
+          "explain": "https://www.citadelagent.org/control/MissingProcesses"
+        },
+        "fr": {
+          "label": "Tous les processus requis sont actifs",
+          "explain": "https://www.citadelagent.org/control/MissingProcesses"
+        }
+      }
+    },
+    "MaxUptime": {
+      "query":
+      "SELECT 'System not restarted in ' || (total_seconds / 86400) || ' days' AS error \
+       FROM uptime \
+       WHERE total_seconds / 86400 > 30;",
+      "text": {
+        "en": {
+          "label": "System was restarted recently",
+          "explain": "https://www.citadelagent.org/control/MaxUptime"
+        },
+        "fr": {
+          "label": "Système a été redémarré récemment",
+          "explain": "https://www.citadelagent.org/control/MaxUptime"
+        }
+      }
+    },
+    "SystemUpdated": {
+      // Debian/Ubuntu expose a reboot-required marker after updates that
+      // require a restart. On RPM-family distributions, a kernel package
+      // installed after the current boot indicates that the newly installed
+      // kernel has not yet been booted. Other distributions fail open.
+      "query":
+      "SELECT DISTINCT 'pending update requires reboot' AS error \
+       FROM file \
+       WHERE path = '/var/run/reboot-required' \
+       UNION ALL \
+       SELECT 'kernel package installed since the current boot' AS error \
+       FROM uptime AS u \
+       WHERE EXISTS ( \
+         SELECT 1 \
+         FROM rpm_packages AS p \
+         WHERE p.name IN ( \
+           'kernel', \
+           'kernel-core', \
+           'kernel-default' \
+         ) \
+         AND p.install_time > ( \
+           CAST(strftime('%s', 'now') AS INTEGER) - u.total_seconds \
+         ) \
+       );",
+      "text": {
+        "en": {
+          "label": "System is up to date",
+          "explain": "https://www.citadelagent.org/control/SystemUpdated"
+        },
+        "fr": {
+          "label": "Système est à jour",
+          "explain": "https://www.citadelagent.org/control/SystemUpdated"
+        }
+      }
+    },
+    "DriveEncryption": {
+      // Detects unencrypted root filesystems mounted directly from common
+      // disk-device names. Layered or unusual storage is deliberately skipped
+      // because a direct name join cannot reliably trace LUKS beneath LVM,
+      // RAID, ZFS, containers, or other device-mapper stacks.
+      "query":
+      "SELECT DISTINCT '' AS error \
+       FROM mounts AS m \
+       LEFT JOIN disk_encryption AS d ON d.name = m.device \
+       WHERE m.path = '/' \
+       AND ( \
+         m.device LIKE '/dev/sd%' \
+         OR m.device LIKE '/dev/nvme%' \
+         OR m.device LIKE '/dev/vd%' \
+         OR m.device LIKE '/dev/xvd%' \
+         OR m.device LIKE '/dev/mmcblk%' \
+       ) \
+       AND (d.name IS NULL OR d.encrypted != 1);",
+      "text": {
+        "en": {
+          "label": "Disk is encrypted",
+          "explain": "https://www.citadelagent.org/control/DriveEncryption"
+        },
+        "fr": {
+          "label": "Disque est chiffré",
+          "explain": "https://www.citadelagent.org/control/DriveEncryption"
+        }
+      }
+    },
+    "SystemIntegrityProtection": {
+      "query":
+      "SELECT 'missing access control (SELinux/AppArmor)' AS error \
+       WHERE NOT EXISTS ( \
+         SELECT 1 \
+         FROM selinux_settings \
+         WHERE key = 'enforce' \
+         AND value = '1' \
+       ) \
+       AND NOT EXISTS ( \
+         SELECT 1 \
+         FROM apparmor_profiles \
+         WHERE mode = 'enforce' \
+         LIMIT 1 \
+       );",
+      "text": {
+        "en": {
+          "label": "System Integrity Protection is enabled",
+          "explain": "https://www.citadelagent.org/control/SystemIntegrityProtection"
+        },
+        "fr": {
+          "label": "Protection Intégrité du Système (SELinux/AppArmor) activée",
+          "explain": "https://www.citadelagent.org/control/SystemIntegrityProtection"
+        }
+      }
+    },
+    "Firewall": {
+      "query":
+      "SELECT '' AS error \
+       WHERE NOT EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE id IN ( \
+           'firewalld.service', \
+           'nftables.service', \
+           'netfilter-persistent.service' \
+         ) \
+         AND active_state = 'active' \
+       ) \
+       AND NOT EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units AS u \
+         WHERE u.id = 'ufw.service' \
+         AND u.active_state = 'active' \
+         AND EXISTS ( \
+           SELECT 1 \
+           FROM file_lines AS f \
+           WHERE f.path = '/etc/ufw/ufw.conf' \
+           AND LOWER(TRIM(f.line)) = 'enabled=yes' \
+         ) \
+       );",
+      "text": {
+        "en": {
+          "label": "Firewall is enabled",
+          "explain": "https://www.citadelagent.org/control/Firewall"
+        },
+        "fr": {
+          "label": "Pare-feu est activé",
+          "explain": "https://www.citadelagent.org/control/Firewall"
+        }
+      }
+    },
+    "AutoUpdates": {
+      // Checks active, enabled systemd timers and the manager-specific
+      // configuration needed for automatic installation. An enabled timer
+      // normally has active_state = 'active' while waiting, even though its
+      // associated oneshot service only becomes active while performing work.
+      "query":
+      "SELECT '' AS error \
+       WHERE NOT EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE id IN ( \
+           'dnf-automatic-install.timer', \
+           'transactional-update.timer' \
+         ) \
+         AND active_state = 'active' \
+         AND unit_file_state IN ('enabled', 'enabled-runtime') \
+       ) \
+       AND NOT EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units AS u \
+         WHERE u.id = 'apt-daily-upgrade.timer' \
+         AND u.active_state = 'active' \
+         AND u.unit_file_state IN ('enabled', 'enabled-runtime') \
+         AND EXISTS ( \
+           SELECT 1 \
+           FROM file_lines AS f \
+           WHERE f.path LIKE '/etc/apt/apt.conf.d/%' \
+           AND REGEX_MATCH( \
+             LOWER(f.line), \
+             '^[[:space:]]*apt::periodic::unattended-upgrade[[:space:]]+\"(1|true)\"[[:space:]]*;', \
+             0 \
+           ) IS NOT NULL \
+         ) \
+       ) \
+       AND NOT EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units AS u \
+         WHERE u.id IN ( \
+           'dnf-automatic.timer', \
+           'dnf5-automatic.timer' \
+         ) \
+         AND u.active_state = 'active' \
+         AND u.unit_file_state IN ('enabled', 'enabled-runtime') \
+         AND EXISTS ( \
+           SELECT 1 \
+           FROM file_lines AS f \
+           WHERE f.path = '/etc/dnf/automatic.conf' \
+           AND REGEX_MATCH( \
+             LOWER(f.line), \
+             '^[[:space:]]*apply_updates[[:space:]]*=[[:space:]]*(yes|true|1)[[:space:]]*$', \
+             0 \
+           ) IS NOT NULL \
+         ) \
+       ) \
+       AND NOT EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units AS u \
+         WHERE u.id = 'rpm-ostreed-automatic.timer' \
+         AND u.active_state = 'active' \
+         AND u.unit_file_state IN ('enabled', 'enabled-runtime') \
+         AND EXISTS ( \
+           SELECT 1 \
+           FROM file_lines AS f \
+           WHERE f.path = '/etc/rpm-ostreed.conf' \
+           AND REGEX_MATCH( \
+             LOWER(f.line), \
+             '^[[:space:]]*automaticupdatepolicy[[:space:]]*=[[:space:]]*(stage|apply)[[:space:]]*$', \
+             0 \
+           ) IS NOT NULL \
+         ) \
+       );",
+      "text": {
+        "en": {
+          "label": "Automatic updates are enabled",
+          "explain": "https://www.citadelagent.org/control/AutoUpdates"
+        },
+        "fr": {
+          "label": "Mises à jour automatiques sont activées",
+          "explain": "https://www.citadelagent.org/control/AutoUpdates"
+        }
+      }
+    },
+    "SharingPreferences": {
+      "query":
+      "SELECT 'SMB sharing is enabled' AS error \
+       WHERE EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE id IN ( \
+           'smb.service', \
+           'smbd.service', \
+           'samba.service' \
+         ) \
+         AND active_state = 'active' \
+       ) \
+       UNION ALL \
+       SELECT 'NFS sharing is enabled' AS error \
+       WHERE EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE id IN ( \
+           'nfs-server.service', \
+           'nfs-kernel-server.service' \
+         ) \
+         AND active_state = 'active' \
+       ) \
+       UNION ALL \
+       SELECT 'remote Desktop (VNC/RDP) is enabled' AS error \
+       WHERE EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE ( \
+           id = 'xrdp.service' \
+           OR id LIKE 'vncserver@%.service' \
+           OR id LIKE 'tigervncserver@%.service' \
+           OR id LIKE 'xvnc@%.service' \
+         ) \
+         AND active_state = 'active' \
+       ) \
+       OR EXISTS ( \
+         SELECT 1 \
+         FROM listening_ports AS l \
+         JOIN processes AS p ON p.pid = l.pid \
+         WHERE l.port != 0 \
+         AND ( \
+           LOWER(p.path) LIKE '%/gnome-remote-desktop%' \
+           OR LOWER(p.path) LIKE '%/vino-server' \
+           OR LOWER(p.path) LIKE '%/wayvnc' \
+           OR LOWER(p.path) LIKE '%/x11vnc' \
+           OR LOWER(p.path) LIKE '%/xvnc' \
+           OR LOWER(p.path) LIKE '%/xtigervnc' \
+         ) \
+       ) \
+       UNION ALL \
+       SELECT 'remote login (SSH) is enabled' AS error \
+       WHERE EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE id IN ( \
+           'sshd.service', \
+           'ssh.service', \
+           'sshd.socket', \
+           'ssh.socket', \
+           'dropbear.service', \
+           'dropbear.socket' \
+         ) \
+         AND active_state = 'active' \
+       ) \
+       UNION ALL \
+       SELECT 'remote management (Cockpit) is enabled' AS error \
+       WHERE EXISTS ( \
+         SELECT 1 \
+         FROM systemd_units \
+         WHERE id IN ( \
+           'cockpit.service', \
+           'cockpit.socket' \
+         ) \
+         AND active_state = 'active' \
+       );",
+      "text": {
+        "en": {
+          "label": "Sharing services are disabled",
+          "explain": "https://www.citadelagent.org/control/SharingPreferences"
+        },
+        "fr": {
+          "label": "Services de partage sont désactivés",
+          "explain": "https://www.citadelagent.org/control/SharingPreferences"
+        }
+      }
+    },
+    "GuestLogin": {
+      // An empty password on a login-capable account is the closest general Linux equivalent to macOS's built-in Guest account.
+      "query":
+      "SELECT 'Interactive account has an empty password: ' || s.username AS error \
+       FROM shadow AS s \
+       JOIN users AS u ON s.username = u.username \
+       WHERE s.password_status = 'empty' \
+       AND u.shell NOT LIKE '%nologin' \
+       AND u.shell NOT LIKE '%/false';",
+      "text": {
+        "en": {
+          "label": "Guest login is disabled",
+          "explain": "https://www.citadelagent.org/control/GuestLogin"
+        },
+        "fr": {
+          "label": "Connexion invité désactivée",
+          "explain": "https://www.citadelagent.org/control/GuestLogin"
+        }
+      }
+    },
+    "SSHKeys": {
+      "query":
+      "SELECT path AS error \
+       FROM user_ssh_keys \
+       WHERE encrypted = 0;",
+      "text": {
+        "en": {
+          "label": "SSH private keys are secured",
+          "explain": "https://www.citadelagent.org/control/SSHKeys"
+        },
+        "fr": {
+          "label": "Clés privées SSH sont sécurisées",
+          "explain": "https://www.citadelagent.org/control/SSHKeys"
+        }
+      }
+    },
+    "BootOptions": {
+      "query":
+      "SELECT 'UEFI Secure Boot is disabled or unavailable' AS error \
+       WHERE NOT EXISTS ( \
+         SELECT 1 \
+         FROM secureboot \
+         WHERE secure_boot = 1 \
+       ) \
+       UNION ALL \
+       SELECT 'insecure kernel boot parameters: ' || arguments AS error \
+       FROM kernel_info \
+       WHERE REGEX_MATCH( \
+         LOWER(arguments), \
+         '(^|[[:space:]])(selinux=0|enforcing=0|apparmor=0|security=none|init=/bin/(sh|bash)|lockdown=none)([[:space:]]|$)', \
+         0 \
+       ) IS NOT NULL;",
+      "text": {
+        "en": {
+          "label": "Boot options are secure",
+          "explain": "https://www.citadelagent.org/control/BootOptions"
+        },
+        "fr": {
+          "label": "Options de démarrage sont sécurisées",
+          "explain": "https://www.citadelagent.org/control/BootOptions"
+        }
+      }
+    },
+    "RemovableStorage": {
+      "query":
+      "SELECT TRIM( \
+         COALESCE(vendor, '') || ' ' || \
+         COALESCE(model, '') || \
+         CASE \
+           WHEN serial IS NOT NULL AND serial != '' THEN ' (' || serial || ')' \
+           ELSE '' \
+         END \
+       ) AS error \
+       FROM usb_devices \
+       WHERE class = 8 \
+       AND removable = 1;",
+      "text": {
+        "en": {
+          "label": "No USB storage devices connected",
+          "explain": "https://www.citadelagent.org/control/RemovableStorage"
+        },
+        "fr": {
+          "label": "Aucun périphérique de stockage USB",
+          "explain": "https://www.citadelagent.org/control/RemovableStorage"
+        }
+      }
+    },
+    "SensitiveFiles": {
+      "query":
+      "SELECT REPLACE(path, '/home/{{username}}/', '') AS error \
+       FROM file \
+       WHERE path LIKE '/home/{{username}}/Downloads/%%' \
+       AND ( \
+         REGEX_MATCH(LOWER(filename), 'password.*\\.(txt|xlsx?|tsv|csv|json|ya?ml|conf|ini|pdf)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(backup|recovery|access|secret|private).?(token|password|code|key).*\\.(txt|xls|xlsx|tsv|csv|json|ya?ml|conf|ini)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(bitwarden|lastpass|dashlane).*export', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '\\.(ppk|pfx|p12|kdbx|1pux|opvault|wallet)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(2fa|authenticator|mfa).*backup', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(wallet\\.dat)(\\..*)?$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), '(rootkey|credentials)\\.csv$', 0) IS NOT NULL \
+         OR REGEX_MATCH(LOWER(filename), 'service.?account.*\\.json$', 0) IS NOT NULL \
+         OR (filename LIKE '%id_rsa%' AND filename NOT LIKE '%.pub') \
+         OR (filename LIKE '%id_ed25519%' AND filename NOT LIKE '%.pub') \
+         OR filename LIKE '%seed%phrase%' \
+         OR filename LIKE '%mnemonic%' \
+         OR filename LIKE '%wallet.dat' \
+         OR filename LIKE '%azureprofile%' \
+         OR filename LIKE 'client_secret%.json' \
+       ) \
+       AND COALESCE(NULLIF(btime, 0), mtime) <= ( \
+         strftime('%s', 'now') - (7 * 24 * 60 * 60) \
+       ) \
+       AND filename NOT LIKE '.%';",
+      "text": {
+        "en": {
+          "label": "Sensitive data is protected",
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+        },
+        "fr": {
+          "label": "Données sensibles sont protégés",
+          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+        }
+      }
+    },
+    "ExportedFiles": {
+      "query":
+      "SELECT REPLACE(path, '/home/{{username}}/', '') AS error \
+       FROM file \
+       WHERE path LIKE '/home/{{username}}/Downloads/%%' \
+       AND REGEX_MATCH( \
+         LOWER(filename), \
+         'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', \
+         0 \
+       ) IS NOT NULL \
+       AND COALESCE(NULLIF(btime, 0), mtime) <= ( \
+         strftime('%s', 'now') - (30 * 24 * 60 * 60) \
+       ) \
+       AND filename NOT LIKE '.%';",
+      "text": {
+        "en": {
+          "label": "Exported files are purged",
+          "explain": "https://www.citadelagent.org/control/ExportedFiles"
+        },
+        "fr": {
+          "label": "Fichiers exportés sont supprimés",
+          "explain": "https://www.citadelagent.org/control/ExportedFiles"
+        }
+      }
+    },
+    "UnusedFiles": {
+      "query":
+      "SELECT REPLACE(path, '/home/{{username}}/', '') AS error \
+       FROM file \
+       WHERE directory = '/home/{{username}}/Downloads' \
+       AND COALESCE(NULLIF(btime, 0), mtime) <= ( \
+         strftime('%s', 'now') - (90 * 24 * 60 * 60) \
+       ) \
+       AND filename NOT LIKE '.%';",
+      "text": {
+        "en": {
+          "label": "Unused files are purged",
+          "explain": "https://www.citadelagent.org/control/UnusedFiles"
+        },
+        "fr": {
+          "label": "Fichiers inutilisés sont supprimés",
+          "explain": "https://www.citadelagent.org/control/UnusedFiles"
+        }
+      }
+    }
+  }
+}

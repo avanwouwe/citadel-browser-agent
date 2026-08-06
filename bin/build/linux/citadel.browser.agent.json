@@ -1,0 +1,12 @@
+{
+"name": "citadel.browser.agent",
+"description": "Citadel browser agent",
+"path": "/opt/citadel-agent/citadel-browser-agent",
+"type": "stdio",
+"allowed_origins": [
+"chrome-extension://anheildjmkfdkdpgbndmpjnmkfliefga/",
+"chrome-extension://dljlhfkijcpkbcnjkkkompmbnipnnmld/",
+"chrome-extension://gaiabdglljkdhmekohlhdajbffpndkdd/",
+"chrome-extension://lcijkiihemncpapclodigonelcmccodd/"
+]
+}

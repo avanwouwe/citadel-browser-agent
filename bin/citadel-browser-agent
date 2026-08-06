@@ -22,13 +22,20 @@ match platform.system().lower():
         SYSTEM_OS = "windows"
     case "darwin":
         SYSTEM_OS = "macos"
+    case "linux":
+        SYSTEM_OS = "linux"
     case _:
         SYSTEM_OS = "unsupported"
 
 PROTOCOL_VERSION = 2
 CONFIG_PATH = "citadel-config.json"
 PERIODIC_CHECK_FREQUENCY = 60 * 60 # every hour
-DEFAULT_OSQUERY_PATH = "C:\\Program Files\\osquery\\osqueryi.exe" if SYSTEM_OS == "windows" else "/usr/local/bin/osqueryi"
+DEFAULT_OSQUERY_PATH = {
+    "windows": "C:\\Program Files\\osquery\\osqueryi.exe",
+    "macos": "/usr/local/bin/osqueryi",
+    # osquery's official .deb/.rpm packages install here on all major distro families
+    "linux": "/usr/bin/osqueryi",
+}.get(SYSTEM_OS, "/usr/local/bin/osqueryi")
 MAX_REPORT_WORKERS = 10
 CONTROL_TIMEOUT = 20   # seconds
 AUDIT_TIMEOUT = 60   # seconds
@@ -110,7 +117,7 @@ def exception(msg, e):
     warning(f"{msg} : {type(e).__name__} at {frame.filename}:{frame.lineno} in {frame.name}")
 
 # create a platform-dependant logger
-if SYSTEM_OS == 'macos':
+if SYSTEM_OS in ('macos', 'linux'):
     import syslog
 
     class SyslogHandler(logging.Handler):
@@ -145,75 +152,154 @@ if SYSTEM_OS == 'macos':
     syslog_handler.setFormatter(formatter)
     logger.addHandler(syslog_handler)
 
-    # ------------------------------------------------------------------
-    # macOS "do not disturb / do not interrupt" detection. Covers:
-    #   1. manually toggled Focus / DND (Assertions.json)
-    #   2. display mirroring (AirPlay / duplicated display)
-    #   3. a new display attached since startup (projector / external screen)
-    # ------------------------------------------------------------------
-    import ctypes
+    if SYSTEM_OS == 'macos':
+        # ------------------------------------------------------------------
+        # macOS "do not disturb / do not interrupt" detection. Covers:
+        #   1. manually toggled Focus / DND (Assertions.json)
+        #   2. display mirroring (AirPlay / duplicated display)
+        #   3. a new display attached since startup (projector / external screen)
+        # ------------------------------------------------------------------
+        import ctypes
 
-    _cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
+        _cg = ctypes.CDLL("/System/Library/Frameworks/CoreGraphics.framework/CoreGraphics")
 
-    _MAX_DISPLAYS = 16
+        _MAX_DISPLAYS = 16
 
-    # CGError CGGetActiveDisplayList(uint32 maxDisplays,
-    #                                CGDirectDisplayID *activeDisplays,
-    #                                uint32 *displayCount)
-    _cg.CGGetActiveDisplayList.argtypes = [
-        ctypes.c_uint32,
-        ctypes.POINTER(ctypes.c_uint32),
-        ctypes.POINTER(ctypes.c_uint32),
-    ]
-    _cg.CGGetActiveDisplayList.restype = ctypes.c_int32
+        # CGError CGGetActiveDisplayList(uint32 maxDisplays,
+        #                                CGDirectDisplayID *activeDisplays,
+        #                                uint32 *displayCount)
+        _cg.CGGetActiveDisplayList.argtypes = [
+            ctypes.c_uint32,
+            ctypes.POINTER(ctypes.c_uint32),
+            ctypes.POINTER(ctypes.c_uint32),
+        ]
+        _cg.CGGetActiveDisplayList.restype = ctypes.c_int32
 
-    # boolean_t CGDisplayIsInMirrorSet(CGDirectDisplayID display)
-    _cg.CGDisplayIsInMirrorSet.argtypes = [ctypes.c_uint32]
-    _cg.CGDisplayIsInMirrorSet.restype = ctypes.c_int
+        # boolean_t CGDisplayIsInMirrorSet(CGDirectDisplayID display)
+        _cg.CGDisplayIsInMirrorSet.argtypes = [ctypes.c_uint32]
+        _cg.CGDisplayIsInMirrorSet.restype = ctypes.c_int
 
 
-    def _current_display_ids():
-        ids = (ctypes.c_uint32 * _MAX_DISPLAYS)()
-        count = ctypes.c_uint32(0)
-        err = _cg.CGGetActiveDisplayList(_MAX_DISPLAYS, ids, ctypes.byref(count))
-        if err != 0:
-            raise OSError(f"CGGetActiveDisplayList err={err}")
-        return set(ids[:count.value])
+        def _current_display_ids():
+            ids = (ctypes.c_uint32 * _MAX_DISPLAYS)()
+            count = ctypes.c_uint32(0)
+            err = _cg.CGGetActiveDisplayList(_MAX_DISPLAYS, ids, ctypes.byref(count))
+            if err != 0:
+                raise OSError(f"CGGetActiveDisplayList err={err}")
+            return set(ids[:count.value])
 
-    # captured ONCE at process start (browser launch): a display already
-    # attached at launch is baselined out; one that appears later is likely
-    # a projector / shared screen rather than a permanent monitor.
-    try:
-        _BASELINE_DISPLAYS = _current_display_ids()
-    except Exception:
-        _BASELINE_DISPLAYS = set()
-
-    def shouldStayQuiet():
+        # captured ONCE at process start (browser launch): a display already
+        # attached at launch is baselined out; one that appears later is likely
+        # a projector / shared screen rather than a permanent monitor.
         try:
-            # 1. manually toggled Focus / DND
-            p = os.path.expanduser("~/Library/DoNotDisturb/DB/Assertions.json")
+            _BASELINE_DISPLAYS = _current_display_ids()
+        except Exception:
+            _BASELINE_DISPLAYS = set()
+
+        def shouldStayQuiet():
             try:
-                with open(p, "r", encoding="utf-8") as f:
-                    data = json.load(f).get("data", [])
-                if data and data[0].get("storeAssertionRecords"):
+                # 1. manually toggled Focus / DND
+                p = os.path.expanduser("~/Library/DoNotDisturb/DB/Assertions.json")
+                try:
+                    with open(p, "r", encoding="utf-8") as f:
+                        data = json.load(f).get("data", [])
+                    if data and data[0].get("storeAssertionRecords"):
+                        return True
+                except (FileNotFoundError, json.JSONDecodeError, IndexError):
+                    pass  # no manual assertion; fall through to presentation checks
+
+                current = _current_display_ids()
+
+                # 2. mirroring (AirPlay / duplicated display)
+                if any(_cg.CGDisplayIsInMirrorSet(d) for d in current):
                     return True
-            except (FileNotFoundError, json.JSONDecodeError, IndexError):
-                pass  # no manual assertion; fall through to presentation checks
 
-            current = _current_display_ids()
+                # 3. a new display appeared since startup (projector / external screen)
+                if current - _BASELINE_DISPLAYS:
+                    return True
 
-            # 2. mirroring (AirPlay / duplicated display)
-            if any(_cg.CGDisplayIsInMirrorSet(d) for d in current):
-                return True
+                return False
+            except Exception as e:
+                exception("macOS DND query failed", e)
+                return False   # fail-open
 
-            # 3. a new display appeared since startup (projector / external screen)
-            if current - _BASELINE_DISPLAYS:
-                return True
+    elif SYSTEM_OS == 'linux':
+        # ------------------------------------------------------------------
+        # Linux "do not disturb" detection.
+        #
+        # There is no single cross-desktop API for this. We do best-effort
+        # detection for the two desktop environments shipped by default on
+        # the major distributions:
+        #   - GNOME family (GNOME/Ubuntu, Fedora Workstation, Debian GNOME,
+        #     Pop!_OS, Mint's Cinnamon, Unity) via `gsettings`.
+        #   - KDE Plasma (Kubuntu, openSUSE KDE, Manjaro KDE, Fedora KDE) via
+        #     its notification config file.
+        #
+        # Desktop environments without an equivalent concept (XFCE, MATE,
+        # LXQt, headless/server installs) fail open, same as any detection
+        # failure below.
+        # ------------------------------------------------------------------
 
-            return False
-        except Exception as e:
-            exception("macOS DND query failed", e)
-            return False   # fail-open
+        def _desktop_environment():
+            return os.environ.get("XDG_CURRENT_DESKTOP", "").lower()
+
+        def _run(cmd, timeout=3):
+            return subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+
+        def _gnome_dnd():
+            # GNOME (and derivatives) expose the master notification switch
+            # here; when the user turns on "Do Not Disturb" this is set to
+            # false. gsettings talks to dconf directly, so it works
+            # regardless of whether a session bus / running shell is present.
+            try:
+                proc = _run(["gsettings", "get", "org.gnome.desktop.notifications", "show-banners"])
+                if proc.returncode == 0:
+                    return proc.stdout.strip().lower() == "false"
+            except FileNotFoundError:
+                pass  # gsettings not installed - not a GNOME-based system
+            except Exception as e:
+                exception("gsettings DND query failed", e)
+            return None
+
+        def _kde_dnd():
+            # KDE Plasma persists the "Do not disturb" toggle in this file.
+            try:
+                path = os.path.expanduser("~/.config/plasmanotifyrc")
+                if not os.path.isfile(path):
+                    return None
+                with open(path, "r", encoding="utf-8") as f:
+                    content = f.read()
+                for line in content.splitlines():
+                    line = line.strip().lower()
+                    if line in ("donotdisturb=true", "inhibited=true"):
+                        return True
+                return False
+            except Exception as e:
+                exception("KDE DND query failed", e)
+            return None
+
+        def shouldStayQuiet():
+            try:
+                de = _desktop_environment()
+                checks = []
+
+                if any(tag in de for tag in ("gnome", "unity", "cinnamon", "x-cinnamon")):
+                    checks = [_gnome_dnd, _kde_dnd]
+                elif any(tag in de for tag in ("kde", "plasma")):
+                    checks = [_kde_dnd, _gnome_dnd]
+                else:
+                    # unknown / misreported desktop - try both, fail open if neither applies
+                    checks = [_gnome_dnd, _kde_dnd]
+
+                for check in checks:
+                    result = check()
+                    if result is not None:
+                        return result
+
+                return False   # no detectable DND state on this desktop
+            except Exception as e:
+                exception("Linux DND query failed", e)
+                return False   # fail-open
 
 elif SYSTEM_OS == 'windows':
     from logging.handlers import NTEventLogHandler
@@ -303,12 +389,12 @@ def checkFileRights(path):
     if not os.path.isfile(path):
         return
 
-    if SYSTEM_OS == "macos":
+    if SYSTEM_OS in ("macos", "linux"):
         stat_info = os.stat(path)
         if stat_info.st_uid != 0:
             error(f"file '{path}' is not owned by root (uid=0).")
         if stat_info.st_gid != 0:
-            error(f"file '{path}' is not owned by group wheel (gid=0).")
+            error(f"file '{path}' is not owned by group root/wheel (gid=0).")
         if stat_info.st_mode & 0o002:
             error(f"file '{path}' is writable by others (world-writable).")
 
@@ -416,6 +502,7 @@ def loadControlPacks():
     controlsSpec = config.get("device", {}).get("controls", {}).get("packs", [])
     controlsSpec.insert(0, {"type": "windows", "path": "controls/windows-default.json"})
     controlsSpec.insert(0, {"type": "macos",  "path": "controls/macos-default.json"})
+    controlsSpec.insert(0, {"type": "linux",  "path": "controls/linux-default.json"})
 
     controls = {}
     filteredSpecs = [c for c in controlsSpec if c.get("type") == SYSTEM_OS]
@@ -459,6 +546,12 @@ def checkApplications():
         query = "SELECT name, bundle_executable, bundle_identifier, bundle_name, display_name, category FROM apps;"
     elif SYSTEM_OS == "windows":
         query = "SELECT name FROM programs;"
+    elif SYSTEM_OS == "linux":
+        # osquery has no unified "installed applications" table on Linux.
+        # deb_packages covers Debian/Ubuntu-family distros; rpm_packages
+        # covers RHEL/Fedora/openSUSE-family distros. Whichever table
+        # doesn't apply to the running distro simply returns no rows.
+        query = "SELECT name FROM deb_packages UNION SELECT name FROM rpm_packages;"
     else:
         warning("unsupported OS")
         return { }
