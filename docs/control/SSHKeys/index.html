@@ -74,6 +74,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -198,6 +201,38 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Encrypting SSH Keys on Linux</h3>
+
+                <div class="method">
+                    <h4>Add a passphrase to an existing key</h4>
+                    <pre><code>ssh-keygen -p -f ~/.ssh/id_ed25519</code></pre>
+                    <p>(replace <kbd>id_ed25519</kbd> with the name of the flagged key, e.g. <kbd>id_rsa</kbd>). You'll be prompted for the new passphrase — don't leave it empty.</p>
+                </div>
+
+                <div class="method">
+                    <h4>Or generate a new, passphrase-protected key</h4>
+                    <pre><code>ssh-keygen -t ed25519 -C "your.email@example.com"</code></pre>
+                    <p>Enter a strong passphrase when prompted, then add the new public key (<kbd>~/.ssh/id_ed25519.pub</kbd>) to GitHub/GitLab/servers as before, and remove the old unencrypted key once the new one works.</p>
+                </div>
+
+                <div class="method">
+                    <h4>Avoid re-typing the passphrase every session</h4>
+                    <pre><code>eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519</code></pre>
+                    <p>Most desktop environments also integrate with <kbd>ssh-agent</kbd> automatically (e.g. GNOME Keyring, KDE Wallet), or you can use <kbd>keychain</kbd> to persist unlocked keys across terminal sessions.</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Use a strong, unique passphrase — this is what protects the key if the file is stolen</li>
+                        <li>Update the public key on every service/server that trusted the old one before deleting it</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -230,6 +265,15 @@
                         <li>If it displays the public key without asking for a passphrase, the key is not encrypted</li>
                     </ol>
                     <p class="note"><strong>Note:</strong> If you've added the key to Keychain, macOS might auto-fill the passphrase. This is normal and secure.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify your SSH key is encrypted:</h4>
+                    <pre><code>ssh-keygen -y -f ~/.ssh/id_ed25519</code></pre>
+                    <p>If the key is encrypted, you'll be prompted for the passphrase. If it prints the public key immediately without asking, the key is not encrypted.</p>
                 </div>
             </div>
         </div>

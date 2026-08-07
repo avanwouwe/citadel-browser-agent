@@ -72,6 +72,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -143,6 +146,26 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Encrypting your disk on Linux</h3>
+
+                <div class="method">
+                    <p>Linux full-disk encryption (LUKS) is normally set up when the OS is installed, not applied afterwards. Check your current status first:</p>
+                    <pre><code>lsblk -f                        # look for a "crypto_LUKS" filesystem type
+sudo cryptsetup status &lt;device&gt;  # e.g. the device backing your root LV</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ If your root filesystem is not encrypted:</strong>
+                    <ul>
+                        <li>There is no safe, standard command to encrypt an already-installed root filesystem in place</li>
+                        <li>The supported path is to back up your data and reinstall, enabling encryption during setup — most installers (e.g. Ubuntu's) offer an <strong>"Encrypt the new installation"</strong> option that puts LVM on top of LUKS</li>
+                        <li>Advanced users can look into online re-encryption tools (e.g. <code>cryptsetup-reencrypt</code>), but this is risky, distro-specific, and not something to attempt without a tested backup</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -174,6 +197,14 @@
                         <li>Scroll down and click <strong>FileVault</strong></li>
                         <li>It should show <strong>"FileVault is turned on"</strong></li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To check encryption status manually:</h4>
+                    <pre><code>lsblk -f   # your root device should show filesystem type "crypto_LUKS"</code></pre>
                 </div>
             </div>
         </div>

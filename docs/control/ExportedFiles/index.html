@@ -74,6 +74,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -173,6 +176,33 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Finding and Removing Old Export Files on Linux</h3>
+
+                <div class="method">
+                    <h4>Find old export files</h4>
+                    <pre><code>find ~/Downloads -maxdepth 1 -iname '*export*.csv' -o -iname '*export*.json' \
+  -o -iname '*export*.txt' -o -iname '*export*.xlsx' -o -iname '*export*.xls' | xargs ls -la</code></pre>
+                    <p>Review the modification dates. If a file is 30+ days old and you haven't needed it since, it's safe to remove.</p>
+                </div>
+
+                <div class="method">
+                    <h4>Delete what you no longer need</h4>
+                    <pre><code>rm ~/Downloads/&lt;file&gt;</code></pre>
+                    <p>If the export contains sensitive business data (customer lists, financial records, etc.), use <kbd>shred -u</kbd> instead of plain <kbd>rm</kbd> for a more thorough deletion.</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>If you need the data long-term, re-export it to a secure, backed-up location rather than keeping it in Downloads</li>
+                        <li>Don't keep exports "just in case" — pull fresh data when you actually need it</li>
+                        <li>When in doubt about whether to delete, consult with IT or your manager</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -205,6 +235,15 @@
                         <li>Review the results and check <strong>Date Modified</strong></li>
                         <li>All remaining export files should be recent (accessed within 30 days)</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify old exports are removed:</h4>
+                    <pre><code>find ~/Downloads -maxdepth 1 -iname '*export*' -mtime +30</code></pre>
+                    <p>This should return no files.</p>
                 </div>
             </div>
         </div>

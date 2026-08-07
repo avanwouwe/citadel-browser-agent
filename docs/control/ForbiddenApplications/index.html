@@ -73,6 +73,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -140,6 +143,43 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Uninstalling Applications on Linux</h3>
+
+                <div class="method">
+                    <p>
+                        The command depends on how the application was installed. Check with your
+                        IT team which package format applies, or try each in turn:
+                    </p>
+                    <pre><code># Debian/Ubuntu (.deb / apt)
+sudo apt remove &lt;package-name&gt;
+sudo apt autoremove
+
+# Fedora/RHEL (rpm / dnf)
+sudo dnf remove &lt;package-name&gt;
+
+# Arch
+sudo pacman -Rns &lt;package-name&gt;
+
+# Flatpak
+flatpak uninstall &lt;app-id&gt;
+
+# Snap
+sudo snap remove &lt;package-name&gt;</code></pre>
+                    <p>If you're not sure of the exact package name, list installed packages and grep for it, e.g. <code>apt list --installed | grep -i &lt;name&gt;</code>.</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Check with IT support if you need a replacement application for your work</li>
+                        <li>Removing a package may also remove dependencies shared with other software — review the removal plan the package manager prints before confirming</li>
+                        <li>If the application was installed manually (e.g. an AppImage or a binary in <code>/opt</code>), simply delete it and remove any related entries in <code>~/.local/share/applications</code></li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -172,6 +212,17 @@
                         <li>Check the <strong>Trash</strong> is empty</li>
                         <li>Restart your Mac to ensure all components are removed</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify the application is removed:</h4>
+                    <pre><code>apt list --installed | grep -i &lt;name&gt;   # or: dnf list installed | grep -i &lt;name&gt;
+flatpak list | grep -i &lt;name&gt;
+snap list | grep -i &lt;name&gt;</code></pre>
+                    <p>No output means the package is gone.</p>
                 </div>
             </div>
         </div>

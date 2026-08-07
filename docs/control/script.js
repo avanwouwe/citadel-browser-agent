@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
             return 'macos';
         } else if (platform.includes('win') || userAgent.includes('win')) {
             return 'windows';
+        } else if (platform.includes('linux') || userAgent.includes('linux')) {
+            return 'linux';
         }
         // Default to Windows if unknown
         return 'windows';

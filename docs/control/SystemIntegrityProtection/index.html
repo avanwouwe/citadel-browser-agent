@@ -71,6 +71,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -143,6 +146,32 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Enabling mandatory access control on Linux</h3>
+
+                <div class="method">
+                    <p>On Linux, this control is satisfied by either SELinux running in enforcing mode or AppArmor with at least one profile in enforce mode. Which one applies depends on your distribution.</p>
+                    <p><strong>Debian / Ubuntu (AppArmor, default):</strong></p>
+                    <pre><code>sudo aa-status                          # check current status
+sudo systemctl enable --now apparmor
+sudo aa-enforce /etc/apparmor.d/*       # switch profiles from complain to enforce</code></pre>
+                    <p><strong>Fedora / RHEL / CentOS (SELinux, default):</strong></p>
+                    <pre><code>getenforce                               # check current status
+sudo setenforce 1                        # enforce now (temporary)
+sudo sed -i 's/^SELINUX=.*/SELINUX=enforcing/' /etc/selinux/config
+sudo reboot                              # required for the config change to persist</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Switching SELinux from permissive/disabled to enforcing can surface policy violations in software that was never tested under it — test on a non-critical machine first if possible</li>
+                        <li>Some distributions ship with neither enabled by default; installing the corresponding package (<code>apparmor</code> or <code>selinux-policy-targeted</code>) is a prerequisite</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -162,6 +191,16 @@
                         <li>You should see: <strong>"System Integrity Protection status: enabled."</strong></li>
                         <li>If you see "disabled" or any individual protections disabled, SIP is not fully enabled</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify SELinux or AppArmor is enforcing:</h4>
+                    <pre><code>getenforce            # expect: Enforcing
+# or
+sudo aa-status        # expect at least one profile listed under "enforce mode"</code></pre>
                 </div>
             </div>
         </div>

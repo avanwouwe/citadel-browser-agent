@@ -74,6 +74,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -158,6 +161,42 @@
                     <strong>Simple fix to try:</strong> Sometimes restarting your Mac will start the required process. Try this first before contacting IT support.
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Starting Required Processes on Linux</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support First:</strong>
+                    <ul>
+                        <li>Missing processes often indicate a failed or disabled service, not something to just restart</li>
+                        <li>IT support can diagnose why the process isn't running and fix it properly</li>
+                        <li><strong>Please contact your IT support team for assistance</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The name of the missing process (from Citadel notification)</li>
+                        <li>Your distribution and version (<code>cat /etc/os-release</code>)</li>
+                        <li>When you last rebooted (<code>uptime -s</code>)</li>
+                        <li>Any errors from the service's log</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>If the process is managed by systemd and IT has asked you to start it:</h4>
+                    <pre><code>systemctl status &lt;service-name&gt;       # or: systemctl --user status &lt;service-name&gt;
+sudo systemctl start &lt;service-name&gt;
+sudo systemctl enable &lt;service-name&gt;   # so it also starts on boot
+journalctl -u &lt;service-name&gt; -n 50    # check recent logs if it fails to start</code></pre>
+                </div>
+
+                <div class="note">
+                    <strong>Simple fix to try:</strong> A reboot (<code>sudo reboot</code>) sometimes clears up a process that failed to start. Try this first before contacting IT support.
+                </div>
+            </div>
         </div>
     </section>
 
@@ -192,6 +231,16 @@
                         <li>The required process should appear in the results</li>
                         <li>Check that it's not highlighted in red (which indicates a crashed process)</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify the process is running:</h4>
+                    <pre><code>pgrep -a &lt;process-name&gt;
+systemctl is-active &lt;service-name&gt;</code></pre>
+                    <p>The process should appear (or systemctl should report "active").</p>
                 </div>
             </div>
         </div>

@@ -74,6 +74,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -201,6 +204,40 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Securing Sensitive Files on Linux</h3>
+
+                <div class="method">
+                    <h4>Review what's in Downloads</h4>
+                    <pre><code>ls -la ~/Downloads</code></pre>
+                    <p>
+                        Look for anything containing passwords, recovery/backup codes, password-manager
+                        exports (Bitwarden, LastPass, 1Password Emergency Kits), SSH keys, crypto wallet
+                        files, or service-account JSON credentials.
+                    </p>
+                </div>
+
+                <div class="method">
+                    <h4>Store credentials properly, then delete the plaintext copy</h4>
+                    <p>
+                        Import genuinely sensitive items (recovery codes, emergency kits, key files) into
+                        a password manager such as KeePassXC or Bitwarden rather than leaving them as files.
+                        Once stored, securely delete the original so it can't be recovered from disk:
+                    </p>
+                    <pre><code>shred -u ~/Downloads/&lt;file&gt;</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Make sure the credentials are safely stored elsewhere before deleting the file</li>
+                        <li><kbd>shred</kbd> is not fully effective on SSDs or some filesystems (e.g. btrfs, ZFS) due to wear-levelling/copy-on-write — full-disk encryption (see the DriveEncryption control) is what actually protects data at rest on those</li>
+                        <li>If you're unsure what a file is, ask IT support before deleting</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -233,6 +270,15 @@
                         <li>Set the search scope to "Downloads"</li>
                         <li>No sensitive files should appear in the results</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify your Downloads folder is clean:</h4>
+                    <pre><code>ls ~/Downloads | grep -iE 'password|recovery|backup|emergency|secret|wallet'</code></pre>
+                    <p>No sensitive files should be listed.</p>
                 </div>
             </div>
         </div>

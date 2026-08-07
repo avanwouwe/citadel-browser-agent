@@ -65,6 +65,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -111,6 +114,31 @@
                         <li>Close all running applications</li>
                         <li>Ensure you have your login password ready</li>
                         <li>If using FileVault, make sure you know your encryption password</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Restarting Linux</h3>
+
+                <div class="method">
+                    <p>Use your desktop's power menu, or from a terminal:</p>
+                    <pre><code>sudo reboot</code></pre>
+                    <p>Before rebooting, it's worth checking whether a reboot is actually flagged as pending:</p>
+                    <pre><code># Debian/Ubuntu
+[ -f /var/run/reboot-required ] &amp;&amp; echo "reboot needed"
+
+# Any distro with needrestart installed
+sudo needrestart</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Before restarting:</strong>
+                    <ul>
+                        <li>Save all your open documents and files</li>
+                        <li>Close all running applications</li>
+                        <li>If using full-disk encryption (LUKS), make sure you know your passphrase</li>
                     </ul>
                 </div>
             </div>

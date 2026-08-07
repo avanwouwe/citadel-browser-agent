@@ -71,6 +71,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -145,6 +148,37 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Enabling automatic updates on Linux</h3>
+
+                <div class="method">
+                    <p><strong>Debian / Ubuntu:</strong></p>
+                    <pre><code>sudo apt install unattended-upgrades
+sudo dpkg-reconfigure -plow unattended-upgrades
+
+# ensure /etc/apt/apt.conf.d/20auto-upgrades contains:
+#   APT::Periodic::Unattended-Upgrade "1";
+
+sudo systemctl enable --now apt-daily-upgrade.timer</code></pre>
+                    <p><strong>Fedora / RHEL / CentOS:</strong></p>
+                    <pre><code>sudo dnf install dnf-automatic
+
+# in /etc/dnf/automatic.conf, set:
+#   apply_updates = yes
+
+sudo systemctl enable --now dnf-automatic.timer</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Other distribution families (e.g. openSUSE transactional-update, Fedora Silverblue/CoreOS rpm-ostree) have their own equivalent timers — check your distribution's documentation if the above doesn't apply</li>
+                        <li>Automatic security updates can still require a reboot to take effect (see the SystemUpdated control)</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -178,6 +212,20 @@
                         <li>Click <strong>Done</strong></li>
                         <li>The main Software Update screen should show when updates were last checked</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To check automatic update settings:</h4>
+                    <pre><code># Debian / Ubuntu
+systemctl is-enabled apt-daily-upgrade.timer
+systemctl is-active apt-daily-upgrade.timer
+
+# Fedora / RHEL / CentOS
+systemctl is-enabled dnf-automatic.timer
+systemctl is-active dnf-automatic.timer</code></pre>
                 </div>
             </div>
         </div>

@@ -72,6 +72,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -174,6 +177,53 @@
                     <strong>Self-Service Options:</strong> Your organization may use an MDM system or self-service portal where you can install approved applications yourself. Ask IT support about this option.
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Installing Required Applications on Linux</h3>
+
+                <div class="warning-box">
+                    <strong>⚠️ Contact IT Support:</strong>
+                    <ul>
+                        <li>Required applications must be obtained from approved, official sources</li>
+                        <li>Your IT team will provide the correct package, repository, or license needed</li>
+                        <li>Installing the wrong version or from an untrusted source/PPA creates security risks</li>
+                        <li><strong>Please contact your IT support team to get the required application</strong></li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Information to provide to IT support:</h4>
+                    <ul>
+                        <li>The name of the missing application (from Citadel notification)</li>
+                        <li>Your distribution and version (<code>lsb_release -a</code> or <code>cat /etc/os-release</code>)</li>
+                        <li>Your department and role</li>
+                        <li>When you need the application installed by</li>
+                    </ul>
+                </div>
+
+                <div class="method">
+                    <h4>Once IT has confirmed the package and source:</h4>
+                    <pre><code># Debian/Ubuntu
+sudo apt update && sudo apt install &lt;package-name&gt;
+
+# Fedora/RHEL
+sudo dnf install &lt;package-name&gt;
+
+# Arch
+sudo pacman -S &lt;package-name&gt;
+
+# Flatpak
+flatpak install &lt;app-id&gt;
+
+# Snap
+sudo snap install &lt;package-name&gt;</code></pre>
+                </div>
+
+                <div class="note">
+                    <strong>Self-Service Options:</strong> If your organization manages Linux devices via a configuration tool (Ansible, Puppet, Landscape, etc.), the application may already be scheduled for install — ask IT before installing it manually.
+                </div>
+            </div>
         </div>
     </section>
 
@@ -207,6 +257,17 @@
                         <li>Alternatively, open <strong>Launchpad</strong> and search for the app</li>
                         <li>Try launching the application to ensure it's working properly</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify the application is installed:</h4>
+                    <pre><code>apt list --installed | grep -i &lt;name&gt;   # or: dnf list installed | grep -i &lt;name&gt;
+flatpak list | grep -i &lt;name&gt;
+snap list | grep -i &lt;name&gt;</code></pre>
+                    <p>Try launching the application to confirm it works.</p>
                 </div>
             </div>
         </div>

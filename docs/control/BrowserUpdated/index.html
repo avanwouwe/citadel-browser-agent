@@ -74,6 +74,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -152,6 +155,38 @@
                         <li>Check for any active downloads that might be interrupted</li>
                         <li>Consider bookmarking important pages if tab restore isn't configured</li>
                     </ul>
+                </div>
+            </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Restarting Your Browser on Linux</h3>
+
+                <div class="method">
+                    <p>
+                        Closing all browser windows and reopening the browser is enough on most
+                        distributions. If it doesn't fully quit (some browsers keep a background
+                        process running for notifications), close it explicitly from a terminal:
+                    </p>
+                    <pre><code>pkill -TERM firefox   # or: pkill -TERM chrome / chromium / brave</code></pre>
+                    <p>then reopen it from your application launcher.</p>
+                </div>
+
+                <div class="method">
+                    <h4>Keeping the browser itself up to date:</h4>
+                    <p>How the browser gets updated depends on how it was installed:</p>
+                    <pre><code># Debian/Ubuntu (apt package)
+sudo apt update && sudo apt upgrade
+
+# Fedora/RHEL (dnf package)
+sudo dnf upgrade
+
+# Flatpak
+flatpak update
+
+# Snap
+sudo snap refresh</code></pre>
+                    <p>Browsers installed as a self-contained binary (e.g. downloaded directly from the vendor) usually update themselves in the background and only need a restart.</p>
                 </div>
             </div>
         </div>

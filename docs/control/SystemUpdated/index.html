@@ -65,6 +65,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -123,6 +126,29 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Installing updates on Linux</h3>
+
+                <div class="method">
+                    <p>Run your distribution's package manager update, then reboot if a new kernel was installed.</p>
+                    <p><strong>Debian / Ubuntu:</strong></p>
+                    <pre><code>sudo apt update && sudo apt upgrade
+sudo reboot   # if prompted, or if a new kernel was installed</code></pre>
+                    <p><strong>Fedora / RHEL / CentOS:</strong></p>
+                    <pre><code>sudo dnf upgrade
+sudo reboot   # if a new kernel package was installed</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>A pending reboot is flagged either by <code>/var/run/reboot-required</code> (Debian/Ubuntu) or by a kernel package installed more recently than your last boot (RPM-based distros)</li>
+                        <li>Installing updates without rebooting leaves the old, vulnerable kernel or libraries running</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -155,6 +181,18 @@
                         <li>The page will display when your Mac last checked for updates</li>
                     </ol>
                     <p class="note"><strong>Note:</strong> If you see "Updates available" or "Restart to finish installing", you need to complete those steps first.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To check if updates are complete:</h4>
+                    <pre><code># Debian / Ubuntu
+test -e /var/run/reboot-required && echo "reboot needed" || echo "no reboot needed"
+
+# Fedora / RHEL / CentOS
+rpm -q --last kernel | head -1   # compare against: uptime -s</code></pre>
                 </div>
             </div>
         </div>

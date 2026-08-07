@@ -71,6 +71,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -106,6 +109,34 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Disabling empty-password accounts on Linux</h3>
+                <p>
+                    Most Linux desktops don't ship a built-in "Guest" account, so this control instead
+                    flags any interactive account (one with a real login shell) that has no password set
+                    at all — the closest equivalent risk.
+                </p>
+
+                <div class="method">
+                    <p>List accounts with an empty password:</p>
+                    <pre><code>sudo awk -F: '($2 == "") {print $1}' /etc/shadow</code></pre>
+                    <p>For each account listed, either set a password:</p>
+                    <pre><code>sudo passwd &lt;username&gt;</code></pre>
+                    <p>or, if the account isn't meant to be logged into interactively, lock it or remove its shell:</p>
+                    <pre><code>sudo passwd -l &lt;username&gt;
+sudo usermod -s /usr/sbin/nologin &lt;username&gt;</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Some system/service accounts intentionally have no password and already use a nologin shell — those are not a concern and won't be flagged</li>
+                        <li>If someone legitimately needs occasional access, create them a standard account with its own password instead of leaving an account passwordless</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -125,6 +156,15 @@
                         <li>Also check that <strong>"Allow guest users to connect to shared folders"</strong> is <strong>Off</strong></li>
                     </ol>
                     <p><strong>Alternative check:</strong> Log out of your Mac (Apple menu → Log Out). The login screen should NOT show a "Guest" option.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify no interactive account has an empty password:</h4>
+                    <pre><code>sudo awk -F: '($2 == "") {print $1}' /etc/shadow</code></pre>
+                    <p>This should return no output.</p>
                 </div>
             </div>
         </div>

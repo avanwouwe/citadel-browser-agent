@@ -73,6 +73,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -165,6 +168,38 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Stopping Forbidden Processes on Linux</h3>
+
+                <div class="method">
+                    <h4>Find and stop the process</h4>
+                    <pre><code>pgrep -a &lt;process-name&gt;      # find its PID(s)
+kill &lt;pid&gt;                    # ask it to stop
+kill -9 &lt;pid&gt;                 # force stop if it won't</code></pre>
+                </div>
+
+                <div class="method">
+                    <h4>Prevent it from restarting</h4>
+                    <p>Killing a process is temporary — it may be relaunched by a systemd unit, a login autostart entry, or its parent application. To permanently fix this:</p>
+                    <pre><code># If it runs as a systemd service:
+systemctl --user status &lt;name&gt;      # or without --user for a system service
+systemctl --user disable --now &lt;name&gt;
+
+# Otherwise, uninstall the application that provides it (see ForbiddenApplications), e.g.:
+sudo apt remove &lt;package-name&gt;   # or dnf remove / pacman -Rns</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Don't kill processes you don't recognize — check with <code>man</code> or IT before stopping anything that looks like a core system service</li>
+                        <li>If the process immediately restarts, contact IT support — it may indicate malware or a policy-managed daemon</li>
+                        <li>Citadel will tell you the specific process name — only stop that one</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -198,6 +233,15 @@
                         <li>If it reappears after a few minutes, the parent application may need to be uninstalled</li>
                         <li>Try restarting your Mac to see if the process stays gone</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify the process is stopped:</h4>
+                    <pre><code>pgrep -a &lt;process-name&gt;</code></pre>
+                    <p>No output means it's no longer running. If it reappears, the parent service or application still needs to be disabled/uninstalled.</p>
                 </div>
             </div>
         </div>

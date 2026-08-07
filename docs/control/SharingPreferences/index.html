@@ -72,6 +72,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -147,6 +150,31 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Disabling sharing services on Linux</h3>
+
+                <div class="method">
+                    <p>Disable whichever of these are active and not required:</p>
+                    <pre><code>sudo systemctl disable --now smbd nmbd samba          # SMB file sharing
+sudo systemctl disable --now nfs-kernel-server nfs-server   # NFS file sharing
+sudo systemctl disable --now xrdp                     # RDP remote desktop
+sudo systemctl disable --now cockpit.socket           # Cockpit remote management
+
+# VNC servers vary by desktop; e.g.:
+sudo systemctl disable --now vncserver@:1.service</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ About SSH:</strong>
+                    <ul>
+                        <li>Unlike on macOS/Windows desktops, running <code>sshd</code> is often intentional on Linux machines used for remote administration — leaving it enabled is fine if that's how you access this machine</li>
+                        <li>If this machine does <em>not</em> need remote SSH access, disable it: <code>sudo systemctl disable --now ssh</code> (Debian/Ubuntu) or <code>sudo systemctl disable --now sshd</code> (Fedora/RHEL)</li>
+                        <li>Only disable services you don't actually rely on — check with IT support if you're unsure</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -179,6 +207,15 @@
                         <li>If any service shows as "On", click it and toggle it off</li>
                     </ol>
                     <p class="note"><strong>Tip:</strong> A quick way to check is to look for any services with a green dot or "On" indicator.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify sharing services are disabled:</h4>
+                    <pre><code>systemctl is-active smbd nmbd samba nfs-kernel-server nfs-server xrdp cockpit.socket ssh sshd</code></pre>
+                    <p class="note">Each should report <strong>inactive</strong> unless you intentionally rely on it (e.g. SSH for remote administration).</p>
                 </div>
             </div>
         </div>

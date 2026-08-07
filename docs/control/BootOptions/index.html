@@ -72,6 +72,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -155,6 +158,50 @@
                     (amfi parameters, etc.).
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Securing boot options on Linux</h3>
+
+                <div class="method">
+                    <h4>Secure Boot</h4>
+                    <p>
+                        This is a firmware-level setting, not something you can toggle from the OS:
+                        restart, enter your UEFI/BIOS firmware setup (usually <kbd>F2</kbd>, <kbd>F10</kbd>,
+                        <kbd>F12</kbd>, <kbd>Del</kbd>, or <kbd>Esc</kbd> during boot), find <strong>Secure
+                        Boot</strong> under the Security/Boot menu, and enable it. Most current distros
+                        (Ubuntu, Fedora, openSUSE, etc.) support Secure Boot out of the box via a signed
+                        shim bootloader; only distros using unsigned custom kernels/drivers may have trouble.
+                    </p>
+                </div>
+
+                <div class="method">
+                    <h4>Insecure kernel boot parameters</h4>
+                    <p>Check the parameters the currently running kernel booted with:</p>
+                    <pre><code>cat /proc/cmdline</code></pre>
+                    <p>
+                        Flags like <kbd>selinux=0</kbd>, <kbd>enforcing=0</kbd>, <kbd>apparmor=0</kbd>,
+                        <kbd>security=none</kbd>, <kbd>init=/bin/sh</kbd>, or <kbd>lockdown=none</kbd>
+                        disable core protections and are usually set in the bootloader config. Remove any
+                        of these from the <kbd>GRUB_CMDLINE_LINUX</kbd> line in <kbd>/etc/default/grub</kbd>,
+                        then regenerate the config:
+                    </p>
+                    <pre><code># Debian/Ubuntu
+sudo grub-mkconfig -o /boot/grub/grub.cfg
+
+# Fedora/RHEL
+sudo grub2-mkconfig -o /boot/grub2/grub.cfg</code></pre>
+                    <p>Reboot for the change to take effect.</p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>These flags are sometimes added deliberately for troubleshooting — confirm with IT before removing them on a managed device</li>
+                        <li>Take note of your current GRUB config before editing it in case you need to revert</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -188,6 +235,15 @@
                         <li>It should show <strong>"System Integrity Protection status: enabled"</strong></li>
                         <li>If it shows "disabled" or lists disabled features, contact IT support</li>
                     </ol>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify boot options are secure:</h4>
+                    <pre><code>cat /proc/cmdline</code></pre>
+                    <p>Confirm none of the insecure flags listed above are present, and check Secure Boot state via your firmware settings (or, if the <kbd>mokutil</kbd> package is installed, <kbd>mokutil --sb-state</kbd>).</p>
                 </div>
             </div>
         </div>

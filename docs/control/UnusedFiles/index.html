@@ -74,6 +74,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -192,6 +195,32 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Cleaning Up Old Downloads on Linux</h3>
+
+                <div class="method">
+                    <h4>Find old files</h4>
+                    <pre><code>find ~/Downloads -maxdepth 1 -type f -mtime +90 -exec ls -la {} \;</code></pre>
+                    <p>For each one, ask: have you used it in the last 3 months? Is it stored elsewhere already? Would you miss it? If not, it's safe to remove.</p>
+                </div>
+
+                <div class="method">
+                    <h4>Move what's worth keeping, delete the rest</h4>
+                    <pre><code>mv ~/Downloads/&lt;file&gt; ~/Documents/     # keep
+rm ~/Downloads/&lt;file&gt;                  # discard</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Downloads is for temporary files — move anything you actually need into Documents or proper cloud storage</li>
+                        <li>Make this a monthly habit to prevent accumulation</li>
+                        <li>When in doubt about a file's importance, ask a colleague or manager</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -226,6 +255,15 @@
                         <li>Files older than a few months should be either moved to proper storage or deleted</li>
                     </ol>
                     <p class="note"><strong>Tip:</strong> Right-click any file and select <strong>Get Info</strong> to see both when it was created and when it was last opened.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify your Downloads folder is clean:</h4>
+                    <pre><code>find ~/Downloads -maxdepth 1 -type f -mtime +90</code></pre>
+                    <p>This should return no files.</p>
                 </div>
             </div>
         </div>

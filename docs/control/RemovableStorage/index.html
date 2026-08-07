@@ -73,6 +73,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -159,6 +162,39 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Removing USB Storage Devices on Linux</h3>
+
+                <div class="method">
+                    <h4>Identify and unmount connected USB storage</h4>
+                    <pre><code>lsblk -o NAME,TRAN,MOUNTPOINT</code></pre>
+                    <p>Devices with <kbd>TRAN</kbd> = <kbd>usb</kbd> are USB storage. Unmount and detach one cleanly with:</p>
+                    <pre><code>udisksctl unmount -b /dev/sdX1
+udisksctl power-off -b /dev/sdX</code></pre>
+                    <p>then physically unplug it. Most desktop file managers also offer an "Eject" action for the same effect.</p>
+                </div>
+
+                <div class="method">
+                    <h4>Enforcing this org-wide</h4>
+                    <p>
+                        If USB storage should be restricted for everyone rather than removed ad hoc, the
+                        standard Linux tool is <a href="https://usbguard.github.io/" target="_blank" rel="noopener">USBGuard</a>,
+                        which lets you allow/block USB devices by policy. Ask your IT/security team whether
+                        this is already deployed before installing it yourself.
+                    </p>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Always unmount before unplugging to avoid data corruption</li>
+                        <li>Use organization-approved cloud storage instead of USB drives for file transfer</li>
+                        <li>Never plug in unknown or found USB drives — they may be deliberately infected</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -194,6 +230,15 @@
                         <li>If you see any external drives or USB devices, they need to be ejected</li>
                     </ol>
                     <p><strong>Alternative:</strong> Click the <strong>Apple menu</strong> → <strong>About This Mac</strong> → <strong>Storage</strong> (or <strong>System Report</strong> → <strong>Hardware</strong> → <strong>USB</strong>) to see all connected devices.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To verify no USB storage devices are connected:</h4>
+                    <pre><code>lsblk -o NAME,TRAN,MOUNTPOINT</code></pre>
+                    <p>No device should show <kbd>TRAN</kbd> = <kbd>usb</kbd>.</p>
                 </div>
             </div>
         </div>

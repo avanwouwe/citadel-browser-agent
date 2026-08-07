@@ -71,6 +71,9 @@
             <button class="tab-button" data-platform="macos">
                 <img src="../../img/macos-logo.png" alt="macOS" class="platform-icon" width="64" height="64"> macOS
             </button>
+            <button class="tab-button" data-platform="linux">
+                <img src="../../img/linux-logo.png" alt="Linux" class="platform-icon" width="64" height="64"> Linux
+            </button>
         </div>
 
         <div class="platform-content">
@@ -135,6 +138,29 @@
                     </ul>
                 </div>
             </div>
+
+            <!-- Linux Instructions -->
+            <div class="platform-panel" id="linux">
+                <h3>Enabling a firewall on Linux</h3>
+
+                <div class="method">
+                    <p>Any active firewall (ufw, firewalld, or nftables) satisfies this control. Use whichever your distribution defaults to.</p>
+                    <p><strong>Debian / Ubuntu (ufw):</strong></p>
+                    <pre><code>sudo ufw enable</code></pre>
+                    <p><strong>Fedora / RHEL / CentOS (firewalld):</strong></p>
+                    <pre><code>sudo systemctl enable --now firewalld</code></pre>
+                    <p><strong>Other distributions (nftables directly):</strong></p>
+                    <pre><code>sudo systemctl enable --now nftables</code></pre>
+                </div>
+
+                <div class="warning-box">
+                    <strong>⚠️ Important notes:</strong>
+                    <ul>
+                        <li>Enable only one firewall manager at a time to avoid conflicting rules</li>
+                        <li>If you're connecting remotely over SSH, double-check that SSH is allowed before enabling (<code>sudo ufw allow ssh</code>) so you don't lock yourself out</li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -166,6 +192,18 @@
                         <li>The toggle switch should be in the <strong>On</strong> position</li>
                     </ol>
                     <p><strong>Alternative:</strong> On older macOS versions, check <strong>System Preferences</strong> → <strong>Security & Privacy</strong> → <strong>Firewall</strong> tab.</p>
+                </div>
+            </div>
+
+            <!-- Linux Verification -->
+            <div class="platform-panel" id="linux-verify">
+                <div class="method">
+                    <h4>To check firewall status manually:</h4>
+                    <pre><code>sudo ufw status                 # expect: Status: active
+# or
+sudo systemctl is-active firewalld
+# or
+sudo systemctl is-active nftables</code></pre>
                 </div>
             </div>
         </div>
