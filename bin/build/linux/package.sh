@@ -3,6 +3,7 @@ set -euo pipefail
 
 PACKAGE_NAME="citadel-browser-agent"
 VERSION="1.5.0"
+PACKAGE_MAINTAINER="Citadel Agent <contact@citadelagent.org>"
 BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 
 cleanup() {
@@ -160,6 +161,7 @@ for ARCH_DIR in binaries/*/; do
         -n "$PACKAGE_NAME" \
         -v "$VERSION" \
         -a "$DEB_ARCH" \
+        --maintainer "$PACKAGE_MAINTAINER" \
         --description "Citadel browser agent" \
         --url "https://www.citadelagent.org" \
         --after-install postinstall.sh \
@@ -174,6 +176,7 @@ for ARCH_DIR in binaries/*/; do
         -n "$PACKAGE_NAME" \
         -v "$VERSION" \
         -a "$RPM_ARCH" \
+        --maintainer "$PACKAGE_MAINTAINER" \
         --description "Citadel browser agent" \
         --url "https://www.citadelagent.org" \
         --after-install postinstall.sh \
