@@ -169,28 +169,20 @@
     "Firewall": {
       "query":
       "SELECT '' AS error \
-       WHERE NOT EXISTS ( \
-         SELECT 1 \
-         FROM systemd_units \
-         WHERE id IN ( \
-           'firewalld.service', \
-           'nftables.service', \
-           'netfilter-persistent.service' \
-         ) \
-         AND active_state = 'active' \
-       ) \
-       AND NOT EXISTS ( \
-         SELECT 1 \
-         FROM systemd_units AS u \
-         WHERE u.id = 'ufw.service' \
-         AND u.active_state = 'active' \
-         AND EXISTS ( \
-           SELECT 1 \
-           FROM file_lines AS f \
-           WHERE f.path = '/etc/ufw/ufw.conf' \
-           AND LOWER(TRIM(f.line)) = 'enabled=yes' \
-         ) \
-       );",
+      WHERE NOT EXISTS ( \
+        SELECT 1 \
+        FROM systemd_units \
+        WHERE id IN ( \
+          'firewalld.service', \
+          'nftables.service', \
+          'iptables.service', \
+          'ip6tables.service', \
+          'netfilter-persistent.service', \
+          'ufw.service' \
+        ) \
+          AND active_state = 'active' \
+          AND unit_file_state IN ('enabled', 'enabled-runtime') \
+      );",
       "text": {
         "en": {
           "label": "Firewall is enabled",
@@ -210,8 +202,7 @@
       "query":
       "SELECT '' AS error \
        WHERE NOT EXISTS ( \
-         SELECT 1 \
-         FROM systemd_units \
+         SELECT 1 FROM systemd_units \
          WHERE id IN ( \
            'dnf-automatic-install.timer', \
            'transactional-update.timer' \
@@ -220,57 +211,14 @@
          AND unit_file_state IN ('enabled', 'enabled-runtime') \
        ) \
        AND NOT EXISTS ( \
-         SELECT 1 \
-         FROM systemd_units AS u \
-         WHERE u.id = 'apt-daily-upgrade.timer' \
-         AND u.active_state = 'active' \
-         AND u.unit_file_state IN ('enabled', 'enabled-runtime') \
+         SELECT 1 FROM systemd_units AS timer \
+         WHERE timer.id = 'apt-daily-upgrade.timer' \
+         AND timer.active_state = 'active' \
+         AND timer.unit_file_state IN ('enabled', 'enabled-runtime') \
          AND EXISTS ( \
-           SELECT 1 \
-           FROM file_lines AS f \
-           WHERE f.path LIKE '/etc/apt/apt.conf.d/%' \
-           AND REGEX_MATCH( \
-             LOWER(f.line), \
-             '^[[:space:]]*apt::periodic::unattended-upgrade[[:space:]]+\"(1|true)\"[[:space:]]*;', \
-             0 \
-           ) IS NOT NULL \
-         ) \
-       ) \
-       AND NOT EXISTS ( \
-         SELECT 1 \
-         FROM systemd_units AS u \
-         WHERE u.id IN ( \
-           'dnf-automatic.timer', \
-           'dnf5-automatic.timer' \
-         ) \
-         AND u.active_state = 'active' \
-         AND u.unit_file_state IN ('enabled', 'enabled-runtime') \
-         AND EXISTS ( \
-           SELECT 1 \
-           FROM file_lines AS f \
-           WHERE f.path = '/etc/dnf/automatic.conf' \
-           AND REGEX_MATCH( \
-             LOWER(f.line), \
-             '^[[:space:]]*apply_updates[[:space:]]*=[[:space:]]*(yes|true|1)[[:space:]]*$', \
-             0 \
-           ) IS NOT NULL \
-         ) \
-       ) \
-       AND NOT EXISTS ( \
-         SELECT 1 \
-         FROM systemd_units AS u \
-         WHERE u.id = 'rpm-ostreed-automatic.timer' \
-         AND u.active_state = 'active' \
-         AND u.unit_file_state IN ('enabled', 'enabled-runtime') \
-         AND EXISTS ( \
-           SELECT 1 \
-           FROM file_lines AS f \
-           WHERE f.path = '/etc/rpm-ostreed.conf' \
-           AND REGEX_MATCH( \
-             LOWER(f.line), \
-             '^[[:space:]]*automaticupdatepolicy[[:space:]]*=[[:space:]]*(stage|apply)[[:space:]]*$', \
-             0 \
-           ) IS NOT NULL \
+           SELECT 1 FROM systemd_units AS service \
+           WHERE service.id = 'unattended-upgrades.service' \
+           AND service.load_state = 'loaded' \
          ) \
        );",
       "text": {
