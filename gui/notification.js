@@ -8,14 +8,14 @@ class Notification {
     static async init() {
         await ColorScheme.ready()
 
-        Notification.#persistence = Notification.#persistence ?? new HydratedObject(
+        Notification.#persistence ??= new HydratedObject(
             'notifications',
             Notification,
             (data, target) => {
                 target.#alerts = data.alerts ?? {}
                 Notification.#updateState()
             },
-            (target) => ({
+            target => ({
                 alerts: target.#alerts
             })
         )

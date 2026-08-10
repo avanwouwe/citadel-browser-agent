@@ -931,12 +931,7 @@ function truncateReason(reason) { return reason.truncate(config.system.maxReason
 
 function acknowledgeAlert(alert, showDashboard) {
 	if (alert.type === Extension.TYPE) {
-		Notification.setAlert(Extension.TYPE, State.PASSING)
-	}
-
-	if (alert.type === Privacy.TYPE) {
-		Privacy.acknowledge()
-		Notification.setAlert(Privacy.TYPE, State.PASSING)
+		Notification.setAlert(alert.type, State.PASSING)
 	}
 
 	if (showDashboard) {
@@ -954,6 +949,7 @@ onMessage((request, sender) => {
 
 	if (request.type === "user-interaction") {
 		registerInteraction(senderUrl, sender)
+		return
 	}
 
 	if (request.type === "print-dialog") {
@@ -1011,6 +1007,10 @@ onMessage((request, sender) => {
 
 	if (request.type === "acknowledge-mfa") {
 		Modal.removeFromDomain(request.domain)
+	}
+
+	if (request.type === "render-privacy") {
+		Privacy.acknowledge()
 	}
 
 	if (request.type === "allow-mfa") {
@@ -1088,7 +1088,7 @@ onMessage((request, sender) => {
 })
 
 chrome.action.onClicked.addListener(() => {
-	openDashboard()
+	openDashboard(Notification.showing?.type)
 })
 
 chrome.notifications.onClicked.addListener(function(notificationId) {

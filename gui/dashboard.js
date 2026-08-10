@@ -311,6 +311,8 @@ const renderEventsDashboard = serialized(async function () {
 const renderPrivacyDashboard = serialized(async function () {
     const content = buildPrivacyNotice()
     document.getElementById("privacy-notice").safeInnerHTML(content)
+
+    sendMessage("render-privacy")
 })
 
 function buildPrivacyNotice() {

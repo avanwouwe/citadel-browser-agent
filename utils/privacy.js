@@ -6,17 +6,13 @@ class Privacy {
 
     static async init() {
         await Config.ready()
+        await Notification.init()
 
-        if (config.isStandalone) return
-
-        const storage = await Privacy.#storage.ready()
-
-        if (storage.value().shown) return
+        if (config.isStandalone || await Privacy.wasAcknowledged()) return
 
         const title = t('privacy.modal.title')
         const message = t('privacy.modal.message', { organization: config.organization.name })
-
-        if (! await Privacy.wasAcknowledged())  Notification.setAlert("privacy", State.BLOCKING, title, message)
+        Notification.setAlert("privacy", State.BLOCKING, title, message)
     }
 
     static async wasAcknowledged() {
@@ -25,6 +21,8 @@ class Privacy {
     }
 
     static async acknowledge() {
+        Notification.setAlert(Privacy.TYPE, State.PASSING)
+
         const storage = await Privacy.#storage.ready()
 
         storage.value().shown = true
