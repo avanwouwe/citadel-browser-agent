@@ -61,7 +61,10 @@
       }
     },
     "MaxUptime": {
-      "query": "SELECT '' AS error FROM uptime WHERE total_seconds / 60 / 60 / 24 > 30;",
+      "query":
+      "SELECT '' AS error \
+        FROM uptime \
+        WHERE total_seconds / 60 / 60 / 24 > 30;",
       "text": {
         "en": {
           "label": "System was restarted recently",
@@ -74,7 +77,13 @@
       }
     },
     "SystemUpdated": {
-      "query": "SELECT value AS error FROM plist WHERE path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' AND key = 'RecommendedUpdates' AND subkey = 'Display Name' AND value LIKE 'macOS %';",
+      "query":
+      "SELECT value AS error \
+        FROM plist \
+        WHERE path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' \
+          AND key = 'RecommendedUpdates' \
+          AND subkey = 'Display Name' \
+          AND value LIKE 'macOS %';",
       "text": {
         "en": {
           "label": "System is up to date",
@@ -87,7 +96,11 @@
       }
     },
     "DriveEncryption": {
-      "query": "SELECT '' AS error FROM disk_encryption WHERE name = '/' AND encrypted != '1';",
+      "query":
+      "SELECT '' AS error \
+        FROM disk_encryption \
+        WHERE name = '/' \
+          AND encrypted != '1';",
       "text": {
         "en": {
           "label": "Disk is encrypted",
@@ -100,7 +113,18 @@
       }
     },
     "LockScreen": {
-      "query": "SELECT 'askForPassword is NOT set' AS error FROM preferences WHERE domain = 'com.apple.screensaver' AND key = 'askForPassword' AND value != 1\nUNION ALL\nSELECT 'askForPasswordDelay too high: ' || value AS error FROM preferences WHERE domain = 'com.apple.screensaver' AND key = 'askForPasswordDelay' AND CAST(value AS INTEGER) > 600;",
+      "query":
+      "SELECT 'askForPassword is NOT set' AS error \
+        FROM preferences \
+        WHERE domain = 'com.apple.screensaver' \
+          AND key = 'askForPassword' \
+          AND value != 1 \
+        UNION ALL \
+        SELECT 'askForPasswordDelay too high: ' || value AS error \
+        FROM preferences \
+        WHERE domain = 'com.apple.screensaver' \
+          AND key = 'askForPasswordDelay' \
+          AND CAST(value AS INTEGER) > 600;",
       "text": {
         "en": {
           "label": "Screen locking is enabled",
@@ -113,7 +137,10 @@
       }
     },
     "SystemIntegrityProtection": {
-      "query": "SELECT 'SIP flag ' || CAST(config_flag AS TEXT) || ' is enabled' AS error FROM sip_config WHERE config_flag == 1;",
+      "query":
+      "SELECT 'SIP flag ' || CAST(config_flag AS TEXT) || ' is enabled' AS error \
+        FROM sip_config \
+        WHERE config_flag == 1;",
       "text": {
         "en": {
           "label": "System Integrity Protection is enabled",
@@ -126,7 +153,10 @@
       }
     },
     "Firewall": {
-      "query": "SELECT '' AS error FROM alf WHERE global_state == 0;",
+      "query":
+      "SELECT '' AS error \
+        FROM alf \
+        WHERE global_state == 0;",
       "text": {
         "en": {
           "label": "Firewall is enabled",
@@ -139,7 +169,10 @@
       }
     },
     "GatekeeperEnabled": {
-      "query": "SELECT '' AS error FROM gatekeeper WHERE assessments_enabled != 1;",
+      "query":
+      "SELECT '' AS error \
+        FROM gatekeeper \
+        WHERE assessments_enabled != 1;",
       "text": {
         "en": {
           "label": "Gatekeeper is enabled",
@@ -152,7 +185,12 @@
       }
     },
     "AutoUpdates": {
-      "query": "SELECT '' AS error FROM preferences WHERE domain='com.apple.SoftwareUpdate' AND key='AutomaticCheckEnabled' AND value != 1;",
+      "query":
+      "SELECT '' AS error \
+        FROM preferences \
+        WHERE domain = 'com.apple.SoftwareUpdate' \
+          AND key = 'AutomaticCheckEnabled' \
+          AND value != 1;",
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
@@ -165,7 +203,42 @@
       }
     },
     "SharingPreferences": {
-      "query": "SELECT 'Screen Sharing is enabled' AS error FROM sharing_preferences WHERE screen_sharing = 1\nUNION ALL\nSELECT 'File Sharing is enabled' FROM sharing_preferences WHERE file_sharing = 1\nUNION ALL\nSELECT 'Printer Sharing is enabled' FROM sharing_preferences WHERE printer_sharing = 1\nUNION ALL\nSELECT 'Remote Login (SSH) is enabled' FROM sharing_preferences WHERE remote_login = 1\nUNION ALL\nSELECT 'Remote Management is enabled' FROM sharing_preferences WHERE remote_management = 1\nUNION ALL\nSELECT 'Remote Apple Events is enabled' FROM sharing_preferences WHERE remote_apple_events = 1\nUNION ALL\nSELECT 'Internet Sharing is enabled' FROM sharing_preferences WHERE internet_sharing = 1\nUNION ALL\nSELECT 'Bluetooth Sharing is enabled' FROM sharing_preferences WHERE bluetooth_sharing = 1\nUNION ALL\nSELECT 'Content Caching is enabled' FROM sharing_preferences WHERE content_caching = 1;",
+      "query":
+      "SELECT 'Screen Sharing is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE screen_sharing = 1 \
+          UNION ALL \
+        SELECT 'File Sharing is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE file_sharing = 1 \
+          UNION ALL \
+        SELECT 'Printer Sharing is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE printer_sharing = 1 \
+          UNION ALL \
+        SELECT 'Remote Login (SSH) is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE remote_login = 1 \
+          UNION ALL \
+        SELECT 'Remote Management is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE remote_management = 1 \
+          UNION ALL \
+        SELECT 'Remote Apple Events is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE remote_apple_events = 1 \
+          UNION ALL \
+        SELECT 'Internet Sharing is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE internet_sharing = 1 \
+          UNION ALL \
+        SELECT 'Bluetooth Sharing is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE bluetooth_sharing = 1 \
+          UNION ALL \
+        SELECT 'Content Caching is enabled' AS error \
+        FROM sharing_preferences \
+        WHERE content_caching = 1;",
       "text": {
         "en": {
           "label": "Sharing services are disabled",
@@ -178,7 +251,12 @@
       }
     },
     "GuestLogin": {
-      "query": "SELECT '' AS error FROM plist WHERE path = '/Library/Preferences/com.apple.loginwindow.plist' AND key = 'GuestEnabled' AND value = 1;",
+      "query":
+      "SELECT '' AS error \
+        FROM plist \
+        WHERE path = '/Library/Preferences/com.apple.loginwindow.plist' \
+          AND key = 'GuestEnabled' \
+          AND value = 1;",
       "text": {
         "en": {
           "label": "Guest login is disabled",
@@ -191,7 +269,10 @@
       }
     },
     "SSHKeys": {
-      "query": "SELECT path AS error FROM user_ssh_keys WHERE encrypted = 0;",
+      "query":
+      "SELECT path AS error \
+        FROM user_ssh_keys \
+        WHERE encrypted = 0;",
       "text": {
         "en": {
           "label": "SSH private keys are secured",
@@ -204,7 +285,25 @@
       }
     },
     "BootOptions": {
-      "query": "SELECT name || ' is set to ' || value AS error\nFROM nvram \nWHERE (name = 'csr-active-config' AND value != '0') OR \n   (name = 'boot-args' AND (\n    value LIKE '%amfi=0x0%' OR \n    value LIKE '%amfi_get_out_of_my_way=1%' OR\n    value LIKE '%amfi_allow_any_signature=1%' OR\n    value LIKE '%amfi_allow_expired_certs=1%' OR\n    value LIKE '%amfi_allow_invalid_signature=1%' OR\n    value LIKE '%amfi_check_dyld=0%' OR\n    value LIKE '%amfi_unrestrict_task_for_pid=1%' OR\n    value LIKE '%amfi_verify_csignatures=0%'\n  ));;",
+      "query":
+      "SELECT name || ' is set to ' || value AS error \
+        FROM nvram \
+        WHERE ( \
+          name = 'csr-active-config' \
+          AND value != '0' \
+        ) OR ( \
+          name = 'boot-args' \
+          AND ( \
+            value LIKE '%amfi=0x0%' \
+            OR value LIKE '%amfi_get_out_of_my_way=1%' \
+            OR value LIKE '%amfi_allow_any_signature=1%' \
+            OR value LIKE '%amfi_allow_expired_certs=1%' \
+            OR value LIKE '%amfi_allow_invalid_signature=1%' \
+            OR value LIKE '%amfi_check_dyld=0%' \
+            OR value LIKE '%amfi_unrestrict_task_for_pid=1%' \
+            OR value LIKE '%amfi_verify_csignatures=0%' \
+          ) \
+        );",
       "text": {
         "en": {
           "label": "Boot options are secure",
@@ -217,7 +316,17 @@
       }
     },
     "WirelessNetworking": {
-      "query": "SELECT DISTINCT '' AS error FROM wifi_status WHERE security_type IN ('Personal', 'WEP', 'Open', 'Dynamic WEP', 'WPA Personal', 'WPA Enterprise');",
+      "query":
+      "SELECT DISTINCT '' AS error \
+        FROM wifi_status \
+        WHERE security_type IN ( \
+          'Personal', \
+          'WEP', \
+          'Open', \
+          'Dynamic WEP', \
+          'WPA Personal', \
+          'WPA Enterprise' \
+        );",
       "text": {
         "en": {
           "label": "No insecure wireless networks",
@@ -230,7 +339,11 @@
       }
     },
     "RemovableStorage": {
-      "query": "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error FROM usb_devices WHERE class = 8 AND removable = 1;",
+      "query":
+      "SELECT vendor || ' ' || model || ' (' || serial || ')' AS error \
+        FROM usb_devices \
+        WHERE class = 8 \
+          AND removable = 1;",
       "text": {
         "en": {
           "label": "No USB storage devices connected",
@@ -245,27 +358,27 @@
     "SensitiveFiles": {
       "query":
       "SELECT REPLACE(path, '/Users/{{username}}/', '') AS error \
-       FROM file \
-       WHERE path LIKE '/Users/{{username}}/Downloads/%%' \
-       AND ( \
-         REGEX_MATCH(LOWER(filename), 'password.*\\.(txt|xlsx?|tsv|csv|json|ya?ml|conf|ini|pdf)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(backup|recovery|access|secret|private).?(token|password|code|key).*\\.(txt|xls|xlsx|tsv|csv|json|ya?ml|conf|ini)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(bitwarden|lastpass|dashlane).*export', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '\\.(ppk|pfx|p12|kdbx|1pux|opvault|wallet)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(2fa|authenticator|mfa).*backup', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(wallet\\.dat)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(rootkey|credentials)\\.csv$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), 'service.?account.*\\.json$', 0) IS NOT NULL \
-         OR (filename LIKE '%id_rsa%' AND filename NOT LIKE '%.pub') \
-         OR (filename LIKE '%id_ed25519%' AND filename NOT LIKE '%.pub') \
-         OR filename LIKE '%seed%phrase%' \
-         OR filename LIKE '%mnemonic%' \
-         OR filename LIKE '%wallet.dat' \
-         OR filename LIKE '%azureprofile%' \
-         OR filename LIKE 'client_secret%.json' \
-       ) \
-       AND btime <= (strftime('%s','now') - (7 * 24 * 60 * 60)) \
-       AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
+        FROM file \
+        WHERE path LIKE '/Users/{{username}}/Downloads/%%' \
+          AND ( \
+            REGEX_MATCH(LOWER(filename), 'password.*\\.(txt|xlsx?|tsv|csv|json|ya?ml|conf|ini|pdf)(\\..*)?$', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), '(backup|recovery|access|secret|private).?(token|password|code|key).*\\.(txt|xls|xlsx|tsv|csv|json|ya?ml|conf|ini)(\\..*)?$', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), '(bitwarden|lastpass|dashlane).*export', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), '\\.(ppk|pfx|p12|kdbx|1pux|opvault|wallet)(\\..*)?$', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), '(2fa|authenticator|mfa).*backup', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), '(wallet\\.dat)(\\..*)?$', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), '(rootkey|credentials)\\.csv$', 0) IS NOT NULL \
+            OR REGEX_MATCH(LOWER(filename), 'service.?account.*\\.json$', 0) IS NOT NULL \
+            OR (filename LIKE '%id_rsa%' AND filename NOT LIKE '%.pub') \
+            OR (filename LIKE '%id_ed25519%' AND filename NOT LIKE '%.pub') \
+            OR filename LIKE '%seed%phrase%' \
+            OR filename LIKE '%mnemonic%' \
+            OR filename LIKE '%wallet.dat' \
+            OR filename LIKE '%azureprofile%' \
+            OR filename LIKE 'client_secret%.json' \
+          ) \
+          AND ctime <= (strftime('%s', 'now') - (7 * 24 * 60 * 60)) \
+          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
       "text": {
         "en": {
           "label": "Sensitive data is protected",
@@ -279,12 +392,12 @@
     },
     "ExportedFiles": {
       "query":
-      "SELECT replace(path, '/Users/{{username}}/', '') AS error \
-       FROM file \
-       WHERE path LIKE '/Users/{{username}}/Downloads/%%' \
-       AND REGEX_MATCH(LOWER(filename), 'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', 0) IS NOT NULL \
-       AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60)) \
-       AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
+      "SELECT REPLACE(path, '/Users/{{username}}/', '') AS error \
+        FROM file \
+        WHERE path LIKE '/Users/{{username}}/Downloads/%%' \
+          AND REGEX_MATCH(LOWER(filename), 'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', 0) IS NOT NULL \
+          AND ctime <= (strftime('%s', 'now') - (30 * 24 * 60 * 60)) \
+          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
       "text": {
         "en": {
           "label": "Exported files are purged",
@@ -297,7 +410,12 @@
       }
     },
     "UnusedFiles": {
-      "query": "SELECT replace(path, '/Users/{{username}}/', '') AS error FROM file WHERE directory = '/Users/{{username}}/Downloads' AND btime <= (strftime('%s','now') - (90 * 24 * 60 * 60)) AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
+      "query":
+      "SELECT REPLACE(path, '/Users/{{username}}/', '') AS error \
+        FROM file \
+        WHERE directory = '/Users/{{username}}/Downloads' \
+          AND ctime <= (strftime('%s', 'now') - (90 * 24 * 60 * 60)) \
+          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
       "text": {
         "en": {
           "label": "Unused files are purged",

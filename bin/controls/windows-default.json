@@ -87,7 +87,14 @@
       }
     },
     "DriveEncryption": {
-      "query": "SELECT '' AS error WHERE NOT EXISTS (\n  SELECT 1 FROM registry\n  WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\BitLockerStatus\\BootStatus'\n    AND data = '1'\n);",
+      "query":
+      "SELECT '' AS error \
+       WHERE NOT EXISTS ( \
+         SELECT 1 \
+         FROM registry \
+         WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\BitLockerStatus\\BootStatus' \
+           AND data = '1' \
+       );",
       "text": {
         "en": {
           "label": "Disk is encrypted",
@@ -100,7 +107,198 @@
       }
     },
     "LockScreen": {
-      "query": "WITH\n  sid AS (SELECT uuid FROM users WHERE username = '{{username}}'),\n  inactivity_lock AS (SELECT CAST(data AS INTEGER) AS val FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\InactivityTimeoutSecs' AND CAST(data AS INTEGER) >= 1),\n  inactivity_lock_ok AS (SELECT 1 FROM inactivity_lock WHERE val <= 600),\n  screensaver_active AS (SELECT 1 FROM registry WHERE (path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaveActive' OR path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Control Panel\\Desktop\\ScreenSaveActive') AND data = '1'),\n  screensaver_secured AS (SELECT 1 FROM registry WHERE (path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaverIsSecure' OR path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Control Panel\\Desktop\\ScreenSaverIsSecure') AND data = '1'),\n  screensaver_timeout AS (SELECT COALESCE((SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaveTimeOut'), (SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Control Panel\\Desktop\\ScreenSaveTimeOut')) AS val),\n  screensaver_ok AS (SELECT 1 WHERE EXISTS (SELECT 1 FROM screensaver_active) AND EXISTS (SELECT 1 FROM screensaver_secured) AND NOT EXISTS (SELECT 1 FROM screensaver_timeout WHERE val IS NOT NULL AND val > 600)),\n  active_scheme_guid AS (SELECT data AS guid FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\ActivePowerScheme'),\n  sleep_timer_ac AS (SELECT COALESCE((SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\7516b95f-f776-4464-8c53-06167f40cc99\\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e\\ACSettingIndex'), (SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\238c9fa8-0aad-41ed-83f4-97be242c8f20\\29f6c1db-86da-48c5-9fdb-f2b67b1f44da\\ACSettingIndex')) AS val),\n  sleep_timer_dc AS (SELECT COALESCE((SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\7516b95f-f776-4464-8c53-06167f40cc99\\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e\\DCSettingIndex'), (SELECT CAST(data AS INTEGER) FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\238c9fa8-0aad-41ed-83f4-97be242c8f20\\29f6c1db-86da-48c5-9fdb-f2b67b1f44da\\DCSettingIndex')) AS val),\n  sleep_sign_in_disabled AS (SELECT 1 FROM registry WHERE (path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\fea3413e-7e05-4911-9a71-700331f1c294\\0e796bdb-100d-47d6-a2d5-f7d2daa51f51\\ACSettingIndex' OR path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\fea3413e-7e05-4911-9a71-700331f1c294\\0e796bdb-100d-47d6-a2d5-f7d2daa51f51\\DCSettingIndex') AND CAST(data AS INTEGER) = 0),\n  sleep_lock_ok AS (SELECT 1 WHERE EXISTS (SELECT 1 FROM sleep_timer_ac WHERE val IS NOT NULL AND val BETWEEN 1 AND 600) AND (EXISTS (SELECT 1 FROM sleep_timer_dc WHERE val IS NOT NULL AND val BETWEEN 1 AND 600) OR NOT EXISTS (SELECT 1 FROM sleep_timer_dc WHERE val IS NOT NULL)) AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled))\nSELECT 'Screen lock inactivity timeout too high (' || val || 's)' AS error FROM inactivity_lock WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock_ok)\nUNION ALL\nSELECT 'Screen saver active but sign-in not required on resume' AS error WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) AND NOT EXISTS (SELECT 1 FROM screensaver_ok) AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) AND EXISTS (SELECT 1 FROM screensaver_active) AND NOT EXISTS (SELECT 1 FROM screensaver_secured)\nUNION ALL\nSELECT 'Screen saver timeout too high (' || val || 's)' AS error FROM screensaver_timeout WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) AND NOT EXISTS (SELECT 1 FROM screensaver_ok) AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) AND EXISTS (SELECT 1 FROM screensaver_active) AND EXISTS (SELECT 1 FROM screensaver_secured) AND val IS NOT NULL AND val > 600\nUNION ALL\nSELECT 'Sign-in not required on wake from sleep' AS error WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) AND NOT EXISTS (SELECT 1 FROM screensaver_ok) AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) AND NOT EXISTS (SELECT 1 FROM screensaver_active) AND EXISTS (SELECT 1 FROM sleep_sign_in_disabled)\nUNION ALL\nSELECT 'Sleep timeout too high on AC (' || val || 's)' AS error FROM sleep_timer_ac WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) AND NOT EXISTS (SELECT 1 FROM screensaver_ok) AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) AND NOT EXISTS (SELECT 1 FROM screensaver_active) AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) AND val IS NOT NULL AND val > 600\nUNION ALL\nSELECT 'Sleep timeout too high on battery (' || val || 's)' AS error FROM sleep_timer_dc WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) AND NOT EXISTS (SELECT 1 FROM screensaver_ok) AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) AND NOT EXISTS (SELECT 1 FROM screensaver_active) AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) AND val IS NOT NULL AND val > 600\nUNION ALL\nSELECT 'No screen lock configured' AS error WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) AND NOT EXISTS (SELECT 1 FROM screensaver_ok) AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) AND NOT EXISTS (SELECT 1 FROM screensaver_active) AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) AND NOT EXISTS (SELECT 1 FROM sleep_timer_ac WHERE val IS NOT NULL AND val > 600) AND NOT EXISTS (SELECT 1 FROM sleep_timer_dc WHERE val IS NOT NULL AND val > 600)",
+      "query":
+      "WITH \
+         sid AS ( \
+           SELECT uuid \
+           FROM users \
+           WHERE username = '{{username}}' \
+         ), \
+         inactivity_lock AS ( \
+           SELECT CAST(data AS INTEGER) AS val \
+           FROM registry \
+           WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\\InactivityTimeoutSecs' \
+             AND CAST(data AS INTEGER) >= 1 \
+         ), \
+         inactivity_lock_ok AS ( \
+           SELECT 1 \
+           FROM inactivity_lock \
+           WHERE val <= 600 \
+         ), \
+         screensaver_active AS ( \
+           SELECT 1 \
+           FROM registry \
+           WHERE ( \
+             path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaveActive' \
+             OR path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Control Panel\\Desktop\\ScreenSaveActive' \
+           ) \
+             AND data = '1' \
+         ), \
+         screensaver_secured AS ( \
+           SELECT 1 \
+           FROM registry \
+           WHERE ( \
+             path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaverIsSecure' \
+             OR path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Control Panel\\Desktop\\ScreenSaverIsSecure' \
+           ) \
+             AND data = '1' \
+         ), \
+         screensaver_timeout AS ( \
+           SELECT COALESCE( \
+             ( \
+               SELECT CAST(data AS INTEGER) \
+               FROM registry \
+               WHERE path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop\\ScreenSaveTimeOut' \
+             ), \
+             ( \
+               SELECT CAST(data AS INTEGER) \
+               FROM registry \
+               WHERE path = 'HKEY_USERS\\' || (SELECT uuid FROM sid) || '\\Control Panel\\Desktop\\ScreenSaveTimeOut' \
+             ) \
+           ) AS val \
+         ), \
+         screensaver_ok AS ( \
+           SELECT 1 \
+           WHERE EXISTS (SELECT 1 FROM screensaver_active) \
+             AND EXISTS (SELECT 1 FROM screensaver_secured) \
+             AND NOT EXISTS ( \
+               SELECT 1 \
+               FROM screensaver_timeout \
+               WHERE val IS NOT NULL \
+                 AND val > 600 \
+             ) \
+         ), \
+         active_scheme_guid AS ( \
+           SELECT data AS guid \
+           FROM registry \
+           WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\ActivePowerScheme' \
+         ), \
+         sleep_timer_ac AS ( \
+           SELECT COALESCE( \
+             ( \
+               SELECT CAST(data AS INTEGER) \
+               FROM registry \
+               WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\7516b95f-f776-4464-8c53-06167f40cc99\\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e\\ACSettingIndex' \
+             ), \
+             ( \
+               SELECT CAST(data AS INTEGER) \
+               FROM registry \
+               WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\238c9fa8-0aad-41ed-83f4-97be242c8f20\\29f6c1db-86da-48c5-9fdb-f2b67b1f44da\\ACSettingIndex' \
+             ) \
+           ) AS val \
+         ), \
+         sleep_timer_dc AS ( \
+           SELECT COALESCE( \
+             ( \
+               SELECT CAST(data AS INTEGER) \
+               FROM registry \
+               WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\7516b95f-f776-4464-8c53-06167f40cc99\\3c0bc021-c8a8-4e07-a973-6b14cbcb2b7e\\DCSettingIndex' \
+             ), \
+             ( \
+               SELECT CAST(data AS INTEGER) \
+               FROM registry \
+               WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\238c9fa8-0aad-41ed-83f4-97be242c8f20\\29f6c1db-86da-48c5-9fdb-f2b67b1f44da\\DCSettingIndex' \
+             ) \
+           ) AS val \
+         ), \
+         sleep_sign_in_disabled AS ( \
+           SELECT 1 \
+           FROM registry \
+           WHERE ( \
+             path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\fea3413e-7e05-4911-9a71-700331f1c294\\0e796bdb-100d-47d6-a2d5-f7d2daa51f51\\ACSettingIndex' \
+             OR path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Power\\User\\PowerSchemes\\' || (SELECT guid FROM active_scheme_guid) || '\\fea3413e-7e05-4911-9a71-700331f1c294\\0e796bdb-100d-47d6-a2d5-f7d2daa51f51\\DCSettingIndex' \
+           ) \
+             AND CAST(data AS INTEGER) = 0 \
+         ), \
+         sleep_lock_ok AS ( \
+           SELECT 1 \
+           WHERE EXISTS ( \
+             SELECT 1 \
+             FROM sleep_timer_ac \
+             WHERE val IS NOT NULL \
+               AND val BETWEEN 1 AND 600 \
+           ) \
+             AND ( \
+               EXISTS ( \
+                 SELECT 1 \
+                 FROM sleep_timer_dc \
+                 WHERE val IS NOT NULL \
+                   AND val BETWEEN 1 AND 600 \
+               ) \
+               OR NOT EXISTS ( \
+                 SELECT 1 \
+                 FROM sleep_timer_dc \
+                 WHERE val IS NOT NULL \
+               ) \
+             ) \
+             AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) \
+         ) \
+       SELECT 'Screen lock inactivity timeout too high (' || val || 's)' AS error \
+       FROM inactivity_lock \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock_ok) \
+         UNION ALL \
+       SELECT 'Screen saver active but sign-in not required on resume' AS error \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_ok) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) \
+         AND EXISTS (SELECT 1 FROM screensaver_active) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_secured) \
+         UNION ALL \
+       SELECT 'Screen saver timeout too high (' || val || 's)' AS error \
+       FROM screensaver_timeout \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_ok) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) \
+         AND EXISTS (SELECT 1 FROM screensaver_active) \
+         AND EXISTS (SELECT 1 FROM screensaver_secured) \
+         AND val IS NOT NULL \
+         AND val > 600 \
+        UNION ALL \
+       SELECT 'Sign-in not required on wake from sleep' AS error \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_ok) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_active) \
+         AND EXISTS (SELECT 1 FROM sleep_sign_in_disabled) \
+        UNION ALL \
+       SELECT 'Sleep timeout too high on AC (' || val || 's)' AS error \
+       FROM sleep_timer_ac \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_ok) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_active) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) \
+         AND val IS NOT NULL \
+         AND val > 600 \
+        UNION ALL \
+       SELECT 'Sleep timeout too high on battery (' || val || 's)' AS error \
+       FROM sleep_timer_dc \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_ok) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_active) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) \
+         AND val IS NOT NULL \
+         AND val > 600 \
+        UNION ALL \
+       SELECT 'No screen lock configured' AS error \
+       WHERE NOT EXISTS (SELECT 1 FROM inactivity_lock) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_ok) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_lock_ok) \
+         AND NOT EXISTS (SELECT 1 FROM screensaver_active) \
+         AND NOT EXISTS (SELECT 1 FROM sleep_sign_in_disabled) \
+         AND NOT EXISTS ( \
+           SELECT 1 \
+           FROM sleep_timer_ac \
+           WHERE val IS NOT NULL \
+             AND val > 600 \
+         ) \
+         AND NOT EXISTS ( \
+           SELECT 1 \
+           FROM sleep_timer_dc \
+           WHERE val IS NOT NULL \
+             AND val > 600 \
+         );",
       "text": {
         "en": {
           "label": "Screen locking is enabled",
@@ -126,7 +324,18 @@
       }
     },
     "ProtectionStatus": {
-      "query": "SELECT 'internet settings = ' || internet_settings AS error FROM windows_security_center WHERE internet_settings != 'Good'\nUNION ALL\nSELECT 'Windows Security Center = ' || windows_security_center_service AS error FROM windows_security_center WHERE windows_security_center_service != 'Good'\nUNION ALL\nSELECT 'User Account Control = ' || user_account_control AS error FROM windows_security_center WHERE user_account_control != 'Good';",
+      "query":
+      "SELECT 'internet settings = ' || internet_settings AS error \
+       FROM windows_security_center \
+       WHERE internet_settings != 'Good' \
+         UNION ALL \
+       SELECT 'Windows Security Center = ' || windows_security_center_service AS error \
+       FROM windows_security_center \
+       WHERE windows_security_center_service != 'Good' \
+        UNION ALL \
+       SELECT 'User Account Control = ' || user_account_control AS error \
+       FROM windows_security_center \
+       WHERE user_account_control != 'Good';",
       "text": {
         "en": {
           "label": "Windows Security Centre features are active",
@@ -139,7 +348,42 @@
       }
     },
     "AutoUpdates": {
-      "query": "SELECT\n  CASE CAST(data AS INTEGER)\n    WHEN 1 THEN 'Automatic updates disabled'\n    WHEN 2 THEN 'Automatic updates: notify only, no download'\n    WHEN 3 THEN 'Automatic updates: auto-download but manual install required'\n    ELSE 'Automatic updates: unexpected configuration value ' || data\n  END AS error\nFROM (\n  SELECT\n    CASE\n      WHEN policies.name IS NOT NULL THEN policies.data\n      ELSE normal.data\n    END AS data\n  FROM\n    (SELECT name,data FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions') AS policies\n  FULL OUTER JOIN\n    (SELECT name,data FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions') AS normal\n  ON 1=1\n) AS update_policy\nWHERE CAST(data AS INTEGER) < 4\nUNION ALL\nSELECT 'Automatic updates disabled via policy' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' AND data = '1'\nUNION ALL\nSELECT 'Windows Update service not running' AS error FROM services WHERE name = 'wuauserv' AND status != 'RUNNING';",
+      "query":
+      "SELECT \
+         CASE CAST(data AS INTEGER) \
+           WHEN 1 THEN 'Automatic updates disabled' \
+           WHEN 2 THEN 'Automatic updates: notify only, no download' \
+           WHEN 3 THEN 'Automatic updates: auto-download but manual install required' \
+           ELSE 'Automatic updates: unexpected configuration value ' || data \
+         END AS error \
+       FROM ( \
+         SELECT \
+           CASE \
+             WHEN policies.name IS NOT NULL THEN policies.data \
+             ELSE normal.data \
+           END AS data \
+         FROM ( \
+           SELECT name, data \
+           FROM registry \
+           WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\AUOptions' \
+         ) AS policies \
+         FULL OUTER JOIN ( \
+           SELECT name, data \
+           FROM registry \
+           WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\WindowsUpdate\\Auto Update\\AUOptions' \
+         ) AS normal ON 1 = 1 \
+       ) AS update_policy \
+       WHERE CAST(data AS INTEGER) < 4 \
+         UNION ALL \
+       SELECT 'Automatic updates disabled via policy' AS error \
+       FROM registry \
+       WHERE path = 'HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU\\NoAutoUpdate' \
+         AND data = '1' \
+         UNION ALL \
+       SELECT 'Windows Update service not running' AS error \
+       FROM services \
+       WHERE name = 'wuauserv' \
+         AND status != 'RUNNING';",
       "text": {
         "en": {
           "label": "Automatic updates are enabled",
@@ -165,7 +409,21 @@
       }
     },
     "SharingPreferences": {
-      "query": "SELECT 'Remote Desktop is enabled' AS error FROM registry WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' AND data = '0'\nUNION ALL\nSELECT 'Non-admin file share exists: ' || name AS error FROM shared_resources WHERE type = 0 AND name NOT LIKE '%$'\nUNION ALL\nSELECT 'Remote Registry is enabled' AS error FROM services WHERE name = 'RemoteRegistry' AND status = 'RUNNING';",
+      "query":
+      "SELECT 'Remote Desktop is enabled' AS error \
+       FROM registry \
+       WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\Terminal Server\\fDenyTSConnections' \
+         AND data = '0' \
+         UNION ALL \
+       SELECT 'Non-admin file share exists: ' || name AS error \
+       FROM shared_resources \
+       WHERE type = 0 \
+         AND name NOT LIKE '%$' \
+        UNION ALL \
+       SELECT 'Remote Registry is enabled' AS error \
+       FROM services \
+       WHERE name = 'RemoteRegistry' \
+         AND status = 'RUNNING';",
       "text": {
         "en": {
           "label": "Sharing services are disabled",
@@ -191,7 +449,14 @@
       }
     },
     "BootOptions": {
-      "query": "SELECT 'UEFI secure boot is disabled' AS error WHERE NOT EXISTS (\n  SELECT 1 FROM registry\n  WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State\\UEFISecureBootEnabled'\n    AND data = '1'\n);",
+      "query":
+      "SELECT 'UEFI secure boot is disabled' AS error \
+       WHERE NOT EXISTS ( \
+         SELECT 1 \
+         FROM registry \
+         WHERE path = 'HKEY_LOCAL_MACHINE\\SYSTEM\\CurrentControlSet\\Control\\SecureBoot\\State\\UEFISecureBootEnabled' \
+           AND data = '1' \
+       );",
       "text": {
         "en": {
           "label": "Boot options are secure",
@@ -221,25 +486,27 @@
       "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error \
        FROM file \
        WHERE path LIKE 'C:\\Users\\{{username}}\\Downloads\\%%' \
-       AND ( \
-         REGEX_MATCH(LOWER(filename), 'password.*\\.(txt|xlsx?|tsv|csv|json|ya?ml|conf|ini|pdf)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(backup|recovery|access|secret|private).?(token|password|code|key).*\\.(txt|xls|xlsx|tsv|csv|json|ya?ml|conf|ini)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(bitwarden|lastpass|dashlane).*export', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '\\.(ppk|pfx|p12|kdbx|1pux|opvault|wallet)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(2fa|authenticator|mfa).*backup', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(wallet\\.dat)(\\..*)?$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), '(rootkey|credentials)\\.csv$', 0) IS NOT NULL \
-         OR REGEX_MATCH(LOWER(filename), 'service.?account.*\\.json$', 0) IS NOT NULL \
-         OR (filename LIKE '%id_rsa%' AND filename NOT LIKE '%.pub') \
-         OR (filename LIKE '%id_ed25519%' AND filename NOT LIKE '%.pub') \
-         OR filename LIKE '%seed%phrase%' \
-         OR filename LIKE '%mnemonic%' \
-         OR filename LIKE '%wallet.dat' \
-         OR filename LIKE '%azureprofile%' \
-         OR filename LIKE 'client_secret%.json' \
-       ) \
-       AND btime <= (strftime('%s','now') - (7 * 24 * 60 * 60)) \
-       AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
+         AND ( \
+           REGEX_MATCH(LOWER(filename), 'password.*\\.(txt|xlsx?|tsv|csv|json|ya?ml|conf|ini|pdf)(\\..*)?$', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), '(backup|recovery|access|secret|private).?(token|password|code|key).*\\.(txt|xls|xlsx|tsv|csv|json|ya?ml|conf|ini)(\\..*)?$', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), '(bitwarden|lastpass|dashlane).*export', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), '\\.(ppk|pfx|p12|kdbx|1pux|opvault|wallet)(\\..*)?$', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), '(2fa|authenticator|mfa).*backup', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), '(wallet\\.dat)(\\..*)?$', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), '(rootkey|credentials)\\.csv$', 0) IS NOT NULL \
+           OR REGEX_MATCH(LOWER(filename), 'service.?account.*\\.json$', 0) IS NOT NULL \
+           OR (filename LIKE '%id_rsa%' AND filename NOT LIKE '%.pub') \
+           OR (filename LIKE '%id_ed25519%' AND filename NOT LIKE '%.pub') \
+           OR filename LIKE '%seed%phrase%' \
+           OR filename LIKE '%mnemonic%' \
+           OR filename LIKE '%wallet.dat' \
+           OR filename LIKE '%azureprofile%' \
+           OR filename LIKE 'client_secret%.json' \
+         ) \
+         AND ctime <= ( \
+           strftime('%s', 'now') - (7 * 24 * 60 * 60) \
+         ) \
+         AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
       "text": {
         "en": {
           "label": "Sensitive data is protected",
@@ -256,9 +523,15 @@
       "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error \
        FROM file \
        WHERE path LIKE 'C:\\Users\\{{username}}\\Downloads\\%%' \
-       AND REGEX_MATCH(LOWER(filename), 'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', 0) IS NOT NULL \
-       AND btime <= (strftime('%s','now') - (30 * 24 * 60 * 60)) \
-       AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
+         AND REGEX_MATCH( \
+           LOWER(filename), \
+           'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', \
+           0 \
+         ) IS NOT NULL \
+         AND ctime <= ( \
+           strftime('%s', 'now') - (30 * 24 * 60 * 60) \
+         ) \
+         AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
       "text": {
         "en": {
           "label": "Exported files are purged",
@@ -271,17 +544,24 @@
       }
     },
     "UnusedFiles": {
-      "query": "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error FROM file WHERE directory = 'C:\\Users\\{{username}}\\Downloads' AND btime <= (strftime('%s','now') - (90 * 24 * 60 * 60)) AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
+      "query":
+      "SELECT REPLACE(path, 'C:\\Users\\{{username}}\\', '') AS error \
+       FROM file \
+       WHERE directory = 'C:\\Users\\{{username}}\\Downloads' \
+         AND ctime <= ( \
+           strftime('%s', 'now') - (90 * 24 * 60 * 60) \
+         ) \
+         AND (attributes IS NULL OR attributes NOT LIKE '%H%');",
       "text": {
         "en": {
           "label": "Unused files are purged",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/UnusedFiles"
         },
         "fr": {
           "label": "Fichiers inutilisés sont supprimés",
-          "explain": "https://www.citadelagent.org/control/SensitiveFiles"
+          "explain": "https://www.citadelagent.org/control/UnusedFiles"
         }
       }
-    }
+    },
   }
 }
