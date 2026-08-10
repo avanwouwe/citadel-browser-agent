@@ -103,6 +103,7 @@ class PersistentObject {
     #storage
     #interval
     #timer
+    #flushPromise = null
 
     #MAX_LIFETIME_SERVICE_WORKER = 20 * 1000
 
@@ -134,7 +135,12 @@ class PersistentObject {
     async start() {
         if (!this.#timer) {
             await this.#storage.ready()
-            this.#timer = setInterval(() => this.flush(), this.#interval)
+
+            this.#timer = setInterval(() => {
+                this.flush().catch(error => {
+                    console.error("PersistentObject flush failed:", error)
+                })
+            }, this.#interval)
         }
     }
 
@@ -146,7 +152,8 @@ class PersistentObject {
     }
 
     async ready() {
-        return this.#storage.ready().then(() => this)
+        await this.#storage.ready()
+        return this
     }
 
     markDirty(bool = true) {
@@ -158,11 +165,26 @@ class PersistentObject {
         this.#value.clear()
     }
 
-    async flush() {
-        if (!this.#value.isDirty) return
+    /** @returns {Promise<void>} */
+    flush() {
+        if (this.#flushPromise) return this.#flushPromise
 
-        this.#value.isDirty = false
-        await this.#storage.save()
+        this.#flushPromise = (async () => {
+            while (this.#value.isDirty) {
+                this.#value.isDirty = false
+
+                try {
+                    await this.#storage.save()
+                } catch (error) {
+                    this.#value.isDirty = true
+                    throw error
+                }
+            }
+        })().finally(() => {
+            this.#flushPromise = null
+        })
+
+        return this.#flushPromise
     }
 }
 
