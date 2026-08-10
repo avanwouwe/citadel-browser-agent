@@ -139,6 +139,10 @@ class DLP {
 
 class ClickFix {
 
+    static TYPE = 'ClickFix'
+
+    static #debouncer = new Debouncer(ONE_SECOND, null, true)
+
     // shell tooling that has no business being on a clipboard the user is about to paste into a shell
     static #KEYWORDS = [
         // --- Windows ---
@@ -173,7 +177,8 @@ class ClickFix {
         /\bbase64\s+-{1,2}[dD]\b/,                     // base64 -d / --decode (mac/linux decode step)
     ]
 
-    // high-confidence execution patterns (download-and-run, encoded commands, hidden windows)
+    // High-confidence execution patterns: download-and-run, encoded commands,
+    // hidden windows, and similar behavior.
     static #STRONG = [
         /-e(?:nc(?:odedcommand)?)?\b\s*[A-Za-z0-9+/=]{16,}/i,
         /\b(?:iex|invoke-expression)\b/i,
@@ -188,7 +193,7 @@ class ClickFix {
         // FileFix: a real command hidden before a '#'-commented decoy file path
         /(?:powershell|pwsh|cmd|conhost|mshta)\b[^\r\n]*#[^\r\n]*(?:\.(?:docx?|pdf|xlsx?|txt)\b|[a-z]:\\|\/)/i,
 
-        // macOS AMOS: do shell script ... with administrator privileges (forces a password prompt)
+        // macOS AMOS: forces a password prompt.
         /with\s+administrator\s+privileges/i,
 
         // macOS loader: curl|wget piped straight into a shell
@@ -204,20 +209,118 @@ class ClickFix {
     // a long base64 blob — suspicious on its own, decisive once it decodes to something shell-like
     static #BASE64_BLOB = /[A-Za-z0-9+/]{40,}={0,2}/
 
-    // looks like a file path / URL / env-var path (FileFix disguises a command as one of these)
-    // + /Volumes/ for the DMG-mount macOS variant, + Ctrl+L-style Explorer paths already covered
-    static #PATH_LIKE = /^\s*(?:[a-z]:\\|\\\\|file:\/\/|\/(?:usr|bin|etc|tmp|opt|var|Volumes|Applications)\/|~\/|%[a-z]+%)/i
+    // Looks like a file path, URL, or environment-variable path. FileFix may
+    // disguise a command as one of these.
+    static #PATH_LIKE =
+        /^\s*(?:[a-z]:\\|\\\\|file:\/\/|\/(?:usr|bin|etc|tmp|opt|var|Volumes|Applications)\/|~\/|%[a-z]+%)/i
 
-    // visible content, a long run of whitespace, then more content — used to push a command off-screen
+    // Visible content, a long run of whitespace, then more content. This may
+    // be used to push a command off-screen.
     static #WHITESPACE_HIDE = /\S[ \t]{30,}\S/
 
-    // a trailing newline / carriage-return auto-runs the command the instant it is pasted into a Run box or terminal
+    /*
+     * A suspicious tool in a position where a shell would plausibly execute it.
+     *
+     * Examples recognized:
+     *
+     *   powershell -NoProfile ...
+     *   /usr/bin/bash -c ...
+     *   sudo curl https://example.test/file
+     *   $ wget https://example.test/file
+     *   PS C:\Users\alice> pwsh ...
+     *   C:\Users\alice> cmd.exe /c ...
+     *   root@example:~# /bin/sh ...
+     *   /usr/bin/env MODE=test bash -c ...
+     *
+     * A command can appear on any physical line, so a malicious command hidden
+     * inside a longer block of decoy text is still recognized.
+     *
+     * The expression intentionally does not accept arbitrary quotes or
+     * punctuation before the tool. Consequently, tool names embedded inside
+     * JSON, SQL strings, regular expressions, prose, and function arguments do
+     * not normally match.
+     */
+    static #COMMAND_LINE = new RegExp(
+        [
+            '^[ \\t]*',
+
+            // Optional shell, PowerShell, Windows cmd, or Unix root prompt.
+            '(?:',
+            '\\$[ \\t]+',
+            '|PS[ \\t]+[^>\\r\\n]{0,160}>[ \\t]*',
+            '|[A-Za-z]:\\\\[^>\\r\\n]{0,160}>[ \\t]*',
+            '|[A-Za-z0-9._-]+@[A-Za-z0-9._-]+:[^#\\r\\n]{0,100}#[ \\t]+',
+            ')?',
+
+            // PowerShell call operator.
+            '(?:&[ \\t]+)?',
+
+            // Common command wrappers.
+            '(?:(?:sudo|nohup|command)[ \\t]+)*',
+
+            // Optional env command and environment-variable assignments.
+            '(?:',
+            '(?:(?:/usr/bin/)?env)',
+            '(?:[ \\t]+[A-Za-z_][A-Za-z0-9_]*=[^ \\t\\r\\n]+)*',
+            '[ \\t]+',
+            ')?',
+
+            // Optional executable path.
+            '(?:',
+            '(?:[A-Za-z]:\\\\|\\.{1,2}\\\\)(?:[^\\\\\\s]+\\\\)*',
+            '|/(?:[^/\\s]+/)*',
+            ')?',
+
+            // Suspicious executable or shell command.
+            '(?:',
+            'powershell',
+            '|pwsh',
+            '|cmd',
+            '|mshta',
+            '|wscript',
+            '|cscript',
+            '|rundll32',
+            '|regsvr32',
+            '|certutil',
+            '|bitsadmin',
+            '|msiexec',
+            '|curl',
+            '|wget',
+            '|iwr',
+            '|invoke-webrequest',
+            '|irm',
+            '|invoke-restmethod',
+            '|bash',
+            '|sh',
+            '|zsh',
+            '|conhost',
+            '|finger',
+            '|forfiles',
+            '|osascript',
+            '|hdiutil',
+            '|xattr',
+            '|launchctl',
+            '|diskutil',
+            '|base64',
+            '|iex',
+            '|invoke-expression',
+            ')',
+            '(?:\\.exe)?',
+            '(?=[ \\t]|$)',
+        ].join(''),
+        'im'
+    )
+
+    // A trailing newline or carriage return can execute a command immediately
+    // when pasted into a Run box or terminal. It is only scored when the raw
+    // clipboard also contains an executable-looking command line.
     static #TRAILING_EXEC = /[\r\n]\s*$/
 
-    // control characters other than tab / newline / carriage-return (e.g. ESC, used for terminal escape tricks)
+    // Control characters other than tab, newline, and carriage return.
     static #CONTROL_CHARS = /[\x00-\x08\x0b\x0c\x0e-\x1f]/
 
-    // Scores a clipboard payload. Returns { score, signals } when it crosses the threshold, else null.
+    // Scores a clipboard payload. Returns { score, signals } when it crosses
+    // the threshold, otherwise null.
     static score(text) {
         if (typeof text !== "string" || text.length === 0) return null
 
@@ -228,10 +331,19 @@ class ClickFix {
         const haystacks = decoded ? [text, decoded] : [text]
         const matchesAny = (re) => haystacks.some(h => re.test(h))
 
+        /*
+         * Command positioning is deliberately checked against the raw
+         * clipboard only. It is a structural property of the content that will
+         * actually be pasted, just like trailing newlines and whitespace
+         * padding.
+         */
+        const commandLineLike = ClickFix.#COMMAND_LINE.test(text)
+
         let keywords = 0
         for (const re of ClickFix.#KEYWORDS) {
             if (matchesAny(re)) keywords++
         }
+
         if (keywords > 0) {
             score += 3 + Math.min(keywords - 1, 2)
             signals.push("shell-keyword")
@@ -241,12 +353,21 @@ class ClickFix {
         for (const re of ClickFix.#STRONG) {
             if (matchesAny(re)) strong++
         }
+
         if (strong > 0) {
             score += Math.min(3 + (strong - 1), 5)
             signals.push("execution-pattern")
         }
 
-        if (matchesAny(ClickFix.#PIPE_TO_SHELL)) {
+        const pipeToShell = matchesAny(ClickFix.#PIPE_TO_SHELL)
+
+        /*
+         * A bare "|bash" or "|sh" can occur in source code and regular
+         * expressions, such as "(sh|bash)". Only score it when the clipboard
+         * also looks like an executable command line or another strong
+         * execution pattern independently confirms command behavior.
+         */
+        if (pipeToShell && (commandLineLike || strong > 0)) {
             score += 3
             signals.push("pipe-to-shell")
         }
@@ -259,11 +380,13 @@ class ClickFix {
             signals.push("base64-blob")
         }
 
-        // The checks below deliberately run against the raw `text` only, never the decoded base64.
-        // They detect structural obfuscation of the payload *as it will be pasted* (auto-exec newline,
-        // off-screen padding, control chars, leading path-disguise) — properties of the literal clipboard
-        // bytes. The decoded blob is a synthetic string that never reaches the paste target, so testing it
-        // here would only manufacture false positives.
+        /*
+         * The checks below deliberately run against the raw text only, never the decoded base64.
+         *
+         * They detect structural obfuscation of the payload as it will be pasted: auto-execution, off-screen padding,
+         * control characters, and leading path disguises. The decoded blob is a synthetic string that never reaches
+         * the paste target, so checking it here would create false positives.
+         */
         if (ClickFix.#PATH_LIKE.test(text) && (keywords > 0 || strong > 0)) {
             score += 3
             signals.push("path-disguise")
@@ -279,8 +402,12 @@ class ClickFix {
             signals.push("control-chars")
         }
 
-        // virtually every block of web-copied text ends with \n so the signal is meaningless in isolation.
-        if (ClickFix.#TRAILING_EXEC.test(text) && score > 0) {
+        /*
+         * Almost every block of web-copied text can end with a newline, so the
+         * newline only contributes when a suspicious tool occurs in a position
+         * where it could plausibly execute as a command.
+         */
+        if (ClickFix.#TRAILING_EXEC.test(text) && commandLineLike && score > 0) {
             score += 3
             signals.push("auto-execute")
         }
@@ -292,20 +419,28 @@ class ClickFix {
         return score >= config.attack.clickfix.threshold ? report : null
     }
 
-    static check(content, url, tabId) {
+    static async check(content, url, tabId) {
         const eventLevel = config.attack.clickfix.level
         assert(Log.levels.includes(eventLevel), `invalid config.attack.clickfix.level : ${eventLevel}`)
 
-        if (eventLevel === Log.NEVER || ! ClickFix.score(content)) return false
+        if (eventLevel === Log.NEVER) return
 
-        const contact = config.organization.contact.embedTag('nowrap')
-        const onAcknowledge = { type: "explain-clickfix", label: t('attack.explain') }
-        const onCancel = { label: t('attack.trust') }
-        Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
+        return ClickFix.#debouncer.debounce(content, null, async () => {
+            const origin = url?.toURL()?.origin
+            if (origin && await AlertSuppression.isSuppressed(origin, ClickFix.TYPE)) return false
 
-        logger.log(nowTimestamp(), "attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `clipboard command-injection attack on ${url?.hostname}`)
+            const score = ClickFix.score(content)
+            if (!score) return false
 
-        return true
+            const contact = config.organization.contact.embedTag('nowrap')
+            const onAcknowledge = { label: t('global.ok') }
+            const onCancel = { type: "suppress-alert", alertType: ClickFix.TYPE, period: config.attack.suppressPeriod, label: t('attack.trust') }
+            await Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
+
+            logger.log(nowTimestamp(),"attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `ClickFix attack level ${score.score} on ${url?.hostname}`)
+
+            return true
+        })
     }
 
     // decodes the base64 blobs found in the text so the keyword scan also sees encoded payloads

@@ -966,6 +966,10 @@ onMessage((request, sender) => {
 		acknowledgeAlert(request.alert, request.openDashboard)
 	}
 
+	if (request.type === "suppress-alert") {
+		AlertSuppression.suppressFor(senderUrl.origin, request.alertType, request.period)
+	}
+
 	if (request.type === "allow-alert") {
 		const alertType = request.alert.type
 		const exceptionDuration = config[alertType].exceptions.duration * ONE_MINUTE
@@ -1056,7 +1060,7 @@ onMessage((request, sender) => {
 		if (request.subtype.startsWith('clipboard-write') || request.subtype.startsWith('clipboard-c') || request.subtype === "datatransfer-set") {
 			for (const item of request.items) {
 				if (item.kind === "text" && item.type === "text/plain" && item.data) {
-					if (ClickFix.check(item.data.substring(0,1000), senderUrl, tabId)) break
+					ClickFix.check(item.data.substring(0,1000), senderUrl, tabId)
 				}
 			}
 		}
@@ -1067,7 +1071,6 @@ onMessage((request, sender) => {
 		}
 	}
 
-	if (request.type === "explain-clickfix") openTab("https://citadelagent.org/control/ClickFix")
 	if (request.type === "sanitize-clipboard") DLP.sanitizeClipboard()
 
 	if (request.type === "acknowledge-shadow-it") {

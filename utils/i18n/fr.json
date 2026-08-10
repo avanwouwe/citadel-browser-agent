@@ -154,10 +154,10 @@
   },
   "attack": {
     "explain": "Expliquer",
-    "trust": "Faire confiance",
+    "trust": "Faire confiance au site",
     "clickfix": {
       "title": "Arnaque possible détectée",
-      "message": "Un élément vient de copier une commande informatique dans votre presse-papiers. Les escrocs utilisent cette technique (« ClickFix ») pour vous faire coller et exécuter des commandes malveillantes, par exemple dans PowerShell, la boîte de dialogue Exécuter de Windows ou un terminal.<p><b>⚠\uFE0F Ne la collez pas</b> sauf si vous êtes certain qu’elle est sûre.<p>Clickez pour plus d'information, et contactez {{contact}} en cas de doute."
+      "message": "Un élément vient de copier une commande informatique dans votre presse-papiers. Les escrocs utilisent cette technique (« ClickFix ») pour vous faire coller et exécuter des commandes malveillantes, par exemple dans PowerShell, la boîte de dialogue Exécuter de Windows ou un terminal.<p><b>⚠\uFE0F Ne la collez pas</b> sauf si vous êtes certain qu’elle est sûre.<p>Clickez pour <a href=\"https://www.citadelagent.org/control/ClickFix/\">plus d'information</a>, et contactez {{contact}} en cas de doute."
     }
   },
   "dlp": {

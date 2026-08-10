@@ -503,6 +503,7 @@ class Config {
             warnInterval: 7         // re-show the warning after this many days once acknowledged
         },
         attack: {
+            suppressPeriod: 60 * 24 * 7,
             clickfix: {
                 level: Log.ERROR,
                 threshold: 5
@@ -514,7 +515,7 @@ class Config {
                 warnProtected: true,
                 domains: [],
                 rules: 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
-                freq: 24,
+                freq: 24 * 60,
             },
         },
         extensions: {

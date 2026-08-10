@@ -107,6 +107,10 @@
     text-align: left;
 }
 
+a:link, a:visited {
+    color: var(--color-link);
+}
+
 /* ── Buttons ────────────────────────────────────────── */
 
 button {
