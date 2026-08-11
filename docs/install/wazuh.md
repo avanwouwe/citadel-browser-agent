@@ -2,7 +2,7 @@
 layout: default
 title: Wazuh integration
 parent: Installation
-nav_order: 5
+nav_order: 6
 ---
 
 # Wazuh integration
@@ -37,6 +37,23 @@ In the `ossec.conf` file that is deployed on agents, add the following `<localfi
     <ignore>, "level": "(DEBUG|TRACE)", </ignore>
   </localfile>
 ```
+
+> **Note**
+> If you change the log level be sure to update the `config.logging.shipLevel` configuration, to ensure that the Event Dashboard shows the correct events. For more information see [logging configuration](/config/logging-reporting).
+{: .note }
+
+### Linux
+If you haven't already done so, install the [Citadel agent](/install/linux) that Citadel needs to communicate the events outside browser sandbox.
+
+Citadel logs to the system log via syslog, so in the `ossec.conf` file that is deployed on agents, add a `<localfile>` entry for the syslog facility used on your distribution, filtering on the `citadel-browser-agent` tag, for example:
+```
+  <!-- Browser Agent -->
+  <localfile>
+    <log_format>syslog</log_format>
+    <location>/var/log/syslog</location>
+  </localfile>
+```
+On distributions that ship `journald` without a `/var/log/syslog` file (for example RHEL-family systems), use `/var/log/messages` instead, or configure a `journald` output that writes `citadel-browser-agent` entries to a file Wazuh can tail.
 
 > **Note**
 > If you change the log level be sure to update the `config.logging.shipLevel` configuration, to ensure that the Event Dashboard shows the correct events. For more information see [logging configuration](/config/logging-reporting).
