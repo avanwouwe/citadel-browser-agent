@@ -1,184 +1,217 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
+set -euo pipefail
 
-FIREFOX_POLICY_SOURCE="/usr/share/citadel-browser-agent/firefox-policy.json"
-CITADEL_STATE_DIR="/var/lib/citadel-browser-agent"
+PACKAGE_NAME="citadel-browser-agent"
+VERSION="1.5.0"
+PACKAGE_MAINTAINER="Citadel Agent <contact@citadelagent.org>"
+BUILD_ROOT="/tmp/citadel-$(uuidgen)"
 
-file_hash() {
-    sha256sum "$1" | awk '{print $1}'
+cleanup() {
+    rm -rf "$BUILD_ROOT"
 }
+trap cleanup EXIT
 
-write_policy_state() {
-    # $1 = state file, $2 = policy file whose hash we're recording
-    STATE_TEMP="$1.tmp.$$"
-
-    file_hash "$2" > "$STATE_TEMP"
-    chmod 0600 "$STATE_TEMP"
-    mv -f "$STATE_TEMP" "$1"
-}
-
-# Detects the real Firefox install prefix and prints its
-# "distribution" directory, e.g. /usr/lib/firefox/distribution.
-# Returns non-zero (and prints nothing) if Firefox is not found,
-# or if it's clearly a snap/flatpak build that a postinst can't manage.
-detect_firefox_distribution_dir() {
-    FX_BIN="$(command -v firefox 2>/dev/null || true)"
-    [ -n "$FX_BIN" ] || return 1
-
-    FX_REAL="$(readlink -f "$FX_BIN" 2>/dev/null || echo "$FX_BIN")"
-
-    case "$FX_REAL" in
-        /snap/*|*/snapd/*)
-            return 1
-            ;;
-    esac
-
-    if [ ! -e "$FX_REAL" ]; then
-        return 1
-    fi
-
-    FX_DIR="$(dirname "$FX_REAL")"
-    printf '%s/distribution\n' "$FX_DIR"
-}
-
-# Installs (and tracks) a Citadel-managed policies.json at one target
-# location, without ever clobbering an admin's own file or a symlink.
+# fpm builds .deb and .rpm packages from the same staged tree. Install via:
 #
-#   $1 = human-readable label, for log messages
-#   $2 = destination directory (created if missing)
-#   $3 = destination policies.json path
-#   $4 = state file recording the hash Citadel last wrote there
-install_firefox_policy() {
-    LABEL="$1"
-    POLICY_DIR="$2"
-    POLICY_FILE="$3"
-    STATE_FILE="$4"
+#   sudo apt-get install -y ruby ruby-dev rubygems build-essential rpm
+#   sudo gem install --no-document fpm
+#
+# The rpm package provides rpmbuild, allowing fpm to emit RPM packages when
+# this script is run on a Debian/Ubuntu host. The script only needs to be run
+# once per architecture, not once per distribution family.
+if ! command -v fpm &>/dev/null; then
+    echo "Error: fpm not found. See the installation instructions above." >&2
+    exit 1
+fi
 
-    if [ ! -f "$FIREFOX_POLICY_SOURCE" ]; then
-        echo "Citadel: packaged Firefox policy template is missing:" >&2
-        echo "  $FIREFOX_POLICY_SOURCE" >&2
-        return 1
+# Verify that at least one architecture build exists.
+if ! compgen -G "binaries/*/" >/dev/null; then
+    echo "Error: no architecture builds found in binaries/. Run build.sh first." >&2
+    exit 1
+fi
+
+# Verify all packaging inputs before staging anything.
+for REQUIRED_FILE in \
+    citadel.browser.agent.json \
+    citadel.browser.agent-firefox.json \
+    citadel-policy.json \
+    citadel-policy-firefox.json \
+    postinstall.sh \
+    postremove.sh
+do
+    if [ ! -f "$REQUIRED_FILE" ]; then
+        echo "Error: required packaging file not found: $REQUIRED_FILE" >&2
+        exit 1
+    fi
+done
+
+if [ ! -d ../../controls ]; then
+    echo "Error: controls directory not found: ../../controls" >&2
+    exit 1
+fi
+
+declare -A DEB_ARCH_MAP=(
+    [x86_64]="amd64"
+    [arm64]="arm64"
+)
+
+declare -A RPM_ARCH_MAP=(
+    [x86_64]="x86_64"
+    [arm64]="aarch64"
+)
+
+# System-wide native-messaging manifest locations for supported
+# Chromium-family Linux browsers.
+#
+# Arc and Comet are intentionally absent because they currently have no
+# documented conventional Linux package/native-messaging locations.
+CHROMIUM_NATIVE_HOST_DIRS=(
+    "etc/opt/chrome/native-messaging-hosts"
+    "etc/chromium/native-messaging-hosts"
+    "etc/opt/edge/native-messaging-hosts"
+    "etc/brave/native-messaging-hosts"
+    "etc/opt/opera/native-messaging-hosts"
+)
+
+# System-wide managed-policy locations for supported Chromium-family Linux
+# browsers. Chromium supports multiple policy fragments, so Citadel can use a
+# uniquely named package-owned file.
+CHROMIUM_POLICY_DIRS=(
+    "etc/opt/chrome/policies/managed"
+    "etc/chromium/policies/managed"
+    "etc/opt/edge/policies/managed"
+    "etc/brave/policies/managed"
+    "etc/opt/opera/policies/managed"
+)
+
+# Firefox native-messaging locations differ between distribution families.
+FIREFOX_NATIVE_HOST_DIRS=(
+    "usr/lib/mozilla/native-messaging-hosts"
+    "usr/lib64/mozilla/native-messaging-hosts"
+)
+
+BUILT_ANY=false
+
+for ARCH_DIR in binaries/*/; do
+    BUILD_ARCH="$(basename "$ARCH_DIR")"
+
+    DEB_ARCH="${DEB_ARCH_MAP[$BUILD_ARCH]:-}"
+    RPM_ARCH="${RPM_ARCH_MAP[$BUILD_ARCH]:-}"
+
+    if [ -z "$DEB_ARCH" ] || [ -z "$RPM_ARCH" ]; then
+        echo "Warning: unknown architecture '$BUILD_ARCH', skipping." >&2
+        continue
     fi
 
-    # A state file means Citadel created this policies.json during an
-    # earlier installation. This normally indicates that the package is
-    # being upgraded or reconfigured.
-    if [ -f "$STATE_FILE" ]; then
-        PREVIOUS_HASH="$(cat "$STATE_FILE")"
+    BUILT_ANY=true
 
-        # Never follow or replace a symbolic link.
-        if [ -L "$POLICY_FILE" ]; then
-            echo "Citadel: preserving Firefox ($LABEL) policy symlink:" >&2
-            echo "  $POLICY_FILE" >&2
-            return 0
-        fi
+    echo "Staging package contents for $BUILD_ARCH..."
 
-        if [ -f "$POLICY_FILE" ]; then
-            CURRENT_HASH="$(file_hash "$POLICY_FILE")"
+    STAGE="$BUILD_ROOT/$BUILD_ARCH"
+    rm -rf "$STAGE"
 
-            if [ "$CURRENT_HASH" = "$PREVIOUS_HASH" ]; then
-                # The policy still matches the version Citadel last
-                # installed, so update it to the policy from the new
-                # package.
-                install -m 0644 \
-                    "$FIREFOX_POLICY_SOURCE" \
-                    "$POLICY_FILE"
+    # --- Agent binaries and control packs ---
 
-                write_policy_state "$STATE_FILE" "$POLICY_FILE"
+    install -d -m 0755 "$STAGE/opt/citadel-agent"
+    cp -a "binaries/$BUILD_ARCH/." "$STAGE/opt/citadel-agent/"
+    cp -a ../../controls "$STAGE/opt/citadel-agent/"
 
-                echo "Citadel: updated Firefox ($LABEL) policy:"
-                echo "  $POLICY_FILE"
-            else
-                # The administrator has modified or replaced the file,
-                # perhaps with a merged policy. Do not overwrite it.
-                echo "Citadel: preserving modified Firefox ($LABEL) policy:" >&2
-                echo "  $POLICY_FILE" >&2
-                echo "Citadel: reconcile policy changes manually using:" >&2
-                echo "  $FIREFOX_POLICY_SOURCE" >&2
-            fi
+    # Individual executable bits are expected to have been set by build.sh.
+    chmod 0755 "$STAGE/opt" "$STAGE/opt/citadel-agent"
 
-            return 0
-        fi
+    # --- Chromium-family native-messaging manifests ---
 
-        if [ -e "$POLICY_FILE" ]; then
-            echo "Citadel: Firefox ($LABEL) policy path is not a regular" >&2
-            echo "Citadel: file; leaving it unchanged:" >&2
-            echo "  $POLICY_FILE" >&2
-            return 0
-        fi
-
-        # Citadel previously created the policy, but the active file has
-        # since disappeared. Recreate it from the current package
-        # template.
-        install -d -m 0755 "$POLICY_DIR"
-        install -d -m 0755 "$CITADEL_STATE_DIR"
-
+    for DIR in "${CHROMIUM_NATIVE_HOST_DIRS[@]}"; do
+        install -d -m 0755 "$STAGE/$DIR"
         install -m 0644 \
-            "$FIREFOX_POLICY_SOURCE" \
-            "$POLICY_FILE"
+            citadel.browser.agent.json \
+            "$STAGE/$DIR/citadel.browser.agent.json"
+    done
 
-        write_policy_state "$STATE_FILE" "$POLICY_FILE"
+    # --- Firefox native-messaging manifests ---
+    #
+    # Install to both Debian/Ubuntu-family and RPM-family paths so the same
+    # staged tree can be used without build-time distribution detection.
 
-        echo "Citadel: restored Firefox ($LABEL) policy:"
-        echo "  $POLICY_FILE"
+    for DIR in "${FIREFOX_NATIVE_HOST_DIRS[@]}"; do
+        install -d -m 0755 "$STAGE/$DIR"
+        install -m 0644 \
+            citadel.browser.agent-firefox.json \
+            "$STAGE/$DIR/citadel.browser.agent.json"
+    done
 
-        return 0
-    fi
+    # --- Chromium-family enterprise policies ---
+    #
+    # Chromium supports multiple policy fragments. Citadel's uniquely named
+    # files are normal package-owned files and are automatically removed when
+    # the package is uninstalled.
 
-    # No Citadel ownership state exists. An existing path belongs to the
-    # administrator or another product, so it must not be overwritten.
-    if [ -e "$POLICY_FILE" ] || [ -L "$POLICY_FILE" ]; then
-        echo "Citadel: existing Firefox ($LABEL) policy was left unchanged:" >&2
-        echo "  $POLICY_FILE" >&2
-        echo "Citadel: merge Citadel's policy into it manually from:" >&2
-        echo "  $FIREFOX_POLICY_SOURCE" >&2
-        return 0
-    fi
+    for DIR in "${CHROMIUM_POLICY_DIRS[@]}"; do
+        install -d -m 0755 "$STAGE/$DIR"
+        install -m 0644 \
+            citadel-policy.json \
+            "$STAGE/$DIR/citadel-policy.json"
+    done
 
-    # No policy exists. Install Citadel's complete policy and record the
-    # exact contents so uninstall/upgrade can determine whether it
-    # remains unchanged.
-    install -d -m 0755 "$POLICY_DIR"
-    install -d -m 0755 "$CITADEL_STATE_DIR"
+    # --- Firefox enterprise-policy template ---
+    #
+    # Firefox supports only one system-wide policies.json and does not support
+    # policy fragments. Do not package the active file directly because it may
+    # already belong to an administrator or another product.
+    #
+    # Instead, package Citadel's complete policy under a private location.
+    # postinstall.sh will copy it into place only when policies.json does not
+    # already exist.
 
+    install -d -m 0755 "$STAGE/usr/share/citadel-browser-agent"
     install -m 0644 \
-        "$FIREFOX_POLICY_SOURCE" \
-        "$POLICY_FILE"
+        citadel-policy-firefox.json \
+        "$STAGE/usr/share/citadel-browser-agent/firefox-policy.json"
 
-    write_policy_state "$STATE_FILE" "$POLICY_FILE"
+    # --- Debian package ---
+    #
+    # No files are marked as configuration files:
+    #
+    # - Chromium policy fragments are ordinary package-owned files.
+    # - Firefox's active policies.json is generated and managed by the
+    #   lifecycle scripts; it is not present in the package archive.
 
-    echo "Citadel: installed Firefox ($LABEL) policy:"
-    echo "  $POLICY_FILE"
-}
+    fpm -s dir -t deb \
+        -n "$PACKAGE_NAME" \
+        -v "$VERSION" \
+        -a "$DEB_ARCH" \
+        --maintainer "$PACKAGE_MAINTAINER" \
+        --description "Citadel browser agent" \
+        --url "https://www.citadelagent.org" \
+        --after-install postinstall.sh \
+        --after-remove postremove.sh \
+        -C "$STAGE" \
+        -p "citadel-browser-agent-${VERSION}-${DEB_ARCH}.deb" \
+        opt etc usr
 
-install_firefox_policies() {
-    # Debian-patched Firefox/Firefox-ESR builds read this location.
-    # Kept unconditionally: harmless if unused, required if present.
-    install_firefox_policy \
-        "system" \
-        "/etc/firefox/policies" \
-        "/etc/firefox/policies/policies.json" \
-        "$CITADEL_STATE_DIR/firefox-policy-etc.sha256"
+    # --- RPM package ---
 
-    # Upstream Mozilla builds (including Mozilla's own .deb, and most
-    # non-Debian-patched installs) only read distribution/policies.json
-    # next to the actual firefox binary. Resolve that path dynamically
-    # rather than assuming /usr/lib/firefox.
-    if DIST_DIR="$(detect_firefox_distribution_dir)"; then
-        install_firefox_policy \
-            "distribution" \
-            "$DIST_DIR" \
-            "$DIST_DIR/policies.json" \
-            "$CITADEL_STATE_DIR/firefox-policy-dist.sha256"
-    else
-        echo "Citadel: could not locate a manageable Firefox install;" >&2
-        echo "Citadel: skipping distribution/policies.json." >&2
-        echo "Citadel: if Firefox is installed as a snap or flatpak," >&2
-        echo "Citadel: its sandbox prevents this package from managing" >&2
-        echo "Citadel: policy automatically. See:" >&2
-        echo "  $FIREFOX_POLICY_SOURCE" >&2
-        echo "Citadel: for the policy to apply manually." >&2
-    fi
-}
+    fpm -s dir -t rpm \
+        -n "$PACKAGE_NAME" \
+        -v "$VERSION" \
+        -a "$RPM_ARCH" \
+        --maintainer "$PACKAGE_MAINTAINER" \
+        --description "Citadel browser agent" \
+        --url "https://www.citadelagent.org" \
+        --after-install postinstall.sh \
+        --after-remove postremove.sh \
+        -C "$STAGE" \
+        -p "citadel-browser-agent-${VERSION}-${RPM_ARCH}.rpm" \
+        opt etc usr
 
-install_firefox_policies
+    echo "Created:"
+    echo "  citadel-browser-agent-${VERSION}-${DEB_ARCH}.deb"
+    echo "  citadel-browser-agent-${VERSION}-${RPM_ARCH}.rpm"
+done
+
+if [ "$BUILT_ANY" = false ]; then
+    echo "Error: no supported architecture builds were found." >&2
+    exit 1
+fi
+
+echo "Packaging completed."
