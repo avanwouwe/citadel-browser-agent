@@ -22,23 +22,63 @@ write_policy_state() {
 # Returns non-zero (and prints nothing) if Firefox is not found,
 # or if it's clearly a snap/flatpak build that a postinst can't manage.
 detect_firefox_distribution_dir() {
-    FX_BIN="$(command -v firefox 2>/dev/null || true)"
+    # 1. Try known install locations directly. This covers the common
+    #    case where /usr/bin/firefox is a wrapper script (Mozilla's
+    #    official .deb, some third-party builds) rather than a symlink.
+    for CANDIDATE in \
+        /usr/lib/firefox \
+        /usr/lib/firefox-esr \
+        /usr/lib64/firefox \
+        /opt/firefox \
+        /opt/firefox-esr
+    do
+        if [ -x "$CANDIDATE/firefox" ] || [ -x "$CANDIDATE/firefox-bin" ]; then
+            printf '%s/distribution\n' "$CANDIDATE"
+            return 0
+        fi
+    done
+
+    # 2. Fall back to resolving whatever "firefox" is on PATH.
+    FX_BIN="$(command -v firefox 2>/dev/null || command -v firefox-esr 2>/dev/null || true)"
     [ -n "$FX_BIN" ] || return 1
 
-    FX_REAL="$(readlink -f "$FX_BIN" 2>/dev/null || echo "$FX_BIN")"
-
-    case "$FX_REAL" in
+    case "$FX_BIN" in
         /snap/*|*/snapd/*)
             return 1
             ;;
     esac
 
-    if [ ! -e "$FX_REAL" ]; then
-        return 1
+    if [ -L "$FX_BIN" ]; then
+        # A real symlink: readlink -f is reliable here.
+        FX_REAL="$(readlink -f "$FX_BIN")"
+        FX_DIR="$(dirname "$FX_REAL")"
+        printf '%s/distribution\n' "$FX_DIR"
+        return 0
     fi
 
-    FX_DIR="$(dirname "$FX_REAL")"
-    printf '%s/distribution\n' "$FX_DIR"
+    if [ -f "$FX_BIN" ] && head -c 2 "$FX_BIN" 2>/dev/null | grep -q '^#!'; then
+        # A wrapper script: look for the real binary it execs.
+        # Matches lines like: exec "/usr/lib/firefox/firefox" "$@"
+        FX_TARGET="$(grep -Eo '(exec[[:space:]]+"?)(/[^"[:space:]]*/firefox(-bin)?)' "$FX_BIN" \
+            | sed -E 's/^exec[[:space:]]+"?//' \
+            | head -n1)"
+
+        if [ -n "$FX_TARGET" ] && [ -x "$FX_TARGET" ]; then
+            FX_DIR="$(dirname "$FX_TARGET")"
+            printf '%s/distribution\n' "$FX_DIR"
+            return 0
+        fi
+    fi
+
+    # 3. Last resort: if it's a real ELF binary directly on PATH somewhere
+    #    unusual, just use its directory as-is.
+    if [ -x "$FX_BIN" ]; then
+        FX_DIR="$(dirname "$FX_BIN")"
+        printf '%s/distribution\n' "$FX_DIR"
+        return 0
+    fi
+
+    return 1
 }
 
 # Installs (and tracks) a Citadel-managed policies.json at one target
