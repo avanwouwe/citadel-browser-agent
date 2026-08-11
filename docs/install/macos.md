@@ -30,7 +30,7 @@ log stream --process citadel-browser-agent --predicate 'eventMessage BEGINSWITH 
 ```
 
 ## configuration
-Citadel has sensible defaults, but you can change the configuration of Citadel. You can for example change the logging and masking levels or declare your own blacklist, the domains you consider part of your IS, or local IT support e-mail address. Just place a file called `citadel-browser-agent.json` with the correct format in the `/Library/Scripts/Citadel/` directory. See the [configuration manual](/config/) for more information.
+Citadel has sensible defaults, but you can change the configuration of Citadel. You can for example change the logging and masking levels or declare your own blacklist, the domains you consider part of your IS, or local IT support e-mail address. Just place a file called `citadel-config.json` with the correct format in the `/Library/Scripts/Citadel/` directory. See the [configuration manual](/config/) for more information.
 
 ## macOS configuration profile
 
