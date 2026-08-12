@@ -71,7 +71,7 @@ class DLP {
     static async checkLeaking(request, senderUrl, tabId) {
         if (! Config.isLoaded()) return false
         if (! config.dlp.leaking.warnProtected && config.isProtected(senderUrl.hostname)) return false
-        if (matchDomain(senderUrl.hostname, config.dlp.leaking.domains) === false) return false
+        if (matchDomain(senderUrl.hostname, config.dlp.leaking.exclude)) return false
 
         const eventType = request.subtype.replaceAll('-', ' ')
         const findings = await Promise.all(
@@ -425,9 +425,11 @@ class ClickFix {
 
         if (eventLevel === Log.NEVER) return
 
+        const urlObj = url?.toURL()
+        if (matchDomain(urlObj?.hostname, config.attack.clickfix.exclude)) return false
+
         return ClickFix.#debouncer.debounce(content, null, async () => {
-            const origin = url?.toURL()?.origin
-            if (origin && await AlertSuppression.isSuppressed(origin, ClickFix.TYPE)) return false
+            if (urlObj?.origin && await AlertSuppression.isSuppressed(urlObj.origin, ClickFix.TYPE)) return false
 
             const score = ClickFix.score(content)
             if (!score) return false
@@ -437,7 +439,7 @@ class ClickFix {
             const onCancel = { type: "suppress-alert", alertType: ClickFix.TYPE, period: config.attack.suppressPeriod, label: t('attack.trust') }
             await Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
 
-            logger.log(nowTimestamp(),"attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `ClickFix attack level ${score.score} on ${url?.hostname}`)
+            logger.log(nowTimestamp(),"attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `ClickFix attack level ${score.score} on ${urlObj?.hostname}`)
 
             return true
         })

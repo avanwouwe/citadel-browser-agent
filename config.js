@@ -505,6 +505,7 @@ class Config {
         attack: {
             suppressPeriod: 60 * 24 * 7,
             clickfix: {
+                exclude: [],
                 level: Log.ERROR,
                 threshold: 5
             },
@@ -513,7 +514,7 @@ class Config {
             leaking: {
                 level: Log.WARN,
                 warnProtected: true,
-                domains: [],
+                exclude: [],
                 rules: 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
                 freq: 24 * 60,
             },
@@ -603,7 +604,8 @@ class Config {
         "account.mfa.exceptions",
         "shadowit.warn",
         "shadowit.block",
-        "dlp.leaking.domains",
+        "dlp.leaking.exclude",
+        "attack.clickfix.exclude",
     ]
 
     static #init(config) {

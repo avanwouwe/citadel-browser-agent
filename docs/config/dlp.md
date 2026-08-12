@@ -27,11 +27,11 @@ Users can transfer data to other sites by pasting the clipboard, or dragging / s
     }
 ```
 
-In order to prevent [alert fatigue](https://en.wikipedia.org/wiki/Alarm_fatigue), it is important to exclude applications where users often legitimately upload secrets. Using the `dlp.leaking.domains` key you can include or exclude specific domains:
+In order to prevent [alert fatigue](https://en.wikipedia.org/wiki/Alarm_fatigue), it is important to exclude applications where users often legitimately upload secrets. Using the `dlp.leaking.exclude` key you can exclude specific domains:
 ```
     "dlp": {
         "leaking": {
-            "domains": ["-*.application.com"],
+            "exclude": ["*.application.com"],
         },
     }
 ```

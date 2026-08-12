@@ -25,3 +25,26 @@ This type of attack involves convincing users to paste a command into a terminal
         },
     }
 ```
+
+## Alert Suppression
+In order to prevent [alert fatigue](https://en.wikipedia.org/wiki/Alarm_fatigue), it is important to exclude sites that trigger frequent false positives. With the following keys you can exclude specific domains:
+* `attack.clickfix.exclude`
+
+```
+    "attack": {
+        "clickfix" : {
+            "exclude": ["*.github.com"]
+        }        
+    }
+```
+
+In some cases, such as ClickFix, users may want to suppress warnings. With the following keys you can define how long users can suppress warnings:
+* `attack.clickfix.suppressPeriod`
+
+```
+    "attack": {
+        "clickfix" : {
+            "suppressPeriod": 60 * 24 * 7
+        }        
+    }
+```
