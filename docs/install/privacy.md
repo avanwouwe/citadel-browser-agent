@@ -24,6 +24,6 @@ Ensure that, amongst others, the following points have been covered during your 
 
 You can use the **Privacy Notice** built into Citadel, as part of your obligations to inform your users. See [the manual](/config/privacy) for more information.
 
-> > **Legal Disclaimer**
+> **Legal Disclaimer**
 > This installation guide does not replace the controller’s obligation to conduct and document its own assessment based on the specific characteristics of its deployment.
-> {: .note }
+{: .note }

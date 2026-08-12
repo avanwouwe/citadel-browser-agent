@@ -55,6 +55,6 @@ The dashboard allows you to configure privacy-specific elements:
 * `privacy.lastModified` : date when notice was last modified (defaults to `privacy.effectiveDate`)
 * `privacy.authority` : free text (may include basic HTML such as lists and links) identifying the supervisory authority, or authorities, competent to receive complaints. Since some organisations operate across multiple jurisdictions, this is left free-form rather than a single fixed field. If left unset, a generic reference to "your local data protection supervisory authority" is shown.
 
-> > **Legal Disclaimer**
+> **Legal Disclaimer**
 > This installation guide does not replace the controller’s obligation to conduct and document its own assessment based on the specific characteristics of its deployment.
-> {: .note }
+{: .note }

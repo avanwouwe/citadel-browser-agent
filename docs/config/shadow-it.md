@@ -13,7 +13,7 @@ Citadel detects when the browser navigates to a known shadow IT application, and
 * **warn** : the user is shown a dismissable modal that explains the risk. Acknowledging the warning is logged as a `WARN` event.
 * **block** : the page is blocked, the user is told why, and can request an exception.
 
-If exceptions are allowed, the user can request one by giving a reason, after which they can access the application. The exception is logged as a time-critical `ERROR` event.
+If the site is blocked and exceptions are allowed, the user can request one by giving a reason, after which they can access the application. The exception is logged as a time-critical `ERROR` event.
 
 Applications on the `shadowit.warn` list are warned, and applications on the `shadowit.block` list are blocked.
 

@@ -30,8 +30,9 @@ On macOS the plugin is force-installed via MDM-deployed configuration profiles. 
 
 The browser-policy payloads for all supported browsers are bundled into the same [citadel-agent.mobileconfig](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/mac/citadel-agent.mobileconfig), see the [macOS installation page](macos.md#mdm-configuration-profile) for upload instructions per MDM vendor.
 
-> [!NOTE]  
+> **Note**
 > If you have already force-installed another plugin via the Google Workspace admin, using profiles will override the Workspace list of force-installed extensions. If you add Citadel via the [Google Workspace admin](https://admin.google.com/ac/chrome/apps/) instead, you can also force the extension on in private sessions. In that case, delete the `com.google.Chrome` payload from the mobileconfig before uploading.
+{: .note }
 
 ## Linux
 On Linux the plugin is force-installed via managed policy files dropped by the [Citadel package](linux.md) for Chrome, Chromium, Edge, Brave and Firefox. Opera does not support automated installation, so it has to be installed manually from the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/). Arc and Comet are not available on Linux.
