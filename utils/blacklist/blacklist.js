@@ -194,9 +194,9 @@ class URLBlacklist {
 			query = query.toURL()
 		}
 
-		if (! query.protocol in URLBlacklist.#SUPPORTED_URL_SCHEMES) {
-			return null
-		}
+		if (! query.href || ! query.hostname) return null
+
+		if (! query.protocol in URLBlacklist.#SUPPORTED_URL_SCHEMES) return null
 
 		if (this.#urlSet.hasOwnProperty(query.href)) return query.href
 		if (this.#urlSet.hasOwnProperty(query.hostname)) return query.hostname
