@@ -53,6 +53,7 @@ The dashboard allows you to configure privacy-specific elements:
 * `privacy.dpo` : address of the DPO (defaults to `organization.contact`)
 * `privacy.effectiveDate` : date when notice was first published (defaults to `privacy.lastModified`)
 * `privacy.lastModified` : date when notice was last modified (defaults to `privacy.effectiveDate`)
+* `privacy.notice` : location of your Privacy Notice, if it exists.
 * `privacy.authority` : free text (may include basic HTML such as lists and links) identifying the supervisory authority, or authorities, competent to receive complaints. Since some organisations operate across multiple jurisdictions, this is left free-form rather than a single fixed field. If left unset, a generic reference to "your local data protection supervisory authority" is shown.
 
 > **Legal Disclaimer**

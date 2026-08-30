@@ -580,7 +580,8 @@
       "meta": "Effective: {{effectiveDate}} · Last modified: {{lastModified}}",
       "controller": {
         "title": "Who is responsible for my data",
-        "body": "The organisation responsible for the data described in this notice is <b>{{org}}</b>. {{org}} decided to deploy Citadel and configured how it operates on this device."
+        "body": "The organisation responsible for the data described in this notice is <b>{{org}}</b>. {{org}} decided to deploy Citadel and configured how it operates on this device.",
+        "notice": "For more information, see the <a href=\"{{notice}}\">Privacy Notice maintained by {{org}}</a>."
       },
       "roles": {
         "title": "Citadel's role",

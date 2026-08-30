@@ -340,7 +340,7 @@ function buildPrivacyNotice() {
     return [
         header,
         dates,
-        section('privacy.notice.controller.title', 'privacy.notice.controller.body', { org }),
+        controllerSection(org),
         section('privacy.notice.roles.title', 'privacy.notice.roles.body', { org }),
         section('privacy.notice.changes.title', 'privacy.notice.changes.body', { org }),
         purposesSection(org),
@@ -357,6 +357,13 @@ function buildPrivacyNotice() {
 
 function section(titleKey, bodyKey, params) {
     return `<section><h3>${t(titleKey)}</h3><p>${t(bodyKey, params)}</p></section>`
+}
+
+function controllerSection(org) {
+    const notice = config.privacy.notice
+    return `<section><h3>${t('privacy.notice.controller.title')}</h3>
+            <p>${t('privacy.notice.controller.body', { org })} ${notice ? t('privacy.notice.controller.notice', { org, notice }) : ''}</p>
+            </section>`
 }
 
 function purposesSection(org) {

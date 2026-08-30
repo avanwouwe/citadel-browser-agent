@@ -580,7 +580,8 @@
       "meta": "Entrée en vigueur : {{effectiveDate}} · Dernière modification : {{lastModified}}",
       "controller": {
         "title": "Qui est responsable de mes données",
-        "body": "L'organisation responsable des données décrites dans cet avis est <b>{{org}}</b>. {{org}} a décidé de déployer Citadel et a configuré son fonctionnement sur cet appareil."
+        "body": "L'organisation responsable des données décrites dans cet avis est <b>{{org}}</b>. {{org}} a décidé de déployer Citadel et a configuré son fonctionnement sur cet appareil.",
+        "moreInfo": "Pour plus d'information, consultez l'<a href=\"{{notice}}\">avis de confidentialité tenu à jour par {{org}}</a>."
       },
       "roles": {
         "title": "Rôle de Citadel",

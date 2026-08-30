@@ -575,6 +575,7 @@ class Config {
             lastModified: undefined,
             controller: undefined,
             dpo: undefined,
+            notice: undefined,
             authority: undefined
         }
     }
