@@ -88,7 +88,11 @@ class Log {
             }
 
             if (levelValue >= config.logging.shipLevel) {
-                events.push(logEntry)
+                // some events have a timestamp that is not the moment of injection (e.g. reporting)
+                // to ensure that the dashboard shows chronological timestamps, use "current time' instead
+                const clonedEvent = structuredClone(logEntry)
+                clonedEvent.timestamp = nowTimestamp()
+                events.push(clonedEvent)
             }
         }
 
