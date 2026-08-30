@@ -423,7 +423,7 @@ function analyzeForm(formElements, eventElement) {
         username = findUsernameInAncestors(eventElement)
     }
 
-    if (PasswordCheck.isSecret(username)) {
+    if (! PasswordCheck.getDomainFromUsername(username) && PasswordCheck.isSecret(username)) {
         username = PasswordCheck.maskSecret(username)
     }
 
