@@ -78,12 +78,13 @@
     },
     "SystemUpdated": {
       "query":
-      "SELECT value AS error \
-        FROM plist \
-        WHERE path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' \
-          AND key = 'RecommendedUpdates' \
-          AND subkey = 'Display Name' \
-          AND value LIKE 'macOS %';",
+      "SELECT p.value AS error \
+              FROM plist p \
+              JOIN os_version o \
+              WHERE p.path = '/Library/Preferences/com.apple.SoftwareUpdate.plist' \
+                AND p.key = 'RecommendedUpdates' \
+                AND p.subkey LIKE '%Display Version' \
+                AND p.value LIKE o.major || '.%';",
       "text": {
         "en": {
           "label": "System is up to date",
@@ -378,7 +379,8 @@
             OR filename LIKE 'client_secret%.json' \
           ) \
           AND ctime <= (strftime('%s', 'now') - (7 * 24 * 60 * 60)) \
-          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
+          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%') \
+          AND filename NOT LIKE '.%';",
       "text": {
         "en": {
           "label": "Sensitive data is protected",
@@ -397,7 +399,8 @@
         WHERE path LIKE '/Users/{{username}}/Downloads/%%' \
           AND REGEX_MATCH(LOWER(filename), 'export.*\\.(csv|tsv|json|txt|xlsx?)(\\..*)?$', 0) IS NOT NULL \
           AND ctime <= (strftime('%s', 'now') - (30 * 24 * 60 * 60)) \
-          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
+          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%') \
+          AND filename NOT LIKE '.%';",
       "text": {
         "en": {
           "label": "Exported files are purged",
@@ -415,7 +418,8 @@
         FROM file \
         WHERE directory = '/Users/{{username}}/Downloads' \
           AND ctime <= (strftime('%s', 'now') - (90 * 24 * 60 * 60)) \
-          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%');",
+          AND (bsd_flags IS NULL OR bsd_flags NOT LIKE '%hidden%') \
+          AND filename NOT LIKE '.%';",
       "text": {
         "en": {
           "label": "Unused files are purged",
