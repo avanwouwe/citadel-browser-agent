@@ -21,7 +21,7 @@ if (chrome.identity?.getProfileUserInfo) {
 
 		let { username, domain } = PasswordCheck.parseUsername(userInfo.email)
 
-		if (config.organization.domains.length > 0 && ! matchDomain(domain, config.organization.domains)) {
+		if (Object.keys(config.organization.domains).length > 0 && ! matchDomain(domain, config.organization.domains)) {
 			username = PasswordCheck.maskSecret(username, '*', 3, 3)
 		}
 
@@ -100,7 +100,7 @@ NativeMessaging.ready().then(() => {
 			"name": "BrowserUpdated",
 			"passing": browserUptimePassing,
 			"timestamp": new Date(),
-			"errors": browserUptimePassing ? null : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
+			"errors": browserUptimePassing ? undefined : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
 		}
 
 		DeviceTrust.addAudit(audit)
@@ -138,7 +138,7 @@ chrome.runtime.onInstalled.addListener(async ({ previousVersion, reason}) => {
 	} else if (reason === "update" && previousVersion !== currentVersion) {
 		debug(`updating from version ${previousVersion} to ${currentVersion}`)
 
-		if (previousVersion && semverBefore(previousVersion, "1.4.6" )) {
+		if (previousVersion && semverBefore(previousVersion, "1.5.1" )) {
 			debug("clearing storage to prevent compatibility issues")
 			await LocalStorage.clear()
 		}
@@ -459,11 +459,10 @@ function markIsAuthenticated(appName, reason) {
 	}
 }
 
-chrome.webRequest.onAuthRequired.addListener(
-	function() {
+chrome.webRequest.onAuthRequired.addListener(details => {
+		const appName = getSitename(details.initiator)
 		markIsAuthenticated(appName, "HTTP auth req")
-	},
-	{ urls: ["<all_urls>"] }
+	}, { urls: ["<all_urls>"] }
 )
 
 chrome.webRequest.onCompleted.addListener(
@@ -594,7 +593,7 @@ function reportDaily() {
 		}
 
 		for (const [date, app] of Object.entries(usagePerDayPerApp)) {
-			const reportDate = `${date}T23:59:59.999Z`
+			const reportDate = `${date}T00:00:00.000Z`
 			const reportedApps = Object.entries(app)
 				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
