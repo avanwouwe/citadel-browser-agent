@@ -10,6 +10,9 @@ The extension is available on the web stores of Chrome, and Firefox. This means 
 
 Unless users go to the extension settings (`chrome://extensions/?id=anheildjmkfdkdpgbndmpjnmkfliefga`) and opt in, extensions are not enabled during Incognito browsing. It is possible to **require** the opt-in using the [MandatoryExtensionsForIncognitoNavigation key](https://chromeenterprise.google/policies/?policy=MandatoryExtensionsForIncognitoNavigation). This key will force the user to manually enable the extension for Incognito browsing, as part of the installation of the extension. The Firefox equivalent of this is the `private_browsing` [policy key](https://mozilla.github.io/policy-templates/).
 
+Firefox does not allow installation of Chrome extensions, so the [Firefox-specific version](https://addons.mozilla.org/fr/firefox/addon/citadel-browser-agent/) must be used.
+Similarly, Edge allows manual installation of Chrome extensions, but requires the [Edge-specific version](https://microsoftedge.microsoft.com/addons/detail/citadel-browser-agent/eanogkilbhfofmcplcoiflibdoomablj) for forced installation.
+
 ## Windows
 For Chrome, Firefox, Edge, Brave, Arc, and Comet (Perplexity) the [Citadel installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) force-installs the plugin for you using registry entries (see below). Opera does not support forced installation of plugins and so the plugin has to be installed manually on the endpoint, using the [Chrome Web Store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga/).
 

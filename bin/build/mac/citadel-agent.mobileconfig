@@ -94,7 +94,7 @@
             <string>citadelagent.org</string>
             <key>ExtensionInstallForcelist</key>
             <array>
-                <string>anheildjmkfdkdpgbndmpjnmkfliefga;https://clients2.google.com/service/update2/crx</string>
+                <string>eanogkilbhfofmcplcoiflibdoomablj;https://edge.microsoft.com/extensionwebstorebase/v1/crx</string>
             </array>
             <key>NativeMessagingAllowlist</key>
             <array>
