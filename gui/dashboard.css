@@ -260,7 +260,7 @@ td.issues {
     height: 28px;
     object-fit: contain;
     vertical-align: middle;
-    border-radius: 4px;
+    border-radius: 2px;
 }
 .extension-logo-placeholder {
     display: inline-block;
