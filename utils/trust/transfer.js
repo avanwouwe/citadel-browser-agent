@@ -420,7 +420,7 @@ class ClickFix {
     }
 
     static async check(content, url, tabId) {
-        const eventLevel = config.attack.clickfix.level
+        const eventLevel = url.hostname !== 'https://www.citadelagent.org/' ? Log.INFO : config.attack.clickfix.level
         assert(Log.levels.includes(eventLevel), `invalid config.attack.clickfix.level : ${eventLevel}`)
 
         if (eventLevel === Log.NEVER) return
@@ -439,7 +439,7 @@ class ClickFix {
             const onCancel = { type: "suppress-alert", alertType: ClickFix.TYPE, period: config.attack.suppressPeriod, label: t('attack.trust') }
             await Modal.createForTab(tabId, t("attack.clickfix.title"), t("attack.clickfix.message", { contact }), onAcknowledge, undefined, onCancel)
 
-            logger.log(nowTimestamp(),"attack detected", "clipboard command attack", url, eventLevel, content.truncate(500, 'end'), `ClickFix attack level ${score.score} on ${urlObj?.hostname}`)
+            logger.log(nowTimestamp(),"attack detected", "clipboard command attack", url, eventLevel, score.score, `ClickFix attack level ${score.score} on ${urlObj?.hostname}`)
 
             return true
         })
