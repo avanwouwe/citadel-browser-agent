@@ -97,10 +97,10 @@ NativeMessaging.ready().then(() => {
 		const browserUptime = (Date.now() - Browser.startTime) / ONE_DAY
 		const browserUptimePassing = browserUptime <= config.device.controls.browser.maxUptime
 		audit.reports.BrowserUpdated = {
-			"name": "BrowserUpdated",
-			"passing": browserUptimePassing,
-			"timestamp": new Date(),
-			"errors": browserUptimePassing ? undefined : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
+			name: "BrowserUpdated",
+			passing: browserUptimePassing,
+			timestamp: new Date(),
+			errors: browserUptimePassing ? undefined : [`browser has not been restarted in ${Math.floor(browserUptime)} days`]
 		}
 
 		DeviceTrust.addAudit(audit)
