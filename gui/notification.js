@@ -48,7 +48,13 @@ class Notification {
         const currLevel = State.indexOf(alert.level)
         const newLevel = State.indexOf(level)
         if (newLevel > currLevel) {
-            Notification.#setAcknowledge(alert, false)
+            if (level === State.FAILING) {
+                // to prevent alert fatigue, don't notify users straight away of less critical issues
+                Notification.#setAcknowledge(alert, true)
+                alert.acknowledgeExpiry = Date.now() + 7 * ONE_DAY
+            } else {
+                Notification.#setAcknowledge(alert, false)
+            }
         } else if (newLevel < currLevel && Notification.showing?.type === type) {
             Notification.#setAcknowledge(alert, true)
         }
