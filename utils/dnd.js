@@ -50,7 +50,7 @@ class Screensharing {
 
         if (Context.isBackground()) {
             chrome.tabs.onRemoved.addListener(onTabGone)
-            chrome.webNavigation.onCommitted.addListener(details => onTabGone(details.tabId))
+            chrome.webNavigation.onCommitted.addListener(details => { if (details.frameId === 0) onTabGone(details.tabId) })
         }
     }
 
@@ -70,21 +70,18 @@ function patchNavigatorScreenShare() {
 
     const md = navigator.mediaDevices
     if (!md || !md.getDisplayMedia || md.__citadelSSHooked) return
-    md.__citadelSSHooked = true
 
     const orig = md.getDisplayMedia.bind(md)
 
     md.getDisplayMedia = async function (...args) {
         const stream = await orig(...args)   // rejects on user-cancel -> no report
 
-        report("start")
-
         trySafe(() => {
             const tracks = stream.getVideoTracks()
             let live = tracks.length || 0
-            if (live === 0) { report("stop"); return stream; }
+            if (live === 0) return
 
-            const done = () => { if (--live <= 0) report("stop"); }
+            const done = () => { if (--live <= 0) report("stop") }
 
             for (const t of tracks) {
                 // user clicks Chrome "Stop sharing"
@@ -93,8 +90,12 @@ function patchNavigatorScreenShare() {
                 const realStop = t.stop.bind(t)
                 t.stop = function () { realStop(); done(); }
             }
+
+            report("start")
         })
 
         return stream
     }
+
+    md.__citadelSSHooked = true
 }
