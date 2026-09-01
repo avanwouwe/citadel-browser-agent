@@ -35,7 +35,7 @@
       "control": "Contrôle",
       "state": "État",
       "next-state": "Suivant",
-      "in-days": "Jours restants"
+      "in-days": "Jours restants →"
     },
     "notification": {
       "title": "Problèmes de sécurité",
