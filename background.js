@@ -152,12 +152,12 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 		issueRegistrationDebouncer.clearAll()
 
 		reportDaily()
+
+		await ExtensionAnalysis.Headless.ofAllInstalled()
 	}
 
 	if (alarm.name === Alarm.BIWEEKLY) {
 		reportBiweekly()
-
-		await ExtensionAnalysis.Headless.ofAllInstalled()
 	}
 
 	if (alarm.name === Alarm.MONTHLY) {

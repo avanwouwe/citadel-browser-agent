@@ -127,11 +127,11 @@ class ExtensionAnalysis {
                     const store = ExtensionStore.of(extensionInfo.updateUrl) ??
                         (Browser.isFirefox() ? ExtensionStore.Firefox : undefined)
 
-                    if (!store) return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error-unknown-store")
+                    if (!store) return ExtensionAnalysis.Headless.#error(extensionInfo, "error-unknown-store")
 
                     const storePage = await ExtensionStore.pageOf(extensionInfo.id, store)
 
-                    if (!storePage) return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error-unknown-storepage")
+                    if (!storePage) return ExtensionAnalysis.Headless.#error(extensionInfo, "error-unknown-storepage")
 
                     if (Browser.isFirefox()) {
                         const analysis = ExtensionAnalysis.promiseOf(storePage, config)
@@ -142,7 +142,7 @@ class ExtensionAnalysis {
                     }
                 } catch (error) {
                     console.error('Extension analysis failed:', error)
-                    return ExtensionAnalysis.Headless.#error(extensionInfo.id, "error")
+                    return ExtensionAnalysis.Headless.#error(extensionInfo, "error")
                 } finally {
                     this.isReady = false
                     if (chrome.offscreen) {
@@ -156,9 +156,9 @@ class ExtensionAnalysis {
             return this.queue
         }
 
-        static #error(extensionId,error) {
+        static #error(extensionInfo, error) {
             return {
-                storeInfo: { id: extensionId },
+                storeInfo: { id: extensionInfo.id, name: extensionInfo.name },
                 evaluation: {
                     allowed: false,
                     rejection: {
@@ -168,10 +168,25 @@ class ExtensionAnalysis {
             }
         }
 
+        static #isDue(prev) {
+            if (!prev) return true
+            const errored = prev.pending
+                || prev.state === State.UNKNOWN
+                || prev.state === State.FAILING
+            const interval = errored ? ONE_DAY : 14 * ONE_DAY
+            return Date.now() - (prev.lastAnalysed ?? 0) >= interval
+        }
+
         static async ofAllInstalled(isfirstAnalysis = false) {
             const installed = await chrome.management.getAll()
             for (const ext of installed) {
                 const scanType = isfirstAnalysis ? ExtensionAnalysis.ScanType.INIT : ExtensionAnalysis.ScanType.PERIODIC
+
+                if (scanType === ExtensionAnalysis.ScanType.PERIODIC &&
+                    !ExtensionAnalysis.Headless.#isDue(await ExtensionTrust.analysisOf(ext.id))) {
+                    continue
+                }
+
                 await ExtensionAnalysis.Headless.ofExtension(ext, scanType)
             }
 
@@ -246,7 +261,7 @@ class ExtensionAnalysis {
             if (error?.length > 0) {
                 if (scanType === ExtensionAnalysis.ScanType.INIT || scanType === ExtensionAnalysis.ScanType.INSTALL) {
                     await ExtensionTrust.allow({
-                        storeInfo: { id: extensionInfo.id },
+                        storeInfo: { id: extensionInfo.id, name: extensionInfo.name },
                         pending: true,
                     })
                 }

@@ -101,7 +101,8 @@ class ExtensionTrust {
         if (!analysis) return
 
         analysis.state = state
-
+        analysis.lastAnalysed = Date.now()
+        
         const isEnabled = await Extension.isEnabled(extensionId)
         const mustDisable = isEnabled && state === State.BLOCKING
 
