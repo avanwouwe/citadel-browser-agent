@@ -427,9 +427,11 @@ function analyzeForm(formElements, eventElement) {
         username = PasswordCheck.maskSecret(username)
     }
 
-    debug("form username is ", username)
-    debug("form password is ", password ? "<masked>" : undefined)
-    debug("form TOTP is ", totp)
+    if (username || password || totp) {
+        debug("form username is ", username)
+        debug("form password is ", password ? "<masked>" : undefined)
+        debug("form TOTP is ", totp)
+    }
 
     if (username !== undefined) sessionState.setUsername(username)
     if (password !== undefined) sessionState.setPassword()
