@@ -514,9 +514,10 @@ class Config {
             leaking: {
                 level: Log.WARN,
                 warnProtected: true,
+                intentionalDensity: 0.8,
                 exclude: [],
                 rules: 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
-                freq: 24 * 60,
+                freq: 24,
             },
         },
         extensions: {

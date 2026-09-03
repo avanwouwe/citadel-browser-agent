@@ -133,7 +133,7 @@ class DLP {
         Modal.createForTab(tabId, t("dlp.leaking.title"), t("dlp.leaking.message", { contact, examples, sanitizeMode }), onAcknowledge, undefined, onCancel)
 
         const exampleSecretType = findings[0].id
-        logger.log(nowTimestamp(), "dlp", eventType, url, eventLevel, exampleSecretType, `found ${exampleSecretType} during '${eventType}' on ${url?.hostname}`)
+        //logger.log(nowTimestamp(), "dlp", eventType, url, eventLevel, exampleSecretType, `found ${exampleSecretType} during '${eventType}' on ${url?.hostname}`)
     }
 }
 
@@ -526,7 +526,7 @@ class Gitleaks {
             errorTag: "gitleaks download error",
             label: "gitleaks rules",
             url: rules,
-            freqMin: freq,
+            freqMin: freq * 60,
             getStatus: () => Gitleaks.isLoaded ? "loaded" : "failed",
             load: () => Gitleaks.load(rules),
         })
@@ -580,12 +580,45 @@ class Gitleaks {
         return { compiled, dropped }
     }
 
-    // gitleaks pipeline. Returns [{ id, masked, len }, ...] — redacted, never the raw secret.
+    /**
+     * Scans text for secrets using the gitleaks ruleset and returns redacted findings.
+     *
+     * Findings are always redacted: the raw secret is never included, only a stable
+     * fingerprint and its length. The scan bails out (returning no findings) in cases
+     * where the secrets were sent intentionally rather than leaked by accident:
+     *
+     *   1. The number of findings reaches `maxFindings` — the input is almost
+     *      certainly a deliberate secrets file.
+     *   2. Secrets make up too large a share of the text (see
+     *      `config.dlp.leaking.intentionalDensity`) — the text is basically nothing
+     *      but secrets.
+     *
+     * @param {string} text - The text to scan for secrets.
+     * @param {number} [maxFindings=1000] - Upper bound on findings; reaching it is
+     *   treated as an intentional secrets file and yields an empty result.
+     * @returns {Array<{ id: string, masked: string, len: number }>} Redacted findings,
+     *   or an empty array when the content is deemed intentional.
+     */
     static scan(text, maxFindings = 1000) {
+        if (! text?.length) return []
+
         const findings = []
+        let secretsLen = 0
+
         for (const { rule, secret } of Gitleaks.#matches(text, { all: false })) {
-            findings.push({ id: rule.id, ...Gitleaks.#fingerprint(secret) })
-            if (findings.length >= maxFindings) break
+            const fingerprint = Gitleaks.#fingerprint(secret)
+            findings.push({ id: rule.id, ...fingerprint })
+            secretsLen += fingerprint.len
+
+            // Hitting the cap means the input is almost certainly a
+            // deliberate secrets file, not an accidental leak.
+            if (findings.length >= maxFindings) return []
+        }
+
+        // If the text is mostly secrets, treat it as intentional.
+        const secretDensity = secretsLen / text.length
+        if (text.length > 0 && secretDensity > config.dlp.leaking.intentionalDensity) {
+            return []
         }
 
         return findings

@@ -13,16 +13,20 @@ Users can transfer data to other sites by pasting the clipboard, or dragging / s
 
 * `dlp.leaking.level` by default the events are logged as `WARN`; level `NEVER` disables the control
 * `dlp.leaking.warnProtected` accidental leaking of secrets is also checked for protected domains, if set to `true`
+* `dlp.leaking.intentionalDensity` do not trigger if secrets were intentionally sent, and represent more than this percentage of the text (0.0 means 'never trigger' and 1.0 means 'never withhold')
+* `dlp.leaking.exclude` array with domain patterns where secrets are often intentionally sent and that must be excluded from checking
 * `dlp.leaking.rules` location of file containing secrets-matching rules, set to [Gitleaks repository](https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml) by default
 * `dlp.leaking.freq` frequency (in hours) that rules are refreshed
 
 ```
-    "dlp": {
-        "leaking": {
-            "level": "WARN",
-            "warnProtected": true,
-            "rules": 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
-            "freq": 24,
+    dlp: {
+        leaking: {
+            level": "WARN",
+            warnProtected": true,
+            intentionalDensity: 0.8,
+            exclude: [],
+            rules: 'https://raw.githubusercontent.com/gitleaks/gitleaks/master/config/gitleaks.toml',
+            freq: 24 * 60,
         },
     }
 ```
