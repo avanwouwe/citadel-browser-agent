@@ -133,7 +133,7 @@ class DLP {
         Modal.createForTab(tabId, t("dlp.leaking.title"), t("dlp.leaking.message", { contact, examples, sanitizeMode }), onAcknowledge, undefined, onCancel)
 
         const exampleSecretType = findings[0].id
-        //logger.log(nowTimestamp(), "dlp", eventType, url, eventLevel, exampleSecretType, `found ${exampleSecretType} during '${eventType}' on ${url?.hostname}`)
+        logger.log(nowTimestamp(), "dlp", eventType, url, eventLevel, exampleSecretType, `found ${exampleSecretType} during '${eventType}' on ${url?.hostname}`)
     }
 }
 
