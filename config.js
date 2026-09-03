@@ -676,7 +676,7 @@ class Config {
                         }
                     },
                     device: {
-                        action: {
+                        actions: {
                             default: Action.NOTIFY,
                             WARN: [],
                             BLOCK: []
