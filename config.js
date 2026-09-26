@@ -4,6 +4,7 @@ class Config {
         system: {                               // N.B. NOT INTENDED FOR USER MODIFICATION
             maxReasonLength: 150,               // max number of characters when users give a reason
             downloadReportingFreq: 20,          // perform error reporting every N downloads
+            confirmLoginDelay: 10,              // time to wait after click to see if login worked (in seconds)
             excludeInject: [                    // cannot inject in these, no point in trying
                 "chromewebstore.google.com",
                 "services.google.com",
@@ -146,7 +147,6 @@ class Config {
             domains: [],
         },
         account: {
-            confirmLoginDelay: 10,
             trigger: {
                 warn: 2,
                 block: 7

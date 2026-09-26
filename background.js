@@ -76,7 +76,7 @@ NativeMessaging.ready().then(() => {
 
 		tabState = new TabState(true)
 
-		issueRegistrationDebouncer = new Debouncer(config.account.confirmLoginDelay * ONE_SECOND)
+		issueRegistrationDebouncer = new Debouncer(config.system.confirmLoginDelay * ONE_SECOND)
 		const version = chrome.runtime.getManifest().version
 		const configHash = config?.hashDJB2()
 
@@ -896,7 +896,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 		registerAccountUsage(siteUrl, username)
 
 		// log any account issues but only after we have confirmed that the login worked, to prevent raising false notifications
-		confirmLogin(tabId, siteUrl, config.account.confirmLoginDelay).then(confirmed => {
+		confirmLogin(tabId, siteUrl, config.system.confirmLoginDelay).then(confirmed => {
 			issueRegistrationDebouncer.debounce(tabId, undefined, async () => {
 				if (!confirmed && MFACheck.findAuthPattern(siteUrl.pathname)) {
 					debug("tab was closed or location did not change, login assumed failed")
