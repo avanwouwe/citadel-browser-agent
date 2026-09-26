@@ -919,7 +919,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
 				const isReconnect = account.lastMFA !== undefined
 				if (isReconnect) debug(`MFA session expired for '${username}' of ${siteUrl.hostname}`)
-				MFACheck.startTimer(siteUrl, isReconnect)
+				MFACheck.startTimer(siteUrl, isReconnect, config)
 				delete account.lastMFA
 			}
 		}
@@ -944,6 +944,7 @@ function acknowledgeAlert(alert, showDashboard) {
 
 onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()
+	const config = Config.forURL(senderUrl)
 	const tabId = sender?.tab?.id
 
 	if (request.type === "user-interaction") {

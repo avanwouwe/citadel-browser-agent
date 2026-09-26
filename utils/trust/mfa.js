@@ -10,8 +10,9 @@ class MFACheck {
      * Fires a warning after `warnMinutes` and blocks access after `blockMinutes`.
      * @param {string} url - The URL that triggered the expectation of MFA
      * @param {boolean} isReconnect - Has the user connected with MFA before, or is this the first time
+     * @param {Object} config - the configuration to use
      * */
-    static startTimer(url, isReconnect) {
+    static startTimer(url, isReconnect, config) {
         const hostname = getSitename(url)
         const domain = getDomain(hostname)
         const session = MFACheck.#sessions.get(domain)

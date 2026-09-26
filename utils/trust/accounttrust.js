@@ -29,7 +29,7 @@ class AccountTrust {
         if (config.account.checkOnlyInternal && isExternalUser(config, username)) return false
 
         // Dual-use identity providers only: a free-mail address is not "protected scope".
-        // Gated on the host so a personal address on a *corp app* is still protected.
+        // Only applies to a small list of known public services, a personal address on a *corp app* is still protected.
         if (config.account.checkOnlyProtected && AccountTrust.#FREE_IDP.has(sitename) && AccountTrust.#FREE_MAIL.test(username)) return false
 
         return true
@@ -67,6 +67,8 @@ class AccountTrust {
         const failingAccounts = AccountTrust.#failingAccounts()
 
         for (const [accountKey, acct] of Object.entries(failingAccounts)) {
+            const config = Config.forHostname(acct.system)
+
             const report = {
                 name: accountKey,
                 passing: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
@@ -105,6 +107,8 @@ class AccountTrust {
 
         const apps = app ? [[appName, app]] : AppStats.allApps()
         for (const [system, app] of apps) {
+            const config = Config.forHostname(system)
+
             for (const [username, details] of AppStats.allAccounts(app)) {
                 // password reuse is a cross-site phishing signal, so it is flagged even on out-of-scope systems;
                 // every other issue (reuse, profile separation) honors the scope promise via checkFor()

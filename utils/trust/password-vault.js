@@ -141,11 +141,13 @@ class PasswordVault {
     static async purge() {
         debug("purging password vault")
 
-        const cutoff = config.account.retentionDays * ONE_DAY
         const now    = Date.now()
 
         for (const [accountKey, account] of Object.entries(PasswordVault.#accounts)) {
             if (! account?.username) continue
+
+            const config = Config.forHostname(account.system)
+            const cutoff = config.account.retentionDays * ONE_DAY
 
             const wrongSalt   = Bcrypt.getSalt(account.passwordHash) !== PasswordVault.salt
             const isExpired   = ! isDate(account.lastUsed) || account.lastUsed < now - cutoff
