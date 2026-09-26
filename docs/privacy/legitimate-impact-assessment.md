@@ -10,7 +10,7 @@ nav_order: 3
 # Legitimate Interests Assessment (LIA): Citadel
 
 > **Legal Disclaimer**
-> This document has been prepared by the developer of Citadel solely for informational purposes in order to facilitate the Organisation’s own assessment of the legitimate interest basis for a deployment of Citadel. It is provided as a general template and technical reference only. It does not constitute legal advice, regulatory advice, or a legal assessment of the Organisation’s specific processing activities. It does not replace the Organisation’s obligation to assess the lawfulness of its processing operations, determine whether reliance on Article 6(1)(f) GDPR (or equivalent legal bases under applicable law) is appropriate for its specific processing, carry out and document its own Legitimate Interests Assessment (LIA) where required, or ensure compliance with applicable employment, cybersecurity, and data protection laws.
+> This document was prepared by the developer of Citadel as a general template and technical aid. It is provided for informational purposes only and does not constitute legal, regulatory or employment-law advice, nor a guarantee of compliance. The deploying organisation, as controller, must carry out and document its own assessment in light of its specific deployment, purposes, users, configuration, retention periods, recipients, SIEM/SOAR environment, applicable laws and employment context. It should obtain advice from its DPO and legal advisers and complete any employee-representative information or consultation required by applicable law. No reliance should be placed on this template as evidence, by itself, of the deploying organisation's compliance.
 {: .note }
 
 The Organisation remains solely responsible for:
@@ -245,9 +245,3 @@ Yes, via configuration or organisational process in special situations.
 | Processing necessary | Yes | Less intrusive means would impair security, detection or compliance.                                                                               |
 | Balancing outcome | Acceptable | Secret, URL and e-mail masking mechanism, no detailed usage stats, minimisation, hashing, transparency, and "need to know" controls address risks. |
 | Lawful basis | Art. 6(1)(f) GDPR – Legitimate Interest | Users are informed; DPIA / LIA documented and actively maintained.                                                                                 |
-
----
-
-> **Legal Disclaimer**
-> This template does not replace the controller’s obligation to conduct and document its own Legitimate Interests Assessment based on the specific characteristics of its deployment, and does not constitute a legal determination that legitimate interest is a valid legal basis for the controller’s processing.
-{: .note }

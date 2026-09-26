@@ -32,7 +32,7 @@ Example:
 
 ```
 {
-    "company": {
+    "organization": {
         "contact": "it-support@yourcompany.com",
         "name": "Company",
         "logo": {

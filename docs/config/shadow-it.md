@@ -25,13 +25,6 @@ Applications on the `shadowit.warn` list are warned, and applications on the `sh
     }
     ...
 ```
-> **Tip**
->
-> Some applications have customer-specific sub-domains, such as `customer.slack.com` or `customer.atlassian.net`. In order to prevent warnings about shadow-IT, you must declare the top-level domain, and your tenant:
-> ```
-> "yourname.slack.com", "app.slack.com", "www.slack.com"
-> ```
-{: .tip }
 
 ## sensitive logging
 Shadow IT applications are considered sensitive, in the same way as the domains in `domain.sensitive`. This means that their URLs are not masked in the logs, even for events below the `maskUrlLevel`. Where a regular hostname, path and query string would be hashed to protect personal data, the URLs of shadow IT applications are logged in clear, so that your SOC can understand exactly which application was used and how. See [Logging & Reporting](/config/logging-reporting) for more on URL masking.
@@ -41,13 +34,17 @@ An application is only considered shadow IT if it is not one of your own. Any ho
 
 ```
     ...
-    "company": {
+    "organization": {
         "applications": [ "*.your-crm.com", "*.your-mdm.com" ]
     }
     ...
 ```
 
-This is useful when one of the applications in the default list is in fact sanctioned in your organization. For example, if you have a company agreement for Dropbox, adding `*.dropbox.com` to `organization.applications` stops it from being flagged.
+This is useful when one of the applications in the default list is in fact sanctioned in your organization. For example, if you are officially using Dropbox, adding `*.dropbox.com` to `organization.applications` stops it from being flagged.
+
+In some cases applications create a subdomain for each tenant, for example `your-org.slack.com` or `your-org.zendesk.com`. If you want to keep considering other tenants as shadow IT, you must add to `organization.applications` not only the hostname of your own tenant, but also any shared hostnames of that application, for example:
+* *Slack*: `yourname.slack.com`, `www.slack.com`, `slack.com`, `app.slack.com`, `files.slack.com`
+* *Zendesk*: `yourname.zendesk.com`, `www.zendesk.com`, `zendesk.com`, `register.zendesk.com`, `support.zendesk.com`
 
 ## default applications
 Citadel ships with a list of typical shadow IT applications, all configured as `warn`. These cover categories such as public AI assistants and AI coding tools, personal cloud storage and file transfer, online document processing, tunneling services, unsanctioned messaging and collaboration tools, personal email, remote access tools, and no-code application builders. The intent is to give you a useful starting point that surfaces the most common cases without blocking anyone, so that you can observe what is actually used in your organization before hardening your stance.
