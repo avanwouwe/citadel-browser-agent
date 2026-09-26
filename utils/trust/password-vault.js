@@ -1,6 +1,6 @@
 class PasswordVault {
 
-    static HASH_ROUNDS = 15
+    static HASH_ROUNDS = 14
 
     static #accounts
     static #byPassword = {}
