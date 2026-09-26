@@ -161,14 +161,14 @@ class Config {
                 domains: ["*"]
             },
             passwordReuse: {
-                action: "WARN",
+                action: 'WARN',
                 exceptions: {
                     allowed: true,
                     groups: [ ]
                 }
             },
             profileSeparation: {
-                action: "WARN"
+                action: 'WARN'
             },
             retentionDays: 90,
             checkOnlyInternal: false,
@@ -669,15 +669,15 @@ class Config {
                             BLOCK: Number.POSITIVE_INFINITY
                         },
                         passwordReuse: {
-                            action: Action.NOTIFY
+                            action: 'NOTIFY'
                         },
                         profileSeparation: {
-                            action: Action.NOTIFY
+                            action: 'NOTIFY'
                         }
                     },
                     device: {
                         actions: {
-                            default: Action.NOTIFY,
+                            default: 'NOTIFY',
                             WARN: [],
                             BLOCK: []
                         }
