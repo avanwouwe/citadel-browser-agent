@@ -326,8 +326,6 @@ function logDownload(event, timestamp, result, level, description) {
 	const download = {}
 	if (event.bytesReceived) download.bytesReceived = event.bytesReceived
 	if (event.danger) download.danger = event.danger
-	if (event.startTime) download.startTime = event.startTime
-	if (event.endTime) download.endTime = event.endTime
 	if (event.totalBytes) download.totalBytes = event.totalBytes
 	if (event.fileSize) download.fileSize = event.fileSize
 	if (event.filename) download.filename = event.filename.truncate(config.logging.maxFilenameLength)
@@ -593,7 +591,7 @@ function reportDaily() {
 		}
 
 		for (const [date, app] of Object.entries(usagePerDayPerApp)) {
-			const reportDate = `${date}T00:00:00.000Z`
+			const reportDate = `${date}23:59:59.999Z`
 			const reportedApps = Object.entries(app)
 				.map(([appName, interactions]) => ({ appName, interactions }))
 				.sort((a, b) => b.interactions - a.interactions)
@@ -601,12 +599,13 @@ function reportDaily() {
 
 			reportedApps.slice(0, config.reporting.maxApplicationEntries)
 				.forEach(it => {
+					const isProtected = Config.isProtected(it.appName)
 					logger.log(reportDate,
 						'report',
 						'interaction report',
 						"https://" + it.appName,
 						Log.INFO,
-						undefined,
+						{ type: "interaction report", value: { isProtected } },
 						`@@URL@@ received interactions on ${date}`
 						, undefined
 						, undefined
@@ -723,7 +722,7 @@ function registerAccountIssues(config, report, system) {
 	}
 
 	if (! AccountTrust.checkFor(report.username, system)) {
-		debug(`did not test password policy on external account ${username} / ${system}`)
+		debug(`did not test password policy on external account ${report.username} / ${system}`)
 		return
 	}
 
@@ -1078,7 +1077,7 @@ onMessage((request, sender) => {
 
 		ShadowIT.grant(app?.hostname, config.shadowit.warnInterval)
 
-		logger.log(nowTimestamp(), "shadow IT", "shadow IT warning", app, Log.WARN, null, `shadow IT warning for '${app?.hostname}'`)
+		logger.log(nowTimestamp(), "shadow IT", "shadow IT warning", app, Log.WARN, app?.hostname, `shadow IT warning for '${app?.hostname}'`)
 	}
 
 	if (request.type === "allow-shadow-it") {
