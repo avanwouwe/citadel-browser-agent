@@ -27,6 +27,10 @@ match platform.system().lower():
     case _:
         SYSTEM_OS = "unsupported"
 
+if SYSTEM_OS =='linux':
+    from pathlib import Path
+    os.chdir(Path(sys.executable).resolve().parent)
+
 PROTOCOL_VERSION = 2
 CONFIG_PATH = "citadel-config.json"
 PERIODIC_CHECK_FREQUENCY = 60 * 60 # every hour
@@ -516,7 +520,7 @@ def loadControlPacks():
 
             controls.update(controlPack.get("controls", {}))
         except Exception as e:
-            exception(f"failed to load control pack {packPath}", e)
+            exception(f"failed to load control pack {packPath} in {os.getcwd()}", e)
 
     return controls
 

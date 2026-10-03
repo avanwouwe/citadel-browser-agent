@@ -36,6 +36,7 @@ for REQUIRED_FILE in \
     citadel.browser.agent-firefox.json \
     citadel-policy.json \
     citadel-policy-firefox.json \
+    citadel-browser-setup \
     postinstall.sh \
     postremove.sh
 do
@@ -167,6 +168,24 @@ for ARCH_DIR in binaries/*/; do
     install -m 0644 \
         citadel-policy-firefox.json \
         "$STAGE/usr/share/citadel-browser-agent/firefox-policy.json"
+
+    # --- Flatpak per-user native-messaging integration ---
+    #
+    # These manifest templates are the same files staged into the system-wide
+    # native-messaging-hosts directories below; citadel-browser-setup reuses
+    # them as templates when generating per-user manifests for Flatpak
+    # browsers, since Flatpak sandboxes cannot see system paths at all.
+
+    install -d -m 0755 "$STAGE/opt/citadel-agent/manifests"
+    install -m 0644 \
+        citadel.browser.agent.json \
+        "$STAGE/opt/citadel-agent/manifests/citadel.browser.agent.json"
+    install -m 0644 \
+        citadel.browser.agent-firefox.json \
+        "$STAGE/opt/citadel-agent/manifests/citadel.browser.agent-firefox.json"
+    install -m 0755 \
+        citadel-browser-setup \
+        "$STAGE/opt/citadel-agent/citadel-browser-setup"
 
     # --- Debian package ---
     #

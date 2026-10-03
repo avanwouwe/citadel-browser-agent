@@ -1,0 +1,364 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+AGENT_DIR=/opt/citadel-agent
+AGENT="$AGENT_DIR/citadel-browser-agent"
+CHROMIUM_TEMPLATE="$AGENT_DIR/manifests/citadel.browser.agent.json"
+FIREFOX_TEMPLATE="$AGENT_DIR/manifests/citadel.browser.agent-firefox.json"
+HOST_NAME=citadel.browser.agent.json
+SETUP_SCRIPT="$AGENT_DIR/citadel-browser-setup"
+
+STATE_DIR="$HOME/.local/state/citadel-browser-setup"
+UNIT_DIR="$HOME/.config/systemd/user"
+SERVICE=citadel-browser-setup.service
+TIMER=citadel-browser-setup.timer
+
+configured=()
+skipped=()
+snap_found=0
+
+die() {
+    printf 'Error: %s\n' "$*" >&2
+    exit 1
+}
+
+report() {
+    local item
+    printf '\nConfigured:\n'
+    if ((${#configured[@]})); then
+        for item in "${configured[@]}"; do printf '  - %s\n' "$item"; done
+    else
+        printf '  - None\n'
+    fi
+
+    printf '\nNot installed:\n'
+    if ((${#skipped[@]})); then
+        for item in "${skipped[@]}"; do printf '  - %s\n' "$item"; done
+    else
+        printf '  - None\n'
+    fi
+}
+
+apt_installed() {
+    local package
+    for package in "$@"; do
+        if [[ $(dpkg-query -W -f='${Status}' "$package" 2>/dev/null || :) \
+              == 'install ok installed' ]]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+flatpak_installed() {
+    command -v flatpak >/dev/null 2>&1 &&
+        flatpak info "$1" >/dev/null 2>&1
+}
+
+snap_installed() {
+    command -v snap >/dev/null 2>&1 &&
+        snap list "$1" >/dev/null 2>&1
+}
+
+# Validate the template, replace only its executable path, and atomically
+# publish the resulting manifest. Keep origins/extensions from the template.
+write_manifest() {
+    local template=$1 destination=$2 executable=$3
+    mkdir -p "$(dirname "$destination")"
+
+    python3 - "$template" "$destination" "$executable" <<'PY'
+import json
+import os
+import sys
+import tempfile
+
+template, destination, executable = sys.argv[1:]
+with open(template, encoding="utf-8") as source:
+    manifest = json.load(source)
+
+if manifest.get("name") != "citadel.browser.agent":
+    raise SystemExit(f"Unexpected native messaging host name in {template}")
+
+manifest["path"] = executable
+directory = os.path.dirname(destination)
+fd, temporary = tempfile.mkstemp(prefix=".citadel-manifest-", dir=directory)
+
+try:
+    with os.fdopen(fd, "w", encoding="utf-8") as output:
+        json.dump(manifest, output, indent=2)
+        output.write("\n")
+    os.chmod(temporary, 0o644)
+    os.replace(temporary, destination)
+finally:
+    if os.path.exists(temporary):
+        os.unlink(temporary)
+PY
+}
+
+# The wrapper lives under this particular Flatpak application's data
+# directory, so the application can execute it inside its sandbox.
+write_flatpak_wrapper() {
+    local destination=$1
+    local temporary
+
+    mkdir -p "$(dirname "$destination")"
+    temporary=$(mktemp "$(dirname "$destination")/.citadel-wrapper.XXXXXXXX")
+
+    if ! cat >"$temporary" <<'EOF'
+#!/bin/sh
+exec flatpak-spawn --host /opt/citadel-agent/citadel-browser-agent "$@"
+EOF
+    then
+        rm -f -- "$temporary"
+        return 1
+    fi
+
+    chmod 755 "$temporary"
+    mv -f -- "$temporary" "$destination"
+}
+
+configure_apt() {
+    local label=$1 template=$2 destination=$3
+    write_manifest "$template" "$destination/$HOST_NAME" "$AGENT"
+    configured+=("$label")
+}
+
+configure_flatpak() {
+    local label=$1 app_id=$2 template=$3 manifest_dir=$4
+    local wrapper="$HOME/.var/app/$app_id/data/citadel-browser-agent/citadel-browser-agent-wrapper"
+
+    write_flatpak_wrapper "$wrapper"
+    write_manifest "$template" "$manifest_dir/$HOST_NAME" "$wrapper"
+    configured+=("$label")
+}
+
+# Only delete an old copy if lsof positively establishes that it has no
+# open files. A missing lsof is rejected before setup starts; any ambiguous
+# lsof result here retains the copy.
+clean_old_snap_copies() {
+    local common=$1 active=$2 candidate output errors status
+
+    while IFS= read -r -d '' candidate; do
+        [[ $candidate != "$active" ]] || continue
+
+        output=$(mktemp)
+        errors=$(mktemp)
+        status=0
+        lsof -t +D "$candidate" >"$output" 2>"$errors" || status=$?
+
+        if [[ $status -eq 1 && ! -s $output && ! -s $errors ]]; then
+            rm -rf -- "$candidate"
+        fi
+
+        rm -f -- "$output" "$errors"
+    done < <(
+        find "$common" -maxdepth 1 -type d \
+            -name 'citadel-agent.*' -mtime +6 -print0
+    )
+}
+
+configure_snap() {
+    local label=$1 snap_name=$2 template=$3 manifest_dir=$4
+    local common="$HOME/snap/$snap_name/common"
+    local stage
+
+    mkdir -p "$common"
+    stage=$(mktemp -d "$common/citadel-agent.XXXXXXXX")
+
+    # Never overwrite a copy that might contain a running native host.
+    if ! cp -a "$AGENT_DIR/." "$stage/"; then
+        rm -rf -- "$stage"
+        die "Could not stage the agent for $label"
+    fi
+    if [[ ! -x $stage/citadel-browser-agent ]]; then
+        rm -rf -- "$stage"
+        die "Staged agent is not executable for $label"
+    fi
+
+    # Publish only after the entire copy, including _internal and config,
+    # is in place.
+    write_manifest "$template" "$manifest_dir/$HOST_NAME" \
+        "$stage/citadel-browser-agent"
+
+    configured+=("$label")
+    clean_old_snap_copies "$common" "$stage"
+}
+
+install_timer() {
+    mkdir -p "$UNIT_DIR"
+
+    cat >"$UNIT_DIR/$SERVICE" <<EOF
+[Unit]
+Description=Refresh Citadel browser setup
+
+[Service]
+Type=oneshot
+ExecStart=$SETUP_SCRIPT
+EOF
+
+    cat >"$UNIT_DIR/$TIMER" <<EOF
+[Unit]
+Description=Refresh Citadel browser setup after restart and daily
+
+[Timer]
+OnStartupSec=2min
+OnUnitActiveSec=1d
+Unit=$SERVICE
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    systemctl --user daemon-reload
+    systemctl --user enable --now "$TIMER"
+}
+
+remove_setup() {
+    local app
+    local manifests=(
+        "$HOME/.config/google-chrome/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/.config/chromium/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/.mozilla/native-messaging-hosts/$HOST_NAME"
+
+        "$HOME/.var/app/com.google.Chrome/config/google-chrome/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/.var/app/org.chromium.Chromium/config/chromium/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/.var/app/org.mozilla.firefox/.mozilla/native-messaging-hosts/$HOST_NAME"
+
+        "$HOME/snap/chromium/common/chromium/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/snap/google-chrome/common/google-chrome/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/snap/chrome/common/google-chrome/NativeMessagingHosts/$HOST_NAME"
+        "$HOME/snap/firefox/common/.mozilla/native-messaging-hosts/$HOST_NAME"
+    )
+
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user disable --now "$TIMER" 2>/dev/null || :
+    fi
+    rm -f -- "$UNIT_DIR/$SERVICE" "$UNIT_DIR/$TIMER"
+    if command -v systemctl >/dev/null 2>&1; then
+        systemctl --user daemon-reload 2>/dev/null || :
+    fi
+
+    rm -f -- "${manifests[@]}"
+    for app in com.google.Chrome org.chromium.Chromium org.mozilla.firefox; do
+        rm -f -- \
+            "$HOME/.var/app/$app/data/citadel-browser-agent/citadel-browser-agent-wrapper"
+    done
+
+    # Deliberately retain Snap copies: an existing native host may still
+    # be running from one of them.
+    printf 'Removed Citadel browser manifests, wrappers, and user timer.\n'
+    printf 'Snap agent copies were retained.\n'
+}
+
+[[ ${EUID:-$(id -u)} -ne 0 ]] || die "Run as your normal user, not with sudo"
+[[ $# -eq 0 || ( $# -eq 1 && $1 == --remove ) ]] ||
+    die "Usage: citadel-browser-setup [--remove]"
+
+command -v flock >/dev/null 2>&1 || die "flock is required"
+mkdir -p "$STATE_DIR"
+exec 9>"$STATE_DIR/setup.lock"
+flock 9
+
+if [[ ${1:-} == --remove ]]; then
+    remove_setup
+    exit 0
+fi
+
+command -v python3 >/dev/null 2>&1 || die "python3 is required"
+[[ -x $AGENT ]] || die "Agent not executable: $AGENT"
+[[ -r $CHROMIUM_TEMPLATE ]] || die "Missing Chromium manifest template"
+[[ -r $FIREFOX_TEMPLATE ]] || die "Missing Firefox manifest template"
+
+# Check Snap-only prerequisites before modifying any browser setup.
+for snap_name in chromium firefox; do
+    if snap_installed "$snap_name"; then
+        snap_found=1
+    fi
+done
+if ((snap_found)); then
+    command -v lsof >/dev/null 2>&1 ||
+        die "lsof is required for Snap agent-copy cleanup"
+    command -v systemctl >/dev/null 2>&1 ||
+        die "systemctl is required for the per-user Snap refresh timer"
+    systemctl --user show-environment >/dev/null 2>&1 ||
+        die "The systemd user manager is unavailable; cannot install the Snap refresh timer"
+fi
+
+# APT / Debian packages.
+if apt_installed google-chrome-stable; then
+    configure_apt "Chrome (APT)" "$CHROMIUM_TEMPLATE" \
+        "$HOME/.config/google-chrome/NativeMessagingHosts"
+else
+    skipped+=("Chrome (APT)")
+fi
+
+if apt_installed chromium chromium-browser; then
+    configure_apt "Chromium (APT)" "$CHROMIUM_TEMPLATE" \
+        "$HOME/.config/chromium/NativeMessagingHosts"
+else
+    skipped+=("Chromium (APT)")
+fi
+
+if apt_installed firefox firefox-esr &&
+   { [[ -x /usr/lib/firefox/firefox ]] ||
+     [[ -x /usr/lib/firefox-esr/firefox-esr ]]; }; then
+    # The executable check avoids treating Ubuntu's Firefox-to-Snap
+    # transitional package as a conventional APT Firefox installation.
+    configure_apt "Firefox (APT)" "$FIREFOX_TEMPLATE" \
+        "$HOME/.mozilla/native-messaging-hosts"
+else
+    skipped+=("Firefox (APT)")
+fi
+
+# Flatpak.
+if flatpak_installed com.google.Chrome; then
+    configure_flatpak "Chrome (Flatpak)" com.google.Chrome \
+        "$CHROMIUM_TEMPLATE" \
+        "$HOME/.var/app/com.google.Chrome/config/google-chrome/NativeMessagingHosts"
+else
+    skipped+=("Chrome (Flatpak)")
+fi
+
+if flatpak_installed org.chromium.Chromium; then
+    configure_flatpak "Chromium (Flatpak)" org.chromium.Chromium \
+        "$CHROMIUM_TEMPLATE" \
+        "$HOME/.var/app/org.chromium.Chromium/config/chromium/NativeMessagingHosts"
+else
+    skipped+=("Chromium (Flatpak)")
+fi
+
+if flatpak_installed org.mozilla.firefox; then
+    configure_flatpak "Firefox (Flatpak)" org.mozilla.firefox \
+        "$FIREFOX_TEMPLATE" \
+        "$HOME/.var/app/org.mozilla.firefox/.mozilla/native-messaging-hosts"
+else
+    skipped+=("Firefox (Flatpak)")
+fi
+
+# Snap.
+# N.B. there are no Chrome snap packages
+if snap_installed chromium; then
+    configure_snap "Chromium (Snap)" chromium "$CHROMIUM_TEMPLATE" \
+        "$HOME/snap/chromium/common/chromium/NativeMessagingHosts"
+else
+    skipped+=("Chromium (Snap)")
+fi
+
+if snap_installed firefox; then
+    configure_snap "Firefox (Snap; path unverified)" firefox \
+        "$FIREFOX_TEMPLATE" \
+        "$HOME/snap/firefox/common/.mozilla/native-messaging-hosts"
+else
+    skipped+=("Firefox (Snap)")
+fi
+
+if ((snap_found)); then
+    install_timer
+fi
+
+report
+
+if ((snap_found)); then
+    printf '\nSnap refresh timer: %s\n' "$TIMER"
+    printf 'Already-running native hosts may need to reconnect to read updated config.\n'
+fi
