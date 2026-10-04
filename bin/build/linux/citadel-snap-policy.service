@@ -1,7 +1,0 @@
-[Unit]
-Description=Install Citadel policy for Snap Chromium
-ConditionPathExists=/opt/citadel-agent/citadel-snap-policy
-
-[Service]
-Type=oneshot
-ExecStart=/opt/citadel-agent/citadel-snap-policy

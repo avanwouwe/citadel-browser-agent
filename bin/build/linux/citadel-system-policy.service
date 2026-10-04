@@ -1,0 +1,7 @@
+[Unit]
+Description=Install Citadel force-install policy for Snap and Flatpak browsers
+ConditionPathExists=/opt/citadel-agent/citadel-system-policy
+
+[Service]
+Type=oneshot
+ExecStart=/opt/citadel-agent/citadel-system-policy

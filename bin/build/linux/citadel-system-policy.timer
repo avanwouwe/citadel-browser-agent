@@ -1,5 +1,5 @@
 [Unit]
-Description=Install Citadel policy for Snap Chromium once the snap exists
+Description=Install Citadel force-install policy once the browsers exist
 
 [Timer]
 OnBootSec=1min

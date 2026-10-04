@@ -39,9 +39,9 @@ for REQUIRED_FILE in \
     citadel-browser-setup \
     citadel-browser-setup.service \
     citadel-browser-setup.timer \
-    citadel-snap-policy \
-    citadel-snap-policy.service \
-    citadel-snap-policy.timer \
+    citadel-system-policy \
+    citadel-system-policy.service \
+    citadel-system-policy.timer \
     postinstall.sh \
     postremove.sh
 do
@@ -186,22 +186,23 @@ for ARCH_DIR in binaries/*/; do
         citadel-policy-firefox.json \
         "$STAGE/usr/share/citadel-browser-agent/firefox-policy.json"
 
-    # Chromium policy for Snap Chromium, which does not read /etc/chromium.
-    # citadel-snap-policy copies it into /var/snap/chromium when that snap
-    # exists; a system timer repeats that so a later snap install is covered.
+    # Policy for browsers that cannot read it from /etc: Snap Chromium and
+    # Flatpak Chromium / Firefox. citadel-system-policy copies the templates
+    # to where those browsers look, and a system timer repeats that so a
+    # browser installed later is covered too.
     install -m 0644 \
         citadel-policy.json \
         "$STAGE/usr/share/citadel-browser-agent/chromium-policy.json"
 
-    install -m 0755 citadel-snap-policy \
-        "$STAGE/opt/citadel-agent/citadel-snap-policy"
+    install -m 0755 citadel-system-policy \
+        "$STAGE/opt/citadel-agent/citadel-system-policy"
     install -d -m 0755 "$STAGE/usr/lib/systemd/system/timers.target.wants"
-    install -m 0644 citadel-snap-policy.service \
-        "$STAGE/usr/lib/systemd/system/citadel-snap-policy.service"
-    install -m 0644 citadel-snap-policy.timer \
-        "$STAGE/usr/lib/systemd/system/citadel-snap-policy.timer"
-    ln -s ../citadel-snap-policy.timer \
-        "$STAGE/usr/lib/systemd/system/timers.target.wants/citadel-snap-policy.timer"
+    install -m 0644 citadel-system-policy.service \
+        "$STAGE/usr/lib/systemd/system/citadel-system-policy.service"
+    install -m 0644 citadel-system-policy.timer \
+        "$STAGE/usr/lib/systemd/system/citadel-system-policy.timer"
+    ln -s ../citadel-system-policy.timer \
+        "$STAGE/usr/lib/systemd/system/timers.target.wants/citadel-system-policy.timer"
 
     # --- Per-user setup timer ---
     #

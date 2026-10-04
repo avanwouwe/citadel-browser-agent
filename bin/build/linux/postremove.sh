@@ -29,9 +29,9 @@ case "${1:-}" in
         ;;
 esac
 
-# Stop the timer that (re)installs the Snap Chromium policy.
+# Stop the timer that (re)installs the Snap / Flatpak policies.
 if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
-    systemctl stop citadel-snap-policy.timer 2>/dev/null || true
+    systemctl stop citadel-system-policy.timer 2>/dev/null || true
     systemctl daemon-reload 2>/dev/null || true
 fi
 
@@ -42,6 +42,27 @@ for MANAGED_DIR in /var/snap/chromium/*/policies/managed; do
     rm -f "$MANAGED_DIR/citadel-policy.json"
     rmdir "$MANAGED_DIR" "$(dirname "$MANAGED_DIR")" 2>/dev/null || true
 done
+
+# Flatpak Chromium: the whole extension directory is Citadel's.
+rm -rf /var/lib/flatpak/extension/org.chromium.Chromium.Policy.citadel
+
+# Flatpak Firefox: remove the policy only if it is still what Citadel wrote.
+FLATPAK_FIREFOX_STATE="$CITADEL_STATE_DIR/flatpak-firefox-policy.sha256"
+if [ -f "$FLATPAK_FIREFOX_STATE" ]; then
+    for FF_POLICY in /var/lib/flatpak/extension/org.mozilla.firefox.systemconfig/*/stable/policies/policies.json; do
+        [ -f "$FF_POLICY" ] || continue
+        if [ "$(file_hash "$FF_POLICY")" = "$(cat "$FLATPAK_FIREFOX_STATE")" ]; then
+            rm -f "$FF_POLICY"
+            FF_DIR="$(dirname "$FF_POLICY")"
+            rmdir "$FF_DIR" "$(dirname "$FF_DIR")" "$(dirname "$(dirname "$FF_DIR")")" \
+                "$(dirname "$(dirname "$(dirname "$FF_DIR")")")" 2>/dev/null || true
+        else
+            echo "Citadel: preserving modified Flatpak Firefox policy:" >&2
+            echo "  $FF_POLICY" >&2
+        fi
+    done
+    rm -f "$FLATPAK_FIREFOX_STATE"
+fi
 
 # Without a state file, Citadel did not create the active Firefox policy.
 if [ ! -f "$CITADEL_POLICY_STATE" ]; then

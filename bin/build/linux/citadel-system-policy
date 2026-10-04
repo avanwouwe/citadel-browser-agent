@@ -1,0 +1,87 @@
+#!/bin/sh
+# Installs Citadel's force-install policy for browsers that cannot read it
+# from the usual /etc locations:
+#   - Snap Chromium: reads policy from its own data directory.
+#   - Flatpak Chromium / Firefox: read policy from Flatpak extension
+#     directories under /var/lib/flatpak/extension.
+# Idempotent; run as root by postinstall.sh and by citadel-system-policy.timer
+# so the policy also appears when a browser is installed after the package.
+set -eu
+
+SHARE="/usr/share/citadel-browser-agent"
+CHROMIUM_SOURCE="$SHARE/chromium-policy.json"
+FIREFOX_SOURCE="$SHARE/firefox-policy.json"
+
+STATE_DIR="/var/lib/citadel-browser-agent"
+FIREFOX_FLATPAK_STATE="$STATE_DIR/flatpak-firefox-policy.sha256"
+
+FLATPAK_EXTENSIONS="/var/lib/flatpak/extension"
+ARCH="$(uname -m)"
+
+file_hash() {
+    sha256sum "$1" | awk '{print $1}'
+}
+
+# Copy $1 to $2 unless it is already identical.
+install_if_changed() {
+    if [ -f "$2" ] && cmp -s "$1" "$2"; then
+        return 0
+    fi
+    install -d -m 0755 "$(dirname "$2")"
+    install -m 0644 "$1" "$2"
+    echo "Citadel: installed policy: $2"
+}
+
+snap_chromium() {
+    [ -d /var/snap/chromium/current ] || return 0
+    install_if_changed "$CHROMIUM_SOURCE" \
+        "/var/snap/chromium/current/policies/managed/citadel-policy.json"
+}
+
+# The extension name is unique to Citadel, so the file is simply ours.
+flatpak_chromium() {
+    install_if_changed "$CHROMIUM_SOURCE" \
+        "$FLATPAK_EXTENSIONS/org.chromium.Chromium.Policy.citadel/$ARCH/1/policies/managed/citadel-policy.json"
+}
+
+# Firefox reads a single policies.json from this extension. Only create or
+# update it if Citadel created it; the hash of what Citadel installed is kept
+# so that anything else is left alone.
+flatpak_firefox() {
+    target="$FLATPAK_EXTENSIONS/org.mozilla.firefox.systemconfig/$ARCH/stable/policies/policies.json"
+
+    if [ -e "$target" ]; then
+        if [ ! -f "$FIREFOX_FLATPAK_STATE" ] ||
+           [ "$(file_hash "$target")" != "$(cat "$FIREFOX_FLATPAK_STATE")" ]; then
+            echo "Citadel: leaving existing Flatpak Firefox policy unchanged: $target" >&2
+            return 0
+        fi
+    fi
+
+    if [ -f "$target" ] && cmp -s "$FIREFOX_SOURCE" "$target"; then
+        return 0
+    fi
+
+    # Record ownership first, so an interrupted run is retried, not orphaned.
+    install -d -m 0755 "$STATE_DIR"
+    file_hash "$FIREFOX_SOURCE" >"$FIREFOX_FLATPAK_STATE.tmp.$$"
+    chmod 0600 "$FIREFOX_FLATPAK_STATE.tmp.$$"
+    mv -f "$FIREFOX_FLATPAK_STATE.tmp.$$" "$FIREFOX_FLATPAK_STATE"
+
+    install_if_changed "$FIREFOX_SOURCE" "$target"
+}
+
+for required in "$CHROMIUM_SOURCE" "$FIREFOX_SOURCE"; do
+    if [ ! -f "$required" ]; then
+        echo "Citadel: packaged policy is missing: $required" >&2
+        exit 1
+    fi
+done
+
+snap_chromium
+
+# /var/lib/flatpak only exists where Flatpak is installed.
+if [ -d /var/lib/flatpak ]; then
+    flatpak_chromium
+    flatpak_firefox
+fi

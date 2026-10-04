@@ -23,7 +23,8 @@ FLATPAK_TARGETS=(
     "Chromium|org.chromium.Chromium|chromium|.var/app/org.chromium.Chromium/config/chromium/NativeMessagingHosts"
     "Firefox|org.mozilla.firefox|firefox|.var/app/org.mozilla.firefox/.mozilla/native-messaging-hosts"
     "Brave|com.brave.Browser|chromium|.var/app/com.brave.Browser/config/BraveSoftware/Brave-Browser/NativeMessagingHosts"
-    "Opera|com.opera.Opera|chromium|.var/app/com.opera.Opera/config/opera/NativeMessagingHosts"
+    "Opera|com.opera.Opera|chromium|.var/app/com.opera.Opera/config/google-chrome/NativeMessagingHosts"
+    "Edge|com.microsoft.Edge|chromium|.var/app/com.microsoft.Edge/config/microsoft-edge/NativeMessagingHosts"
 )
 
 # name | snap name | manifest flavour | manifest dir (relative to $HOME)
@@ -33,6 +34,8 @@ FLATPAK_TARGETS=(
 SNAP_TARGETS=(
     "Chromium|chromium|chromium|snap/chromium/common/chromium/NativeMessagingHosts"
     "Firefox|firefox|firefox|snap/firefox/common/.mozilla/native-messaging-hosts"
+    "Brave|brave|chromium|snap/brave/current/.config/BraveSoftware/Brave-Browser/NativeMessagingHosts"
+    "Opera|opera|chromium|snap/opera/current/.config/google-chrome/NativeMessagingHosts"
 )
 
 configured=()
@@ -160,6 +163,18 @@ configure_flatpak() {
     local app_id=$1 template=$2 manifest_dir=$3
     local wrapper="$HOME/.var/app/$app_id/data/citadel-browser-agent/citadel-browser-agent-wrapper"
 
+    # The wrapper runs the agent on the host through flatpak-spawn, which a
+    # sandboxed browser may only do with this permission. Per-user and
+    # idempotent; it lets the app run host commands, which is inherent to
+    # this approach.
+    flatpak override --user --talk-name=org.freedesktop.Flatpak "$app_id" ||
+        return 1
+    # Opera cannot see the host's /etc, where its policy (force-install)
+    # lives. Chrome, Brave and Edge ship with this permission already.
+    if [[ $app_id == com.opera.Opera ]]; then
+        flatpak override --user --filesystem=host-etc:ro "$app_id" ||
+            return 1
+    fi
     write_flatpak_wrapper "$wrapper" || return 1
     write_manifest "$template" "$manifest_dir/$MANIFEST_NAME" "$wrapper"
 }

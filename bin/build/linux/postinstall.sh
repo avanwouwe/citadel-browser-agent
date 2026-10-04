@@ -120,19 +120,19 @@ install_firefox_policy() {
     echo "  $FIREFOX_POLICY_FILE"
 }
 
-# Snap Chromium is confined and ignores /etc/chromium/policies. The helper
-# installs the policy if the snap exists now; a system timer shipped with the
-# package repeats it so a snap installed later is covered too.
-install_snap_chromium_policy() {
-    /opt/citadel-agent/citadel-snap-policy
+# Snap Chromium and Flatpak Chromium / Firefox cannot read the policies above.
+# The helper installs their policy for the browsers present now; a system
+# timer shipped with the package repeats it for browsers installed later.
+install_system_policy() {
+    /opt/citadel-agent/citadel-system-policy
 
     if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
         systemctl daemon-reload || true
-        systemctl start citadel-snap-policy.timer || true
+        systemctl start citadel-system-policy.timer || true
     fi
 }
 
 install_firefox_policy
-install_snap_chromium_policy
+install_system_policy
 
 # Add any other existing Citadel post-install operations below this line.
