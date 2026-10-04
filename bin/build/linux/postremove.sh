@@ -29,6 +29,20 @@ case "${1:-}" in
         ;;
 esac
 
+# Stop the timer that (re)installs the Snap Chromium policy.
+if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+    systemctl stop citadel-snap-policy.timer 2>/dev/null || true
+    systemctl daemon-reload 2>/dev/null || true
+fi
+
+# Snap Chromium policy: a Citadel-only file name, always safe to remove.
+# (Glob over revisions in case "current" has moved since installation.)
+for MANAGED_DIR in /var/snap/chromium/*/policies/managed; do
+    [ -d "$MANAGED_DIR" ] || continue
+    rm -f "$MANAGED_DIR/citadel-policy.json"
+    rmdir "$MANAGED_DIR" "$(dirname "$MANAGED_DIR")" 2>/dev/null || true
+done
+
 # Without a state file, Citadel did not create the active Firefox policy.
 if [ ! -f "$CITADEL_POLICY_STATE" ]; then
     exit 0

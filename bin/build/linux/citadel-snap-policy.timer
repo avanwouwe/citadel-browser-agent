@@ -1,0 +1,9 @@
+[Unit]
+Description=Install Citadel policy for Snap Chromium once the snap exists
+
+[Timer]
+OnBootSec=1min
+OnUnitActiveSec=10min
+
+[Install]
+WantedBy=timers.target

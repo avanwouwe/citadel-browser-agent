@@ -15,7 +15,9 @@ file_hash() {
 write_policy_state() {
     STATE_TEMP="$CITADEL_POLICY_STATE.tmp.$$"
 
-    file_hash "$FIREFOX_POLICY_FILE" > "$STATE_TEMP"
+    # The installed file is a copy of the source, so they hash identically.
+    # This allows the state to be recorded before the policy is installed.
+    file_hash "$FIREFOX_POLICY_SOURCE" > "$STATE_TEMP"
     chmod 0600 "$STATE_TEMP"
     mv -f "$STATE_TEMP" "$CITADEL_POLICY_STATE"
 }
@@ -78,11 +80,13 @@ install_firefox_policy() {
         install -d -m 0755 "$FIREFOX_POLICY_DIR"
         install -d -m 0755 "$CITADEL_STATE_DIR"
 
+        # Record ownership first: if interrupted in between, the next run
+        # recreates the missing policy instead of treating it as foreign.
+        write_policy_state
+
         install -m 0644 \
             "$FIREFOX_POLICY_SOURCE" \
             "$FIREFOX_POLICY_FILE"
-
-        write_policy_state
 
         echo "Citadel: restored Firefox policy:"
         echo "  $FIREFOX_POLICY_FILE"
@@ -106,16 +110,29 @@ install_firefox_policy() {
     install -d -m 0755 "$FIREFOX_POLICY_DIR"
     install -d -m 0755 "$CITADEL_STATE_DIR"
 
+    write_policy_state
+
     install -m 0644 \
         "$FIREFOX_POLICY_SOURCE" \
         "$FIREFOX_POLICY_FILE"
-
-    write_policy_state
 
     echo "Citadel: installed Firefox policy:"
     echo "  $FIREFOX_POLICY_FILE"
 }
 
+# Snap Chromium is confined and ignores /etc/chromium/policies. The helper
+# installs the policy if the snap exists now; a system timer shipped with the
+# package repeats it so a snap installed later is covered too.
+install_snap_chromium_policy() {
+    /opt/citadel-agent/citadel-snap-policy
+
+    if command -v systemctl >/dev/null 2>&1 && [ -d /run/systemd/system ]; then
+        systemctl daemon-reload || true
+        systemctl start citadel-snap-policy.timer || true
+    fi
+}
+
 install_firefox_policy
+install_snap_chromium_policy
 
 # Add any other existing Citadel post-install operations below this line.

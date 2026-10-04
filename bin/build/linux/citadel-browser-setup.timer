@@ -1,0 +1,9 @@
+[Unit]
+Description=Refresh Citadel browser setup after login and daily
+
+[Timer]
+OnStartupSec=1min
+OnUnitActiveSec=1d
+
+[Install]
+WantedBy=timers.target

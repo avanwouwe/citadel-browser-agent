@@ -4,7 +4,7 @@ set -euo pipefail
 PACKAGE_NAME="citadel-browser-agent"
 VERSION="1.5.0"
 PACKAGE_MAINTAINER="Citadel Agent <contact@citadelagent.org>"
-BUILD_ROOT="/tmp/citadel-$(uuidgen)"
+BUILD_ROOT="$(mktemp -d /tmp/citadel-XXXXXXXX)"
 
 cleanup() {
     rm -rf "$BUILD_ROOT"
@@ -37,6 +37,11 @@ for REQUIRED_FILE in \
     citadel-policy.json \
     citadel-policy-firefox.json \
     citadel-browser-setup \
+    citadel-browser-setup.service \
+    citadel-browser-setup.timer \
+    citadel-snap-policy \
+    citadel-snap-policy.service \
+    citadel-snap-policy.timer \
     postinstall.sh \
     postremove.sh
 do
@@ -85,10 +90,24 @@ CHROMIUM_POLICY_DIRS=(
     "etc/opt/opera/policies/managed"
 )
 
-# Firefox native-messaging locations differ between distribution families.
-FIREFOX_NATIVE_HOST_DIRS=(
-    "usr/lib/mozilla/native-messaging-hosts"
-    "usr/lib64/mozilla/native-messaging-hosts"
+# Firefox native-messaging locations differ between distribution families:
+# Debian/Ubuntu use usr/lib, Fedora/RHEL (RPM) use usr/lib64.
+FIREFOX_NATIVE_HOST_DIR_DEB="usr/lib/mozilla/native-messaging-hosts"
+FIREFOX_NATIVE_HOST_DIR_RPM="usr/lib64/mozilla/native-messaging-hosts"
+
+# Owner of every packaged file. Without this, fpm keeps the uid of whoever
+# runs the build, which would make /opt/citadel-agent owned by an arbitrary
+# user on the target machine.
+FPM_COMMON_ARGS=(
+    -s dir
+    -n "$PACKAGE_NAME"
+    -v "$VERSION"
+    --force
+    --maintainer "$PACKAGE_MAINTAINER"
+    --description "Citadel browser agent"
+    --url "https://www.citadelagent.org"
+    --after-install postinstall.sh
+    --after-remove postremove.sh
 )
 
 BUILT_ANY=false
@@ -117,7 +136,8 @@ for ARCH_DIR in binaries/*/; do
     cp -a "binaries/$BUILD_ARCH/." "$STAGE/opt/citadel-agent/"
     cp -a ../../controls "$STAGE/opt/citadel-agent/"
 
-    # Individual executable bits are expected to have been set by build.sh.
+    # Executable bits come from the PyInstaller output (run by build.sh) and
+    # are preserved by cp -a.
     chmod 0755 "$STAGE/opt" "$STAGE/opt/citadel-agent"
 
     # --- Chromium-family native-messaging manifests ---
@@ -129,17 +149,14 @@ for ARCH_DIR in binaries/*/; do
             "$STAGE/$DIR/citadel.browser.agent.json"
     done
 
-    # --- Firefox native-messaging manifests ---
+    # --- Firefox native-messaging manifest (Debian layout) ---
     #
-    # Install to both Debian/Ubuntu-family and RPM-family paths so the same
-    # staged tree can be used without build-time distribution detection.
+    # The RPM-specific location is added after the .deb has been built.
 
-    for DIR in "${FIREFOX_NATIVE_HOST_DIRS[@]}"; do
-        install -d -m 0755 "$STAGE/$DIR"
-        install -m 0644 \
-            citadel.browser.agent-firefox.json \
-            "$STAGE/$DIR/citadel.browser.agent.json"
-    done
+    install -d -m 0755 "$STAGE/$FIREFOX_NATIVE_HOST_DIR_DEB"
+    install -m 0644 \
+        citadel.browser.agent-firefox.json \
+        "$STAGE/$FIREFOX_NATIVE_HOST_DIR_DEB/citadel.browser.agent.json"
 
     # --- Chromium-family enterprise policies ---
     #
@@ -169,6 +186,37 @@ for ARCH_DIR in binaries/*/; do
         citadel-policy-firefox.json \
         "$STAGE/usr/share/citadel-browser-agent/firefox-policy.json"
 
+    # Chromium policy for Snap Chromium, which does not read /etc/chromium.
+    # citadel-snap-policy copies it into /var/snap/chromium when that snap
+    # exists; a system timer repeats that so a later snap install is covered.
+    install -m 0644 \
+        citadel-policy.json \
+        "$STAGE/usr/share/citadel-browser-agent/chromium-policy.json"
+
+    install -m 0755 citadel-snap-policy \
+        "$STAGE/opt/citadel-agent/citadel-snap-policy"
+    install -d -m 0755 "$STAGE/usr/lib/systemd/system/timers.target.wants"
+    install -m 0644 citadel-snap-policy.service \
+        "$STAGE/usr/lib/systemd/system/citadel-snap-policy.service"
+    install -m 0644 citadel-snap-policy.timer \
+        "$STAGE/usr/lib/systemd/system/citadel-snap-policy.timer"
+    ln -s ../citadel-snap-policy.timer \
+        "$STAGE/usr/lib/systemd/system/timers.target.wants/citadel-snap-policy.timer"
+
+    # --- Per-user setup timer ---
+    #
+    # Vendor units for every user's systemd user manager. The symlink in
+    # timers.target.wants enables the timer for all users; both disappear
+    # with the package.
+
+    install -d -m 0755 "$STAGE/usr/lib/systemd/user/timers.target.wants"
+    install -m 0644 citadel-browser-setup.service \
+        "$STAGE/usr/lib/systemd/user/citadel-browser-setup.service"
+    install -m 0644 citadel-browser-setup.timer \
+        "$STAGE/usr/lib/systemd/user/citadel-browser-setup.timer"
+    ln -s ../citadel-browser-setup.timer \
+        "$STAGE/usr/lib/systemd/user/timers.target.wants/citadel-browser-setup.timer"
+
     # --- Flatpak per-user native-messaging integration ---
     #
     # These manifest templates are the same files staged into the system-wide
@@ -189,36 +237,38 @@ for ARCH_DIR in binaries/*/; do
 
     # --- Debian package ---
     #
-    # No files are marked as configuration files:
-    #
-    # - Chromium policy fragments are ordinary package-owned files.
-    # - Firefox's active policies.json is generated and managed by the
-    #   lifecycle scripts; it is not present in the package archive.
+    # fpm flags everything under /etc as a conffile by default, which would
+    # leave the Chromium policy (force-install list) active after a plain
+    # "apt remove". The fragments are uniquely named and package-owned, so
+    # treat them as ordinary files. Firefox's active policies.json is not in
+    # the archive; it is managed by the lifecycle scripts.
 
-    fpm -s dir -t deb \
-        -n "$PACKAGE_NAME" \
-        -v "$VERSION" \
+    fpm "${FPM_COMMON_ARGS[@]}" -t deb \
         -a "$DEB_ARCH" \
-        --maintainer "$PACKAGE_MAINTAINER" \
-        --description "Citadel browser agent" \
-        --url "https://www.citadelagent.org" \
-        --after-install postinstall.sh \
-        --after-remove postremove.sh \
+        --deb-user root --deb-group root \
+        --deb-no-default-config-files \
+        --deb-recommends python3 \
+        --deb-recommends lsof \
         -C "$STAGE" \
         -p "citadel-browser-agent-${VERSION}-${DEB_ARCH}.deb" \
         opt etc usr
 
     # --- RPM package ---
+    #
+    # RPM keeps fpm's default of %config(noreplace) for /etc files: an
+    # unmodified file is removed with the package, a modified one is kept
+    # as .rpmsave.
 
-    fpm -s dir -t rpm \
-        -n "$PACKAGE_NAME" \
-        -v "$VERSION" \
+    install -d -m 0755 "$STAGE/$FIREFOX_NATIVE_HOST_DIR_RPM"
+    install -m 0644 \
+        citadel.browser.agent-firefox.json \
+        "$STAGE/$FIREFOX_NATIVE_HOST_DIR_RPM/citadel.browser.agent.json"
+
+    fpm "${FPM_COMMON_ARGS[@]}" -t rpm \
         -a "$RPM_ARCH" \
-        --maintainer "$PACKAGE_MAINTAINER" \
-        --description "Citadel browser agent" \
-        --url "https://www.citadelagent.org" \
-        --after-install postinstall.sh \
-        --after-remove postremove.sh \
+        --rpm-user root --rpm-group root \
+        --rpm-tag "Recommends: python3" \
+        --rpm-tag "Recommends: lsof" \
         -C "$STAGE" \
         -p "citadel-browser-agent-${VERSION}-${RPM_ARCH}.rpm" \
         opt etc usr

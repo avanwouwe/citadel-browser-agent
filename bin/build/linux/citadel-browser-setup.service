@@ -1,0 +1,7 @@
+[Unit]
+Description=Refresh Citadel browser setup
+ConditionPathExists=/opt/citadel-agent/citadel-browser-setup
+
+[Service]
+Type=oneshot
+ExecStart=/opt/citadel-agent/citadel-browser-setup

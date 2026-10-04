@@ -21,6 +21,12 @@ You can distribute the package via your configuration management tool (Ansible, 
 
 On top of the Citadel package, you need to [install osquery](https://osquery.io/downloads) on the endpoint, so that the agent can query the device state.
 
+> **Note**
+> The installer performs forced installation of the extension by shipping managed-policy fragments and native-messaging host manifests to the standard system-wide locations under `/etc` (Chromium family) and `/usr/lib` (Firefox).
+>
+> This will not work for browsers installed as FlatPaks (or Snaps). These run in a sandbox with a private filesystem view rooted at `~/.var/app/<app-id>/` (FlatPak) or `~/snap/<name>/` (Snap), so the browser never reads the system `/etc` and `/usr/lib` paths the package writes to. As a result neither the forced-install policy nor the native-messaging manifest is visible, and even a correctly placed manifest cannot launch the native host unless the sandbox is granted permission to execute the binary in `/opt/citadel-agent` (e.g. via `flatpak override --filesystem=...` or an appropriate portal).
+{: .note }
+
 ## package contents
 
 * the agent binary and [controls](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/controls) in `/opt/citadel-agent/`
