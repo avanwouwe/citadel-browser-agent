@@ -25,20 +25,19 @@ The package works for browsers installed from your distribution (APT/RPM), as a 
 
 ## supported browsers
 
-Each cell shows the result for **forced installation of the extension / native messaging**.
+Each cell shows the result for **forced installation of the extension / native messaging**. Device monitoring through osquery works everywhere except Chromium, Brave and Opera as a Snap, see [limitations](#limitations).
 
-| Browser  | APT / RPM  | Flatpak | Snap |
-|----------|------------|---------|------|
-| Chrome   | ✓ / ✓      | ✓ / ✓   | inexistant |
-| Chromium | inexistant | ✓ / ✓ | ✓ / ✓ |
-| Firefox  | ✓ / ✓      | ✓ / ✓   | ✓ / ✓ |
-| Edge     | ✓ / ✓      | ✓ / ✓   | inexistant |
-| Brave    | ✓ / ✓      | ✓ / ✓   | ✗ / ✓ (2) |
-| Opera    | ✓ / ✓      | ✓ / ✓   | ✗ / ✓ |
+| Browser  | APT / RPM      | Flatpak | Snap |
+|----------|----------------|---------|------|
+| Chrome   | ✓ / ✓          | ✓ / ✓   | inexistant |
+| Chromium | inexistant (1) | ✓ / ✓ | ✓ / ✓ |
+| Firefox  | ✓ / ✓          | ✓ / ✓   | ✓ / ✓ |
+| Edge     | ✓ / ✓          | ✓ / ✓   | inexistant |
+| Brave    | ✓ / ✓          | ✓ / ✓   | ✗ / ✓ |
+| Opera    | ✓ / ✓          | ✓ / ✓   | ✗ / ✓ |
 {: .table }
 
-1. Chromium is not available as an APT package on Ubuntu (only as a Snap); it uses the same system-wide files as the other Chromium-family browsers.
-2. <!-- TODO: verify after the agent has been rebuilt on Ubuntu 22.04 (glibc 2.35) -->Native messaging in the Brave Snap requires an agent built against glibc 2.35 or older, see [building the package](#building-the-package-yourself).
+1. The Chromium APT package is a wrapper of a Snap package; it uses the same system-wide files as the other Chromium-family browsers.
 
 The results were obtained on Ubuntu 24.04. The `.rpm` package is built from the same files but has had less testing.
 
@@ -63,6 +62,7 @@ Browsers need to be restarted before they pick up a new policy or manifest.
 ## limitations
 
 * **Brave and Opera as a Snap cannot be force-installed.** Their snaps do not allow access to the host's policy directory (they have no `system-files` plug, and the host's `/etc` is blocked by the snap's confinement), so there is nowhere for Citadel to put the policy. Native messaging does work. Install the extension manually, or use the APT or Flatpak version of the browser.
+* **No device monitoring in Chromium, Brave and Opera as a Snap.** The agent runs inside the browser's sandbox, where it cannot see the host's osquery (`/usr/bin/osqueryi`). Even a copy of osquery placed inside the sandbox reports the sandbox rather than the host: the OS shows up as the snap's base image (for example `Ubuntu Core 22`) and the installed packages are not visible. For that reason no device trust report is generated for these browsers, and the agent logs a warning (`device trust report not generated, osquery not found`). Firefox as a Snap is not affected, since it starts the agent on the host, and neither are the APT/RPM and Flatpak versions of any browser. Use one of those if you need device monitoring.
 * **Chromium policy fragments do not merge.** Within one `managed/` directory Chromium does not combine a list policy such as `ExtensionInstallForcelist` from several files; the file that sorts last wins. If you already manage that policy in another fragment in the same directory, add Citadel's extension to your own list instead.
 * **Firefox supports one `policies.json`.** See [Firefox policy](#firefox-policy).
 * **Browsers other than those listed** (for example Arc and Comet, or beta and nightly builds with a different package name) are not covered.
@@ -87,6 +87,7 @@ Browsers need to be restarted before they pick up a new policy or manifest.
   * `/etc/brave/policies/managed/citadel-policy.json`
   * `/etc/opt/opera/policies/managed/citadel-policy.json`
 * the policy templates in `/usr/share/citadel-browser-agent/`
+* package metadata for software centers: the icon in `/usr/share/icons/hicolor/` and an AppStream description (with license, links and screenshots) in `/usr/share/metainfo/`
 
 The `.deb` does not treat these `/etc` files as configuration files, so a plain `apt remove` also removes the forced-installation policy. In the `.rpm` they are configuration files: an unmodified file is removed with the package, a modified one is kept as `.rpmsave`.
 
