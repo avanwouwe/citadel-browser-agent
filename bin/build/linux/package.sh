@@ -98,9 +98,10 @@ FIREFOX_NATIVE_HOST_DIR_RPM="usr/lib64/mozilla/native-messaging-hosts"
 
 # Package description, shown by software centers and package managers.
 SUMMARY="Manages IT policy enforcement and detection of malware & shadow IT, by analyzing & logging security events"
-DESCRIPTION="$SUMMARY
-
-Browser extension and background agent. It force-installs the Citadel extension in Chrome, Chromium, Firefox, Brave, Opera and Edge and sets up native messaging, so that the extension can log security events to syslog and report the device state through osquery."
+# No blank lines: the Debian format encodes them as a lone "." which some
+# software centers show literally.
+DESCRIPTION="Citadel browser agent
+$SUMMARY. Browser extension and background agent. It force-installs the Citadel extension in Chrome, Chromium, Firefox, Brave, Opera and Edge and sets up native messaging, so that the extension can log security events to syslog and report the device state through osquery."
 
 # Owner of every packaged file. Without this, fpm keeps the uid of whoever
 # runs the build, which would make /opt/citadel-agent owned by an arbitrary
@@ -276,6 +277,7 @@ for ARCH_DIR in binaries/*/; do
         -a "$DEB_ARCH" \
         --deb-user root --deb-group root \
         --deb-no-default-config-files \
+        --deb-field "Bugs: https://github.com/avanwouwe/citadel-browser-agent/issues" \
         --deb-recommends python3 \
         --deb-recommends lsof \
         -C "$STAGE" \

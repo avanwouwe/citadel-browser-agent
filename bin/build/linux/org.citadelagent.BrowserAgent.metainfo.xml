@@ -15,6 +15,7 @@
     <p>Citadel is developed in the open and released under the GNU General Public License.</p>
   </description>
   <icon type="stock">citadel-browser-agent</icon>
+  <icon type="remote" width="128" height="128">https://raw.githubusercontent.com/avanwouwe/citadel-browser-agent/main/gui/images/icon128.png</icon>
   <categories>
     <category>System</category>
     <category>Security</category>
