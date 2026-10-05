@@ -39,6 +39,7 @@ for REQUIRED_FILE in \
     citadel-browser-setup \
     citadel-browser-setup.service \
     citadel-browser-setup.timer \
+    org.citadelagent.BrowserAgent.metainfo.xml \
     citadel-system-policy \
     citadel-system-policy.service \
     citadel-system-policy.timer \
@@ -95,6 +96,12 @@ CHROMIUM_POLICY_DIRS=(
 FIREFOX_NATIVE_HOST_DIR_DEB="usr/lib/mozilla/native-messaging-hosts"
 FIREFOX_NATIVE_HOST_DIR_RPM="usr/lib64/mozilla/native-messaging-hosts"
 
+# Package description, shown by software centers and package managers.
+SUMMARY="Manages IT policy enforcement and detection of malware & shadow IT, by analyzing & logging security events"
+DESCRIPTION="$SUMMARY
+
+Browser extension and background agent. It force-installs the Citadel extension in Chrome, Chromium, Firefox, Brave, Opera and Edge and sets up native messaging, so that the extension can log security events to syslog and report the device state through osquery."
+
 # Owner of every packaged file. Without this, fpm keeps the uid of whoever
 # runs the build, which would make /opt/citadel-agent owned by an arbitrary
 # user on the target machine.
@@ -104,7 +111,10 @@ FPM_COMMON_ARGS=(
     -v "$VERSION"
     --force
     --maintainer "$PACKAGE_MAINTAINER"
-    --description "Citadel browser agent"
+    --vendor "Citadel"
+    --license "GPL-3.0"
+    --category "admin"
+    --description "$DESCRIPTION"
     --url "https://www.citadelagent.org"
     --after-install postinstall.sh
     --after-remove postremove.sh
@@ -236,6 +246,24 @@ for ARCH_DIR in binaries/*/; do
         citadel-browser-setup \
         "$STAGE/opt/citadel-agent/citadel-browser-setup"
 
+    # --- Package metadata: icon and AppStream description ---
+    #
+    # There is no .desktop file, since this is a background component. The
+    # AppStream metainfo lets software centers (GNOME Software, KDE Discover)
+    # show name, summary, icon, license and screenshots when the package is
+    # opened.
+
+    for SIZE in 48 64 128; do
+        install -d -m 0755 "$STAGE/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps"
+        install -m 0644 "../../../gui/images/icon$SIZE.png" \
+            "$STAGE/usr/share/icons/hicolor/${SIZE}x${SIZE}/apps/citadel-browser-agent.png"
+    done
+
+    install -d -m 0755 "$STAGE/usr/share/metainfo"
+    sed "s/@VERSION@/$VERSION/" org.citadelagent.BrowserAgent.metainfo.xml \
+        >"$STAGE/usr/share/metainfo/org.citadelagent.BrowserAgent.metainfo.xml"
+    chmod 0644 "$STAGE/usr/share/metainfo/org.citadelagent.BrowserAgent.metainfo.xml"
+
     # --- Debian package ---
     #
     # fpm flags everything under /etc as a conffile by default, which would
@@ -267,6 +295,7 @@ for ARCH_DIR in binaries/*/; do
 
     fpm "${FPM_COMMON_ARGS[@]}" -t rpm \
         -a "$RPM_ARCH" \
+        --rpm-summary "$SUMMARY" \
         --rpm-user root --rpm-group root \
         --rpm-tag "Recommends: python3" \
         --rpm-tag "Recommends: lsof" \

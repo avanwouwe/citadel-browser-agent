@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AppStream metadata, shown by software centers when the package is opened.
+     @VERSION@ is filled in by package.sh. -->
+<component type="console-application">
+  <id>org.citadelagent.BrowserAgent</id>
+  <name>Citadel browser agent</name>
+  <summary>Manages IT policy enforcement and detection of malware &amp; shadow IT, by analyzing &amp; logging security events</summary>
+  <developer id="org.citadelagent">
+    <name>Citadel</name>
+  </developer>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <description>
+    <p>Browser extension and background agent. It force-installs the Citadel extension in Chrome, Chromium, Firefox, Brave, Opera and Edge (APT/RPM, Flatpak and Snap) and sets up native messaging, so that the extension can log security events to syslog and report the device state through osquery.</p>
+    <p>Citadel is developed in the open and released under the GNU General Public License.</p>
+  </description>
+  <icon type="stock">citadel-browser-agent</icon>
+  <categories>
+    <category>System</category>
+    <category>Security</category>
+  </categories>
+  <url type="homepage">https://www.citadelagent.org</url>
+  <url type="bugtracker">https://github.com/avanwouwe/citadel-browser-agent/issues</url>
+  <url type="help">https://www.citadelagent.org/install/linux/</url>
+  <url type="vcs-browser">https://github.com/avanwouwe/citadel-browser-agent</url>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/avanwouwe/citadel-browser-agent/main/docs/img/screenshot/screenshot-dashboard-device.png</image>
+      <caption>Device status, as reported to your security team</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source">https://raw.githubusercontent.com/avanwouwe/citadel-browser-agent/main/docs/img/screenshot/screenshot-dashboard-events.png</image>
+      <caption>Security events logged by the agent</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source">https://raw.githubusercontent.com/avanwouwe/citadel-browser-agent/main/docs/img/screenshot/screenshot-dashboard-extensions.png</image>
+      <caption>Overview of the installed browser extensions</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source">https://raw.githubusercontent.com/avanwouwe/citadel-browser-agent/main/docs/img/screenshot/screenshot-warning-phishing.png</image>
+      <caption>Warning when a phishing site is detected</caption>
+    </screenshot>
+    <screenshot>
+      <image type="source">https://raw.githubusercontent.com/avanwouwe/citadel-browser-agent/main/docs/img/screenshot/screenshot-issue-mfa.png</image>
+      <caption>Reminder to enable multi-factor authentication</caption>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <provides>
+    <binary>citadel-browser-agent</binary>
+  </provides>
+  <pkgname>citadel-browser-agent</pkgname>
+  <releases>
+    <release version="@VERSION@"/>
+  </releases>
+</component>
