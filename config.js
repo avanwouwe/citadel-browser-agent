@@ -533,7 +533,7 @@ class Config {
                 bundled: [
                     "ghbmnnjooekpmoecnnnilnnbdlolhkhi", "lmjegmlicamnimmfhcmpkclmigmmcbeh", // Google
                     "uBlock0@raymondhill.net", "newtab@mozilla.org", // Firefox
-                    "jifbgnmbgbdiedhdecealmlgmekpagde", "gojhcdgcpbpfigcaejpfhfegekdgiblk","igpdmclhhlcpoindmhkhillbfhdgoegm" // Opera
+                    "jifbgnmbgbdiedhdecealmlgmekpagde", "gojhcdgcpbpfigcaejpfhfegekdgiblk","igpdmclhhlcpoindmhkhillbfhdgoegm", "ijcflbogjpkmfhbbikopgkcojpdaldjm" // Opera
                 ],
                 allowInstall: [],
                 allowAlways: ["gaiabdglljkdhmekohlhdajbffpndkdd"],
