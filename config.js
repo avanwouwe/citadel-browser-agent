@@ -647,6 +647,9 @@ class Config {
         debug(`loading ${localConfig ? 'local' : 'global'} configuration`)
 
         if (localConfig) {
+            clearTimeout(Config.#loadTimeout)
+            Config.#loadTimeout = null
+
             const isStandalone = Object.keys(localConfig).length === 0
             if (! isStandalone) {
                 const configVersion = localConfig.version
@@ -772,12 +775,19 @@ class Config {
 
     static #loadPromise = null
     static #loadResolve = null
+    static #loadTimeout = null
 
     static ready() {
         if (Config.#isLoaded) return Promise.resolve(config)
 
         if (!Config.#loadPromise) {
-            Config.#loadPromise = new Promise((resolve) => Config.#loadResolve = resolve)
+            Config.#loadPromise = new Promise((resolve, reject) => {
+                Config.#loadResolve = resolve
+
+                Config.#loadTimeout = setTimeout(() => {
+                    reject(new Error("timed out waiting for configuration to load"))
+                }, 20_000)
+            })
         }
 
         return Config.#loadPromise

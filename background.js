@@ -174,7 +174,8 @@ function evaluateRequest(details) {
 
 	if (ignorelist?.find(details.url) ||
 		details.tabId < 0 ||
-		!isNavigate && ignorelist?.find(details.initiator)
+		!isNavigate && ignorelist?.find(details.initiator) ||
+		! Config.isLoaded()
 	) return { result: "ignored" }
 
 	const result = {
@@ -943,7 +944,6 @@ function acknowledgeAlert(alert, showDashboard) {
 
 onMessage((request, sender) => {
 	const senderUrl = sender.url.toURL()
-	const config = Config.forURL(senderUrl)
 	const tabId = sender?.tab?.id
 
 	if (request.type === "user-interaction") {
@@ -990,6 +990,7 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "warn-reuse") {
+		const config = Config.forURL(senderUrl)
 		const allowException = config.account.passwordReuse.exceptions.allowed
 		const report = request.report
 		const onAcknowledge = { type: 'acknowledge-reuse', label: t('global.cancel') , username: report.username, system: sender.origin }

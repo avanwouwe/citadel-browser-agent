@@ -24,7 +24,7 @@ class Bridge {
             return { accounts  }
         })
 
-        Bridge.listenTo("SecureMessageKey", async () => SecureMessage.getPublicKey())
+        Bridge.listenTo("SecureMessageKey", () => SecureMessage.getPublicKey())
 
         Bridge.listenTo("DeletePassword", ({ username }, { url: system }) => PasswordVault.deleteAccount(system, username))
 
@@ -42,7 +42,7 @@ class Bridge {
             NativeMessaging.postMessage("devicetrust", { request: "update" })
         })
 
-        Bridge.listenTo("GetExtensionStatus", async() => await ExtensionTrust.getStatus())
+        Bridge.listenTo("GetExtensionStatus", () => ExtensionTrust.getStatus())
 
         Bridge.listenTo("EnableExtension", async ({extensionId, enable}) => {
             if (enable) {
@@ -53,7 +53,7 @@ class Bridge {
             await Extension.enable(extensionId, enable)
         })
 
-        Bridge.listenTo("FetchExtensionPage", async ({url}) => await ExtensionStore.fetchPage(url))
+        Bridge.listenTo("FetchExtensionPage", ({url}) => ExtensionStore.fetchPage(url))
 
         Bridge.listenTo("ShowExtensionPage", ({tabId, storePage}) => ExtensionAnalysis.showStorePage(tabId, storePage))
 
