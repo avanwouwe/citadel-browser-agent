@@ -24,7 +24,7 @@ Copy the contents of [/bin/controls](https://github.com/avanwouwe/citadel-browse
 
 Then download [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) or build it using the [build script](https://github.com/avanwouwe/citadel-browser-agent/blob/main/bin/build/mac/build.sh) and ensure that it is deployed in `/Library/Scripts/Citadel/citadel-browser-agent`. If you need to rebuild it, you will have to generate a certificate and update the certificate hash in the configuration profile (see below).
 
-You can verify that events are being created by running the following command:
+You can verify that events are being created, and debug Native Messaging issues, by running the following command:
 ```
 log stream --process citadel-browser-agent --predicate 'eventMessage BEGINSWITH "browser agent"' --level debug
 ```

@@ -7,7 +7,7 @@ nav_order: 1
 
 # Windows installation
 
-Browser extensions are sandboxed and cannot access the local operating system. To allow Citadel to write to check the device status and write to the system event log it is necessary to use *Native Messaging*. This involves placing a JSON manifest file that gives the path to the program that will be started by Chrome, and then receive the events and log them to the Windows Event log. The Citadel service receives those events and writes them to a syslog-formatted log file.
+Browser extensions are sandboxed and cannot access the local operating system. To allow Citadel to check the device status and write to the system event log it is necessary to use *Native Messaging*. This involves placing a JSON manifest file that gives the path to the program that will be started by Chrome, and then receive the events and log them to the Windows Event log. The Citadel service receives those events and writes them to a syslog-formatted log file.
 
 You can use your MDM to distribute [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest), which takes care of all of that.
 

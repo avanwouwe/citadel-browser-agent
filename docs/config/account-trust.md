@@ -10,8 +10,7 @@ You can use Citadel to enforce your IAM policies, such as:
 * your password complexity rules
 * the re-use of passwords
 * the use of Multi-Factor Authentication
-
-Of course, these policies will only be enforced on endpoints that are running Citadel.
+* storing corporate passwords in personal profiles
 
 ![Account Trust alert](/img/screenshot/screenshot-issue-mfa.png)
 
@@ -93,11 +92,11 @@ Users can then ask for a temporary exception and continue. The account will be r
 ![Phishing alert](/img/screenshot/screenshot-warning-phishing.png)
 
 ## professional accounts in personal profiles
-When a browser profile is signed into a *personal* cloud account (e.g. a personal Google account), the passwords it stores are synced to that account. Personal accounts are generally less protected, they propagate to non-enterprise devices, and survives offboarding.
+When a browser profile is signed into a *personal* cloud account (e.g. a personal Google account), the passwords it stores are synced to that account. Personal accounts are generally less protected, they propagate to non-enterprise devices, and survive offboarding.
 
-Citadel detects this when the browser auto-fills an e-mail address belonging to one of your `organization.domains` while the browser profile is signed into an account that is *not* on one of those domains. The account is raised as an Account Trust issue, so it follows the same escalation logic as the other account issues, and the user can clear it from the Account Dashboard with the account *delete* button.
+Citadel detects this when the browser auto-fills an e-mail address belonging to one of your `organization.domains` while the browser profile is logged into an account that is *not* on one of those domains. The account is raised as an Account Trust issue, so it follows the same escalation logic as the other account issues, and the user can clear it from the Account Dashboard with the account *delete* button.
 
-Use`account.profileSeparation.action` to configure the escalation step to take when a professional account is auto-filled in a personal profile. Set to `"NOTHING"` to disable the check.
+Use`account.profileSeparation.action` to configure the escalation step to take when a professional account is auto-filled in a personal profile. Set it to `"NOTHING"` to disable the check.
 
 > **Note**
 > * like the other account checks it honors your scope settings (e.g. `checkOnlyProtected`)

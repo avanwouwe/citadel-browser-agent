@@ -27,14 +27,14 @@ The package works for browsers installed from your distribution (APT/RPM), as a 
 
 Each cell shows the result for **forced installation of the extension / native messaging**. Device monitoring through osquery works everywhere except Chromium, Brave and Opera as a Snap, see [limitations](#limitations).
 
-| Browser  | APT / RPM      | Flatpak | Snap |
-|----------|----------------|---------|------|
+| Browser  | APT / RPM      | Flatpak | Snap       |
+|----------|----------------|---------|------------|
 | Chrome   | ✓ / ✓          | ✓ / ✓   | inexistant |
-| Chromium | inexistant (1) | ✓ / ✓ | ✓ / ✓ |
-| Firefox  | ✓ / ✓          | ✓ / ✓   | ✓ / ✓ |
+| Chromium | inexistant (1) | ✓ / ✓   | ✓ / ✓      |
+| Firefox  | ✓ / ✓          | ✓ / ✓   | ✓ / ✓      |
 | Edge     | ✓ / ✓          | ✓ / ✓   | inexistant |
-| Brave    | ✓ / ✓          | ✓ / ✓   | ✗ / ✓ |
-| Opera    | ✓ / ✓          | ✓ / ✓   | ✗ / ✓ |
+| Brave    | ✓ / ✓          | ✓ / ✓   | ✗ / ✓      |
+| Opera    | ✓ / ✓          | ✓ / ✓   | ✗ / ✓      |
 {: .table }
 
 1. The Chromium APT package is a wrapper of a Snap package; it uses the same system-wide files as the other Chromium-family browsers.
