@@ -733,6 +733,14 @@ class Config {
         newConfig.exceptions = {}
 
         for (const exception of Object.values(exceptions)) {
+            // only copy settings that can be overridden
+            for (const key of Object.keys(exception.config)) {
+                if (! this.#exceptionCompatible.includes(key)) {
+                    console.warn(`cannot override configuration for setting '${key}'`)
+                    delete exception.config[key]
+                }
+            }
+
             const mergedExceptionConfig = structuredClone(newConfig)
             delete mergedExceptionConfig.exceptions
 
@@ -743,17 +751,6 @@ class Config {
             for (const domain of exception.domains) {
                 newConfig.exceptions[domain] = mergedExceptionConfig
             }
-
-            // but only copy settings that can be overridden
-            for (const key of Object.keys(mergedExceptionConfig)) {
-                if (! this.#exceptionCompatible.includes(key)) {
-                    if (exception.config.hasOwnProperty(key)) {
-                        console.warn(`cannot override configuration for setting '${key}'`)
-                    }
-                    delete mergedExceptionConfig[key]
-                }
-            }
-
         }
 
         config = newConfig
