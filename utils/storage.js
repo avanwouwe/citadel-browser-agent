@@ -1,7 +1,7 @@
 class LocalStorage {
 
     static QUOTA = 10 * 1024 * 1024
-    static bytesInUse = () => chrome.storage.local.getBytesInUse(null)
+    static bytesInUse = () => chrome.storage.local.getBytesInUse?.(null) ?? Promise.resolve(0)
 
     static async checkQuota(percent) {
         assert(percent >= 0.0 && percent <= 1.0, "percent must be between 0.0 and 1.0")
