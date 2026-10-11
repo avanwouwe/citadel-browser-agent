@@ -36,17 +36,18 @@ class MFACheck {
 
         const title = t("mfa.title")
         const disconnectReason = isReconnect ? 'session-expiration' : 'first-connect'
-        const reconnectTxt = t('mfa.reconnect')
-        const laterTxt = t('global.later')
 
         let warnTimerId
         if (warnMinutes > 0 && warnMinutes < blockMinutes) {
             warnTimerId = setTimeout(async () => {
                 debug(`MFA warning for ${domain}`)
+                const actionReconnect = { type: 'logoff-domain', label: t('mfa.reconnect'), domain }
+                const actionOK = { label: t('global.ok') }
+                const actionLater = { label: t('global.later') }
 
-                const message = t(`mfa.${disconnectReason}.warning`, { domain, hostname, minutes: blockMinutes - warnMinutes, contact })
-                const onAcknowledge = isReconnect ? { type: 'logoff-domain', label: reconnectTxt, domain } : { label: t('global.ok') }
-                const onCancel = isReconnect ? { label: laterTxt } : undefined
+                const message = t(`mfa.${disconnectReason}.warning`, { domain, hostname, minutes: Math.round(blockMinutes - warnMinutes), contact })
+                const onAcknowledge = isReconnect ? actionReconnect : actionReconnect
+                const onCancel = isReconnect ? actionLater : actionOK
                 await Modal.createForDomain(domain, title, message, onAcknowledge, undefined, onCancel)
 
             }, warnMinutes * ONE_MINUTE)
@@ -61,7 +62,7 @@ class MFACheck {
             await injectFuncIntoDomain(domain, () => location.reload())
 
             const message = t(`mfa.${disconnectReason}.disconnected`, { domain, hostname, contact })
-            const onAcknowledge = { type: 'acknowledge-mfa', label: reconnectTxt, domain }
+            const onAcknowledge = { type: 'acknowledge-mfa', label: t('mfa.reconnect'), domain }
             const onException = { type: 'allow-mfa', domain }
 
             await sleep(ONE_SECOND)
@@ -77,30 +78,29 @@ class MFACheck {
      * Called when MFA timer is canceled (MFA received or password failed)
      * @param {string} url - The URL of the MFA timer
      * @param {string} reason - The reason the timer was interrupted (TOTP, WebAuth, etc)
+     * @param {boolean} isMFAProven - was the timer canceled because MFA was proven
      */
-    static cancelTimer(url, reason) {
+    static cancelTimer(url, reason, isMFAProven = true) {
         const domain = getDomain(getSitename(url))
         const session = MFACheck.#sessions.get(domain)
 
         // Record cancel intent before early-return so a racing startTimer is also suppressed
         MFACheck.#sessions.set(domain, { state: 'cancelled', cancelledAt: Date.now() })
 
-        if (session?.state !== 'waiting') {
-            return
-        }
-
-        debug(`MFA detected using "${reason} at ${url}`)
-
-        const app = AppStats.forURL(url)
-        const account = AppStats.getOrCreateAccount(app, app.lastAccount)
-        account.lastMFA = nowDatestamp()
-        AppStats.markDirty()
+        if (session?.state !== 'waiting') return
 
         const elapsedTime = (Date.now() - session.startedAt) / 1000
-        debug(`MFA timer for ${domain} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason}`)
+        debug(`MFA timer for ${domain} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason} at ${url}`)
 
         clearTimeout(session.warnTimerId)
         clearTimeout(session.blockTimerId)
+
+        if (isMFAProven) {
+            const app = AppStats.forURL(url)
+            const account = AppStats.getOrCreateAccount(app, app.lastAccount)
+            account.lastMFA = nowDatestamp()
+            AppStats.markDirty()
+        }
     }
 
     /**
@@ -119,7 +119,7 @@ class MFACheck {
     static #TOTP_FORMAT_REGEX = /^[0-9]{6,8}$/
     static isTOTP = (str) => MFACheck.#TOTP_FORMAT_REGEX.test(str)
 
-    static #MFA_NAME_REGEX = /(^|[/_.-])(mfa|t?otp|factor|2sv|2fa|a2f|challenge|(two|second)[_.-]?step|security[_.-]?code|pin[/_.-]|token|one[_.-]?time[_.-]?(password|pwd))|(mfa|t?otp|factor|2sv|2fa|a2f|challenge|(two|second)[_.-]?step|security[_.-]?code|[/_.-]pin|token|one[_.-]?time[_.-]?(password|pwd))([/_.-]|$)/i
+    static #MFA_NAME_REGEX = /(^|[/_.-])(mfa|t?otp|factor|2sv|2fa|a2f|challenge|(two|second)[_.-]?step|(verify|verification|security|secure)[_.-]?code|pin[/_.-]|token|one[_.-]?time[_.-]?(password|pwd))|(mfa|t?otp|factor|2sv|2fa|a2f|challenge|(two|second)[_.-]?step|(verify|verification|security|secure)[_.-]?code|[/_.-]pin|token|one[_.-]?time[_.-]?(password|pwd))([/_.-]|$)/i
     static isMFA = (str) => MFACheck.#MFA_NAME_REGEX.test(str)
 
     static #AUTH_URL_REGEX = /(^|[/_.-])(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)|(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)([/_.-]|$)/i

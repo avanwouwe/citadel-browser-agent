@@ -778,14 +778,27 @@ function registerAccountUsage(url, username) {
 }
 
 
+chrome.webNavigation.onHistoryStateUpdated.addListener((details) => {
+	const { tabId, parentFrameId, url } = details
+	if (parentFrameId >= 0 || tabId < 0) return
+
+	const target = url.toURL()
+	if (MFACheck.isMFA(target?.pathname)) {
+		MFACheck.cancelTimer(url, "navigate to MFA-esque URL")
+	}
+})
+
 chrome.webNavigation.onCommitted.addListener(async details => {
 	if (details.documentLifecycle && details.documentLifecycle !== 'active') return
 
 	const { tabId, frameId, parentFrameId, url } = details
-
 	const target = url.toURL()
 
-	if (target.isWebURL() && ! matchDomain(target.hostname, config.system.excludeInject)) {
+	if (MFACheck.isMFA(target?.pathname)) {
+		MFACheck.cancelTimer(url, "navigate to MFA-esque URL")
+	}
+
+	if (target?.isWebURL() && ! matchDomain(target.hostname, config.system.excludeInject)) {
 		const inject = (func, args, what) =>
 			chrome.scripting.executeScript({
 				target: { tabId, frameIds: [frameId] },
@@ -1026,8 +1039,8 @@ onMessage((request, sender) => {
 	}
 
 	if (request.type === "logoff-domain") {
-		MFACheck.cancelTimer(`https://${request.domain}`, 'logged off from domain')
-		logOffDomain(request.domain).then(() => injectFuncIntoDomain(request.domain, () => location.reload()))
+		MFACheck.cancelTimer(senderUrl, 'logged off from domain', false)
+		logOffDomain(request.domain).then(() => injectFuncIntoDomain(request.domain, () => location.href = location.origin))
 	}
 
 	if (request.type === "allow-blacklist") {
