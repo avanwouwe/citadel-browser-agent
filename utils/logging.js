@@ -97,7 +97,7 @@ class Log {
         }
 
         if (config.logging.consoleLevel > 0 && levelValue >= config.logging.consoleLevel) {
-            switch (event.level) {
+            switch (level) {
                 case Log.TRACE:
                     return console.trace(logEntry)
                 case Log.DEBUG:
