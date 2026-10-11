@@ -736,8 +736,7 @@ function registerAccountIssues(config, report, system) {
 		numberOfSymbols: report.password.numberOfSymbols < config.account.passwordPolicy.minNumberOfSymbols ? 1 : null,
 		usernameInPassword: report.password.usernameInPassword ? 1 : null,
 		entropy: report.password.entropy < config.account.passwordPolicy.minEntropy ? 1 : null,
-		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null,
-		reuse: null
+		sequence: report.password.sequence < config.account.passwordPolicy.minSequence ? 1 : null
 	}
 
 	AppStats.setIssues(system, report.username, issues)
@@ -747,7 +746,7 @@ function registerAccountAutofill(email, url) {
 	const config = Config.forURL(url)
 
 	const action = config.account.profileSeparation.action
-	if (action === Action.NOTHING || action === Action.SKIP) return
+	if (action === Action.SKIP) return
 
 	const appName = getSitename(url)
 	if (! appName || ! AccountTrust.checkFor(email, appName)) return

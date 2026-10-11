@@ -10,14 +10,19 @@ class DeviceTrust {
 
     static addAudit(audit) {
         for (const report of Object.values(audit.reports)) {
+            const action = DeviceTrust.#getAction(report.name)
+            if (action === Action.SKIP) {
+                DeviceTrust.#audit.removeFinding(report.name)
+                continue
+            }
+
             const prevControl = DeviceTrust.#audit.getFinding(report.name)
             const currControl = DeviceTrust.#createControl(report.name)
-
             const control = prevControl ?? currControl
             control.definition = audit.definitions[report.name]
             control.action = currControl.action
-
-            if (control.action === Action.SKIP) continue
+            control.warnTrigger = currControl.warnTrigger
+            control.blockTrigger = currControl.blockTrigger
 
             const prevState = prevControl?.getState()
             control.addReport(report)
@@ -40,16 +45,22 @@ class DeviceTrust {
         DeviceTrust.#audit.save()
     }
 
-    static #createControl(name) {
-        const warnTrigger = config.device.trigger.warn
-        const blockTrigger = config.device.trigger.block
-
+    static #getAction(name) {
         let action = config.device.actions.default
         for (const i of Action.values) {
             if (config.device.actions[i].includes(name)) {
                 action = i
             }
         }
+
+        return action
+    }
+
+    static #createControl(name) {
+        const warnTrigger = config.device.trigger.warn
+        const blockTrigger = config.device.trigger.block
+
+        let action = DeviceTrust.#getAction(name)
         return new Control(name, action, warnTrigger, blockTrigger)
     }
 

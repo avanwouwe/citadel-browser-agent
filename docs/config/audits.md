@@ -16,13 +16,14 @@ Citadel performs audits, verifying compliance regarding device configuration or 
 All controls and audits are aggregated and the "worst" control defines the state of your device.
 
 ## gradual escalation
-In order to allow users time to react, to prevent blocking them when they are performing time-critical tasks, and to ensure that notifications and access restrictions are commensurate with the information security risk, Citadel applies a gradual escalation mechanism.
-* <span class="failing">`FAILING`</span> : user is notified, reminded periodically
-* <span class="warning">`WARNING`</span> : user is warned access will be cut unless action is taken
-* <span class="blocking">`BLOCKING`</span> : user is told access will be restored once the control is restored
+In order to allow users time to react, to prevent blocking them when they are performing time-critical tasks, and to ensure that notifications and access restrictions are commensurate with the information security risk, Citadel allows you to specify different notification schemas.
+* <span class="unknown">`NOTHING`</span> : issue is shown in the dashboard, but the user is not notified or reminded
+* <span class="failing">`NOTIFY`</span> : user is notified, reminded periodically
+* <span class="warning">`WARN`</span> : user is warned that access will be cut unless action is taken
+* <span class="blocking">`BLOCK`</span> : user is told access will be restored once the control is restored
 
-You can set for each control different maximum escalation levels and delays between steps, in order to adapt Citadel to your context and risks.
+Controls set to `SKIP` are not run at all.
 
-The delay between steps is in **worked days** and only takes into account the days that the user is active. If a user has a failing control and is absent from work for two weeks (without using the device) Citadel does not take this period of absence into account.
+The delay between the warning and blocking steps is in **worked days** and only takes into account the days that the user is active. If a user has a failing control and is absent from work for two weeks (without using the device) Citadel does not take this period of absence into account.
 
 Notifications and warnings are given to the user via OS-level notifications and modal windows that are injected in the pages of the protected scope. When the user clicks on the notification, the user is shown the [dashboard](/dashboard) to show them the controls that are non-compliant. 

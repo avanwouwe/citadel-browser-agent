@@ -149,19 +149,30 @@ class Audit {
         return status
     }
 
+    #notifiableState() {
+        let worst = State.indexOf(State.PASSING)
+        for (const f of Object.values(this.#findings)) {
+            if (f.action === Action.NOTHING) continue
+            worst = Math.max(worst, State.indexOf(f.getState()))
+        }
+        return State.values[worst]
+    }
+
     notify() {
         const title = t(`${this.#type}trust.notification.title`)
         const contact = config.organization.contact
 
-        if (this.#conclusion === State.PASSING) {
-            Notification.setAlert(this.#type, this.#conclusion)
-        } else if (this.#conclusion === State.FAILING) {
-            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.failing`, { contact }))
-        } else if (this.#conclusion === State.WARNING) {
+        const state = this.#notifiableState()
+
+        if (state === State.PASSING) {
+            Notification.setAlert(this.#type, state)
+        } else if (state === State.FAILING) {
+            Notification.setAlert(this.#type, state, title, t(`${this.#type}trust.notification.failing`, { contact }))
+        } else if (state === State.WARNING) {
             const days = this.getNextState().days ?? t(`${this.#type}trust.notification.a-few`)
-            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.warning`,  { days, contact }))
-        } else if (this.#conclusion === State.BLOCKING) {
-            Notification.setAlert(this.#type, this.#conclusion, title, t(`${this.#type}trust.notification.blocking`, { contact }))
+            Notification.setAlert(this.#type, state, title, t(`${this.#type}trust.notification.warning`,  { days, contact }))
+        } else if (state === State.BLOCKING) {
+            Notification.setAlert(this.#type, state, title, t(`${this.#type}trust.notification.blocking`, { contact }))
         }
     }
 }

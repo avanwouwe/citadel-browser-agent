@@ -202,7 +202,7 @@ class ExtensionAnalysis {
             await this.debouncer.debounce(
                 extensionInfo.id,
                 { extensionInfo, scanType },
-                async data => this.#ofExtension(data.extensionInfo, data.scanType)
+                data => this.#ofExtension(data.extensionInfo, data.scanType)
             )
         }
 

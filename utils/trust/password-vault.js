@@ -31,7 +31,7 @@ class PasswordVault {
         return reuse
     }
 
-    static #detectReuseHash(passwordHash, system) {
+    static #detectReuseHash(passwordHash, system, ignoreSkipped = false) {
         const sharingAccounts = PasswordVault.#getAccounts(passwordHash)
 
         if (! sharingAccounts.some(account => AccountTrust.checkFor(account.username, account.system))) return
@@ -42,7 +42,8 @@ class PasswordVault {
 
         const isAllowed = (account) =>
             inSameDomain(account.system, system) ||
-            exceptions.some(exception => matchDomain(account.system, exception))
+            exceptions.some(exception => matchDomain(account.system, exception)) ||
+            (ignoreSkipped && Config.forHostname(account.system).account.passwordReuse.action === Action.SKIP)
 
         const forbidden = sharingAccounts.filter(account => !isAllowed(account))
         if (forbidden.length === 0) return
@@ -69,7 +70,7 @@ class PasswordVault {
                 reusingAccounts[accountKey] = {
                     username: account.username,
                     system:   account.system,
-                    reuse:    PasswordVault.#detectReuseHash(account.passwordHash, account.system)
+                    reuse:    PasswordVault.#detectReuseHash(account.passwordHash, account.system, true)
                 }
             }
         }
@@ -81,7 +82,7 @@ class PasswordVault {
                 reusingAccounts[accountKey] ??= {
                     username: account.username,
                     system:   account.system,
-                    reuse:    PasswordVault.#detectReuseHash(account.passwordHash, account.system)
+                    reuse:    PasswordVault.#detectReuseHash(account.passwordHash, account.system, true)
                 }
             }
         }
@@ -165,8 +166,9 @@ class PasswordVault {
     static updateReuse(system, username) {
         const reusingAccounts = PasswordVault.#reusingAccounts(system, username)
 
-        for (const reuse of Object.values(reusingAccounts)) {
-            AppStats.setIssues(reuse.system, reuse.username, { reuse: reuse.reuse })
+        for (const account of Object.values(reusingAccounts)) {
+            const skipped = Config.forHostname(account.system).account.passwordReuse.action === Action.SKIP
+            AppStats.setIssues(account.system, account.username, { reuse: skipped ? null : account.reuse })
         }
     }
 

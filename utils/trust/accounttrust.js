@@ -71,7 +71,7 @@ class AccountTrust {
 
             const report = {
                 name: accountKey,
-                passing: acct.report.action === Action.NOTHING || acct.report.action === Action.SKIP,
+                passing: false,
                 timestamp: new Date()
             }
 
@@ -116,7 +116,7 @@ class AccountTrust {
 
                 const report = structuredClone(details)
 
-                report.action = Action.NOTHING
+                report.action = Action.SKIP
                 const escalateTo = (action) => {
                     if (action && Action.indexOf(action) > Action.indexOf(report.action)) report.action = action
                 }
@@ -130,7 +130,7 @@ class AccountTrust {
                     }
                 }
 
-                if (Action.indexOf(report.action) >= Action.indexOf(Action.NOTIFY)) {
+                if (Action.indexOf(report.action) >= Action.indexOf(Action.NOTHING)) {
                     const description = {
                         numberOfDigits:     t("accounttrust.password.quality.number-digits",     { min: config.account.passwordPolicy.minNumberOfDigits }),
                         numberOfLetters:    t("accounttrust.password.quality.number-letters",    { min: config.account.passwordPolicy.minNumberOfLetters }),

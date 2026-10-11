@@ -96,7 +96,7 @@ When a browser profile is signed into a *personal* cloud account (e.g. a persona
 
 Citadel detects this when the browser auto-fills an e-mail address belonging to one of your `organization.domains` while the browser profile is logged into an account that is *not* on one of those domains. The account is raised as an Account Trust issue, so it follows the same escalation logic as the other account issues, and the user can clear it from the Account Dashboard with the account *delete* button.
 
-Use`account.profileSeparation.action` to configure the escalation step to take when a professional account is auto-filled in a personal profile. Set it to `"NOTHING"` to disable the check.
+Use`account.profileSeparation.action` to configure the escalation step to take when a professional account is auto-filled in a personal profile, or set it to `SKIP` to disable it.
 
 > **Note**
 > * like the other account checks it honors your scope settings (e.g. `checkOnlyProtected`)
