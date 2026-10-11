@@ -83,16 +83,18 @@ For example, to ignore warnings about HTTP traffic over your VPN, you can overri
     ...
 ```
 
-Or you can disable password policy enforcement of external domains for specific domains. A typical example would be domains that are part of your protected scope but that are shared, such as `accounts.google.com` or `login.microsoftonline.com`:
+Or you can adapt the password policy of specific applications, for example when they restrict the length or structure of passwords in a way that is incompatible with your global password policy:
 ```
     ...
     "exceptions": [
         {
-          "description" : "do not apply password policy to external domains",
-          "domains": ["accounts.google.com"],
+          "description" : "insecure password restrictions",
+          "domains": ["insecure-app.com"],
           "config": {
             "account": {
-              "checkOnlyInternal": true
+              "passwordPolicy": {
+                "minLength": 10
+              }
             }
           }
         }
