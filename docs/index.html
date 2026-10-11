@@ -180,7 +180,12 @@
             z-index: 1000; padding: 2rem;
         }
         .lightbox.open { display: flex; }
+        .lightbox { touch-action: pan-y; }
         .lightbox img { max-width: 95%; max-height: 95%; border-radius: 6px; }
+        @media (max-width: 768px) {
+            .lightbox { padding: 0.5rem; }
+            .lightbox img { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+        }
 
         .carousel-slide figcaption {
             font-size: 0.9rem;
@@ -581,15 +586,39 @@
         lb.className = 'lightbox';
         lb.innerHTML = '<img alt="">';
         document.body.appendChild(lb);
+        const lbImg = lb.firstElementChild;
+        const isOpen = () => lb.classList.contains('open');
+        function syncLightbox() { lbImg.src = slides[current].querySelector('img').src; }
+        function closeLightbox() { lb.classList.remove('open'); if (playing) start(); }
+
         carousel.querySelectorAll('.carousel-slide img').forEach(img => {
             img.addEventListener('click', () => {
-                lb.firstElementChild.src = img.src;
+                syncLightbox();
                 lb.classList.add('open');
                 stop();
             });
         });
-        lb.addEventListener('click', () => { lb.classList.remove('open'); if (playing) start(); });
-        document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+
+        // swipe left/right in lightbox; a tap (no swipe) closes it
+        let touchX = null, swiped = false;
+        lb.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; swiped = false; }, { passive: true });
+        lb.addEventListener('touchend', e => {
+            if (touchX === null) return;
+            const dx = e.changedTouches[0].clientX - touchX;
+            touchX = null;
+            if (Math.abs(dx) > 50) {
+                swiped = true;
+                dx < 0 ? next() : prev();
+                syncLightbox();
+            }
+        });
+        lb.addEventListener('click', () => { if (swiped) { swiped = false; return; } closeLightbox(); });
+        document.addEventListener('keydown', e => {
+            if (!isOpen()) return;
+            if (e.key === 'Escape') closeLightbox();
+            else if (e.key === 'ArrowRight') { next(); syncLightbox(); }
+            else if (e.key === 'ArrowLeft') { prev(); syncLightbox(); }
+        });
     })();
 </script>
 </body>
