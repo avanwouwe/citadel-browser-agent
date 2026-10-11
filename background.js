@@ -1088,7 +1088,7 @@ onMessage((request, sender) => {
 
 		ShadowIT.grant(app?.hostname, config.shadowit.warnInterval)
 
-		logger.log(nowTimestamp(), "shadow IT", "shadow IT warning", app, Log.WARN, app?.hostname, `shadow IT warning for '${app?.hostname}'`)
+		logger.log(nowTimestamp(), "shadow IT", "shadow IT warning", app, Log.WARN, getDomain(app?.hostname), `shadow IT warning for '${app?.hostname}'`)
 	}
 
 	if (request.type === "allow-shadow-it") {
