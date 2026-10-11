@@ -36,7 +36,7 @@ class AppStats {
         return AppStats.#APPSTATS[appName]
     }
 
-    static getAccount(app, username) {
+    static getOrCreateAccount(app, username) {
         assert(app && username, "must specify app and username", app, username)
 
         const accounts = app.getOrSet("accounts", {})

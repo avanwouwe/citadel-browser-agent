@@ -92,7 +92,7 @@ class MFACheck {
         debug(`MFA detected using "${reason} at ${url}`)
 
         const app = AppStats.forURL(url)
-        const account = AppStats.getAccount(app, app.lastAccount)
+        const account = AppStats.getOrCreateAccount(app, app.lastAccount)
         account.lastMFA = nowDatestamp()
         AppStats.markDirty()
 

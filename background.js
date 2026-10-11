@@ -758,9 +758,7 @@ function registerAccountAutofill(email, url) {
 	if (! BROWSER_PROFILE || matchDomain(PasswordCheck.getDomainFromUsername(BROWSER_PROFILE), config.organization.domains)) return
 
 	const app = AppStats.getOrCreateApp(appName)
-	AppStats.getAccount(app, email)
-
-	if (AppStats.getIssues(appName, email)?.profileSeparation) return        // already flagged for this account
+	AppStats.getOrCreateAccount(app, email)
 	AppStats.setIssues(appName, email, { profileSeparation: { profile: BROWSER_PROFILE } })
 
 	logger.log(nowTimestamp(), "account trust", "profile separation issue", url, Log.WARN, email, `professional account '${email}' for '${appName}' is synced to personal browser profile '${BROWSER_PROFILE}'`)
@@ -774,7 +772,7 @@ function registerAccountUsage(url, username) {
 	app.lastAccount = username
 	app.isAuthenticated = app.isAuthenticated ?? "auth form submit"
 
-	const account = AppStats.getAccount(app, username)
+	const account = AppStats.getOrCreateAccount(app, username)
 	account.lastConnected = nowDatestamp()
 
 	AppStats.markDirty()
@@ -914,7 +912,7 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 			debug(`MFA required for connection of '${username}' to ${siteUrl.hostname}`)
 
 			const app = AppStats.forURL(siteUrl)
-			const account = AppStats.getAccount(app, username)
+			const account = AppStats.getOrCreateAccount(app, username)
 
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
 				const isReconnect = account.lastMFA !== undefined
@@ -1019,7 +1017,7 @@ onMessage((request, sender) => {
 
 	if (request.type === "allow-mfa") {
 		const app = AppStats.forURL(senderUrl)
-		const account = AppStats.getAccount(app, app.lastAccount)
+		const account = AppStats.getOrCreateAccount(app, app.lastAccount)
 		account.lastMFA = nowDatestamp()
 		AppStats.markDirty()
 
