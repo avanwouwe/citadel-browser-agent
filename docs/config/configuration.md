@@ -74,7 +74,7 @@ For example, to ignore warnings about HTTP traffic over your VPN, you can overri
     "exceptions": [
         {
           "description" : "unencrypted traffic is allowed over VPN",
-          "domains": ["yourcompany.lan", "yourcompany.local"],
+          "domains": ["*.yourcompany.lan", "*.yourcompany.local"],
           "config": {
             "warningProtocols": ["ftp:", "ws:"]
           }
@@ -89,7 +89,7 @@ Or you can adapt the password policy of specific applications, for example when 
     "exceptions": [
         {
           "description" : "insecure password restrictions",
-          "domains": ["insecure-app.com"],
+          "domains": ["*.insecure-app.com"],
           "config": {
             "account": {
               "passwordPolicy": {

@@ -40,22 +40,21 @@ Example:
             "dark": "https://www.yourcompany.com/assets/images/company-darkmode-logo.png",
          },
         "domains": [
-          "yourcompany.com",
-          "yourcompany.io",
-          "yourcompany.net"
+          "*.yourcompany.com",
+          "*.yourcompany.io",
+          "*.yourcompany.net"
         ]
         "applications": [
             "*.google.com", "-www.google.com",
-            "www.your-crm.com",
-            "www.your-hris.com",
-            "login.your-iam-solution.com
+            "*.your-crm.com",
+            "*.your-hris.com",
+            "*.your-iam-solution.com
         ]
     }
 }
 ```
 
 > **Tip**
-
 > You can [encode your company logo](/tools/logo-encode.html) **inside a URL**. That way you don't have to host it somewhere, and it will show correctly even if the endpoint is temporarily not connected to the internet. It is best to stay under 2-3 Kb.
 > 
 > **N.B.** SVG logos will render in the browser, but they will not work with OS notifications.
@@ -69,10 +68,9 @@ If you want to go further, you can define:
 
 Organisations with mature and robust security systems may decide to:
 * change the escalation schema in case of account- or device policy infringement
-* modify or add device controls (using [osquery](https://www.osquery.io/) requests)
+* modify or add device controls (using [osquery](https://www.osquery.io/) queries)
 * adapt the extension policy
 
 > **Tip**
->
 > During the initial testing period it may be easier to deploy the extension by manually installing it, instead of force-installing it. This will allow you to install / uninstall quickly, and has the advantage of allow you to see the console: `Extensions` > `Manage Extensions` > inspect the `service worker`. You may need to turn on **developer mode**.
 {: .tip }
