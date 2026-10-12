@@ -182,9 +182,9 @@
         .lightbox.open { display: flex; }
         .lightbox { touch-action: pan-y; }
         .lightbox img { max-width: 95%; max-height: 95%; border-radius: 6px; }
-        @media (max-width: 768px) {
-            .lightbox { padding: 0.5rem; }
-            .lightbox img { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; }
+        @media (max-width: 768px), (max-height: 500px) {
+            .lightbox { padding: 0; }
+            .lightbox img { width: 100%; height: 100%; max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 0; }
         }
 
         .carousel-slide figcaption {
