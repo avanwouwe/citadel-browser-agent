@@ -37,13 +37,17 @@ class ColorScheme {
     }
 
     static async refresh() {
-        await ColorScheme.#ensureOffscreen()
-        const scheme = await chrome.runtime.sendMessage({ type: 'GET_SCHEME' })
-        ColorScheme.#cache = scheme
+        try {
+            await ColorScheme.#ensureOffscreen()
+            const scheme = await chrome.runtime.sendMessage({ type: 'GET_SCHEME' })
+            ColorScheme.#cache = scheme
 
-        chrome.offscreen.closeDocument()
-
-        return scheme
+            return scheme
+        } finally {
+            try {
+                await chrome.offscreen.closeDocument()
+            } catch {}
+        }
     }
 
     static async ready() {
