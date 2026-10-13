@@ -23,7 +23,7 @@ class MFACheck {
 
         if (session?.state === 'cancelled' && (Date.now() - session.cancelledAt) < MFACheck.#CANCEL_GRACE) {
             debug(`MFA startTimer suppressed for ${domain} — cancelled ${Date.now() - session.cancelledAt}ms ago`)
-            MFACheck.#sessions.delete(domain)
+            MFACheck.cancelTimer(url, session.cancelReason)
             return
         }
 
@@ -81,22 +81,29 @@ class MFACheck {
      * @param {boolean} isMFAProven - was the timer canceled because MFA was proven
      */
     static cancelTimer(url, reason, isMFAProven = true) {
-        const domain = getDomain(getSitename(url))
+        const appName = getSitename(url)
+        const domain = getDomain(appName)
         const session = MFACheck.#sessions.get(domain)
 
         // Record cancel intent before early-return so a racing startTimer is also suppressed
-        MFACheck.#sessions.set(domain, { state: 'cancelled', cancelledAt: Date.now() })
+        if (!session) {
+            debug(`MFA timer for ${appName} cancelled without session based on "${reason}" at ${url}`)
+            MFACheck.#sessions.set(domain, { state: 'cancelled', cancelReason: reason, cancelledAt: Date.now() })
+            return
+        }
 
-        if (session?.state !== 'waiting') return
-
-        const elapsedTime = (Date.now() - session.startedAt) / 1000
-        debug(`MFA timer for ${domain} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason} at ${url}`)
+        if (session.state === 'cancelled') {
+            debug(`MFA timer for ${appName} was already cancelled without session based on "${session.cancelReason}"`)
+        } else {
+            const elapsedTime = (Date.now() - session.startedAt) / 1000
+            debug(`MFA timer for ${appName} cancelled after ${elapsedTime.toFixed(1)} seconds based on ${reason} at ${url}`)
+        }
 
         clearTimeout(session.warnTimerId)
         clearTimeout(session.blockTimerId)
 
         if (isMFAProven) {
-            const app = AppStats.forURL(url)
+            const app = AppStats.getOrCreateApp(appName)
             const account = AppStats.getOrCreateAccount(app, app.lastAccount)
             account.lastMFA = nowDatestamp()
             AppStats.markDirty()
@@ -119,7 +126,7 @@ class MFACheck {
     static #TOTP_FORMAT_REGEX = /^[0-9]{6,8}$/
     static isTOTP = (str) => MFACheck.#TOTP_FORMAT_REGEX.test(str)
 
-    static #MFA_NAME_REGEX = /(^|[/_.-])(mfa|t?otp|factor|2sv|2fa|a2f|challenge|(two|second)[_.-]?step|(verify|verification|security|secure)[_.-]?code|pin[/_.-]|token|one[_.-]?time[_.-]?(password|pwd))|(mfa|t?otp|factor|2sv|2fa|a2f|challenge|(two|second)[_.-]?step|(verify|verification|security|secure)[_.-]?code|[/_.-]pin|token|one[_.-]?time[_.-]?(password|pwd))([/_.-]|$)/i
+    static #MFA_NAME_REGEX = /(^|[/_.-])(mfa|t?otp|factor|2sv|2fa|a2f|(two|second)[_.-]?step|(challenge|verify|verification|security|secure)[_.-]?code|pin[/_.-]|token|one[_.-]?time[_.-]?(password|pwd))|(mfa|t?otp|factor|2sv|2fa|a2f|(two|second)[_.-]?step|(challenge|verify|verification|security|secure)[_.-]?code|[/_.-]pin|token|one[_.-]?time[_.-]?(password|pwd))([/_.-]|$)/i
     static isMFA = (str) => MFACheck.#MFA_NAME_REGEX.test(str)
 
     static #AUTH_URL_REGEX = /(^|[/_.-])(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)|(login|sign[_.-]?in|auth|saml|oauth|sso|mfa|oidc|ident|connect)([/_.-]|$)/i

@@ -929,8 +929,8 @@ SecureMessage.listenTo("AccountUsage", async ({ subtype, username, password }, {
 			if (!isDate(account.lastMFA) || daysSince(account.lastMFA) >= config.account.mfa.maxSessionDays) {
 				const isReconnect = account.lastMFA !== undefined
 				if (isReconnect) debug(`MFA session expired for '${username}' of ${siteUrl.hostname}`)
-				MFACheck.startTimer(siteUrl, isReconnect, config)
 				delete account.lastMFA
+				MFACheck.startTimer(siteUrl, isReconnect, config)
 			}
 		}
 	}
