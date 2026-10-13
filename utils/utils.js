@@ -1,10 +1,9 @@
-function assert(condition, message) {
+function assert(condition, message, ...params) {
   if (!condition) {
-      console.error(message)
+      console.error(message, ...params)
       throw new Error(message || "Assertion failed")
   }
 }
-
 
 function timestampToISO(timestamp) {
 	const roundedTimestamp = Math.round(Number(timestamp));
