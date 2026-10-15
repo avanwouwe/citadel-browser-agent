@@ -449,8 +449,8 @@
             </div>
 
             <div class="carousel-controls">
+                <button class="carousel-btn" id="carPlay" aria-label="Pause slideshow"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg></button>
                 <button class="carousel-btn" id="carPrev" aria-label="Previous screenshot">&#8249;</button>
-                <button class="carousel-btn" id="carPlay" aria-label="Pause slideshow">&#10073;&#10073;</button>
                 <div class="carousel-dots" id="carDots"></div>
                 <button class="carousel-btn" id="carNext" aria-label="Next screenshot">&#8250;</button>
             </div>
@@ -534,6 +534,9 @@
         const playBtn = document.getElementById('carPlay');
         const dotsWrap = document.getElementById('carDots');
         const INTERVAL = 3000;
+        const ICON_PAUSE = '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><rect x="2" y="1" width="3" height="10"/><rect x="7" y="1" width="3" height="10"/></svg>';
+        // triangle is nudged right so its visual centre (not its bounding box) is centred
+        const ICON_PLAY = '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M3.5 1.5v9l7-4.5z"/></svg>';
 
         const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         let current = 0;
@@ -570,8 +573,8 @@
 
         function setPlaying(state) {
             playing = state;
-            if (playing) { start(); playBtn.innerHTML = '&#10073;&#10073;'; playBtn.setAttribute('aria-label', 'Pause slideshow'); }
-            else { stop(); playBtn.innerHTML = '&#9654;'; playBtn.setAttribute('aria-label', 'Play slideshow'); }
+            if (playing) { start(); playBtn.innerHTML = ICON_PAUSE; playBtn.setAttribute('aria-label', 'Pause slideshow'); }
+            else { stop(); playBtn.innerHTML = ICON_PLAY; playBtn.setAttribute('aria-label', 'Play slideshow'); }
         }
 
         prevBtn.addEventListener('click', () => { prev(); if (playing) restart(); });

@@ -3,7 +3,7 @@
 </div>
 
 # Citadel browser agent
-Citadel is a browser agent that enforces IT policy and detects malware and shadow IT by analyzing and logging browser security events to syslog and Windows Event Log a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)).
+Citadel is a browser agent that enforces IT policy, detects malware, phishing, data loss and shadow IT, and vets browser extensions, by analyzing and logging browser security events to syslog and Windows Event Log in a privacy-respecting way. It is meant to be used by CISO and CIO to secure staff laptops, increase situational awareness and allow Digital Forensics and Incident Response ([DFIR](https://en.wikipedia.org/wiki/Digital_forensics)). It runs on Windows, macOS and Linux.
 
 Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source XDR. But any system that can ingest syslog lines containing JSON objects will work.
 
@@ -11,6 +11,10 @@ Citadel comes pre-integrated with [Wazuh](https://wazuh.com/), the open source X
   <tr>
     <td><img src="/docs/img/screenshot/screenshot-wazuh.png" alt="screenshot Wazuh"></td>
     <td><img src="/docs/img/screenshot/screenshot-issue-mfa.png" alt="screenshot MFA blocking"></td>
+  </tr>
+  <tr>
+    <td><img src="/docs/img/screenshot/screenshot-warning-clickfix.png" alt="screenshot ClickFix warning"></td>
+    <td><img src="/docs/img/screenshot/screenshot-extension-analysis.png" alt="screenshot extension analysis"></td>
   </tr>
 </table>
 
@@ -21,11 +25,15 @@ In today's cybersecurity landscape it is difficult to have good control over you
 
 Out of this dissatisfaction, and the realisation that for many organisations the browser constitutes today's operating system, Citadel was born.
 
-Citadel has a native component that ensures device compliance by monitoring the usual controls (patching, disk encryption, firewall, etc) and even a few more unusual ones (protection of SSH keys, requiring or prohibiting of installed or running software, storage of unnecessary sensitive data, etc). It also has a browser component that performs web filtering, enforces your password and MFA policies, and limits the maximum duration of authenticated sessions.
+Citadel has a native component that ensures device compliance by monitoring the usual controls (patching, disk encryption, firewall, etc) and even a few more unusual ones (protection of SSH keys, requiring or prohibiting of installed or running software, storage of unnecessary sensitive data, etc). It also has a browser component that performs web filtering, enforces your password and MFA policies, limits the maximum duration of authenticated sessions, vets browser extensions, and protects against phishing, ClickFix scams and leaking of secrets.
 
-In case of non-compliance users are notified and access to protected systems can be temporarily disabled until the controls are compliant. To prevent users being blocked at a critical moment it is possible to give the possibility to request exceptions. 
+In case of non-compliance users are notified and access to protected systems can be temporarily disabled until the controls are compliant. Escalation is gradual (notify, warn, then block) so that users are not blocked at a critical moment, and it is possible to give users the possibility to request exceptions. Users can see what is wrong, and how to fix it, in the built-in dashboard.
 
 On top of this, Citadel detects the following events in the browser:
+* user is entering the password of one site into another site (phishing, or poor password hygiene)
+* user has copied a dangerous command that they are likely to paste in a terminal (ClickFix)
+* user is copying, pasting, dragging or selecting a file that contains secrets such as API keys or tokens
+* a risky browser extension is installed or requests risky permissions when updating
 * IP, URL or domain is blacklisted (good default blacklists provided, can be made bypassable by users)
 * user is using unencrypted protocols for an application (e.g. FTP, HTTP or WS)
 * user has downloaded a file
@@ -75,6 +83,23 @@ Since MFA is not available for all sites, the list of sites for which MFA is req
 ## Device Trust
 Citadel uses [osquery](https://osquery.io/) to check the state of various controls, regarding disk encryption, screen locking, etc. Controls are defined using osquery queries, and depending on the configured severity of the control, it is possible to notify the user or block use of protected sites until the control stops failing. It is also possible to warn users before blocking them, or even to allow them to ask for (temporary) exceptions.
 
+To prevent alert fatigue, less critical issues are not notified straight away, and the delay between warning and blocking is counted in worked days (days the user is actually active).
+
+## Extension Trust
+Browser extensions are a significant risk: they can read and manipulate pages, and recover authentication or session secrets. Citadel analyzes extensions before they are installed or updated, and rescans them periodically. The analysis takes into account the permissions requested, the sites they act on, whether the extension or its publisher have been vetted by the store, user ratings and the description of the extension. Extensions that request more permissions during an update are detected too.
+
+Depending on the policy, risky extensions are disabled, and users can request an exception, or are shown the analysis to understand why. Extensions can be whitelisted (always, only for installation, or for daily use), and sideloaded extensions are covered as well. Extension stores for Chrome, Edge and Firefox are supported.
+
+## Attacks
+* **Phishing**: when users type the password of one site into another site, they are warned before it is submitted.
+* **ClickFix**: Citadel monitors the clipboard and warns users when they have copied what looks like a dangerous command, using a configurable scoring mechanism. Warnings can be suppressed for a period, and domains excluded to avoid false positives.
+
+## Data Loss Prevention
+Citadel uses [Gitleaks](https://github.com/gitleaks/gitleaks) rules to detect secrets (API keys, certificates, tokens) when users paste the clipboard, or drag or select files. Users are warned of the risks and, where possible, offered to sanitize the clipboard. Both the sensitivity and the domains to exclude are configurable.
+
+## Dashboard
+Users have access to a dashboard showing the state of their device controls, accounts (including password issues), extensions, recent events and the privacy notice. It tells them what is not compliant and how to fix it.
+
 ## Privacy respecting
 Citadel hashes the URL for events that do not indicate immediate threats, and are only logged for digital forensics. The different parts (hostname, path, query, etc) of the URL are hashed separately so that it remains possible to perform analysis after an incident.
 
@@ -82,15 +107,19 @@ The shadow IT detection only reports on whether the user interacted with (authen
 
 The data is logged on the local machine and is never sent across the network, unless of course you choose to ship the events to your SIEM.
 
+Citadel generates a **privacy notice** for your users based on your live configuration, available in the dashboard. Users are informed of the installation and where to find the notice. Organisations can add their own privacy notice. Installations by individual users (outside of an organisation) do not log to the endpoint.
+
+The interface is available in English and French.
+
 ## Installation
-There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) takes care of everything except integration into your SIEM. Everything is explained in the [installation guide](https://www.citadelagent.org/install).
+There are a lot of moving parts. Citadel needs to be installed in the browser, on the OS, and in your SIEM. Nevertheless, installation of Citadel should be relatively straightforward. There are sensible defaults, and [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest) (Windows, macOS, and `.deb` / `.rpm` packages for Linux) takes care of everything except integration into your SIEM. Everything is explained in the [installation guide](https://www.citadelagent.org/install).
 
 ## Frequently Asked Questions
 
 ### who is Citadel meant for?
 The design objective of Citadel is to allow a CISO or a CIO to secure staff laptops, increase situational awareness and allow DFIR. Citadel does check for injection vulnerabilities but competent adversarial users or sites may be able to render compliance verifications ineffective.
 
-Regular users can gain some benefit from Citadel (web filtering, detection of copy-paste attacks, endpoint controls, etc). They can manually install [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest). MacOS users must also manually install the extension from the store.
+Regular users can gain some benefit from Citadel (web filtering, phishing and ClickFix detection, secret leak detection, extension vetting, endpoint controls, etc). They can manually install [the installer](https://github.com/avanwouwe/citadel-browser-agent/releases/latest). MacOS users must also manually install the extension from the store.
 
 ### what about the privacy of my staff?
 Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) this protection using the configuration. By default:
@@ -102,10 +131,10 @@ Citadel has privacy-preserving defaults and allows you to reinforce (or reduce) 
 A [Data Protection Transparency statement](/docs/privacy/transparency.md) is available that can be used to perform Data Privacy Impact Analysis (DPIA)
 
 ### which browsers are supported?
-Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Firefox, Opera, Edge, Brave, Arc, Dia, Atlas (OpenAI) and Comet (Perplexity). Other Chromium-based browsers may work. However, this has not been tested. It is likely that the only thing left to do is to update the forced-installation of the extension. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
+Citadel uses the [Chrome Extensions API](https://developer.chrome.com/docs/extensions/reference/) (V3) and fully supports Chrome, Firefox, Opera, Edge, Brave, Arc, Dia, Atlas (OpenAI) and Comet (Perplexity). Other Chromium-based browsers may work. However, this has not been tested. It is likely that the only thing that changes with other browsers, is the way the forced installation works. Unfortunately Safari does not support all of the Chrome API and so porting it would take considerable effort (aside from the horribly complex Apple tool chain).
 
 ### I don't want to install external software
-Of course, you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/build/win/build.ps1) and [macOS](/bin/build/mac/build.sh). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browsers). Or you can even take the locally built plugin and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).
+Of course, you can inspect the source code. You can then build the installer yourself using the build scripts for [Windows](/bin/build/win/build.ps1), [macOS](/bin/build/mac/build.sh) and [Linux](https://www.citadelagent.org/install/linux/). And you can verify that the code corresponds to the extension that is [served via the Chrome store](https://chromewebstore.google.com/detail/citadel-browser-agent/anheildjmkfdkdpgbndmpjnmkfliefga). If you don't want to risk that the extension is updated one day, you can [pin the extension version](https://support.google.com/chrome/a/answer/11190170?hl=en) (though that may not be supported by all browsers). Or you can even take the locally built plugin and [distribute that to your endpoints](https://developer.chrome.com/docs/extensions/how-to/distribute).
 
 ### what about performance?
 Citadel is designed to be very efficient. It only runs (very briefly) every time when you click on a web page. All operations are asynchronous and are optimized so as to have a minimal impact on the browsing experience of the user. With the default blacklist configuration the extension consumes about 35 Mb of memory and will download approximately 20 Mb every hour. That is roughly equivalent to 5 minutes of video conferencing.
