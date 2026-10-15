@@ -29,6 +29,7 @@ importScripts('utils/toml.js');
 importScripts('utils/re2.js');
 importScripts('utils/privacy.js');
 importScripts('utils/alert-suppression.js');
+importScripts('utils/offscreen.js');
 importScripts('gui/color-scheme/color-scheme.js');
 importScripts('gui/interface.js');
 importScripts('gui/modal.js');

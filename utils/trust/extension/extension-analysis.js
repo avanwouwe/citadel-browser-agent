@@ -55,7 +55,6 @@ class ExtensionAnalysis {
     static Headless = class {
 
         static queue = Promise.resolve()
-        static isReady = false
         static debouncer = new Debouncer(200, (existing, incoming) => {
             // When installing we receive both INSTALL and ENABLE; merge into one INSTALL event
             const scanType = (existing.scanType === ExtensionAnalysis.ScanType.INSTALL ||
@@ -66,30 +65,26 @@ class ExtensionAnalysis {
             return { extensionInfo: incoming.extensionInfo, scanType }
         })
 
-        static async #ensureOffscreen() {
-            if (this.isReady) return
-
-            if (!await chrome.offscreen.hasDocument()) {
-                await chrome.offscreen.createDocument({
-                    url: '/gui/extension-analysis.html',
-                    reasons: ['DOM_PARSER'],
-                    justification: 'retrieve extension store information'
-                })
-
+        static async #analyzeOffscreen(storePage, config) {
+            return Offscreen.run({
+                url: '/gui/extension-analysis.html',
+                reasons: ['DOM_PARSER'],
+                justification: 'retrieve extension store information'
+            }, async () => {
                 // Wait for offscreen page to be ready
-                for (let i = 0; i < 10; i++) {
+                let ready = false
+                for (let i = 0; i < 10 && !ready; i++) {
                     try {
                         await sendMessagePromise('PING', {})
-                        this.isReady = true
-                        return
+                        ready = true
                     } catch {
                         await new Promise(resolve => setTimeout(resolve, 100))
                     }
                 }
-                throw new Error('Offscreen document failed to initialize')
-            }
+                if (!ready) throw new Error('Offscreen document failed to initialize')
 
-            this.isReady = true
+                return sendMessagePromise('ANALYZE_EXTENSION', { storePage, config })
+            })
         }
 
         static async resolveAnalysis(promise) {
@@ -137,19 +132,11 @@ class ExtensionAnalysis {
                         const analysis = ExtensionAnalysis.promiseOf(storePage, config)
                         return await this.resolveAnalysis(analysis)
                     } else {
-                        await this.#ensureOffscreen()
-                        return await sendMessagePromise('ANALYZE_EXTENSION', { storePage, config })
+                        return await this.#analyzeOffscreen(storePage, config)
                     }
                 } catch (error) {
                     console.error('Extension analysis failed:', error)
                     return ExtensionAnalysis.Headless.#error(extensionInfo, "error")
-                } finally {
-                    this.isReady = false
-                    if (chrome.offscreen) {
-                        try {
-                            await chrome.offscreen.closeDocument()
-                        } catch {}
-                    }
                 }
             })
 

@@ -72,6 +72,7 @@
       "/utils/re2.js",
       "/utils/privacy.js",
       "/utils/alert-suppression.js",
+      "/utils/offscreen.js",
       "/gui/color-scheme/color-scheme.js",
       "/gui/interface.js",
       "/gui/modal.js",

@@ -17,17 +17,6 @@ class ColorScheme {
         })
     }
 
-    static async #ensureOffscreen() {
-        const has = await chrome.offscreen.hasDocument?.()
-        if (has) return
-
-        await chrome.offscreen.createDocument({
-            url: '/gui/color-scheme/color-scheme.html',
-            reasons: ['MATCH_MEDIA'],
-            justification: 'detect OS dark mode'
-        })
-    }
-
     static getScheme() {
         if (ColorScheme.#hasDom) {
             return self.matchMedia('(prefers-color-scheme: dark)').matches ? ColorScheme.DARK : ColorScheme.LIGHT
@@ -37,17 +26,14 @@ class ColorScheme {
     }
 
     static async refresh() {
-        try {
-            await ColorScheme.#ensureOffscreen()
-            const scheme = await chrome.runtime.sendMessage({ type: 'GET_SCHEME' })
-            ColorScheme.#cache = scheme
+        const scheme = await Offscreen.run({
+            url: '/gui/color-scheme/color-scheme.html',
+            reasons: ['MATCH_MEDIA'],
+            justification: 'detect OS dark mode'
+        }, () => chrome.runtime.sendMessage({ type: 'GET_SCHEME' }))
+        ColorScheme.#cache = scheme
 
-            return scheme
-        } finally {
-            try {
-                await chrome.offscreen.closeDocument()
-            } catch {}
-        }
+        return scheme
     }
 
     static async ready() {
