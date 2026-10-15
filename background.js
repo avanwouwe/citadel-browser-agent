@@ -473,11 +473,13 @@ chrome.webRequest.onCompleted.addListener(
 
 		setInitiator(details)
 
-		if (MFACheck.isMFA(url.pathname) && details.statusCode >= 200 && details.statusCode < 300) {
+		const isMFA = MFACheck.isMFA(url.pathname)
+		if (isMFA && details.statusCode >= 200 && details.statusCode < 300) {
 			MFACheck.cancelTimer(details.initiator, "POST to MFA-esque URL")
+			return
 		}
 
-		if (MFACheck.findAuthPattern(url.pathname) && details.statusCode >= 400) {
+		if (isMFA && MFACheck.findAuthPattern(url.pathname) && (details.statusCode === 401 || details.statusCode === 403)) {
 			MFACheck.cancelTimer(details.initiator, "failed authentication web request")
 
 			new SessionState(details.initiator.toURL().origin).load().then(async sessionState =>  {
