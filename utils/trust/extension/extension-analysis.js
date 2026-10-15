@@ -119,6 +119,22 @@ class ExtensionAnalysis {
         static async fetch(extensionInfo) {
             this.queue = this.queue.then(async () => {
                 try {
+                    if (Extension.isSideloaded(extensionInfo)) {
+                        return {
+                            evaluation: {
+                                allowed: false,
+                                rejection: {
+                                    reasons: ["sideloaded"]
+                                }
+                            },
+                            storeInfo: {
+                                id: extensionInfo.id,
+                                name : extensionInfo.name,
+                            },
+                            extensionInfo,
+                        }
+                    }
+
                     const store = ExtensionStore.of(extensionInfo.updateUrl) ??
                         (Browser.isFirefox() ? ExtensionStore.Firefox : undefined)
 

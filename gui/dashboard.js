@@ -486,7 +486,7 @@ async function handleExtensionAction(event) {
 
         const errors = analysis.evaluation.rejection?.reasons.filter(reason => reason.startsWith("error")) ?? []
         if (errors.length > 0) {
-            const message = `${t('extension-analysis.disable-modal.message-error')} : ${t(`extension-analysis.block-page.status.${errors[0]}`)}`
+            const message = `${t('extension-analysis.disable-modal.message-error')} ${t(`extension-analysis.block-page.status.${errors[0]}`)}.`
             await showBlockExtensionModal(t('extension-analysis.disable-modal.title'), message)
             return
         }

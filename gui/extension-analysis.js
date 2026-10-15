@@ -201,7 +201,7 @@ function setError(errorType, message) {
     retryButton.hidden = false
     retryButton.onclick = () => location.reload()
 
-    const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '')
+    const error = t(`extension-analysis.block-page.status.${errorType}`) + (message ? ' : ' + message : '') + '.'
     setStatus(error, false)
 }
 

@@ -193,10 +193,12 @@
         "analyze-manifest": "Analyzing manifest",
         "analyze-code": "Analyzing code",
         "error": "an error occurred",
-        "error-network": "network error",
-        "error-store": "unable to analyze the extension store page",
-        "error-manifest": "unable to analyze the manifest",
-        "error-evaluation": "unable to evaluate the extension"
+        "error-network": "of a network error",
+        "error-store": "the extension store page could not be analyzed",
+        "error-manifest": "the manifest could not be analyzed",
+        "error-evaluation": "the extension could not be analyzed",
+        "error-unknown-store": "the extension store type was unknown",
+        "error-unknown-storepage": "the store does not contain that extension"
       },
       "page-blocked-header": "Analyzing Extension",
       "install-blocked":  {

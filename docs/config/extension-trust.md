@@ -66,14 +66,14 @@ Using the `extensions.blacklist` you can specify extensions that are blacklisted
 
 ## policy reject
 You can reject extensions based on the following criteria:
-* `extensions.allowSideloading` : do not allow if they are sideloaded
+* `extensions.allowSideloading` : do not allow if they are sideloaded (i.e. `installType` of `development` or `sideloaded`)
 * `extensions.verified.required` : do not allow if they or their publisher are not verified (have a badge in the store)
 * `extensions.installations.required` : do not allow extensions if they have less than N installations
-* `extensions.blacklist.id` : do not allow extensions based on their extension id
-* `extensions.blacklist.category` : do not allow extensions based on their category
-* `extensions.blacklist.keyword` : do not allow extensions based on their category
-* `extennsions.ratings.minRatingLevel` : do not allow extensions if they are rated poorly
-* `extennsions.ratings.minRatingCnt` : do not allow extensions if their rating is based on few reviews
+* `extensions.blacklist.id` : refuse extensions based on their extension id
+* `extensions.blacklist.category` : refuse extensions based on their category
+* `extensions.blacklist.keyword` : refuse extensions based keywords in their description
+* `extennsions.ratings.minRatingLevel` : refuse extensions if they are rated poorly
+* `extennsions.ratings.minRatingCnt` : refuse extensions if their rating is based on few reviews
 
 You can of course also reject based on the permissions requested by the extension. The default configuration prohibits extensions that request permissions that could be used to get access to authentication or session secrets of sites in you protected scope:
 * disallows `proxy`,`debugger`,`clipboardRead` (these are global permissions)

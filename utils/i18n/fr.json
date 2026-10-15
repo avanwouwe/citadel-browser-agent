@@ -193,10 +193,12 @@
         "analyze-manifest": "Analyse du manifeste",
         "analyze-code": "Analyse du code",
         "error": "une erreur est survenue",
-        "error-network": "erreur réseau",
-        "error-store": "impossible d’analyser la page de l'extension dans le store",
-        "error-manifest": "impossible d’analyser le manifeste",
-        "error-evaluation": "impossible d'évaluer l'extension"
+        "error-network": "d'une erreur réseau",
+        "error-store": "la page de l'extension dans le store n'a pas pu être analysée",
+        "error-manifest": "le manifeste n'a pas pu être analysé",
+        "error-evaluation": "l'extension n'a pas pu être évaluée",
+        "error-unknown-store": "le type de store d'extensions était inconnu",
+        "error-unknown-storepage": "le store ne contient pas cette extension"
       },
       "page-blocked-header": "Analyse de l’extension",
       "install-blocked": {
