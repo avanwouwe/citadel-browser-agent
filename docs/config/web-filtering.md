@@ -9,7 +9,7 @@ Citadel performs web filtering out of the box. This means that Citadel periodica
 
 The user is explained why the page was blocked, and is proposed to analyze the reputation issue further by clicking on a [VirusTotal](https://www.virustotal.com) link. Citadel is configured to allow users to request exceptions, so as not, in case of a false positive, unduly block users that may urgently require access. This means that the option to request an exception is displayed. Users can then access the blocked page after having given a reason for doing so. In this case the event, with the reason, is then logged as a time-critical security event.
 
-Bittorrent tracker sites are also filtered by default, to help you comply with Intellectual Property legislation.
+BitTorrent tracker sites are also filtered by default, to help you comply with Intellectual Property legislation.
 
 ![Webfilter alert](/img/screenshot/screenshot-issue-webfilter.png)
 
@@ -20,19 +20,22 @@ You can add your own blacklists or disable the existing one by overriding the `w
         "blacklist": {
             "ip": {
                 "FireHOL (level 1)": {
-                    "urls": ["https://iplists.firehol.org/files/firehol_level1.netset"],
+                    "dynamic": ["https://iplists.firehol.org/files/firehol_level1.netset"],
                     "freq": 60
                 },
-                "IPsum (level 2+)": {
-                    "urls": ["https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt"],
-                    freq: 60 * 12
+                "internal IP blacklist": {
+                    "static": ["192.168.0.0/16","1.32.128.0/18"],
                 }
             },
             "url": {
                 "URLhaus": {
-                    "urls": ["https://urlhaus.abuse.ch/downloads/text_online/"],
+                    "dynamic": ["https://urlhaus.abuse.ch/downloads/text_online/"],
                     "freq": 60
                 },
+                "internal blacklist": {
+                    "static": ["www.forbiddensite.com", "https://evilurl.com/path?q=evil]
+                },
+
             }
         }
     }

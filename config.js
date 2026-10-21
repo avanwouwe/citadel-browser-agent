@@ -197,25 +197,25 @@ class Config {
                 },
                 ip: {
                     "FireHOL (level 1)": {
-                        urls: ["https://iplists.firehol.org/files/firehol_level1.netset"],
+                        dynamic: ["https://iplists.firehol.org/files/firehol_level1.netset"],
                         freq: 60
                     },
                     "https://github.com/romainmarcoux/malicious-outgoing-ip-domains": {
-                        urls: ["https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt"],
+                        dynamic: ["https://raw.githubusercontent.com/romainmarcoux/malicious-outgoing-ip/main/full-outgoing-ip-40k.txt"],
                         freq: 60
                     },
                     "IPsum (level 2+)": {
-                        urls: ["https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt"],
+                        dynamic: ["https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/2.txt"],
                         freq: 60 * 12
                     }
                 },
                 url: {
                     "URLhaus": {
-                        urls: ["https://urlhaus.abuse.ch/downloads/text_online/"],
+                        dynamic: ["https://urlhaus.abuse.ch/downloads/text_online/"],
                         freq: 60
                     },
                     "https://github.com/romainmarcoux/malicious-domains": {
-                        urls: [
+                        dynamic: [
                             "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-aa.txt",
                             "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ab.txt",
                             "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/main/full-domains-ac.txt"
@@ -223,7 +223,7 @@ class Config {
                         freq: 60
                     },
                     "Known Torrent Sites": {
-                        urls: ["https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackers.txt"],
+                        dynamic: ["https://raw.githubusercontent.com/sakib-m/Pi-hole-Torrent-Blocklist/refs/heads/main/all-torrent-trackers.txt"],
                         freq: 60 * 12
                     }
                 }

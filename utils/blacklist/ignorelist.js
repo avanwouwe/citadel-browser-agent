@@ -5,7 +5,7 @@ class Ignorelist {
     constructor() {
         for (const blacklist of [config.webfilter.blacklist.url, config.webfilter.blacklist.ip]) {
             for (const blacklistEntry of Object.values(blacklist)) {
-                blacklistEntry.urls.forEach(url => this.#ignoreList.add(url))
+                blacklistEntry.dynamic?.forEach(url => this.#ignoreList.add(url))
             }
         }
 

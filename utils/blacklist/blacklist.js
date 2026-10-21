@@ -6,32 +6,55 @@ class CombinedBlacklist {
 
 	static TEST_BLACKLIST = '192.0.2.1'
 
+	#markLoaded(listName, url, blacklist) {
+		this.#blacklists[listName] = blacklist
+		this.#downloadStatus[listName] = "loaded"
+
+		const size = blacklist.size()
+		logger.log(nowTimestamp(), "report", "blacklist entries loaded", url, Log.TRACE, size,
+			`blacklist '${listName}' was loaded with ${size} entries`)
+	}
+
 	async load(configs, blacklistClass) {
-		const tasks = Object.entries(configs).flatMap(([blacklistName, conf]) =>
-			conf.urls.map((url, i) => {
-				const fileCnt = conf.urls.length
-				const filename = fileCnt > 1 ? `${blacklistName} [${i + 1} / ${fileCnt}]` : blacklistName
+		const tasks = Object.entries(configs).flatMap(([blacklistName, conf]) => {
+			const dynamicList = conf.dynamic ?? []
+			const staticList = conf.static ?? []
+
+			// static, inline entries
+			if (staticList.length > 0) {
+				const listName = dynamicList.length > 0 ? `${blacklistName} [static]` : blacklistName
+
+				try {
+					const blacklist = new blacklistClass()
+					staticList.forEach(entry => blacklist.add(entry))
+					this.#markLoaded(listName, undefined, blacklist)
+				} catch (e) {
+					this.#downloadStatus[listName] = "failed"
+					logger.log(nowTimestamp(), "report", "blacklist entries load error", undefined, Log.ERROR, 0,
+						`blacklist '${listName}' failed to load: ${e.message}`)
+				}
+			}
+
+			// dynamic, by-reference lists
+			return dynamicList.map((url, i) => {
+				const listCnt = dynamicList.length
+				const listName = listCnt > 1 ? `${blacklistName} [${i + 1} / ${listCnt}]` : blacklistName
 
 				return scheduleReload({
-					errorKey: CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + filename,
+					errorKey: CombinedBlacklist.#BLACKLIST_DOWNLOAD_ERRORS + listName,
 					errorTag: "blacklist download error",
-					label: `blacklist '${filename}'`,
+					label: `blacklist '${listName}'`,
 					url,
 					freqMin: conf.freq,
-					getStatus: () => this.#downloadStatus[filename],
-					onError: () => { this.#downloadStatus[filename] = "failed" },
+					getStatus: () => this.#downloadStatus[listName],
+					onError: () => { this.#downloadStatus[listName] = "failed" },
 					load: async () => {
 						const blacklist = await new blacklistClass().load(url)
-						this.#blacklists[filename] = blacklist
-						this.#downloadStatus[filename] = "loaded"
-
-						const size = blacklist.size()
-						logger.log(nowTimestamp(), "report", "blacklist downloaded", url, Log.TRACE, size,
-							`blacklist '${filename}' was loaded with ${size} entries`)
+						this.#markLoaded(listName, url, blacklist)
 					},
 				})
 			})
-		)
+		})
 
 		await Promise.allSettled(tasks)
 		return this
@@ -66,6 +89,8 @@ class IPBlacklist {
 	}
 
 	add(cidr) {
+		if (!cidr) return
+
 		this.init()
 
 		this.#sortedCidrList.push(new IPv4Range(cidr))
@@ -76,7 +101,7 @@ class IPBlacklist {
 		assert(this.#sortedCidrList != null, 'blacklist is not loaded')
 
 		const cidr = new IPv4Range(cidrStr)
-		this.#sortedCidrList = this.#sortedCidrList.filter(entry => entry.start = cidr.start && entry.end === cidr.end)
+		this.#sortedCidrList = this.#sortedCidrList.filter(entry => !(entry.start === cidr.start && entry.end === cidr.end))
 	}
 
 	async load(url) {
@@ -142,15 +167,17 @@ class URLBlacklist {
 	}
 
 	add(entry) {
+		if (!entry) return
+
 		this.init()
 
-		this.#urlSet[entry] = true
+		this.#urlSet[entry.toLowerCase()] = true
 	}
 
 	remove(entry) {
 		assert(this.#urlSet != null, 'blacklist is not loaded')
 
-		delete this.#urlSet[entry]
+		delete this.#urlSet[entry.toLowerCase()]
 	}
 
 	async load(url) {
@@ -159,7 +186,6 @@ class URLBlacklist {
 		const lines = await getCached(url).then(res => res.body.pipeThrough(new TextDecoderStream()))
 
 		await processTextStream(lines,line => {
-			line = line.toLowerCase()
 			this.add(line)
 		})
 
@@ -196,7 +222,7 @@ class URLBlacklist {
 
 		if (! query.href || ! query.hostname) return null
 
-		if (! query.protocol in URLBlacklist.#SUPPORTED_URL_SCHEMES) return null
+		if (! URLBlacklist.#SUPPORTED_URL_SCHEMES.includes(query.protocol)) return null
 
 		if (this.#urlSet.hasOwnProperty(query.href)) return query.href
 		if (this.#urlSet.hasOwnProperty(query.hostname)) return query.hostname
